@@ -3,12 +3,15 @@
 pub mod ast;
 pub mod ltac;
 
+mod lex;
+
 // Import what we need
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 use ast::AstTree;
+use lex::{Token, Lex, create_lex};
 
 // The main parse function
 // This function opens the file and reads a line; 
@@ -43,9 +46,24 @@ pub fn parse(path : String) {
             continue;
         }
         
-        println!("{}", current);
+        build_line(current);
     }
     
     // TODO: Remove this
     tree.print();
+}
+
+// Converts a line to an AST node
+fn build_line(line : String) {
+    let mut analyzer = lex::create_lex(line);
+    analyzer.tokenize();
+    
+    let mut token = analyzer.get_token();
+    
+    while token != Token::Eof {
+        print!("{:?} ", token);
+        token = analyzer.get_token();
+    }
+    
+    println!("");
 }
