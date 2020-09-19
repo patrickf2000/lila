@@ -1,5 +1,7 @@
 use std::env;
 
+use parser;
+
 mod test1;
 
 fn main() {
@@ -21,6 +23,6 @@ fn main() {
         println!("LTAC:");
         test1::build_ltac();
     } else {
-        println!("Welcome to rquik");
+        parser::parse("first.qk".to_string());
     }
 }

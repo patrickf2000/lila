@@ -1,0 +1,8 @@
+extern func puts(s:str)
+
+func main
+    int x = 5
+    int y = 3
+    
+    puts("Hello!")
+end
