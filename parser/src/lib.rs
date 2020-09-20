@@ -11,7 +11,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 use ast::AstTree;
-use lex::{Token, Lex, create_lex};
+use lex::{Token, create_lex};
 
 // The main parse function
 // This function opens the file and reads a line; 
@@ -55,7 +55,7 @@ pub fn parse(path : String) {
 
 // Converts a line to an AST node
 fn build_line(line : String) {
-    let mut analyzer = lex::create_lex(line);
+    let mut analyzer = create_lex(line);
     analyzer.tokenize();
     
     let mut token = analyzer.get_token();
