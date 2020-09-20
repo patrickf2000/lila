@@ -111,7 +111,7 @@ impl Lex {
     }
     
     // Returns the symbol for a given character
-    fn get_symbol(&self, c : char, pos : i32) -> Token {
+    fn get_symbol(&self, c : char, _pos : i32) -> Token {
         match c {
             '(' => return Token::LParen,
             ')' => return Token::RParen,

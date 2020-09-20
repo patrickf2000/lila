@@ -3,6 +3,7 @@
 pub enum AstStmtType {
     VarDec,
     FuncCall,
+    End,
 }
 
 // Represents AST argument types
@@ -89,6 +90,7 @@ impl AstStmt {
         match &self.stmt_type {
             AstStmtType::VarDec => println!("VAR DEC {}", self.name),
             AstStmtType::FuncCall => println!("FUNC CALL {}", self.name),
+            AstStmtType::End => println!("END"),
         }
         
         for m in self.modifiers.iter() {
@@ -140,5 +142,38 @@ pub fn create_func(name : String) -> AstFunc {
         name : name,
         is_extern : false,
         statements : Vec::new(),
+    }
+}
+
+pub fn create_stmt(stmt_type : AstStmtType) -> AstStmt {
+    AstStmt {
+        stmt_type : stmt_type,
+        name : String::new(),
+        
+        sub_statements : Vec::new(),
+        args : Vec::new(),
+        modifiers : Vec::new(),
+    }
+}
+
+pub fn add_stmt(tree : &mut AstTree, stmt : AstStmt) {
+    let top_func_pos = tree.functions.len() - 1;
+    let top_func = &mut tree.functions[top_func_pos];
+    &top_func.statements.push(stmt);
+}
+
+pub fn create_int(val : i32) -> AstArg {
+    AstArg {
+        arg_type : AstArgType::IntL,
+        str_val : String::new(),
+        i32_val : val,
+    }
+}
+
+pub fn create_string(val : String) -> AstArg {
+    AstArg {
+        arg_type : AstArgType::StringL,
+        str_val : val,
+        i32_val : 0,
     }
 }
