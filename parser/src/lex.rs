@@ -15,6 +15,8 @@ pub enum Token {
     RParen,
     Assign,
     Colon,
+    OpAdd,
+    OpMul,
     
     Id(String),
     IntL(i32),
@@ -106,6 +108,8 @@ impl Lex {
             ')' => return true,
             '=' => return true,
             ':' => return true,
+            '+' => return true,
+            '*' => return true,
             _ => return false,
         }
     }
@@ -117,6 +121,8 @@ impl Lex {
             ')' => return Token::RParen,
             '=' => return Token::Assign,
             ':' => return Token::Colon,
+            '+' => return Token::OpAdd,
+            '*' => return Token::OpMul,
             _ => return Token::Unknown,
         }
     }

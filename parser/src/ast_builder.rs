@@ -183,6 +183,22 @@ fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
                 stmt.args.push(arg);
             },
             
+            Token::Id(ref val) => {
+                let mut arg = ast::create_arg(AstArgType::Id);
+                arg.str_val = val.to_string();
+                stmt.args.push(arg);
+            },
+            
+            Token::OpAdd => {
+                let arg = ast::create_arg(AstArgType::OpAdd);
+                stmt.args.push(arg);
+            },
+            
+            Token::OpMul => {
+                let arg = ast::create_arg(AstArgType::OpMul);
+                stmt.args.push(arg);
+            },
+            
             // TODO: Better syntax error
             _ => println!("Invalid expression argument: {:?}", token),
         }

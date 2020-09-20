@@ -11,6 +11,7 @@ pub enum AstArgType {
     IntL,
     StringL,
     Id,
+    OpAdd,
     OpMul,
 }
 
@@ -97,8 +98,14 @@ impl AstStmt {
             m.print();
         }
         
-        for arg in self.args.iter() {
-            arg.print();
+        if self.args.len() > 0 {
+            print!("        ARG ");
+            
+            for arg in self.args.iter() {
+                arg.print();
+            }
+            
+            println!("");
         }
     }
 }
@@ -106,13 +113,12 @@ impl AstStmt {
 // Argument implementation
 impl AstArg {
     pub fn print(&self) {
-        print!("        ARG ");
-        
         match &self.arg_type {
-            AstArgType::IntL => println!("{} ", self.i32_val),
-            AstArgType::StringL => println!("\"{}\" ", self.str_val),
-            AstArgType::Id => println!("{} ", self.str_val),
-            AstArgType::OpMul => println!("* "),
+            AstArgType::IntL => print!("{} ", self.i32_val),
+            AstArgType::StringL => print!("\"{}\" ", self.str_val),
+            AstArgType::Id => print!("{} ", self.str_val),
+            AstArgType::OpAdd => print!("+ "),
+            AstArgType::OpMul => print!("* "),
         }
     }
 }
@@ -174,6 +180,14 @@ pub fn create_string(val : String) -> AstArg {
     AstArg {
         arg_type : AstArgType::StringL,
         str_val : val,
+        i32_val : 0,
+    }
+}
+
+pub fn create_arg(arg_type : AstArgType) -> AstArg {
+    AstArg {
+        arg_type : arg_type,
+        str_val : String::new(),
         i32_val : 0,
     }
 }

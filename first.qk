@@ -2,7 +2,7 @@ extern func puts(s:str)
 
 func main
     int x = 5
-    int y = 3
+    int y = 3 + x
     
     puts("Hello!")
 end
