@@ -1,11 +1,26 @@
 
+use std::collections::HashMap;
+
 use crate::ast::*;
 use crate::ltac;
 use crate::ltac::*;
 
+#[derive(PartialEq, Clone)]
+enum DataType {
+    Int,
+}
+
+#[derive(Clone)]
+struct Var {
+    pos : i32,
+    data_type : DataType,
+}
+
 pub struct LtacBuilder {
     file : LtacFile,
     str_pos : i32,
+    vars : HashMap<String, Var>,
+    stack_pos : i32,
 }
 
 pub fn new_ltac_builder(name : String) -> LtacBuilder {
@@ -16,6 +31,8 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
             code : Vec::new(),
         },
         str_pos : 0,
+        vars : HashMap::new(),
+        stack_pos : 0,
     }
 }
 
@@ -52,11 +69,67 @@ impl LtacBuilder {
     fn build_block(&mut self, statements : &Vec<AstStmt>) {
         for line in statements {
             match &line.stmt_type {
-                AstStmtType::VarDec => {},
+                AstStmtType::VarDec => self.build_var_dec(&line),
                 AstStmtType::FuncCall => self.build_func_call(&line),
                 AstStmtType::End => self.build_end(),
             }
         }
+    }
+    
+    // Builds an LTAC variable declaration
+    fn build_var_dec(&mut self, line : &AstStmt) {
+        let name = line.name.clone();
+        let data_type = &line.modifiers[0];
+        
+        match &data_type.mod_type {
+            AstModType::Int => self.stack_pos += 4,
+        }
+        
+        let v = Var {
+            pos : self.stack_pos,
+            data_type : DataType::Int,
+        };
+        
+        self.vars.insert(name, v);
+        self.build_var_assign(line);
+    }
+    
+    // Builds an LTAC variable assignment
+    fn build_var_assign(&mut self, line : &AstStmt) {
+        let var : Var;
+        match self.vars.get(&line.name) {
+            Some(v) => var = v.clone(),
+            None => return,
+        }
+        
+        if var.data_type == DataType::Int {
+            if line.args.len() == 1 {
+                self.build_i32var_single_assign(&line.args, &var);
+            } else {
+                // TODO Math
+            }
+        }
+    }
+    
+    // Builds a single int32 variable assignment
+    fn build_i32var_single_assign(&mut self, args : &Vec<AstArg>, var : &Var) {
+        let arg = &args[0];
+        
+        let mut instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        
+        match &arg.arg_type {
+            AstArgType::IntL => {
+                instr.arg2_type = LtacArg::I32;
+                instr.arg2_val = arg.i32_val;
+            },
+            
+            AstArgType::Id => {},
+            _ => { /* TODO ERROR */ },
+        }
+        
+        self.file.code.push(instr);
     }
 
     // Builds an LTAC function call
