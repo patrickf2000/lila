@@ -106,7 +106,7 @@ impl LtacBuilder {
             if line.args.len() == 1 {
                 self.build_i32var_single_assign(&line.args, &var);
             } else {
-                // TODO Math
+                self.build_i32var_math(&line.args, &var);
             }
         }
     }
@@ -131,6 +131,55 @@ impl LtacBuilder {
         
         self.file.code.push(instr);
     }
+    
+    // Builds an int32 math assignment
+    fn build_i32var_math(&mut self, args : &Vec<AstArg>, var : &Var) {
+        let mut instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Reg;
+        instr.arg1_val = 1;
+        
+        for arg in args.iter() {
+            match &arg.arg_type {
+                AstArgType::IntL => {
+                    instr.arg2_type = LtacArg::I32;
+                    instr.arg2_val = arg.i32_val;
+                    self.file.code.push(instr.clone());
+                },
+                
+                AstArgType::StringL => {},
+                
+                AstArgType::Id => {
+                    match self.vars.get(&arg.str_val) {
+                        Some(v) => instr.arg2_val = v.pos,
+                        None => instr.arg2_val = 0,
+                    }
+                    
+                    instr.arg2_type = LtacArg::Mem;
+                    self.file.code.push(instr.clone());
+                },
+                
+                AstArgType::OpAdd => {
+                    instr = ltac::create_instr(LtacType::I32Add);
+                    instr.arg1_type = LtacArg::Reg;
+                    instr.arg1_val = 1;
+                },
+                
+                AstArgType::OpMul => {
+                    instr = ltac::create_instr(LtacType::I32Mul);
+                    instr.arg1_type = LtacArg::Reg;
+                    instr.arg1_val = 1;
+                },
+            }
+        }
+        
+        //Store the result back
+        instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = LtacArg::Reg;
+        instr.arg2_val = 1;
+        self.file.code.push(instr);
+    }
 
     // Builds an LTAC function call
     fn build_func_call(&mut self, line : &AstStmt) {
@@ -148,7 +197,18 @@ impl LtacBuilder {
                     self.file.code.push(push);
                 },
                 
-                AstArgType::Id => {},
+                AstArgType::Id => {
+                    let mut push = ltac::create_instr(LtacType::PushArg);
+                    push.arg1_type = LtacArg::Mem;
+                    
+                    match &self.vars.get(&arg.str_val) {
+                        Some(v) => push.arg1_val = v.pos,
+                        None => push.arg1_val = 0,
+                    }
+                    
+                    self.file.code.push(push);
+                },
+                
                 _ => {},
             }
         }

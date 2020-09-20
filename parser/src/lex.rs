@@ -15,6 +15,7 @@ pub enum Token {
     RParen,
     Assign,
     Colon,
+    Comma,
     OpAdd,
     OpMul,
     
@@ -108,6 +109,7 @@ impl Lex {
             ')' => return true,
             '=' => return true,
             ':' => return true,
+            ',' => return true,
             '+' => return true,
             '*' => return true,
             _ => return false,
@@ -121,6 +123,7 @@ impl Lex {
             ')' => return Token::RParen,
             '=' => return Token::Assign,
             ':' => return Token::Colon,
+            ',' => return Token::Comma,
             '+' => return Token::OpAdd,
             '*' => return Token::OpMul,
             _ => return Token::Unknown,
