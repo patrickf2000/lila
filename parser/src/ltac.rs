@@ -1,12 +1,12 @@
 
 // Represents a data entry type
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum LtacDataType {
     StringL,
 }
 
 // Represents an instruction type
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum LtacType {
     Extern,
     Func,
@@ -21,7 +21,7 @@ pub enum LtacType {
 }
 
 // Represents an instruction argument type
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum LtacArg {
     Empty,
     Reg,
@@ -31,6 +31,7 @@ pub enum LtacArg {
 }
 
 // Represents an LTAC file
+#[derive(Clone)]
 pub struct LtacFile {
     pub name : String,
     pub data : Vec<LtacData>,
@@ -38,6 +39,7 @@ pub struct LtacFile {
 }
 
 // Represents data for the ELF .data entry
+#[derive(Clone)]
 pub struct LtacData {
     pub data_type : LtacDataType,
     pub name : String,
@@ -45,6 +47,7 @@ pub struct LtacData {
 }
 
 // Represents an instruction
+#[derive(Clone)]
 pub struct LtacInstr {
     pub instr_type : LtacType,
     pub name : String,

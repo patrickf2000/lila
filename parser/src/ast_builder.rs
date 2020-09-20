@@ -1,6 +1,5 @@
 
 // Import what we need
-use std::path::Path;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -16,12 +15,7 @@ use crate::lex::{Token, Lex, create_lex};
 // In Quik, each line is a self-contained expression; as a result, we read a line
 // and then lexically analyze and build an AST node from it
 //
-pub fn build_ast(path : String) -> AstTree {
-    let file_path = Path::new(&path);
-    let name = file_path.file_stem()
-        .unwrap().to_os_string()
-        .into_string().unwrap();
-    
+pub fn build_ast(path : String, name : String) -> AstTree {   
     let mut tree = AstTree {
         file_name : name,
         functions : Vec::new(),
