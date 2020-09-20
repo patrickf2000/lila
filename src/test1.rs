@@ -33,6 +33,7 @@ pub fn build_ast() {
     
     let mut func = AstFunc {
         name : "main".to_string(),
+        is_extern : false,
         statements : Vec::new(),
     };
     

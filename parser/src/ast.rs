@@ -27,6 +27,7 @@ pub struct AstTree {
 // Represents a function in a tree
 pub struct AstFunc {
     pub name : String,
+    pub is_extern : bool,
     pub statements : Vec<AstStmt>,
 }
 
@@ -67,7 +68,12 @@ impl AstTree {
 // Function implementation
 impl AstFunc {
     pub fn print(&self) {
-        println!("  FUNC {}", self.name);
+        print!("  ");
+        if self.is_extern {
+            print!("EXTERN ");
+        }
+        
+        println!("FUNC {}", self.name);
         
         for stmt in self.statements.iter() {
             stmt.print();
@@ -117,5 +123,22 @@ impl AstMod {
         match &self.mod_type {
             AstModType::Int => println!("Int"),
         }
+    }
+}
+
+// Helper functions
+pub fn create_extern_func(name : String) -> AstFunc {
+    AstFunc {
+        name : name,
+        is_extern : true,
+        statements : Vec::new(),
+    }
+}
+
+pub fn create_func(name : String) -> AstFunc {
+    AstFunc {
+        name : name,
+        is_extern : false,
+        statements : Vec::new(),
     }
 }

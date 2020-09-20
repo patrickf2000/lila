@@ -11,7 +11,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 use ast::AstTree;
-use lex::{Token, create_lex};
+use lex::{Token, Lex, create_lex};
 
 // The main parse function
 // This function opens the file and reads a line; 
@@ -27,7 +27,7 @@ pub fn parse(path : String) {
         .unwrap().to_os_string()
         .into_string().unwrap();
     
-    let tree = AstTree {
+    let mut tree = AstTree {
         file_name : name,
         functions : Vec::new(),
     };
@@ -46,7 +46,7 @@ pub fn parse(path : String) {
             continue;
         }
         
-        build_line(current);
+        build_line(current, &mut tree);
     }
     
     // TODO: Remove this
@@ -54,16 +54,58 @@ pub fn parse(path : String) {
 }
 
 // Converts a line to an AST node
-fn build_line(line : String) {
+fn build_line(line : String, tree : &mut AstTree) {
     let mut analyzer = create_lex(line);
     analyzer.tokenize();
     
-    let mut token = analyzer.get_token();
+    // Get the first token
+    let token = analyzer.get_token();
     
-    while token != Token::Eof {
-        print!("{:?} ", token);
-        token = analyzer.get_token();
+    match token {
+        Token::Extern => build_extern(&mut analyzer, tree),
+        Token::Func => build_func(&mut analyzer, tree),
+        Token::End => println!("End: {:?}", token),
+        Token::Int => println!("Int: {:?}", token),
+        Token::TStr => println!("TStr: {:?}", token),
+        Token::Id(ref _val) => println!("Id: {:?}", token),
+        _ => println!("Error: {:?}", token),
+    }
+}
+
+// Builds an external function
+fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
+    // Syntax check
+    // The first token should be the "func" keyword, and the second token should be an ID
+    let token1 = scanner.get_token();
+    let token2 = scanner.get_token();
+    let mut name = String::new();
+    
+    // TODO: Syntax error
+    match token1 {
+        Token::Func => {},
+        _ => println!("Error: Invalid token-> {:?}", token1),
     }
     
-    println!("");
+    match token2 {
+        Token::Id(ref val) => name = val.to_string(),
+        _ => println!("Error: Invalid extern name-> {:?}", token2),
+    }
+    
+    let func = ast::create_extern_func(name);
+    tree.functions.push(func);
+}
+
+// Builds a regular function declaration
+fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
+    // The first token should be the function name
+    let token = scanner.get_token();
+    let mut name = String::new();
+    
+    match token {
+        Token::Id(ref val) => name = val.to_string(),
+        _ => println!("Error: Invalid function name-> {:?}", token),
+    }
+    
+    let func = ast::create_func(name);
+    tree.functions.push(func);
 }
