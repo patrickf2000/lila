@@ -219,15 +219,24 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
 // Builds a function argument
 fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr) {
-    let mut line = "  mov rdi, ".to_string();
+    let mut line = "  ".to_string();
     
     match &code.arg1_type {
         LtacArg::Empty => {},
         LtacArg::Reg => {},
-        LtacArg::Mem => {},
+        
+        LtacArg::Mem => {
+            line.push_str("mov esi, [rbp-");
+            line.push_str(&code.arg1_val.to_string());
+            line.push_str("]");
+        },
+        
         LtacArg::I32 => {},
         
-        LtacArg::Ptr => line.push_str(&code.arg1_sval),
+        LtacArg::Ptr => {
+            line.push_str("mov rdi, ");
+            line.push_str(&code.arg1_sval);
+        },
     }
     
     line.push_str("\n");

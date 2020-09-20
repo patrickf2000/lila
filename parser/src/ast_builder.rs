@@ -199,6 +199,8 @@ fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
                 stmt.args.push(arg);
             },
             
+            Token::Comma => {},
+            
             // TODO: Better syntax error
             _ => println!("Invalid expression argument: {:?}", token),
         }

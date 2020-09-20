@@ -58,9 +58,21 @@ impl LtacBuilder {
                 let mut fc = ltac::create_instr(LtacType::Func);
                 fc.name = func.name.clone();
                 fc.arg1_val = 0;
-                self.file.code.push(fc);
+                
+                let pos = self.file.code.len();
                 
                 self.build_block(&func.statements);
+                
+                if self.vars.len() > 0 {
+                    let mut stack_size = 0;
+                    while stack_size < (self.stack_pos + 1) {
+                        stack_size = stack_size + 16;
+                    }
+                    
+                    fc.arg1_val = stack_size;
+                }
+                
+                self.file.code.insert(pos, fc);
             }
         }
     }

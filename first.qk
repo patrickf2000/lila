@@ -8,4 +8,5 @@ func main
     int y = 3 + x
     
     printf("X: %d\n", x)
+    printf("Y: %d\n", y)
 end
