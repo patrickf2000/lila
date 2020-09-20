@@ -206,6 +206,6 @@ pub fn build_ltac() {
     file.print();
     
     // compile
-    x86::compile(&file).expect("Codegen failed with unknown error.");
-    x86::build_asm();
+    /*x86::compile(&file).expect("Codegen failed with unknown error.");
+    x86::build_asm();*/
 }

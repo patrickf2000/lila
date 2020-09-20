@@ -7,10 +7,12 @@ use std::process::Command;
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
-    println!("Compiling: {}", ltac_file.name);
+    let mut name = "/tmp/".to_string();
+    name.push_str(&ltac_file.name);
+    name.push_str(".asm");
     
     // Write it out
-    let file = File::create(&ltac_file.name)?;
+    let file = File::create(&name)?;
     let mut writer = BufWriter::new(file);
     
     write_data(&mut writer, &ltac_file.data);
@@ -19,10 +21,21 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     Ok(())
 }
  
-pub fn build_asm() {   
+pub fn build_asm(name : &String) {
+    // Create all the names
+    let mut asm_name = "/tmp/".to_string();
+    asm_name.push_str(name);
+    asm_name.push_str(".asm");
+    
+    let mut obj_name = "/tmp/".to_string();
+    obj_name.push_str(name);
+    obj_name.push_str(".o");
+    
+    let output = &mut name.clone();
+
     // Assemble
     let asm = Command::new("asmx86")
-        .args(&["test.asm", "-o", "test.o"])
+        .args(&[&asm_name, "-o", &obj_name])
         .output()
         .expect("Fatal: Assembly failed.");
         
@@ -36,12 +49,12 @@ pub fn build_asm() {
         "/usr/lib64/crti.o",
         "/usr/lib64/crtn.o",
         "/usr/lib64/crt1.o",
-        "test.o",
+        &obj_name,
         "-dynamic-linker",
         "/lib64/ld-linux-x86-64.so.2",
         "-lc",
         "-o",
-        "test"
+        output
     ];
     
     let ld = Command::new("ld")
