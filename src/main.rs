@@ -1,7 +1,8 @@
 use std::env;
 
 use parser;
-use x86;
+//use x86;
+use aarch64;
 
 fn main() {
     let mut args : Vec<String> = env::args().collect();
@@ -32,7 +33,9 @@ fn main() {
         ltac.print();
     } else {
         let ltac = parser::parse(input);
-        x86::compile(&ltac).expect("Codegen failed with unknown error.");
-        x86::build_asm(&ltac.name);
+        //x86::compile(&ltac).expect("Codegen failed with unknown error.");
+        //x86::build_asm(&ltac.name);
+        aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
+        aarch64::build_asm(&ltac.name);
     }
 }
