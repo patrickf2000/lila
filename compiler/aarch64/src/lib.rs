@@ -97,11 +97,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     writer.write(&line.into_bytes())
         .expect("[ARCH64_text] Write failed in .text");
         
+    // TODO: Store function stack size around here, then pass to return
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => aarch64_build_extern(writer, &code),
-            LtacType::Func => {},
-            LtacType::Ret => {},
+            LtacType::Func => aarch64_build_func(writer, &code),
+            LtacType::Ret => aarch64_build_ret(writer, &code),
             LtacType::Mov => {},
             LtacType::PushArg => {},
             LtacType::Call => {},
@@ -122,3 +123,27 @@ fn aarch64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
         .expect("[ARCH64_build_extern] Write failed.");
 }
 
+// Builds a function declaration
+fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let name = &code.name;
+    
+    let mut line = "\n.global ".to_string();
+    line.push_str(name);
+    line.push_str("\n");
+    line.push_str(name);
+    line.push_str(":\n");
+    
+    // Set up the stack
+    line.push_str("  stp x29, x30, [sp, -");
+    line.push_str(&code.arg1_val.to_string());
+    line.push_str("]!\n");
+    line.push_str("  mov x29, sp\n\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[ARCH64_build_func] Write failed.");
+}
+
+// Builds a function return
+fn aarch64_build_ret(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    
+}
