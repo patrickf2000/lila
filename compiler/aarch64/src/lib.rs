@@ -105,7 +105,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Ret => aarch64_build_ret(writer, &code),
             LtacType::Mov => {},
             LtacType::PushArg => {},
+            LtacType::KPushArg => {},
             LtacType::Call => {},
+            LtacType::Syscall => {},
             LtacType::I32Add => {},
             LtacType::I32Mul => {},
         }
@@ -144,6 +146,6 @@ fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
 }
 
 // Builds a function return
-fn aarch64_build_ret(writer : &mut BufWriter<File>, code : &LtacInstr) {
+fn aarch64_build_ret(_writer : &mut BufWriter<File>, _code : &LtacInstr) {
     
 }

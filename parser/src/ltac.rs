@@ -14,7 +14,9 @@ pub enum LtacType {
     Mov,
     
     PushArg,
+    KPushArg,
     Call,
+    Syscall,
     
     I32Add,
     I32Mul,
@@ -139,12 +141,19 @@ impl LtacInstr {
             LtacType::Mov => print!("  mov "),
             
             LtacType::PushArg => print!("  pusharg "),
+            LtacType::KPushArg => print!("  kpusharg "),
             
             LtacType::Call => {
                 println!("  call {}", self.name);
                 println!("");
                 return;
-            } ,
+            },
+            
+            LtacType::Syscall => {
+                println!("  syscall");
+                println!("");
+                return;
+            },
             
             LtacType::I32Add => print!("  i32.add "),
             LtacType::I32Mul => print!("  i32.mul "),

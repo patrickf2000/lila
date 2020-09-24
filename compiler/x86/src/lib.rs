@@ -46,13 +46,7 @@ pub fn build_asm(name : &String) {
     
     // Link
     let args = [
-        "/usr/lib64/crti.o",
-        "/usr/lib64/crtn.o",
-        "/usr/lib64/crt1.o",
         &obj_name,
-        "-dynamic-linker",
-        "/lib64/ld-linux-x86-64.so.2",
-        "-lc",
         "-o",
         output
     ];
@@ -95,8 +89,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Func => amd64_build_func(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
-            LtacType::PushArg => amd64_build_pusharg(writer, &code),
+            LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
+            LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
+            LtacType::Syscall => amd64_build_syscall(writer),
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
         }
@@ -217,24 +213,79 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         .expect("[AMD64_write_instr] Write failed.");
 }
 
+// Gets a register based on position
+// Kernel argument registers
+fn amd64_karg_reg32(pos : i32) -> String {
+    match pos {
+        1 => return "eax".to_string(),
+        2 => return "edi".to_string(),
+        3 => return "esi".to_string(),
+        4 => return "edx".to_string(),
+        _ => return String::new(),
+    };
+}
+
+fn amd64_karg_reg64(pos : i32) -> String {
+    match pos {
+        1 => return "rax".to_string(),
+        2 => return "rdi".to_string(),
+        3 => return "rsi".to_string(),
+        4 => return "rdx".to_string(),
+        _ => return String::new(),
+    };
+}
+
+// Function argument registers
+fn amd64_arg_reg32(pos : i32) -> String {
+    match pos {
+        1 => return "edx".to_string(),
+        2 => return "esi".to_string(),
+        _ => return String::new(),
+    };
+}
+
+fn amd64_arg_reg64(pos : i32) -> String {
+    match pos {
+        1 => return "rdi".to_string(),
+        2 => return "rsi".to_string(),
+        _ => return String::new(),
+    };
+}
+
 // Builds a function argument
-fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr) {
-    let mut line = "  ".to_string();
+fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool) {
+    let mut line = "  mov ".to_string();
     
+    // Get the argument registers
+    let mut reg32 = amd64_arg_reg32(code.arg2_val);
+    let mut reg64 = amd64_arg_reg64(code.arg2_val);
+    
+    if is_karg {
+        reg32 = amd64_karg_reg32(code.arg2_val);
+        reg64 = amd64_karg_reg64(code.arg2_val);
+    }
+    
+    // Assemble
     match &code.arg1_type {
         LtacArg::Empty => {},
         LtacArg::Reg => {},
         
         LtacArg::Mem => {
-            line.push_str("mov esi, [rbp-");
+            line.push_str(&reg32);
+            line.push_str(", [rbp-");
             line.push_str(&code.arg1_val.to_string());
             line.push_str("]");
         },
         
-        LtacArg::I32 => {},
+        LtacArg::I32 => {
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&code.arg1_val.to_string());
+        },
         
         LtacArg::Ptr => {
-            line.push_str("mov rdi, ");
+            line.push_str(&reg64);
+            line.push_str(", ");
             line.push_str(&code.arg1_sval);
         },
     }
@@ -254,3 +305,13 @@ fn amd64_build_call(writer : &mut BufWriter<File>, code : &LtacInstr) {
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_call] Write failed.");
 }
+
+// Builds a system call
+fn amd64_build_syscall(writer : &mut BufWriter<File>) {
+    let mut line = "  syscall".to_string();
+    line.push_str("\n\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_syscall] Write failed.");
+}
+

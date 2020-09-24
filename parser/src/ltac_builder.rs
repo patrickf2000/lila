@@ -195,22 +195,41 @@ impl LtacBuilder {
 
     // Builds an LTAC function call
     fn build_func_call(&mut self, line : &AstStmt) {
+        let mut arg_type = LtacType::PushArg;
+        let mut call_type = LtacType::Call;
+        
+        if line.name == "syscall" {
+            arg_type = LtacType::KPushArg;
+            call_type = LtacType::Syscall;
+        }
+        
+        // Represents the current argument position
+        let mut arg_no : i32 = 1;
+    
         // Build the arguments
         for arg in line.args.iter() {
             match &arg.arg_type {
-                AstArgType::IntL => {},
+                AstArgType::IntL => {
+                    let mut push = ltac::create_instr(arg_type.clone());
+                    push.arg1_type = LtacArg::I32;
+                    push.arg1_val = arg.i32_val.clone();
+                    push.arg2_val = arg_no;
+                    self.file.code.push(push);
+                },
                 
                 AstArgType::StringL => {
                     let name = self.build_string(arg.str_val.clone());
                     
-                    let mut push = ltac::create_instr(LtacType::PushArg);
+                    let mut push = ltac::create_instr(arg_type.clone());
                     push.arg1_type = LtacArg::Ptr;
                     push.arg1_sval = name;
+                    push.arg2_val = arg_no;
                     self.file.code.push(push);
                 },
                 
                 AstArgType::Id => {
-                    let mut push = ltac::create_instr(LtacType::PushArg);
+                    let mut push = ltac::create_instr(arg_type.clone());
+                    push.arg2_val = arg_no;
                     push.arg1_type = LtacArg::Mem;
                     
                     match &self.vars.get(&arg.str_val) {
@@ -223,10 +242,12 @@ impl LtacBuilder {
                 
                 _ => {},
             }
+            
+            arg_no = arg_no + 1;
         }
         
         // Build the call
-        let mut fc = ltac::create_instr(LtacType::Call);
+        let mut fc = ltac::create_instr(call_type);
         fc.name = line.name.clone();
         self.file.code.push(fc);
     }
