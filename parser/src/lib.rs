@@ -4,6 +4,8 @@ pub mod ast;
 pub mod ltac;
 
 mod ast_builder;
+mod ast_func;
+mod ast_utils;
 mod ltac_builder;
 mod lex;
 

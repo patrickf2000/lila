@@ -7,6 +7,9 @@ use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex, create_lex};
 
+use crate::ast_func::*;
+use crate::ast_utils::*;
+
 // The AST building function
 // This function opens the file and reads a line; 
 // the line is then passed to another function which lexically analyzes
@@ -62,60 +65,6 @@ fn build_line(line : String, tree : &mut AstTree) {
     }
 }
 
-// Builds an external function
-fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
-    // Syntax check
-    // The first token should be the "func" keyword, and the second token should be an ID
-    let token1 = scanner.get_token();
-    let token2 = scanner.get_token();
-    let mut name = String::new();
-    
-    // TODO: Better syntax error
-    match token1 {
-        Token::Func => {},
-        _ => println!("Error: Invalid token-> {:?}", token1),
-    }
-    
-    // TODO: Better syntax error
-    match token2 {
-        Token::Id(ref val) => name = val.to_string(),
-        _ => println!("Error: Invalid extern name-> {:?}", token2),
-    }
-    
-    let func = ast::create_extern_func(name);
-    tree.functions.push(func);
-}
-
-// Builds a regular function declaration
-fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
-    // The first token should be the function name
-    let token = scanner.get_token();
-    let mut name = String::new();
-    
-    // TODO: Better syntax error
-    match token {
-        Token::Id(ref val) => name = val.to_string(),
-        _ => println!("Error: Invalid function name-> {:?}", token),
-    }
-    
-    let func = ast::create_func(name);
-    tree.functions.push(func);
-}
-
-// Builds a return statement
-fn build_return(scanner : &mut Lex, tree : &mut AstTree) {
-    let mut ret = ast::create_stmt(AstStmtType::Return);
-    build_args(scanner, &mut ret, Token::Eof);
-    
-    ast::add_stmt(tree, ret);
-}
-
-// Builds the end statement
-fn build_end(tree : &mut AstTree) {
-    let stmt = ast::create_stmt(AstStmtType::End);
-    ast::add_stmt(tree, stmt);
-}
-
 // Builds an integer variable declaration
 fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec);
@@ -165,18 +114,6 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
     }
 }
 
-// Builds function calls
-fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
-    let mut fc = ast::create_stmt(AstStmtType::FuncCall);
-    fc.name = id_val;
-    
-    // Build arguments
-    build_args(scanner, &mut fc, Token::RParen);
-    
-    // Add the call
-    ast::add_stmt(tree, fc);
-}
-
 // Builds conditional statements
 fn build_cond(scanner : &mut Lex, tree : &mut AstTree, _cond_type : Token) {
     let mut cond = ast::create_stmt(AstStmtType::If);
@@ -188,49 +125,3 @@ fn build_cond(scanner : &mut Lex, tree : &mut AstTree, _cond_type : Token) {
     ast::add_stmt(tree, cond);
 }
 
-// A common function for building statement arguments
-fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
-    let mut token = scanner.get_token();
-    
-    while token != end {
-        match token {
-            Token::IntL(val) => {
-                let arg = ast::create_int(val);
-                stmt.args.push(arg);
-            },
-            
-            Token::StringL(ref val) => {
-                let arg = ast::create_string(val.to_string());
-                stmt.args.push(arg);
-            },
-            
-            Token::Id(ref val) => {
-                let mut arg = ast::create_arg(AstArgType::Id);
-                arg.str_val = val.to_string();
-                stmt.args.push(arg);
-            },
-            
-            Token::OpAdd => {
-                let arg = ast::create_arg(AstArgType::OpAdd);
-                stmt.args.push(arg);
-            },
-            
-            Token::OpMul => {
-                let arg = ast::create_arg(AstArgType::OpMul);
-                stmt.args.push(arg);
-            },
-            
-            Token::OpEq => {
-                let arg = ast::create_arg(AstArgType::OpEq);
-                stmt.args.push(arg);
-            },
-            
-            Token::Comma => {},
-            
-            // TODO: Better syntax error
-            _ => println!("Invalid expression argument: {:?}", token),
-        }
-    
-        token = scanner.get_token();
-    }
-}

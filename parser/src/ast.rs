@@ -1,5 +1,6 @@
 
 // Represents AST statement types
+#[derive(PartialEq, Clone)]
 pub enum AstStmtType {
     VarDec,
     If,
@@ -9,6 +10,7 @@ pub enum AstStmtType {
 }
 
 // Represents AST argument types
+#[derive(Clone)]
 pub enum AstArgType {
     IntL,
     StringL,
@@ -19,6 +21,7 @@ pub enum AstArgType {
 }
 
 // Represents modifiers
+#[derive(Clone)]
 pub enum AstModType {
     Int
 }
@@ -37,6 +40,7 @@ pub struct AstFunc {
 }
 
 // Represents a statement
+#[derive(Clone)]
 pub struct AstStmt {
     pub stmt_type : AstStmtType,
     pub name : String,
@@ -48,6 +52,7 @@ pub struct AstStmt {
 
 // Represents an argument
 // Arguments are constants, variables, operators, etc
+#[derive(Clone)]
 pub struct AstArg {
     pub arg_type : AstArgType,
     pub str_val : String,
@@ -55,6 +60,7 @@ pub struct AstArg {
 }
 
 // Represents an statement modifier
+#[derive(Clone)]
 pub struct AstMod {
     pub mod_type : AstModType,
 }
