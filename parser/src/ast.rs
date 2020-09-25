@@ -2,7 +2,9 @@
 // Represents AST statement types
 pub enum AstStmtType {
     VarDec,
+    If,
     FuncCall,
+    Return,
     End,
 }
 
@@ -13,6 +15,7 @@ pub enum AstArgType {
     Id,
     OpAdd,
     OpMul,
+    OpEq,
 }
 
 // Represents modifiers
@@ -90,7 +93,9 @@ impl AstStmt {
         
         match &self.stmt_type {
             AstStmtType::VarDec => println!("VAR DEC {}", self.name),
+            AstStmtType::If => println!("IF"),
             AstStmtType::FuncCall => println!("FUNC CALL {}", self.name),
+            AstStmtType::Return => println!("RETURN"),
             AstStmtType::End => println!("END"),
         }
         
@@ -119,6 +124,7 @@ impl AstArg {
             AstArgType::Id => print!("{} ", self.str_val),
             AstArgType::OpAdd => print!("+ "),
             AstArgType::OpMul => print!("* "),
+            AstArgType::OpEq => print!("== "),
         }
     }
 }
@@ -191,3 +197,4 @@ pub fn create_arg(arg_type : AstArgType) -> AstArg {
         i32_val : 0,
     }
 }
+

@@ -52,10 +52,12 @@ fn build_line(line : String, tree : &mut AstTree) {
     match token {
         Token::Extern => build_extern(&mut analyzer, tree),
         Token::Func => build_func(&mut analyzer, tree),
+        Token::Return => build_return(&mut analyzer, tree),
         Token::End => build_end(tree),
         Token::Int => build_i32var_dec(&mut analyzer, tree),
         Token::TStr => println!("TStr: {:?}", token),
         Token::Id(ref val) => build_id(&mut analyzer, tree, val.to_string()),
+        Token::If => build_cond(&mut analyzer, tree, Token::If),
         _ => println!("Error: {:?}", token),
     }
 }
@@ -98,6 +100,14 @@ fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
     
     let func = ast::create_func(name);
     tree.functions.push(func);
+}
+
+// Builds a return statement
+fn build_return(scanner : &mut Lex, tree : &mut AstTree) {
+    let mut ret = ast::create_stmt(AstStmtType::Return);
+    build_args(scanner, &mut ret, Token::Eof);
+    
+    ast::add_stmt(tree, ret);
 }
 
 // Builds the end statement
@@ -167,6 +177,17 @@ fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
     ast::add_stmt(tree, fc);
 }
 
+// Builds conditional statements
+fn build_cond(scanner : &mut Lex, tree : &mut AstTree, _cond_type : Token) {
+    let mut cond = ast::create_stmt(AstStmtType::If);
+    
+    // Build arguments
+    build_args(scanner, &mut cond, Token::Eof);
+    
+    // Add the conditional
+    ast::add_stmt(tree, cond);
+}
+
 // A common function for building statement arguments
 fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
     let mut token = scanner.get_token();
@@ -196,6 +217,11 @@ fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
             
             Token::OpMul => {
                 let arg = ast::create_arg(AstArgType::OpMul);
+                stmt.args.push(arg);
+            },
+            
+            Token::OpEq => {
+                let arg = ast::create_arg(AstArgType::OpEq);
                 stmt.args.push(arg);
             },
             

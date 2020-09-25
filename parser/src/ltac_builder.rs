@@ -82,7 +82,9 @@ impl LtacBuilder {
         for line in statements {
             match &line.stmt_type {
                 AstStmtType::VarDec => self.build_var_dec(&line),
+                AstStmtType::If => {},
                 AstStmtType::FuncCall => self.build_func_call(&line),
+                AstStmtType::Return => {},
                 AstStmtType::End => self.build_end(),
             }
         }
@@ -181,6 +183,8 @@ impl LtacBuilder {
                     instr.arg1_type = LtacArg::Reg;
                     instr.arg1_val = 1;
                 },
+                
+                AstArgType::OpEq => {},
             }
         }
         

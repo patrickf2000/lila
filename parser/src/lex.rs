@@ -6,7 +6,10 @@ pub enum Token {
     
     Extern,
     Func,
+    Return,
     End,
+    
+    If,
     
     Int,
     TStr,
@@ -18,6 +21,7 @@ pub enum Token {
     Comma,
     OpAdd,
     OpMul,
+    OpEq,
     
     Id(String),
     IntL(i32),
@@ -28,16 +32,27 @@ pub enum Token {
 pub struct Lex {
     input : String,
     pos : usize,
+    index : usize,
     all_tokens : Vec<Token>,
 }
 
 impl Lex {
     pub fn tokenize(&mut self) {
+        self.index = 0;
         let mut current = String::new();
-        let mut index = 0;
         let mut in_quote = false;
         
-        for c in self.input.chars() {
+        let length = self.input.len();
+        
+        while self.index < length {
+            let c = self.input.chars().nth(self.index).unwrap();
+            let c2 : char;
+            if self.index + 1 < length {
+                c2 = self.input.chars().nth(self.index+1).unwrap();
+            } else {
+                c2 = '\0';
+            }
+            
             // Check to see if we are in a quote (string literal)
             if c == '\"' {
                 if in_quote {
@@ -50,13 +65,13 @@ impl Lex {
                     in_quote = true;
                 }
                 
-                index = index + 1;
+                self.index += 1;
                 continue;
             }
             
             if in_quote {
                 current.push(c);
-                index = index + 1;
+                self.index += 1;
                 continue;
             }
         
@@ -68,7 +83,7 @@ impl Lex {
                     current = String::new();
                 }
                 
-                let symbol = self.get_symbol(c, index);
+                let symbol = self.get_symbol(c, c2);
                 self.all_tokens.push(symbol);
             } else if c == ' ' || c == '\t' {
                 if current.len() > 0 {
@@ -80,7 +95,7 @@ impl Lex {
                 current.push(c);
             }
             
-            index = index + 1;
+            self.index += 1;
         }
         
         if current.len() > 0 {
@@ -117,11 +132,20 @@ impl Lex {
     }
     
     // Returns the symbol for a given character
-    fn get_symbol(&self, c : char, _pos : i32) -> Token {
+    fn get_symbol(&mut self, c : char, c2 : char) -> Token {
         match c {
             '(' => return Token::LParen,
             ')' => return Token::RParen,
-            '=' => return Token::Assign,
+            
+            '=' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::OpEq;
+                }
+                
+                return Token::Assign;
+            },
+            
             ':' => return Token::Colon,
             ',' => return Token::Comma,
             '+' => return Token::OpAdd,
@@ -145,9 +169,11 @@ impl Lex {
         match current.as_ref() {
             "extern" => token = Token::Extern,
             "func" => token = Token::Func,
+            "return" => token = Token::Return,
             "end" => token = Token::End,
             "int" => token = Token::Int,
             "str" => token = Token::TStr,
+            "if" => token = Token::If,
             _ => token = Token::Id(current.clone()),
         };
         
@@ -159,6 +185,8 @@ pub fn create_lex(input : String) -> Lex {
     Lex {
         input : input,
         pos : 0,
+        index : 0,
         all_tokens : Vec::new(),
     }
 }
+
