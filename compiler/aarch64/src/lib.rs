@@ -101,6 +101,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => aarch64_build_extern(writer, &code),
+            LtacType::Label => {},
             LtacType::Func => aarch64_build_func(writer, &code),
             LtacType::Ret => aarch64_build_ret(writer, &code),
             LtacType::Mov => {},
@@ -108,6 +109,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::KPushArg => {},
             LtacType::Call => {},
             LtacType::Syscall => {},
+            LtacType::I32Cmp => {},
+            LtacType::Br => {},
+            LtacType::Be => {},
+            LtacType::Bne => {},
             LtacType::I32Add => {},
             LtacType::I32Mul => {},
         }

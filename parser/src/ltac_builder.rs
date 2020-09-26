@@ -21,6 +21,11 @@ pub struct LtacBuilder {
     str_pos : i32,
     vars : HashMap<String, Var>,
     stack_pos : i32,
+    
+    // For labels and blocks
+    block_layer : i32,
+    label_stack : Vec<String>,
+    top_label_stack : Vec<String>,
 }
 
 pub fn new_ltac_builder(name : String) -> LtacBuilder {
@@ -33,6 +38,9 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
         str_pos : 0,
         vars : HashMap::new(),
         stack_pos : 0,
+        block_layer : 0,
+        label_stack : Vec::new(),
+        top_label_stack : Vec::new(),
     }
 }
 
@@ -82,7 +90,7 @@ impl LtacBuilder {
         for line in statements {
             match &line.stmt_type {
                 AstStmtType::VarDec => self.build_var_dec(&line),
-                AstStmtType::If => {},
+                AstStmtType::If => self.build_cond(&line),
                 AstStmtType::FuncCall => self.build_func_call(&line),
                 AstStmtType::Return => {},
                 AstStmtType::End => self.build_end(),
@@ -196,6 +204,96 @@ impl LtacBuilder {
         instr.arg2_val = 1;
         self.file.code.push(instr);
     }
+    
+    // A utility function to create a label
+    fn create_label(&mut self, is_top : bool) {
+        let lbl_pos = self.str_pos.to_string();
+        self.str_pos += 1;
+        
+        let mut name = "L".to_string();
+        name.push_str(&lbl_pos);
+        
+        if is_top {
+            self.top_label_stack.push(name);
+        } else {
+            self.label_stack.push(name);
+        }
+    }
+    
+    // Builds an LTAC conditional block
+    fn build_cond(&mut self, line : &AstStmt) {
+        if self.block_layer > 0 {
+            let mut jmp = ltac::create_instr(LtacType::Br);
+            jmp.name = self.top_label_stack.last().unwrap().to_string();
+            self.file.code.push(jmp);
+        }
+    
+        self.block_layer += 1;
+        
+        if line.stmt_type == AstStmtType::If {
+            self.create_label(true);
+        }
+        
+        self.create_label(false);
+        
+        // Build the conditional statement
+        let arg1 = &line.args.iter().nth(0).unwrap();
+        let arg2 = &line.args.iter().nth(2).unwrap();
+        
+        let mut cmp = ltac::create_instr(LtacType::I32Cmp);
+        
+        match &arg1.arg_type {
+            AstArgType::IntL => {
+                cmp.arg1_type = LtacArg::I32;
+                cmp.arg1_val = arg1.i32_val;
+            },
+            
+            AstArgType::StringL => {},
+            
+            AstArgType::Id => {
+                cmp.arg1_type = LtacArg::Mem;
+                match &self.vars.get(&arg1.str_val) {
+                    Some(v) => cmp.arg1_val = v.pos,
+                    None => cmp.arg1_val = 0,
+                }
+            },
+            
+            _ => {},
+        }
+        
+        match &arg2.arg_type {
+            AstArgType::IntL => {
+                cmp.arg2_type = LtacArg::I32;
+                cmp.arg2_val = arg2.i32_val;
+            },
+            
+            AstArgType::StringL => {},
+            
+            AstArgType::Id => {
+                cmp.arg2_type = LtacArg::Mem;
+                match &self.vars.get(&arg2.str_val) {
+                    Some(v) => cmp.arg2_val = v.pos,
+                    None => cmp.arg2_val = 0,
+                }
+            },
+            
+            _ => {},
+        }
+        
+        self.file.code.push(cmp);
+        
+        // Now the operator
+        let op = &line.args.iter().nth(1).unwrap();
+        let mut br = ltac::create_instr(LtacType::Br);
+        br.name = self.label_stack.last().unwrap().to_string();
+        
+        match &op.arg_type {
+            AstArgType::OpEq => br.instr_type = LtacType::Bne,
+            _ => {},
+        }
+        
+        self.file.code.push(br);
+    }
 
     // Builds an LTAC function call
     fn build_func_call(&mut self, line : &AstStmt) {
@@ -259,8 +357,24 @@ impl LtacBuilder {
     // Builds a void return
     // TODO: We will eventually need better handling of this
     fn build_end(&mut self) {
-        let ret = ltac::create_instr(LtacType::Ret);
-        self.file.code.push(ret);
+        if self.block_layer == 0 {
+            let ret = ltac::create_instr(LtacType::Ret);
+            self.file.code.push(ret);
+        } else {
+            self.block_layer -= 1;
+            
+            if self.label_stack.len() > 0 {
+                let mut label = ltac::create_instr(LtacType::Label);
+                label.name = self.label_stack.pop().unwrap();
+                self.file.code.push(label);
+            }
+            
+            if self.top_label_stack.len() > 0 {
+                let mut label = ltac::create_instr(LtacType::Label);
+                label.name = self.top_label_stack.pop().unwrap();
+                self.file.code.push(label);
+            }
+        }
     }
 
     // Builds a string and adds it to the data section

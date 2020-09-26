@@ -9,6 +9,7 @@ pub enum LtacDataType {
 #[derive(Clone, PartialEq)]
 pub enum LtacType {
     Extern,
+    Label,
     Func,
     Ret,
     Mov,
@@ -17,6 +18,11 @@ pub enum LtacType {
     KPushArg,
     Call,
     Syscall,
+    
+    I32Cmp,
+    Br,
+    Be,
+    Bne,
     
     I32Add,
     I32Mul,
@@ -125,6 +131,10 @@ impl LtacInstr {
                 return;
             }
             
+            LtacType::Label => {
+                println!("lbl {}", self.name);
+            }
+            
             LtacType::Func => {
                 println!("func {}", self.name);
                 println!("  setup {}", self.arg1_val);
@@ -154,6 +164,12 @@ impl LtacInstr {
                 println!("");
                 return;
             },
+            
+            LtacType::I32Cmp => print!("  i32.cmp "),
+            
+            LtacType::Br => println!("  br {}\n", self.name),
+            LtacType::Be => println!("  be {}\n", self.name),
+            LtacType::Bne => println!("  bne {}\n", self.name),
             
             LtacType::I32Add => print!("  i32.add "),
             LtacType::I32Mul => print!("  i32.mul "),

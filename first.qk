@@ -1,8 +1,13 @@
 
 
 func main
+    int x = 3
+    
     if x == 5
         syscall(1, 1, "Correct", 7)
+        if x == 3
+            syscall(1, 1, "Yeah", 7)
+        end
     end
 
     syscall(1, 1, "Hello!\n", 7)

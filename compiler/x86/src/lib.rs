@@ -86,6 +86,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => amd64_build_extern(writer, &code),
+            LtacType::Label => {},
             LtacType::Func => amd64_build_func(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
@@ -93,6 +94,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
+            LtacType::I32Cmp => {},
+            LtacType::Br => {},
+            LtacType::Be => {},
+            LtacType::Bne => {},
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
         }
