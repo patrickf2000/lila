@@ -94,7 +94,7 @@ impl LtacBuilder {
                 AstStmtType::Elif => self.build_cond(&line),
                 AstStmtType::Else => self.build_cond(&line),
                 AstStmtType::FuncCall => self.build_func_call(&line),
-                AstStmtType::Return => {},
+                AstStmtType::Return => self.build_return(&line),
                 AstStmtType::End => self.build_end(),
             }
         }
@@ -379,12 +379,42 @@ impl LtacBuilder {
         self.file.code.push(fc);
     }
     
+    // Builds a function return
+    fn build_return(&mut self, line : &AstStmt) {
+        if line.args.len() == 1 {
+            let arg1 = line.args.first().unwrap();
+            let mut mov = ltac::create_instr(LtacType::Mov);
+            mov.arg1_type = LtacArg::RetRegI32;
+            
+            match &arg1.arg_type {
+                AstArgType::IntL => {
+                    mov.arg2_type = LtacArg::I32;
+                    mov.arg2_val = arg1.i32_val;
+                },
+                
+                AstArgType::StringL => {},
+                AstArgType::Id => {},
+                _ => {},
+            }
+            
+            self.file.code.push(mov);
+        } else if line.args.len() > 1 {
+            // TODO
+        }
+        
+        let ret = ltac::create_instr(LtacType::Ret);
+        self.file.code.push(ret);
+    }
+    
     // Builds a void return
-    // TODO: We will eventually need better handling of this
     fn build_end(&mut self) {
         if self.block_layer == 0 {
-            let ret = ltac::create_instr(LtacType::Ret);
-            self.file.code.push(ret);
+            let last = self.file.code.last().unwrap();
+            
+            if last.instr_type != LtacType::Ret {
+                let ret = ltac::create_instr(LtacType::Ret);
+                self.file.code.push(ret);
+            }
         } else {
             self.block_layer -= 1;
             

@@ -5,7 +5,11 @@ function run_test() {
     do
     	name=`basename $entry .qk`
     	
-        cargo run $entry
+    	if [[ $2 == "sys" ]] ; then
+            cargo run $entry
+        elif [[ $2 == "clib" ]] ; then
+            cargo run $entry --use-c
+        fi
         
     	./test.py $entry ./$name
     	
@@ -20,8 +24,8 @@ function run_test() {
 echo "Running all tests..."
 echo ""
 
-run_test 'test/cond/*.qk'
-run_test 'test/math/*.qk'
-run_test 'test/syscall/*.qk'
+run_test 'test/cond/*.qk' 'sys'
+run_test 'test/math/*.qk' 'clib'
+run_test 'test/syscall/*.qk' 'sys'
 
 echo "Done"

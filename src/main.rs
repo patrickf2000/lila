@@ -10,6 +10,7 @@ fn main() {
     
     let mut print_ast = false;
     let mut print_ltac = false;
+    let mut use_c = false;
     let mut input = String::new();
     
     if args.is_empty() {
@@ -21,6 +22,7 @@ fn main() {
         match arg.as_ref() {
             "--ast" => print_ast = true,
             "--ltac" => print_ltac = true,
+            "--use-c" => use_c = true,
             _ => input = arg.clone(),
         }
     }
@@ -34,7 +36,8 @@ fn main() {
     } else {
         let ltac = parser::parse(input);
         x86::compile(&ltac).expect("Codegen failed with unknown error.");
-        x86::build_asm(&ltac.name);
+        x86::build_asm(&ltac.name, use_c);
+        
         //aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
         //aarch64::build_asm(&ltac.name);
     }

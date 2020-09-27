@@ -2,7 +2,7 @@ use std::io;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
-use std::process::Command;
+use std::process::{Command, Output};
 
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
@@ -21,7 +21,7 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     Ok(())
 }
  
-pub fn build_asm(name : &String) {
+pub fn build_asm(name : &String, use_c : bool) {
     // Create all the names
     let mut asm_name = "/tmp/".to_string();
     asm_name.push_str(name);
@@ -45,16 +45,37 @@ pub fn build_asm(name : &String) {
     }
     
     // Link
-    let args = [
-        &obj_name,
-        "-o",
-        output
-    ];
+    let ld : Output;
     
-    let ld = Command::new("ld")
-        .args(&args)
-        .output()
-        .expect("Fatal: Linking failed.");
+    if use_c {
+        let args = [
+            "/usr/lib/x86_64-linux-gnu/crti.o",
+            "/usr/lib/x86_64-linux-gnu/crtn.o",
+            "/usr/lib/x86_64-linux-gnu/crt1.o",
+            &obj_name,
+            "-dynamic-linker",
+            "/lib64/ld-linux-x86-64.so.2",
+            "-lc",
+            "-o",
+            output
+        ];
+        
+        ld = Command::new("ld")
+            .args(&args)
+            .output()
+            .expect("Fatal: Linking failed.");
+    } else {
+        let args = [
+            &obj_name,
+            "-o",
+            output
+        ];
+        
+        ld = Command::new("ld")
+            .args(&args)
+            .output()
+            .expect("Fatal: Linking failed.");
+    }
     
     if !ld.status.success() {
         io::stdout().write_all(&ld.stdout).unwrap();
@@ -189,6 +210,10 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("eax, ");
         },
         
+        LtacArg::RetRegI32 => {
+            line.push_str("eax, ");
+        },
+        
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::I32 {
                 line.push_str("dword ");
@@ -208,6 +233,10 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         // TODO: We need register indexing
         LtacArg::Reg => {
+            line.push_str("eax");
+        },
+        
+        LtacArg::RetRegI32 => {
             line.push_str("eax");
         },
         
@@ -286,6 +315,7 @@ fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg
     match &code.arg1_type {
         LtacArg::Empty => {},
         LtacArg::Reg => {},
+        LtacArg::RetRegI32 => {},
         
         LtacArg::Mem => {
             line.push_str(&reg32);
