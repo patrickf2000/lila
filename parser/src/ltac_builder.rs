@@ -91,6 +91,8 @@ impl LtacBuilder {
             match &line.stmt_type {
                 AstStmtType::VarDec => self.build_var_dec(&line),
                 AstStmtType::If => self.build_cond(&line),
+                AstStmtType::Elif => self.build_cond(&line),
+                AstStmtType::Else => self.build_cond(&line),
                 AstStmtType::FuncCall => self.build_func_call(&line),
                 AstStmtType::Return => {},
                 AstStmtType::End => self.build_end(),
@@ -222,16 +224,21 @@ impl LtacBuilder {
     
     // Builds an LTAC conditional block
     fn build_cond(&mut self, line : &AstStmt) {
-        if self.block_layer > 0 {
+        if line.stmt_type == AstStmtType::If {
+            self.block_layer += 1;
+            self.create_label(true);
+        } else {
             let mut jmp = ltac::create_instr(LtacType::Br);
             jmp.name = self.top_label_stack.last().unwrap().to_string();
             self.file.code.push(jmp);
-        }
-    
-        self.block_layer += 1;
         
-        if line.stmt_type == AstStmtType::If {
-            self.create_label(true);
+            let mut label = ltac::create_instr(LtacType::Label);
+            label.name = self.label_stack.pop().unwrap();
+            self.file.code.push(label);
+            
+            if line.stmt_type == AstStmtType::Else {
+                return;
+            }
         }
         
         self.create_label(false);

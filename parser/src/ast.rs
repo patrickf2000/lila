@@ -4,6 +4,8 @@
 pub enum AstStmtType {
     VarDec,
     If,
+    Elif,
+    Else,
     FuncCall,
     Return,
     End,
@@ -100,6 +102,8 @@ impl AstStmt {
         match &self.stmt_type {
             AstStmtType::VarDec => println!("VAR DEC {}", self.name),
             AstStmtType::If => println!("IF"),
+            AstStmtType::Elif => println!("ELIF"),
+            AstStmtType::Else => println!("ELSE"),
             AstStmtType::FuncCall => println!("FUNC CALL {}", self.name),
             AstStmtType::Return => println!("RETURN"),
             AstStmtType::End => println!("END"),

@@ -61,6 +61,8 @@ fn build_line(line : String, tree : &mut AstTree) {
         Token::TStr => println!("TStr: {:?}", token),
         Token::Id(ref val) => build_id(&mut analyzer, tree, val.to_string()),
         Token::If => build_cond(&mut analyzer, tree, Token::If),
+        Token::Elif => build_cond(&mut analyzer, tree, Token::Elif),
+        Token::Else => build_cond(&mut analyzer, tree, Token::Else),
         _ => println!("Error: {:?}", token),
     }
 }
@@ -115,11 +117,21 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
 }
 
 // Builds conditional statements
-fn build_cond(scanner : &mut Lex, tree : &mut AstTree, _cond_type : Token) {
-    let mut cond = ast::create_stmt(AstStmtType::If);
+fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token) {
+    let mut ast_cond_type : AstStmtType = AstStmtType::If;
+    match cond_type {
+        Token::If => ast_cond_type = AstStmtType::If,
+        Token::Elif => ast_cond_type = AstStmtType::Elif,
+        Token::Else => ast_cond_type = AstStmtType::Else,
+        _ => {},
+    }
+    
+    let mut cond = ast::create_stmt(ast_cond_type);
     
     // Build arguments
-    build_args(scanner, &mut cond, Token::Eof);
+    if cond_type != Token::Else {
+        build_args(scanner, &mut cond, Token::Eof);
+    }
     
     // Add the conditional
     ast::add_stmt(tree, cond);

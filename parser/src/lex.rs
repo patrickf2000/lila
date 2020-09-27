@@ -10,6 +10,8 @@ pub enum Token {
     End,
     
     If,
+    Elif,
+    Else,
     
     Int,
     TStr,
@@ -174,6 +176,8 @@ impl Lex {
             "int" => token = Token::Int,
             "str" => token = Token::TStr,
             "if" => token = Token::If,
+            "elif" => token = Token::Elif,
+            "else" => token = Token::Else,
             _ => token = Token::Id(current.clone()),
         };
         
