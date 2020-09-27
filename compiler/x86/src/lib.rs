@@ -86,7 +86,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => amd64_build_extern(writer, &code),
-            LtacType::Label => {},
+            LtacType::Label => amd64_build_label(writer, &code),
             LtacType::Func => amd64_build_func(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
@@ -94,10 +94,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
-            LtacType::I32Cmp => {},
-            LtacType::Br => {},
-            LtacType::Be => {},
-            LtacType::Bne => {},
+            LtacType::I32Cmp => amd64_build_instr(writer, &code),
+            LtacType::Br => amd64_build_jump(writer, &code),
+            LtacType::Be => amd64_build_jump(writer, &code),
+            LtacType::Bne => amd64_build_jump(writer, &code),
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
         }
@@ -113,6 +113,16 @@ fn amd64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_extern] Write failed.");
+}
+
+// Builds a label
+fn amd64_build_label(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    line.push_str(&code.name);
+    line.push_str(":\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_label] Write failed.");
 }
 
 // Builds a function
@@ -164,6 +174,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         line = "  add".to_string();
     } else if code.instr_type == LtacType::I32Mul {
         line = "  imul".to_string();
+    } else if code.instr_type == LtacType::I32Cmp {
+        line = "  cmp".to_string();
     }
     
     line.push_str(" ");
@@ -318,5 +330,23 @@ fn amd64_build_syscall(writer : &mut BufWriter<File>) {
     
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_syscall] Write failed.");
+}
+
+// Builds a branch (actually kinda called "jumps" in x86...)
+fn amd64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = "  ".to_string();
+    
+    match &code.instr_type {
+        LtacType::Br => line.push_str("jmp "),
+        LtacType::Be => line.push_str("je "),
+        LtacType::Bne => line.push_str("jne "),
+        _ => {},
+    }
+    
+    line.push_str(&code.name);
+    line.push_str("\n\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_jump] Write failed.");
 }
 

@@ -251,11 +251,20 @@ impl LtacBuilder {
             AstArgType::StringL => {},
             
             AstArgType::Id => {
-                cmp.arg1_type = LtacArg::Mem;
+                let mut mov = ltac::create_instr(LtacType::Mov);
+                mov.arg1_type = LtacArg::Reg;
+                mov.arg1_val = 0;
+                mov.arg2_type = LtacArg::Mem;
+                
                 match &self.vars.get(&arg1.str_val) {
-                    Some(v) => cmp.arg1_val = v.pos,
-                    None => cmp.arg1_val = 0,
+                    Some(v) => mov.arg2_val = v.pos,
+                    None => mov.arg2_val = 0,
                 }
+                
+                self.file.code.push(mov);
+                
+                cmp.arg1_type = LtacArg::Reg;
+                cmp.arg1_val = 0;
             },
             
             _ => {},
@@ -270,11 +279,20 @@ impl LtacBuilder {
             AstArgType::StringL => {},
             
             AstArgType::Id => {
-                cmp.arg2_type = LtacArg::Mem;
-                match &self.vars.get(&arg2.str_val) {
-                    Some(v) => cmp.arg2_val = v.pos,
-                    None => cmp.arg2_val = 0,
+                let mut mov = ltac::create_instr(LtacType::Mov);
+                mov.arg1_type = LtacArg::Reg;
+                mov.arg1_val = 0;
+                mov.arg2_type = LtacArg::Mem;
+                
+                match &self.vars.get(&arg1.str_val) {
+                    Some(v) => mov.arg2_val = v.pos,
+                    None => mov.arg2_val = 0,
                 }
+                
+                self.file.code.push(mov);
+                
+                cmp.arg1_type = LtacArg::Reg;
+                cmp.arg1_val = 0;
             },
             
             _ => {},
