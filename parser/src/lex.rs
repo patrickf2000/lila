@@ -55,6 +55,11 @@ impl Lex {
                 c2 = '\0';
             }
             
+            // Return if we have a comment
+            if c == '#' {
+                return;
+            }
+            
             // Check to see if we are in a quote (string literal)
             if c == '\"' {
                 if in_quote {

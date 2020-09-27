@@ -1,0 +1,32 @@
+
+#OUTPUT
+#Also correct!
+#Idk!!
+#Hello!
+#END
+
+#RET 0
+
+func main()
+    int x = 3
+    
+    if x == 5
+        syscall(1, 1, "Correct\n", 8)
+    elif x == 3
+        syscall(1, 1, "Also correct!\n", 14)
+        if x == 3
+            syscall(1, 1, "Idk!!\n", 6)
+        end
+    else
+        syscall(1, 1, "Idk\n", 4)
+    end
+
+    syscall(1, 1, "Hello!\n", 7)
+    return 5
+end
+
+func _start
+    main()
+    syscall(60, 0)
+end
+
