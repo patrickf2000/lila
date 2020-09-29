@@ -65,12 +65,20 @@ impl LtacBuilder {
                 fc.name = func.name.clone();
                 self.file.code.push(fc);
             } else {
+                // Create the function and load the arguments
                 let mut fc = ltac::create_instr(LtacType::Func);
                 fc.name = func.name.clone();
                 fc.arg1_val = 0;
                 
-                let pos = self.file.code.len();
+                let pos = self.file.code.len();        // The position of the code before we add anything
+                let mut arg_pos = 1;                   // Needed for function arguments
                 
+                for arg in func.args.iter() {
+                    self.build_var_dec(&arg, arg_pos);
+                    arg_pos += 1;
+                }
+                
+                // Build the body and calculate the stack size
                 self.build_block(&func.statements);
                 
                 if self.vars.len() > 0 {
@@ -92,7 +100,7 @@ impl LtacBuilder {
     fn build_block(&mut self, statements : &Vec<AstStmt>) {
         for line in statements {
             match &line.stmt_type {
-                AstStmtType::VarDec => self.build_var_dec(&line),
+                AstStmtType::VarDec => self.build_var_dec(&line, 0),
                 AstStmtType::If => self.build_cond(&line),
                 AstStmtType::Elif => self.build_cond(&line),
                 AstStmtType::Else => self.build_cond(&line),
@@ -104,7 +112,7 @@ impl LtacBuilder {
     }
     
     // Builds an LTAC variable declaration
-    fn build_var_dec(&mut self, line : &AstStmt) {
+    fn build_var_dec(&mut self, line : &AstStmt, arg_no : i32) {
         let name = line.name.clone();
         let data_type = &line.modifiers[0];
         
@@ -118,7 +126,16 @@ impl LtacBuilder {
         };
         
         self.vars.insert(name, v);
-        self.build_var_assign(line);
+        
+        // If we have a function argument, add the load instruction
+        if arg_no > 0 {
+            let mut ld = ltac::create_instr(LtacType::LdArgI32);
+            ld.arg1_val = self.stack_pos;
+            ld.arg2_val = arg_no;
+            self.file.code.push(ld);
+        } else {
+            self.build_var_assign(line);
+        }
     }
     
     // Builds an LTAC variable assignment

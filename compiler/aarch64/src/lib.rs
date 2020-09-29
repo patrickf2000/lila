@@ -129,6 +129,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Func => {
                 stack_size = aarch64_build_func(writer, &code);
             },
+            LtacType::LdArgI32 => {},
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
             LtacType::Mov => aarch64_build_mov(writer, &code, stack_size),
             LtacType::PushArg => aarch64_build_pusharg(writer, &code, false, stack_size),
