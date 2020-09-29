@@ -234,6 +234,31 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
             
             _ => {},
         }
+        
+    // Otherwise, we're probably moving something to a register
+    } else {
+        match &code.arg1_type {
+            LtacArg::Reg => {
+                line.push_str("  mov w0, ");
+            },
+            
+            LtacArg::RetRegI32 => {
+                line.push_str("  mov w0, ");
+            },
+            
+            _ => {},
+        }
+        
+        match &code.arg2_type {
+            LtacArg::I32 => {
+                line.push_str(&code.arg2_val.to_string());
+                line.push_str("\n");
+            },
+            
+            LtacArg::Ptr => {},
+            
+            _ => {},
+        }
     }
     
     writer.write(&line.into_bytes())
