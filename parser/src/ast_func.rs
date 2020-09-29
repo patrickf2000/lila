@@ -60,6 +60,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
         
         match name_token {
             Token::Id(ref val) => arg.name = val.to_string(),
+            Token::RParen => break,
             _ => println!("Error: Invalid function argument name-> {:?}", name_token),
         }
         
