@@ -125,7 +125,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => aarch64_build_extern(writer, &code),
-            LtacType::Label => {},
+            LtacType::Label => aarch64_build_label(writer, &code),
             LtacType::Func => {
                 stack_size = aarch64_build_func(writer, &code);
             },
@@ -135,12 +135,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true, stack_size),
             LtacType::Call => aarch64_build_call(writer, &code),
             LtacType::Syscall => aarch64_build_syscall(writer),
-            LtacType::I32Cmp => {},
-            LtacType::Br => {},
-            LtacType::Be => {},
-            LtacType::Bne => {},
-            LtacType::I32Add => aarch64_build_math(writer, &code, stack_size),
-            LtacType::I32Mul => aarch64_build_math(writer, &code, stack_size),
+            LtacType::I32Cmp => aarch64_build_instr(writer, &code, stack_size),
+            LtacType::Br => aarch64_build_branch(writer, &code),
+            LtacType::Be => aarch64_build_branch(writer, &code),
+            LtacType::Bne => aarch64_build_branch(writer, &code),
+            LtacType::I32Add => aarch64_build_instr(writer, &code, stack_size),
+            LtacType::I32Mul => aarch64_build_instr(writer, &code, stack_size),
         }
     }
 }
@@ -222,19 +222,25 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
         .expect("[AARCH64_build_mov] Write failed.");
 }
 
-// A common function for math instructions
-fn aarch64_build_math(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+// A common function for several instructions
+fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line = String::new();
     
     if code.instr_type == LtacType::I32Add {
         line.push_str("  add ");
     } else if code.instr_type == LtacType::I32Mul {
         line.push_str("  mul ");
+    } else if code.instr_type == LtacType::I32Cmp {
+        line.push_str("  cmp ");
     }
     
     match &code.arg1_type {
         LtacArg::Reg => {
-            line.push_str("w0, w0, ");
+            if code.instr_type == LtacType::I32Cmp {
+                line.push_str("w0, ");
+            } else {
+                line.push_str("w0, w0, ");
+            }
         },
         
         LtacArg::RetRegI32 => {},
@@ -259,13 +265,18 @@ fn aarch64_build_math(writer : &mut BufWriter<File>, code : &LtacInstr, stack_si
         },
         
         LtacArg::I32 => {
-            let mut mov = String::new();
-            mov.push_str("  mov w1, ");
-            mov.push_str(&code.arg2_val.to_string());
-            mov.push_str("\n");
-            line.insert_str(0, &mov);
-            
-            line.push_str("w1\n");
+            if code.instr_type == LtacType::I32Mul {
+                let mut mov = String::new();
+                mov.push_str("  mov w1, ");
+                mov.push_str(&code.arg2_val.to_string());
+                mov.push_str("\n");
+                line.insert_str(0, &mov);
+                
+                line.push_str("w1\n");
+            } else {
+                line.push_str(&code.arg2_val.to_string());
+                line.push_str("\n");
+            }
         },
         
         _ => {},
@@ -273,4 +284,22 @@ fn aarch64_build_math(writer : &mut BufWriter<File>, code : &LtacInstr, stack_si
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_math] Write failed.");
+}
+
+// Generates the flow control instructions
+fn aarch64_build_branch(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    
+    match &code.instr_type {
+        LtacType::Br => line.push_str("  b "),
+        LtacType::Be => line.push_str("  be "),
+        LtacType::Bne => line.push_str("  bne "),
+        _ => {},
+    }
+    
+    line.push_str(&code.name);
+    line.push_str("\n\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_branch] Write failed.");
 }

@@ -1,5 +1,14 @@
+extern func puts(s:str)
 
-func _start
-    syscall(93, 5)
+func main
+    int x = 10
+    
+    if x == 10
+        puts("Correct!")
+    end
+    
+    puts("Done!")
+    
+    return 10
 end
 

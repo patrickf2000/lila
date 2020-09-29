@@ -14,6 +14,16 @@ pub fn aarch64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
         .expect("[ARCH64_build_extern] Write failed.");
 }
 
+// Generates labels
+pub fn aarch64_build_label(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    line.push_str(&code.name);
+    line.push_str(":\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_label] Write failed.");
+}
+
 // Builds a function declaration
 pub fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) -> i32 {
     let name = &code.name;
