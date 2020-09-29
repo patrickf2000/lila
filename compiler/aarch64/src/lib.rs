@@ -4,7 +4,7 @@ use std::io::BufWriter;
 use std::fs::File;
 use std::process::{Command, Output};
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -124,7 +124,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
                 stack_size = code.arg1_val;
             },
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
-            LtacType::Mov => {},
+            LtacType::Mov => aarch64_build_mov(writer, &code, stack_size),
             LtacType::PushArg => {},
             LtacType::KPushArg => {},
             LtacType::Call => {},
@@ -180,4 +180,56 @@ fn aarch64_build_ret(writer : &mut BufWriter<File>, stack_size : i32) {
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_ret] Write failed.");
+}
+
+// A common function for data moves
+fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+    let mut line = "".to_string();
+    
+    // Check if we're storing to a variable
+    if code.arg1_type == LtacArg::Mem {
+        match &code.arg2_type {
+            LtacArg::Reg => {},
+            LtacArg::RetRegI32 => {},
+            LtacArg::Mem => {},
+            
+            LtacArg::I32 => {
+                line.push_str("  mov w0, ");
+                line.push_str(&code.arg2_val.to_string());
+                line.push_str("\n");
+            },
+            
+            LtacArg::Ptr => {},
+            _ => {},
+        }
+        
+        let pos = stack_size - code.arg1_val;
+        
+        line.push_str("  str w0, [sp, ");
+        line.push_str(&pos.to_string());
+        line.push_str("]\n");
+        
+    // Check if we are loading a variable
+    } else if code.arg2_type == LtacArg::Mem {
+        let pos = stack_size - code.arg2_val;
+        
+        match &code.arg1_type {
+            LtacArg::Reg => {
+                line.push_str("  ldr w0, [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            },
+            
+            LtacArg::RetRegI32 => {
+                line.push_str("  ldr w0, [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            },
+            
+            _ => {},
+        }
+    }
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_mov] Write failed.");
 }
