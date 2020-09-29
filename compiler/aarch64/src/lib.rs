@@ -348,7 +348,6 @@ fn aarch64_arg_reg64(pos : i32) -> String {
 }
 
 // Kernel argument registers
-// TODO: I don't know if there are any system calls that take 8 arguments
 fn aarch64_karg_reg32(pos : i32) -> String {
     match pos {
         1 => "w8".to_string(),
@@ -358,8 +357,6 @@ fn aarch64_karg_reg32(pos : i32) -> String {
         5 => "w3".to_string(),
         6 => "w4".to_string(),
         7 => "w5".to_string(),
-        8 => "w6".to_string(),
-        9 => "w7".to_string(),
         _ => String::new(),
     }
 }
@@ -373,8 +370,6 @@ fn aarch64_karg_reg64(pos : i32) -> String {
         5 => "x3".to_string(),
         6 => "x4".to_string(),
         7 => "x5".to_string(),
-        8 => "x6".to_string(),
-        9 => "x7".to_string(),
         _ => String::new(),
     }
 }
