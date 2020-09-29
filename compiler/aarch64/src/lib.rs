@@ -132,8 +132,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Br => {},
             LtacType::Be => {},
             LtacType::Bne => {},
-            LtacType::I32Add => {},
-            LtacType::I32Mul => {},
+            LtacType::I32Add => aarch64_build_math(writer, &code, stack_size),
+            LtacType::I32Mul => aarch64_build_math(writer, &code, stack_size),
         }
     }
 }
@@ -263,6 +263,59 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_mov] Write failed.");
+}
+
+// A common function for math instructions
+fn aarch64_build_math(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+    let mut line = String::new();
+    
+    if code.instr_type == LtacType::I32Add {
+        line.push_str("  add ");
+    } else if code.instr_type == LtacType::I32Mul {
+        line.push_str("  mul ");
+    }
+    
+    match &code.arg1_type {
+        LtacArg::Reg => {
+            line.push_str("w0, w0, ");
+        },
+        
+        LtacArg::RetRegI32 => {},
+        LtacArg::Mem => {},
+        
+        _ => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg => {},
+        
+        LtacArg::Mem => {
+            let pos = stack_size - &code.arg2_val;
+            
+            let mut mov = String::new();
+            mov.push_str("  ldr w1, [sp, ");
+            mov.push_str(&pos.to_string());
+            mov.push_str("]\n");
+            line.insert_str(0, &mov);
+            
+            line.push_str("w1\n");
+        },
+        
+        LtacArg::I32 => {
+            let mut mov = String::new();
+            mov.push_str("  mov w1, ");
+            mov.push_str(&code.arg2_val.to_string());
+            mov.push_str("\n");
+            line.insert_str(0, &mov);
+            
+            line.push_str("w1\n");
+        },
+        
+        _ => {},
+    }
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_math] Write failed.");
 }
 
 // Function argument registers
