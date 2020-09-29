@@ -32,6 +32,7 @@ echo ""
 
 run_test 'test/math/*.qk' 'clib'
 run_test 'test/cond/*.qk' 'clib'
+run_test 'test/func/*.qk' 'clib'
 
 if [[ $1 == "x86-64" ]] ; then
     run_test 'test/syscall/*.qk' 'sys'
