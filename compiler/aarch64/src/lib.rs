@@ -54,7 +54,7 @@ pub fn build_asm(name : &String, use_c : bool) {
             "/usr/lib/aarch64-linux-gnu/crt1.o",
             &obj_name,
             "-dynamic-linker",
-            "/lib64/ld-linux-aarch64.so.1",
+            "/lib/ld-linux-aarch64.so.1",
             "-lc",
             "-o",
             output
@@ -112,13 +112,18 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     writer.write(&line.into_bytes())
         .expect("[ARCH64_text] Write failed in .text");
         
+    let mut stack_size = 0;
+        
     // TODO: Store function stack size around here, then pass to return
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => aarch64_build_extern(writer, &code),
             LtacType::Label => {},
-            LtacType::Func => aarch64_build_func(writer, &code),
-            LtacType::Ret => aarch64_build_ret(writer, &code),
+            LtacType::Func => {
+                aarch64_build_func(writer, &code);
+                stack_size = code.arg1_val;
+            },
+            LtacType::Ret => aarch64_build_ret(writer, stack_size),
             LtacType::Mov => {},
             LtacType::PushArg => {},
             LtacType::KPushArg => {},
@@ -166,6 +171,13 @@ fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
 }
 
 // Builds a function return
-fn aarch64_build_ret(_writer : &mut BufWriter<File>, _code : &LtacInstr) {
+fn aarch64_build_ret(writer : &mut BufWriter<File>, stack_size : i32) {
+    let mut line = "\n  ".to_string();
+    line.push_str("ldp x29, x30, [sp], ");
+    line.push_str(&stack_size.to_string());
+    line.push_str("\n");
+    line.push_str("  ret\n");
     
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_ret] Write failed.");
 }

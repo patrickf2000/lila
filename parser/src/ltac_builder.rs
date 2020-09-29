@@ -19,6 +19,8 @@ struct Var {
 pub struct LtacBuilder {
     file : LtacFile,
     str_pos : i32,
+    
+    // Variable-related values
     vars : HashMap<String, Var>,
     stack_pos : i32,
     
