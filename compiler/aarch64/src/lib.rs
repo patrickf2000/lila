@@ -124,10 +124,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             },
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
             LtacType::Mov => aarch64_build_mov(writer, &code, stack_size),
-            LtacType::PushArg => aarch64_build_pusharg(writer, &code, stack_size),
-            LtacType::KPushArg => {},
+            LtacType::PushArg => aarch64_build_pusharg(writer, &code, false, stack_size),
+            LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true, stack_size),
             LtacType::Call => aarch64_build_call(writer, &code),
-            LtacType::Syscall => {},
+            LtacType::Syscall => aarch64_build_syscall(writer),
             LtacType::I32Cmp => {},
             LtacType::Br => {},
             LtacType::Be => {},
@@ -347,12 +347,49 @@ fn aarch64_arg_reg64(pos : i32) -> String {
     }
 }
 
+// Kernel argument registers
+// TODO: I don't know if there are any system calls that take 8 arguments
+fn aarch64_karg_reg32(pos : i32) -> String {
+    match pos {
+        1 => "w8".to_string(),
+        2 => "w0".to_string(),
+        3 => "w1".to_string(),
+        4 => "w2".to_string(),
+        5 => "w3".to_string(),
+        6 => "w4".to_string(),
+        7 => "w5".to_string(),
+        8 => "w6".to_string(),
+        9 => "w7".to_string(),
+        _ => String::new(),
+    }
+}
+
+fn aarch64_karg_reg64(pos : i32) -> String {
+    match pos {
+        1 => "x8".to_string(),
+        2 => "x0".to_string(),
+        3 => "x1".to_string(),
+        4 => "x2".to_string(),
+        5 => "x3".to_string(),
+        6 => "x4".to_string(),
+        7 => "x5".to_string(),
+        8 => "x6".to_string(),
+        9 => "x7".to_string(),
+        _ => String::new(),
+    }
+}
+
 // Loads an argument for a function call
-fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, karg : bool, stack_size : i32) {
     let mut line = String::new();
     
-    let reg32 = aarch64_arg_reg32(code.arg2_val);
-    let reg64 = aarch64_arg_reg64(code.arg2_val);
+    let mut reg32 = aarch64_arg_reg32(code.arg2_val);
+    let mut reg64 = aarch64_arg_reg64(code.arg2_val);
+    
+    if karg {
+        reg32 = aarch64_karg_reg32(code.arg2_val);
+        reg64 = aarch64_karg_reg64(code.arg2_val);
+    }
     
     match &code.arg1_type {
         LtacArg::Reg => {},
@@ -404,4 +441,12 @@ fn aarch64_build_call(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_func_call] Write failed.");
+}
+
+// Build a system call
+fn aarch64_build_syscall(writer : &mut BufWriter<File>) {
+    let line = "  svc 0\n\n".to_string();
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_syscall] Write failed.");
 }
