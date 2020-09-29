@@ -1,14 +1,29 @@
+
+#OUTPUT
+#Also correct!
+#Idk!!
+#Hello!
+#END
+
+#RET 0
+
 extern func puts(s:str)
 
-func main
-    int x = 10
+func main()
+    int x = 3
     
-    if x == 10
-        puts("Correct!")
+    if x == 5
+        puts("Correct")
+    elif x == 3
+        puts("Also correct!")
+        if x == 3
+            puts("Idk!!")
+        end
+    else
+        puts("Idk")
     end
-    
-    puts("Done!")
-    
-    return 10
+
+    puts("Hello!")
+    return 0
 end
 
