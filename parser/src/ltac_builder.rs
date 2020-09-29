@@ -80,6 +80,7 @@ impl LtacBuilder {
                     }
                     
                     fc.arg1_val = stack_size;
+                    fc.arg2_val = self.stack_pos;    // At this point, only needed by Arm
                 }
                 
                 self.file.code.insert(pos, fc);
