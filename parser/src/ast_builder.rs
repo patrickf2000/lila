@@ -98,9 +98,16 @@ fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     
     // Build the remaining arguments
     build_args(scanner, &mut var_dec, Token::Eof);
-
-    // Add the declaration
     ast::add_stmt(tree, var_dec);
+}
+
+// Builds a variable assignment
+fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String) {
+    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign);
+    var_assign.name = name;
+    
+    build_args(scanner, &mut var_assign, Token::Eof);
+    ast::add_stmt(tree, var_assign);
 }
 
 // Handles cases when an identifier is the first token
@@ -111,7 +118,7 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
     
     // TODO: Better assignment
     match token {
-        Token::Assign => {},
+        Token::Assign => build_var_assign(scanner, tree, id_val),
         Token::LParen => build_func_call(scanner, tree, id_val),
         _ => println!("Invalid declaration or assignment"),
     }

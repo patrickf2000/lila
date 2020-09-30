@@ -101,6 +101,7 @@ impl LtacBuilder {
         for line in statements {
             match &line.stmt_type {
                 AstStmtType::VarDec => self.build_var_dec(&line, 0),
+                AstStmtType::VarAssign => self.build_var_assign(&line),
                 AstStmtType::If => self.build_cond(&line),
                 AstStmtType::Elif => self.build_cond(&line),
                 AstStmtType::Else => self.build_cond(&line),
