@@ -32,7 +32,7 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
 // Builds a regular function declaration
 pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
     // The first token should be the function name
-    let token = scanner.get_token();
+    let mut token = scanner.get_token();
     let mut name = String::new();
     
     // TODO: Better syntax error
@@ -41,7 +41,53 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
         _ => println!("Error: Invalid function name-> {:?}", token),
     }
     
-    let func = ast::create_func(name);
+    let mut func = ast::create_func(name);
+    
+    // Check for arguments, and get them if so
+    token = scanner.get_token();
+    
+    if token != Token::LParen {
+        tree.functions.push(func);
+        return;
+    }
+    
+    while token != Token::RParen {
+        let name_token = scanner.get_token();
+        let sym_token = scanner.get_token();
+        let type_token = scanner.get_token();
+        
+        let mut arg = ast::create_stmt(AstStmtType::VarDec);
+        
+        match name_token {
+            Token::Id(ref val) => arg.name = val.to_string(),
+            Token::RParen => break,
+            _ => println!("Error: Invalid function argument name-> {:?}", name_token),
+        }
+        
+        if sym_token != Token::Colon {
+            println!("Error: Function arguments should have a colon between name and type.");
+            return;
+        }
+        
+        match type_token {
+            Token::Int => {
+                let val_type = AstMod { mod_type : AstModType::Int, };
+                arg.modifiers.push(val_type);
+            },
+            
+            Token::TStr => {},
+            _ => println!("Error: Invalid function argument type."),
+        }
+        
+        func.args.push(arg);
+        
+        token = scanner.get_token();
+        if token != Token::Comma && token != Token::RParen {
+            println!("Error: Invalid function arguments list.");
+            return;
+        }
+    }
+    
     tree.functions.push(func);
 }
 

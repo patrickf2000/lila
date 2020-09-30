@@ -14,6 +14,8 @@ pub enum LtacType {
     Ret,
     Mov,
     
+    LdArgI32,
+    
     PushArg,
     KPushArg,
     Call,
@@ -146,6 +148,12 @@ impl LtacInstr {
             LtacType::Ret => {
                 println!("  leave");
                 println!("  ret");
+                println!("");
+                return;
+            },
+            
+            LtacType::LdArgI32 => {
+                println!("  i32.ldarg [bp-{}], r{}", self.arg1_val, self.arg2_val);
                 println!("");
                 return;
             },

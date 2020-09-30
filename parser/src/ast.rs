@@ -39,6 +39,7 @@ pub struct AstFunc {
     pub name : String,
     pub is_extern : bool,
     pub statements : Vec<AstStmt>,
+    pub args : Vec<AstStmt>,
 }
 
 // Represents a statement
@@ -88,16 +89,24 @@ impl AstFunc {
         
         println!("FUNC {}", self.name);
         
+        for arg in self.args.iter() {
+            arg.print(true);
+        }
+        
         for stmt in self.statements.iter() {
-            stmt.print();
+            stmt.print(false);
         }
     }
 }
 
 // Statement implementation
 impl AstStmt {
-    pub fn print(&self) {
+    pub fn print(&self, is_arg : bool) {
         print!("    ");
+        
+        if is_arg {
+            print!("FUNC_ARG ");
+        }
         
         match &self.stmt_type {
             AstStmtType::VarDec => println!("VAR DEC {}", self.name),
@@ -156,6 +165,7 @@ pub fn create_extern_func(name : String) -> AstFunc {
         name : name,
         is_extern : true,
         statements : Vec::new(),
+        args : Vec::new(),
     }
 }
 
@@ -164,6 +174,7 @@ pub fn create_func(name : String) -> AstFunc {
         name : name,
         is_extern : false,
         statements : Vec::new(),
+        args : Vec::new(),
     }
 }
 
