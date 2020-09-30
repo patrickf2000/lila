@@ -141,6 +141,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Br => aarch64_build_branch(writer, &code),
             LtacType::Be => aarch64_build_branch(writer, &code),
             LtacType::Bne => aarch64_build_branch(writer, &code),
+            LtacType::Bl => aarch64_build_branch(writer, &code),
+            LtacType::Ble => aarch64_build_branch(writer, &code),
+            LtacType::Bg => aarch64_build_branch(writer, &code),
+            LtacType::Bge => aarch64_build_branch(writer, &code),
             LtacType::I32Add => aarch64_build_instr(writer, &code, stack_size),
             LtacType::I32Mul => aarch64_build_instr(writer, &code, stack_size),
         }

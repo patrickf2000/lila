@@ -40,6 +40,31 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
                 stmt.args.push(arg);
             },
             
+            Token::OpNeq => {
+                let arg = ast::create_arg(AstArgType::OpNeq);
+                stmt.args.push(arg);
+            },
+            
+            Token::OpLt => {
+                let arg = ast::create_arg(AstArgType::OpLt);
+                stmt.args.push(arg);
+            },
+            
+            Token::OpLte => {
+                let arg = ast::create_arg(AstArgType::OpLte);
+                stmt.args.push(arg);
+            },
+            
+            Token::OpGt => {
+                let arg = ast::create_arg(AstArgType::OpGt);
+                stmt.args.push(arg);
+            },
+            
+            Token::OpGte => {
+                let arg = ast::create_arg(AstArgType::OpGte);
+                stmt.args.push(arg);
+            },
+            
             Token::Comma => {},
             
             // TODO: Better syntax error

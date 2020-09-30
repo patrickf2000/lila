@@ -24,6 +24,12 @@ pub enum Token {
     OpAdd,
     OpMul,
     OpEq,
+    OpNeq,
+    OpLt,
+    OpLte,
+    OpGt,
+    OpGte,
+    OpNot,
     
     Id(String),
     IntL(i32),
@@ -134,6 +140,9 @@ impl Lex {
             ',' => return true,
             '+' => return true,
             '*' => return true,
+            '!' => return true,
+            '<' => return true,
+            '>' => return true,
             _ => return false,
         }
     }
@@ -151,6 +160,33 @@ impl Lex {
                 }
                 
                 return Token::Assign;
+            },
+            
+            '!' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::OpNeq;
+                }
+                
+                return Token::OpNot;
+            },
+            
+            '<' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::OpLte;
+                }
+                
+                return Token::OpLt;
+            },
+            
+            '>' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::OpGte;
+                }
+                
+                return Token::OpGt;
             },
             
             ':' => return Token::Colon,

@@ -9,14 +9,11 @@
 extern func printf(s:str, ...)
 
 func main
-    int x = 22
+    int x = 0
     
-    printf("X1: %d\n", x)
-    
-    int y = 3
-    x = 44 * y
-    
-    printf("X2: %d\n", x)
+    if x < 10 
+        printf("Num: %d\n", x)
+    end
     
     return 0
 end

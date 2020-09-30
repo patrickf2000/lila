@@ -139,6 +139,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Br => amd64_build_jump(writer, &code),
             LtacType::Be => amd64_build_jump(writer, &code),
             LtacType::Bne => amd64_build_jump(writer, &code),
+            LtacType::Bl => amd64_build_jump(writer, &code),
+            LtacType::Ble => amd64_build_jump(writer, &code),
+            LtacType::Bg => amd64_build_jump(writer, &code),
+            LtacType::Bge => amd64_build_jump(writer, &code),
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
         }
@@ -228,6 +232,10 @@ fn amd64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::Br => line.push_str("jmp "),
         LtacType::Be => line.push_str("je "),
         LtacType::Bne => line.push_str("jne "),
+        LtacType::Bl => line.push_str("jl "),
+        LtacType::Ble => line.push_str("jle "),
+        LtacType::Bg => line.push_str("jg "),
+        LtacType::Bge => line.push_str("jge "),
         _ => {},
     }
     

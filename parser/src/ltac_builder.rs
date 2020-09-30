@@ -215,7 +215,7 @@ impl LtacBuilder {
                     instr.arg1_val = 1;
                 },
                 
-                AstArgType::OpEq => {},
+                _ => {},
             }
         }
         
@@ -335,6 +335,11 @@ impl LtacBuilder {
         
         match &op.arg_type {
             AstArgType::OpEq => br.instr_type = LtacType::Bne,
+            AstArgType::OpNeq => br.instr_type = LtacType::Be,
+            AstArgType::OpLt => br.instr_type = LtacType::Bge,
+            AstArgType::OpLte => br.instr_type = LtacType::Bg,
+            AstArgType::OpGt => br.instr_type = LtacType::Ble,
+            AstArgType::OpGte => br.instr_type = LtacType::Bl,
             _ => {},
         }
         

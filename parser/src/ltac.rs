@@ -25,6 +25,10 @@ pub enum LtacType {
     Br,
     Be,
     Bne,
+    Bl,
+    Ble,
+    Bg,
+    Bge,
     
     I32Add,
     I32Mul,
@@ -180,6 +184,10 @@ impl LtacInstr {
             LtacType::Br => println!("  br {}\n", self.name),
             LtacType::Be => println!("  be {}\n", self.name),
             LtacType::Bne => println!("  bne {}\n", self.name),
+            LtacType::Bl => println!("  bl {}\n", self.name),
+            LtacType::Ble => println!("  ble {}\n", self.name),
+            LtacType::Bg => println!("  bg {}\n", self.name),
+            LtacType::Bge => println!("  bge {}\n", self.name),
             
             LtacType::I32Add => print!("  i32.add "),
             LtacType::I32Mul => print!("  i32.mul "),

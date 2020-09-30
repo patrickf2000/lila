@@ -21,6 +21,12 @@ pub enum AstArgType {
     OpAdd,
     OpMul,
     OpEq,
+    OpNeq,
+    OpLt,
+    OpLte,
+    OpGt,
+    OpGte,
+    OpNot,
 }
 
 // Represents modifiers
@@ -146,6 +152,12 @@ impl AstArg {
             AstArgType::OpAdd => print!("+ "),
             AstArgType::OpMul => print!("* "),
             AstArgType::OpEq => print!("== "),
+            AstArgType::OpNeq => print!("!= "),
+            AstArgType::OpLt => print!("< "),
+            AstArgType::OpLte => print!("<= "),
+            AstArgType::OpGt => print!("> "),
+            AstArgType::OpGte => print!(">= "),
+            AstArgType::OpNot => print!("! "),
         }
     }
 }
