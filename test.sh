@@ -21,11 +21,22 @@ function run_test() {
     done
 }
 
+if [[ $1 != "x86-64" && $1 != "aarch64" ]] ; then
+    echo "Invalid architecture: $1"
+    echo "Please choose either \"x86-64\" or \"aarch64\""
+    exit 1
+fi
+
 echo "Running all tests..."
 echo ""
 
-run_test 'test/cond/*.qk' 'sys'
 run_test 'test/math/*.qk' 'clib'
-run_test 'test/syscall/*.qk' 'sys'
+run_test 'test/cond/*.qk' 'clib'
+
+if [[ $1 == "x86-64" ]] ; then
+    run_test 'test/syscall/*.qk' 'sys'
+elif [[ $1 == "aarch64" ]] ; then
+    run_test 'test/syscall/aarch64/*.qk' 'sys'
+fi
 
 echo "Done"

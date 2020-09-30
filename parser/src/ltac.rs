@@ -144,6 +144,7 @@ impl LtacInstr {
             }
             
             LtacType::Ret => {
+                println!("  leave");
                 println!("  ret");
                 println!("");
                 return;

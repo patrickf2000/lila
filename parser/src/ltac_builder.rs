@@ -19,6 +19,8 @@ struct Var {
 pub struct LtacBuilder {
     file : LtacFile,
     str_pos : i32,
+    
+    // Variable-related values
     vars : HashMap<String, Var>,
     stack_pos : i32,
     
@@ -78,6 +80,7 @@ impl LtacBuilder {
                     }
                     
                     fc.arg1_val = stack_size;
+                    fc.arg2_val = self.stack_pos;    // At this point, only needed by Arm
                 }
                 
                 self.file.code.insert(pos, fc);
