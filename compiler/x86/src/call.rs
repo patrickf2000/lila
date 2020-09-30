@@ -76,7 +76,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         
         LtacArg::Ptr => {
             line.push_str(&reg64);
-            line.push_str(", ");
+            line.push_str(", OFFSET FLAT:");
             line.push_str(&code.arg1_sval);
         },
     }

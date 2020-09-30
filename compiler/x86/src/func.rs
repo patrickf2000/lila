@@ -6,7 +6,7 @@ use parser::ltac::LtacInstr;
 // Builds an extern declaration
 pub fn amd64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
-    line.push_str("extern ");
+    line.push_str(".extern ");
     line.push_str(&code.name);
     line.push_str("\n");
     
@@ -30,7 +30,9 @@ pub fn amd64_build_label(writer : &mut BufWriter<File>, code : &LtacInstr) {
 pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
 
-    line.push_str("\nglobal ");
+    line.push_str("\n.global ");
+    line.push_str(&code.name);
+    line.push_str("\n");
     line.push_str(&code.name);
     line.push_str(":\n");
     

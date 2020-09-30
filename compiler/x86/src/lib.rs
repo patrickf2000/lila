@@ -22,6 +22,10 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let file = File::create(&name)?;
     let mut writer = BufWriter::new(file);
     
+    //GNU AS specific
+    writer.write(b".intel_syntax noprefix\n")
+        .expect("[AMD64_setup] Write failed.");
+    
     write_data(&mut writer, &ltac_file.data);
     write_code(&mut writer, &ltac_file.code);
     
@@ -41,7 +45,7 @@ pub fn build_asm(name : &String, use_c : bool) {
     let output = &mut name.clone();
 
     // Assemble
-    let asm = Command::new("asmx86")
+    let asm = Command::new("as")
         .args(&[&asm_name, "-o", &obj_name])
         .output()
         .expect("Fatal: Assembly failed.");
@@ -92,25 +96,32 @@ pub fn build_asm(name : &String, use_c : bool) {
 
 // Writes the .data section
 fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
+    let mut line = String::new();
+    line.push_str(".data\n");
+
     for data in data.iter() {
-        let mut line = String::new();
-        
         match &data.data_type {
             LtacDataType::StringL => {
                 line.push_str(&data.name);
-                line.push_str(" .string \"");
+                line.push_str(": .string \"");
                 line.push_str(&data.val);
                 line.push_str("\"\n");
             },
         }
-        
-        writer.write(&line.into_bytes())
-            .expect("[AMD64_data] Write failed in .data");
     }
+    
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_data] Write failed in .data");
 }
 
 // Writes the .text section
 fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
+    let line = ".text\n".to_string();
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_code] Write failed");
+
     for code in code.iter() {
         match &code.instr_type {
             LtacType::Extern => amd64_build_extern(writer, &code),
@@ -165,7 +176,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::I32 {
-                line.push_str("dword ");
+                line.push_str("DWORD PTR ");
             }
                 
             line.push_str("[rbp-");

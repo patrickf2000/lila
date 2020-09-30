@@ -35,10 +35,10 @@ fn main() {
         ltac.print();
     } else {
         let ltac = parser::parse(input);
-        //x86::compile(&ltac).expect("Codegen failed with unknown error.");
-        //x86::build_asm(&ltac.name, use_c);
+        x86::compile(&ltac).expect("Codegen failed with unknown error.");
+        x86::build_asm(&ltac.name, use_c);
         
-        aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
-        aarch64::build_asm(&ltac.name, use_c);
+        //aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
+        //aarch64::build_asm(&ltac.name, use_c);
     }
 }
