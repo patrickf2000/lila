@@ -1,7 +1,8 @@
 use std::io::{BufWriter, Write};
 use std::fs::File;
 
-use parser::ltac::LtacInstr;
+use parser::ltac::{LtacInstr, LtacType};
+use crate::utils::*;
 
 // Builds an extern declaration
 pub fn amd64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
@@ -49,6 +50,27 @@ pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_func] Write failed.");
+}
+
+// Load a function argument to a variable
+// In the LtacInstr:
+//      -> arg1_val = memory location
+//      -> arg2_val = register position
+pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    line.push_str("  mov [rbp-");
+    line.push_str(&code.arg1_val.to_string());
+    line.push_str("], ");
+    
+    if code.instr_type == LtacType::LdArgI32 {
+        let reg = amd64_arg_reg32(code.arg2_val);
+        line.push_str(&reg);
+    }
+    
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_ldarg] Write failed.");
 }
 
 // Builds a return statement

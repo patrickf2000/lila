@@ -2,45 +2,7 @@ use std::io::{BufWriter, Write};
 use std::fs::File;
 
 use parser::ltac::{LtacInstr, LtacArg};
-
-// Gets a register based on position
-// Kernel argument registers
-fn amd64_karg_reg32(pos : i32) -> String {
-    match pos {
-        1 => return "eax".to_string(),
-        2 => return "edi".to_string(),
-        3 => return "esi".to_string(),
-        4 => return "edx".to_string(),
-        _ => return String::new(),
-    };
-}
-
-fn amd64_karg_reg64(pos : i32) -> String {
-    match pos {
-        1 => return "rax".to_string(),
-        2 => return "rdi".to_string(),
-        3 => return "rsi".to_string(),
-        4 => return "rdx".to_string(),
-        _ => return String::new(),
-    };
-}
-
-// Function argument registers
-fn amd64_arg_reg32(pos : i32) -> String {
-    match pos {
-        1 => return "edx".to_string(),
-        2 => return "esi".to_string(),
-        _ => return String::new(),
-    };
-}
-
-fn amd64_arg_reg64(pos : i32) -> String {
-    match pos {
-        1 => return "rdi".to_string(),
-        2 => return "rsi".to_string(),
-        _ => return String::new(),
-    };
-}
+use crate::utils::*;
 
 // Builds a function argument
 pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool) {

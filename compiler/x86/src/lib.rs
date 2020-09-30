@@ -9,6 +9,7 @@ use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacAr
 // Import local modules
 mod call;
 mod func;
+mod utils;
 
 use call::*;
 use func::*;
@@ -127,7 +128,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Extern => amd64_build_extern(writer, &code),
             LtacType::Label => amd64_build_label(writer, &code),
             LtacType::Func => amd64_build_func(writer, &code),
-            LtacType::LdArgI32 => {},
+            LtacType::LdArgI32 => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
