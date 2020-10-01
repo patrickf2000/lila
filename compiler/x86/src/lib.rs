@@ -198,7 +198,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         // TODO: We need register indexing
         LtacArg::Reg => {
-            line.push_str("eax");
+            line.push_str("ebx");
         },
         
         LtacArg::RetRegI32 => {

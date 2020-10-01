@@ -28,6 +28,7 @@ pub struct LtacBuilder {
     block_layer : i32,
     label_stack : Vec<String>,
     top_label_stack : Vec<String>,
+    code_stack : Vec<Vec<LtacInstr>>,
 }
 
 pub fn new_ltac_builder(name : String) -> LtacBuilder {
@@ -43,6 +44,7 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
         block_layer : 0,
         label_stack : Vec::new(),
         top_label_stack : Vec::new(),
+        code_stack : Vec::new(),
     }
 }
 
@@ -105,6 +107,7 @@ impl LtacBuilder {
                 AstStmtType::If => self.build_cond(&line),
                 AstStmtType::Elif => self.build_cond(&line),
                 AstStmtType::Else => self.build_cond(&line),
+                AstStmtType::While => self.build_while(&line),
                 AstStmtType::FuncCall => self.build_func_call(&line),
                 AstStmtType::Return => self.build_return(&line),
                 AstStmtType::End => self.build_end(),
@@ -344,6 +347,119 @@ impl LtacBuilder {
         }
         
         self.file.code.push(br);
+        
+        // A dummy placeholder
+        let code_block : Vec<LtacInstr> = Vec::new();
+        self.code_stack.push(code_block);
+    }
+    
+    // Builds a while loop block
+    fn build_while(&mut self, line : &AstStmt) {
+        self.block_layer += 1;
+        self.create_label(false);    // Add a comparison label
+        self.create_label(false);   // Add a loop label
+        
+        let loop_label = self.label_stack.pop().unwrap();
+        let cmp_label = self.label_stack.pop().unwrap();
+        
+        // Jump to the comparsion label, and add the loop label
+        let mut br = ltac::create_instr(LtacType::Br);
+        br.name = cmp_label.clone();
+        self.file.code.push(br);
+        
+        let mut lbl = ltac::create_instr(LtacType::Label);
+        lbl.name = loop_label.clone();
+        self.file.code.push(lbl);
+        
+        // Now build the comparison
+        let mut cmp_block : Vec<LtacInstr> = Vec::new();
+        
+        let mut lbl2 = ltac::create_instr(LtacType::Label);
+        lbl2.name = cmp_label.clone();
+        cmp_block.push(lbl2);
+        
+        // Now for the arguments
+        let arg1 = &line.args.iter().nth(0).unwrap();
+        let arg2 = &line.args.iter().nth(2).unwrap();
+        
+        let mut cmp = ltac::create_instr(LtacType::I32Cmp);
+        
+        match &arg1.arg_type {
+            AstArgType::IntL => {
+                cmp.arg1_type = LtacArg::I32;
+                cmp.arg1_val = arg1.i32_val;
+            },
+            
+            AstArgType::StringL => {},
+            
+            AstArgType::Id => {
+                let mut mov = ltac::create_instr(LtacType::Mov);
+                mov.arg1_type = LtacArg::Reg;
+                mov.arg1_val = 0;
+                mov.arg2_type = LtacArg::Mem;
+                
+                match &self.vars.get(&arg1.str_val) {
+                    Some(v) => mov.arg2_val = v.pos,
+                    None => mov.arg2_val = 0,
+                }
+                
+                cmp_block.push(mov);
+                
+                cmp.arg1_type = LtacArg::Reg;
+                cmp.arg1_val = 0;
+            },
+            
+            _ => {},
+        }
+        
+        match &arg2.arg_type {
+            AstArgType::IntL => {
+                cmp.arg2_type = LtacArg::I32;
+                cmp.arg2_val = arg2.i32_val;
+            },
+            
+            AstArgType::StringL => {},
+            
+            AstArgType::Id => {
+                let mut mov = ltac::create_instr(LtacType::Mov);
+                mov.arg1_type = LtacArg::Reg;
+                mov.arg1_val = 1;
+                mov.arg2_type = LtacArg::Mem;
+                
+                match &self.vars.get(&arg2.str_val) {
+                    Some(v) => mov.arg2_val = v.pos,
+                    None => mov.arg2_val = 0,
+                }
+                
+                cmp_block.push(mov);
+                
+                cmp.arg2_type = LtacArg::Reg;
+                cmp.arg2_val = 1;
+            },
+            
+            _ => {},
+        }
+        
+        cmp_block.push(cmp);
+        
+        // Now the operator
+        let op = &line.args.iter().nth(1).unwrap();
+        let mut br = ltac::create_instr(LtacType::Br);
+        br.name = loop_label.clone();
+        
+        match &op.arg_type {
+            AstArgType::OpEq => br.instr_type = LtacType::Be,
+            AstArgType::OpNeq => br.instr_type = LtacType::Bne,
+            AstArgType::OpLt => br.instr_type = LtacType::Bl,
+            AstArgType::OpLte => br.instr_type = LtacType::Ble,
+            AstArgType::OpGt => br.instr_type = LtacType::Bg,
+            AstArgType::OpGte => br.instr_type = LtacType::Bge,
+            _ => {},
+        }
+        
+        cmp_block.push(br);
+        
+        self.code_stack.push(cmp_block);
     }
 
     // Builds an LTAC function call
@@ -454,6 +570,14 @@ impl LtacBuilder {
                 let mut label = ltac::create_instr(LtacType::Label);
                 label.name = self.top_label_stack.pop().unwrap();
                 self.file.code.push(label);
+            }
+            
+            if self.code_stack.len() > 0 {
+                let sub_block = self.code_stack.pop().unwrap();
+                
+                for item in sub_block.iter() {
+                    self.file.code.push(item.clone());
+                }
             }
         }
     }

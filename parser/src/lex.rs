@@ -12,6 +12,7 @@ pub enum Token {
     If,
     Elif,
     Else,
+    While,
     
     Int,
     TStr,
@@ -219,6 +220,7 @@ impl Lex {
             "if" => token = Token::If,
             "elif" => token = Token::Elif,
             "else" => token = Token::Else,
+            "while" => token = Token::While,
             _ => token = Token::Id(current.clone()),
         };
         

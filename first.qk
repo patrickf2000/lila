@@ -1,18 +1,23 @@
-
-#OUTPUT
-#X1: 22
-#X2: 132
-#END
-
-#RET 0
-
 extern func printf(s:str, ...)
+extern func puts(s:str)
 
 func main
     int x = 0
     
-    if x < 10 
+    while x < 10 
+        if x == 5
+            puts("Halfway!")
+        end
+        
+        int i = 0
+        while i < x
+            printf("* ");
+            i = i + 1
+        end
+        puts("")
+    
         printf("Num: %d\n", x)
+        x = x + 1
     end
     
     return 0

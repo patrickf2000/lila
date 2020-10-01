@@ -63,6 +63,7 @@ fn build_line(line : String, tree : &mut AstTree) {
         Token::If => build_cond(&mut analyzer, tree, Token::If),
         Token::Elif => build_cond(&mut analyzer, tree, Token::Elif),
         Token::Else => build_cond(&mut analyzer, tree, Token::Else),
+        Token::While => build_cond(&mut analyzer, tree, Token::While),
         Token::Eof => {},
         _ => println!("Error: {:?}", token),
     }
@@ -131,6 +132,7 @@ fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token) {
         Token::If => ast_cond_type = AstStmtType::If,
         Token::Elif => ast_cond_type = AstStmtType::Elif,
         Token::Else => ast_cond_type = AstStmtType::Else,
+        Token::While => ast_cond_type = AstStmtType::While,
         _ => {},
     }
     
