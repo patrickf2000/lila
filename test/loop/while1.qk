@@ -9,6 +9,7 @@
 #Num: 7
 #Num: 8
 #Num: 9
+#Num: 10
 #END
 
 #RET 0
@@ -18,7 +19,7 @@ extern func printf(s:str, ...)
 func main
     int x = 0
     
-    while x < 10 
+    while x <= 10 
         printf("Num: %d\n", x)
         x = x + 1
     end
