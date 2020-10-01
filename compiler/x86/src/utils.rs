@@ -24,7 +24,7 @@ pub fn amd64_karg_reg64(pos : i32) -> String {
 // Function argument registers
 pub fn amd64_arg_reg32(pos : i32) -> String {
     match pos {
-        1 => return "edx".to_string(),
+        1 => return "edi".to_string(),
         2 => return "esi".to_string(),
         _ => return String::new(),
     };

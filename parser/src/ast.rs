@@ -16,11 +16,12 @@ pub enum AstStmtType {
 }
 
 // Represents AST argument types
-#[derive(Clone)]
+#[derive(PartialEq, Clone)]
 pub enum AstArgType {
     IntL,
     StringL,
     Id,
+    Array,
     OpAdd,
     OpMul,
     OpEq,
@@ -35,7 +36,8 @@ pub enum AstArgType {
 // Represents modifiers
 #[derive(Clone)]
 pub enum AstModType {
-    Int
+    Int,
+    IntDynArray,
 }
 
 // Represents the top of an AST tree
@@ -58,7 +60,7 @@ pub struct AstStmt {
     pub stmt_type : AstStmtType,
     pub name : String,
     
-    pub sub_statements : Vec<AstStmt>,
+    pub sub_args : Vec<AstArg>,
     pub args : Vec<AstArg>,
     pub modifiers : Vec<AstMod>,
 }
@@ -145,6 +147,16 @@ impl AstStmt {
             
             println!("");
         }
+        
+        if self.sub_args.len() > 0 {
+            print!("        SUB_ARG ");
+            
+            for arg in self.sub_args.iter() {
+                arg.print();
+            }
+            
+            println!("");
+        }
     }
 }
 
@@ -155,6 +167,7 @@ impl AstArg {
             AstArgType::IntL => print!("{} ", self.i32_val),
             AstArgType::StringL => print!("\"{}\" ", self.str_val),
             AstArgType::Id => print!("{} ", self.str_val),
+            AstArgType::Array => print!("ARRAY "),
             AstArgType::OpAdd => print!("+ "),
             AstArgType::OpMul => print!("* "),
             AstArgType::OpEq => print!("== "),
@@ -175,6 +188,7 @@ impl AstMod {
         
         match &self.mod_type {
             AstModType::Int => println!("Int"),
+            AstModType::IntDynArray => println!("IntDynArr"),
         }
     }
 }
@@ -203,7 +217,7 @@ pub fn create_stmt(stmt_type : AstStmtType) -> AstStmt {
         stmt_type : stmt_type,
         name : String::new(),
         
-        sub_statements : Vec::new(),
+        sub_args : Vec::new(),
         args : Vec::new(),
         modifiers : Vec::new(),
     }

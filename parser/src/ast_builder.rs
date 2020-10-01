@@ -83,11 +83,11 @@ fn build_line(line : String, tree : &mut AstTree) {
 // Builds an integer variable declaration
 fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec);
+    let mut is_array = false;
         
-    let data_type = AstMod {
+    let mut data_type = AstMod {
         mod_type : AstModType::Int,
     };
-    var_dec.modifiers.push(data_type);
     
     // Gather information
     // The first token should be the name
@@ -96,7 +96,19 @@ fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     // TODO: Better syntax error
     match token {
         Token::Id(ref val) => var_dec.name = val.to_string(),
-        _ => println!("Error: Invalid variable name-> {:?}", token),
+        
+        Token::LBracket => {
+            is_array = true;
+            build_args(scanner, &mut var_dec, Token::RBracket);
+            
+            token = scanner.get_token();
+            match token {
+                Token::Id(ref val) => var_dec.name = val.to_string(),
+                _ => println!("Error: Invalid array name-> {:?}", token),
+            }
+        },
+        
+        _ => println!("Error: Invalid variable-> {:?}", token),
     }
     
     // The next token should be the assign operator
@@ -110,6 +122,17 @@ fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     
     // Build the remaining arguments
     build_args(scanner, &mut var_dec, Token::Eof);
+    
+    // If we have the array, check the array type
+    if is_array {
+        if var_dec.args.len() == 1 && var_dec.args.last().unwrap().arg_type == AstArgType::Array {
+            data_type.mod_type = AstModType::IntDynArray;
+        } else {
+            //TODO
+        }
+    }
+    
+    var_dec.modifiers.push(data_type);
     ast::add_stmt(tree, var_dec);
 }
 

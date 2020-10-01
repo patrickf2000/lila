@@ -2,41 +2,7 @@
 extern func printf(s:str, ...)
 
 func main
-    int x = 0
-    
-    while x < 20 
-        x = x + 1
-        
-        if x == 5
-            continue
-        elif x == 10
-            continue
-        elif x == 15
-            continue
-        end
-        
-        int i = 0
-        while i < x
-            if i == 15
-                break
-            end
-            
-            if i == 4
-                printf("|")
-            elif i == 8
-                printf("|")
-            elif i == 12
-                printf("|")
-            else
-                printf("*")
-            end
-            
-            i = i + 1
-        end
-        puts("")
-        
-        printf("Num: %d\n", x)
-    end
+    int[10] numbers = array
     
     return 0
 end

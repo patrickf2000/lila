@@ -18,9 +18,12 @@ pub enum Token {
     
     Int,
     TStr,
+    Array,
     
     LParen,
     RParen,
+    LBracket,
+    RBracket,
     Assign,
     Colon,
     Comma,
@@ -138,6 +141,8 @@ impl Lex {
         match c {
             '(' => return true,
             ')' => return true,
+            '[' => return true,
+            ']' => return true,
             '=' => return true,
             ':' => return true,
             ',' => return true,
@@ -155,6 +160,8 @@ impl Lex {
         match c {
             '(' => return Token::LParen,
             ')' => return Token::RParen,
+            '[' => return Token::LBracket,
+            ']' => return Token::RBracket,
             
             '=' => {
                 if c2 == '=' {
@@ -225,6 +232,7 @@ impl Lex {
             "while" => token = Token::While,
             "break" => token = Token::Break,
             "continue" => token = Token::Continue,
+            "array" => token = Token::Array,
             _ => token = Token::Id(current.clone()),
         };
         

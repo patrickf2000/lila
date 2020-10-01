@@ -178,9 +178,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::RetRegI32 => {
-            line.push_str("eax, ");
-        },
+        LtacArg::RetRegI32 => line.push_str("eax, "),
+        LtacArg::RetRegI64 => line.push_str("rax, "),
         
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::I32 {
@@ -205,9 +204,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::RetRegI32 => {
-            line.push_str("eax");
-        },
+        LtacArg::RetRegI32 => line.push_str("eax"),
+        LtacArg::RetRegI64 => line.push_str("rax"),
         
         LtacArg::Mem => {
             line.push_str("[rbp-");

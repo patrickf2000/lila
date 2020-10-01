@@ -8,6 +8,7 @@ use crate::ltac::*;
 #[derive(PartialEq, Clone)]
 enum DataType {
     Int,
+    IntDynArray,
 }
 
 #[derive(Clone)]
@@ -128,15 +129,24 @@ impl LtacBuilder {
     // Builds an LTAC variable declaration
     fn build_var_dec(&mut self, line : &AstStmt, arg_no : i32) {
         let name = line.name.clone();
-        let data_type = &line.modifiers[0];
+        let ast_data_type = &line.modifiers[0];
+        let data_type : DataType;
         
-        match &data_type.mod_type {
-            AstModType::Int => self.stack_pos += 4,
+        match &ast_data_type.mod_type {
+            AstModType::Int => {
+                data_type = DataType::Int;
+                self.stack_pos += 4;
+            },
+            
+            AstModType::IntDynArray => {
+                data_type = DataType::IntDynArray;
+                self.stack_pos += 8
+            },
         }
         
         let v = Var {
             pos : self.stack_pos,
-            data_type : DataType::Int,
+            data_type : data_type,
         };
         
         self.vars.insert(name, v);
@@ -166,6 +176,8 @@ impl LtacBuilder {
             } else {
                 self.build_i32var_math(&line.args, &var);
             }
+        } else if var.data_type == DataType::IntDynArray {
+            self.build_i32dyn_array(&line.sub_args, &var);
         }
     }
     
@@ -238,6 +250,33 @@ impl LtacBuilder {
         instr.arg1_val = var.pos;
         instr.arg2_type = LtacArg::Reg;
         instr.arg2_val = 1;
+        self.file.code.push(instr);
+    }
+    
+    // Initializes a 32-bit integer array in the heap
+    fn build_i32dyn_array(&mut self, args : &Vec<AstArg>, var : &Var) {
+        if args.len() == 1 && args.last().unwrap().arg_type == AstArgType::IntL {
+            let arg = args.last().unwrap();
+            
+            let mut pusharg = ltac::create_instr(LtacType::PushArg);
+            pusharg.arg1_type = LtacArg::I32;
+            pusharg.arg1_val = arg.i32_val * 4;
+            pusharg.arg2_val = 1;
+            
+            self.file.code.push(pusharg);
+        } else {
+            //TODO
+        }
+        
+        let mut instr = ltac::create_instr(LtacType::Call);
+        instr.name = "malloc".to_string();
+        self.file.code.push(instr);
+        
+        // Move the return register back to the variable
+        instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = LtacArg::RetRegI64;
         self.file.code.push(instr);
     }
     

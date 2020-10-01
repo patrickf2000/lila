@@ -22,6 +22,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Empty => {},
         LtacArg::Reg => {},
         LtacArg::RetRegI32 => {},
+        LtacArg::RetRegI64 => {},
         
         LtacArg::Mem => {
             line.push_str(&reg32);
