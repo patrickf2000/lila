@@ -113,6 +113,7 @@ impl LtacBuilder {
             match &line.stmt_type {
                 AstStmtType::VarDec => self.build_var_dec(&line, 0),
                 AstStmtType::VarAssign => self.build_var_assign(&line),
+                AstStmtType::ArrayAssign => self.build_array_assign(&line),
                 AstStmtType::If => self.build_cond(&line),
                 AstStmtType::Elif => self.build_cond(&line),
                 AstStmtType::Else => self.build_cond(&line),
@@ -181,6 +182,23 @@ impl LtacBuilder {
         }
     }
     
+    // Assigns a value to an array
+    fn build_array_assign(&mut self, line : &AstStmt) {
+        let var : Var;
+        match self.vars.get(&line.name) {
+            Some(v) => var = v.clone(),
+            None => return,
+        }
+        
+        if var.data_type == DataType::IntDynArray {
+            if line.args.len() == 1 {
+                self.build_i32array_single_assign(&line, &var);
+            } else {
+                //TODO
+            }
+        }
+    }
+    
     // Builds a single int32 variable assignment
     fn build_i32var_single_assign(&mut self, args : &Vec<AstArg>, var : &Var) {
         let arg = &args[0];
@@ -188,6 +206,36 @@ impl LtacBuilder {
         let mut instr = ltac::create_instr(LtacType::Mov);
         instr.arg1_type = LtacArg::Mem;
         instr.arg1_val = var.pos;
+        
+        match &arg.arg_type {
+            AstArgType::IntL => {
+                instr.arg2_type = LtacArg::I32;
+                instr.arg2_val = arg.i32_val;
+            },
+            
+            AstArgType::Id => {},
+            _ => { /* TODO ERROR */ },
+        }
+        
+        self.file.code.push(instr);
+    }
+    
+    // Builds a single int32 array assignment
+    fn build_i32array_single_assign(&mut self, line : &AstStmt, var : &Var) {
+        let arg = &line.args[0];
+        let mut instr : LtacInstr;
+        
+        if line.sub_args.len() == 1 && line.sub_args.last().unwrap().arg_type == AstArgType::IntL {
+            let imm = line.sub_args.last().unwrap();
+            
+            instr = ltac::create_instr(LtacType::MovOffImm);
+            instr.arg1_type = LtacArg::Mem;
+            instr.arg1_val = var.pos;
+            instr.arg1_offset = imm.i32_val * 4;
+        } else {
+            // TODO: This is wrong
+            instr = ltac::create_instr(LtacType::Mov);
+        }
         
         match &arg.arg_type {
             AstArgType::IntL => {

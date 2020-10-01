@@ -145,16 +145,32 @@ fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String) {
     ast::add_stmt(tree, var_assign);
 }
 
+// Builds an array assignment
+fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
+    let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign);
+    array_assign.name = id_val;
+    build_args(scanner, &mut array_assign, Token::RBracket);
+    
+    // TODO: Better error
+    if scanner.get_token() != Token::Assign {
+        println!("Expected \'=\' in array assignment.");
+    }
+    
+    build_args(scanner, &mut array_assign, Token::Eof);
+    ast::add_stmt(tree, array_assign);
+}
+
 // Handles cases when an identifier is the first token
 fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
     // If the next token is an assignment, we have a variable assignment
     // If the next token is a parantheses, we have a function call
     let token = scanner.get_token();
     
-    // TODO: Better assignment
+    // TODO: Better assignment error
     match token {
         Token::Assign => build_var_assign(scanner, tree, id_val),
         Token::LParen => build_func_call(scanner, tree, id_val),
+        Token::LBracket => build_array_assign(scanner, tree, id_val),
         _ => println!("Invalid declaration or assignment"),
     }
 }

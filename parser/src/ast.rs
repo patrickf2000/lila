@@ -4,6 +4,7 @@
 pub enum AstStmtType {
     VarDec,
     VarAssign,
+    ArrayAssign,
     If,
     Elif,
     Else,
@@ -123,6 +124,7 @@ impl AstStmt {
         match &self.stmt_type {
             AstStmtType::VarDec => println!("VAR DEC {}", self.name),
             AstStmtType::VarAssign => println!("VAR ASSIGN {}", self.name),
+            AstStmtType::ArrayAssign => println!("ARRAY ASSIGN {}", self.name),
             AstStmtType::If => println!("IF"),
             AstStmtType::Elif => println!("ELIF"),
             AstStmtType::Else => println!("ELSE"),

@@ -132,6 +132,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgI32 => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
+            LtacType::MovOffImm => {},
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),

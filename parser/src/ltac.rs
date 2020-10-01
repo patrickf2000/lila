@@ -12,7 +12,9 @@ pub enum LtacType {
     Label,
     Func,
     Ret,
+    
     Mov,
+    MovOffImm,
     
     LdArgI32,
     
@@ -71,10 +73,14 @@ pub struct LtacInstr {
     pub arg1_type : LtacArg,
     pub arg1_val : i32,
     pub arg1_sval : String,
+    pub arg1_offset : i32,
+    pub arg1_offset_s : String,
     
     pub arg2_type : LtacArg,
     pub arg2_val : i32,
     pub arg2_sval : String,
+    pub arg2_offset : i32,
+    pub arg2_offset_s : String,
 }
 
 //=====================================
@@ -88,10 +94,14 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         arg1_type : LtacArg::Empty,
         arg1_val : 0,
         arg1_sval : String::new(),
+        arg1_offset : 0,
+        arg1_offset_s : String::new(),
         
         arg2_type : LtacArg::Empty,
         arg2_val : 0,
         arg2_sval : String::new(),
+        arg2_offset : 0,
+        arg2_offset_s : String::new(),
     }
 }
 
@@ -165,6 +175,7 @@ impl LtacInstr {
             },
             
             LtacType::Mov => print!("  mov "),
+            LtacType::MovOffImm => print!("  mov.imm "),
             
             LtacType::PushArg => print!("  pusharg "),
             LtacType::KPushArg => print!("  kpusharg "),
@@ -200,7 +211,15 @@ impl LtacInstr {
             LtacArg::Reg => print!("r{}", self.arg1_val),
             LtacArg::RetRegI32 => print!("i32.ret"),
             LtacArg::RetRegI64 => print!("i64.ret"),
-            LtacArg::Mem => print!("[bp-{}]", self.arg1_val),
+            
+            LtacArg::Mem => {
+                if self.instr_type == LtacType::MovOffImm {
+                    print!("[bp-{}+{}]", self.arg1_val, self.arg1_offset);
+                } else {
+                    print!("[bp-{}]", self.arg1_val);
+                }
+            },
+            
             LtacArg::I32 => print!("{}", self.arg1_val),
             LtacArg::Ptr => print!("{}", self.arg1_sval),
         }
