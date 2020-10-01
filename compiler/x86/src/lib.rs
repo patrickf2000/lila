@@ -235,10 +235,11 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
     if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffImm {
         line.push_str("  mov r15, QWORD PTR [rbp-");
         line.push_str(&code.arg2_val.to_string());
-        line.push_str("\n");
+        line.push_str("]\n");
         
         line.push_str("  mov r15d, DWORD PTR [r15+");
         line.push_str(&code.arg2_offset.to_string());
+        line.push_str("]\n");
     }
     
     // The arguments

@@ -213,7 +213,34 @@ impl LtacBuilder {
                 instr.arg2_val = arg.i32_val;
             },
             
-            AstArgType::Id => {},
+            AstArgType::Id => {
+                let mut size = 1;
+            
+                match self.vars.get(&arg.str_val) {
+                    Some(v) => {
+                        instr.arg2_val = v.pos;
+                        
+                        if v.data_type == DataType::IntDynArray {
+                            size = 4;
+                        }
+                    },
+                    
+                    None => instr.arg2_val = 0,
+                }
+                
+                instr.arg2_type = LtacArg::Mem;
+                
+                // TODO: Add the rest of the variations
+                if arg.sub_args.len() > 0 {
+                    let first_arg = arg.sub_args.last().unwrap();
+                    
+                    if arg.sub_args.len() == 1 && first_arg.arg_type == AstArgType::IntL {
+                        instr.instr_type = LtacType::MovOffImm;
+                        instr.arg2_offset = first_arg.i32_val * size;
+                    }
+                }
+            },
+                
             _ => { /* TODO ERROR */ },
         }
         
@@ -273,6 +300,17 @@ impl LtacBuilder {
                     }
                     
                     instr.arg2_type = LtacArg::Mem;
+                    
+                    // TODO: Add the rest of the variations
+                    if arg.sub_args.len() > 0 {
+                        let first_arg = arg.sub_args.last().unwrap();
+                        
+                        if arg.sub_args.len() == 1 && arg.arg_type == AstArgType::IntL {
+                            instr.instr_type = LtacType::MovOffImm;
+                            instr.arg2_offset = first_arg.i32_val;
+                        }
+                    }
+                    
                     self.file.code.push(instr.clone());
                 },
                 

@@ -4,15 +4,24 @@ use crate::ast::*;
 use crate::lex::{Token, Lex};
 
 // A common function for building statement arguments
+// TODO: If there's a way to not make parts of this so repetative, that would be great
 pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
     let mut token = scanner.get_token();
     let mut args : Vec<AstArg> = Vec::new();
+    
+    let mut current_arg = ast::create_arg(AstArgType::Id);
+    let mut in_array = false;
     
     while token != end {
         match token {
             Token::IntL(val) => {
                 let arg = ast::create_int(val);
-                args.push(arg);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
             },
             
             Token::StringL(ref val) => {
@@ -69,6 +78,18 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
             Token::OpGte => {
                 let arg = ast::create_arg(AstArgType::OpGte);
                 args.push(arg);
+            },
+            
+            Token::LBracket => {
+                in_array = true;
+                
+                let arg = args.pop().unwrap();
+                current_arg = arg;
+            },
+            
+            Token::RBracket => {
+                in_array = false;
+                args.push(current_arg.clone());
             },
             
             Token::Comma => {},

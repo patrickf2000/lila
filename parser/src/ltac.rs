@@ -213,7 +213,7 @@ impl LtacInstr {
             LtacArg::RetRegI64 => print!("i64.ret"),
             
             LtacArg::Mem => {
-                if self.instr_type == LtacType::MovOffImm {
+                if self.arg1_offset > 0 {
                     print!("[bp-{}+{}]", self.arg1_val, self.arg1_offset);
                 } else {
                     print!("[bp-{}]", self.arg1_val);
@@ -229,7 +229,15 @@ impl LtacInstr {
             LtacArg::Reg => println!(", r{}", self.arg2_val),
             LtacArg::RetRegI32 => println!(", i32.ret"),
             LtacArg::RetRegI64 => println!(", i64.ret"),
-            LtacArg::Mem => println!(", [bp-{}]", self.arg2_val),
+            
+            LtacArg::Mem => {
+                if self.arg2_offset > 0 {
+                    println!(", [bp-{}+{}]", self.arg2_val, self.arg2_offset);
+                } else {
+                    println!(", [bp-{}]", self.arg2_val);
+                }
+            },
+            
             LtacArg::I32 => println!(", {}", self.arg2_val),
             LtacArg::Ptr => println!(", {}", self.arg2_sval),
         }

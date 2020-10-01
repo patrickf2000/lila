@@ -73,6 +73,8 @@ pub struct AstArg {
     pub arg_type : AstArgType,
     pub str_val : String,
     pub i32_val : i32,
+    
+    pub sub_args : Vec<AstArg>,
 }
 
 // Represents an statement modifier
@@ -180,6 +182,14 @@ impl AstArg {
             AstArgType::OpGte => print!(">= "),
             AstArgType::OpNot => print!("! "),
         }
+        
+        if self.sub_args.len() > 0 {
+            print!("(");
+            for arg in self.sub_args.iter() {
+                arg.print();
+            }
+            print!(") ");
+        }
     }
 }
 
@@ -236,6 +246,7 @@ pub fn create_int(val : i32) -> AstArg {
         arg_type : AstArgType::IntL,
         str_val : String::new(),
         i32_val : val,
+        sub_args : Vec::new(),
     }
 }
 
@@ -244,6 +255,7 @@ pub fn create_string(val : String) -> AstArg {
         arg_type : AstArgType::StringL,
         str_val : val,
         i32_val : 0,
+        sub_args : Vec::new(),
     }
 }
 
@@ -252,6 +264,7 @@ pub fn create_arg(arg_type : AstArgType) -> AstArg {
         arg_type : arg_type,
         str_val : String::new(),
         i32_val : 0,
+        sub_args : Vec::new(),
     }
 }
 
