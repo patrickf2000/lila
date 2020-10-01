@@ -132,7 +132,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgI32 => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
-            LtacType::MovOffImm => {},
+            LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
@@ -186,7 +186,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             if code.arg2_type == LtacArg::I32 {
                 line.push_str("DWORD PTR ");
             }
-                
+            
             line.push_str("[rbp-");
             line.push_str(&code.arg1_val.to_string());
             line.push_str("], ");
@@ -225,6 +225,101 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str("\n");
     writer.write(&line.into_bytes())
         .expect("[AMD64_write_instr] Write failed.");
+}
+
+// Builds a move-offset instruction
+fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    
+    // Needed if the source is an array index
+    if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffImm {
+        line.push_str("  mov r15, QWORD PTR [rbp-");
+        line.push_str(&code.arg2_val.to_string());
+        line.push_str("\n");
+        
+        line.push_str("  mov r15d, DWORD PTR [r15+");
+        line.push_str(&code.arg2_offset.to_string());
+    }
+    
+    // The arguments
+    match &code.arg1_type {
+        LtacArg::Empty => {},
+        
+        LtacArg::Reg => {
+            let reg = amd64_op_reg32(code.arg1_val);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
+        
+        LtacArg::RetRegI32 => line.push_str("  mov eax, "),
+        LtacArg::RetRegI64 => line.push_str("  mov rax, "),
+        
+        LtacArg::Mem => {
+            if code.arg1_offset > 0 && code.instr_type == LtacType::MovOffImm {
+                line.push_str("  mov r15, QWORD PTR [rbp-");
+                line.push_str(&code.arg1_val.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  add r15, ");
+                line.push_str(&code.arg1_offset.to_string());
+                line.push_str("\n");
+                
+                line.push_str("  mov ");
+                if code.arg2_type == LtacArg::I32 {
+                    line.push_str("DWORD PTR ");
+                }
+                line.push_str("[r15], ");
+            } else {
+                if code.arg2_type == LtacArg::I32 {
+                    line.push_str("  mov DWORD PTR ");
+                } else {
+                    line.push_str("  mov ");
+                }
+                
+                line.push_str("[rbp-");
+                line.push_str(&code.arg1_val.to_string());
+                line.push_str("], ");
+            }
+        },
+        
+        LtacArg::I32 => {},
+        LtacArg::Ptr => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Empty => {},
+        
+        LtacArg::Reg => {
+            let reg = amd64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::RetRegI32 => line.push_str("eax"),
+        LtacArg::RetRegI64 => line.push_str("rax"),
+        
+        LtacArg::Mem => {
+            if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffImm {
+                line.push_str("r15d");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&code.arg2_val.to_string());
+                line.push_str("]");
+            }
+        },
+        
+        LtacArg::I32 => {
+            line.push_str(&code.arg2_val.to_string());
+        },
+        
+        LtacArg::Ptr => {},
+    }
+    
+    line.push_str("\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_writer_instr] Write failed.");
 }
 
 // Builds a branch (actually kinda called "jumps" in x86...)

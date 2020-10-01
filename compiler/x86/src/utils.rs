@@ -39,11 +39,13 @@ pub fn amd64_arg_reg64(pos : i32) -> String {
 }
 
 // Operation registers
+// EAX -> Return register
+// R15D -> Operations register
 pub fn amd64_op_reg32(pos : i32) -> String {
     match pos {
-        0 => return "eax".to_string(),
-        1 => return "ebx".to_string(),
-        2 => return "edx".to_string(),
+        0 => return "ebx".to_string(),
+        1 => return "edx".to_string(),
+        2 => return "r10d".to_string(),
         _ => return String::new(),
     };
 }
