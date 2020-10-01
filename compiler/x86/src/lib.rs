@@ -13,6 +13,7 @@ mod utils;
 
 use call::*;
 use func::*;
+use utils::*;
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -172,7 +173,9 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         // TODO: We need register indexing
         LtacArg::Reg => {
-            line.push_str("eax, ");
+            let reg = amd64_op_reg32(code.arg1_val);
+            line.push_str(&reg);
+            line.push_str(", ");
         },
         
         LtacArg::RetRegI32 => {
@@ -198,7 +201,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         // TODO: We need register indexing
         LtacArg::Reg => {
-            line.push_str("ebx");
+            let reg = amd64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
         },
         
         LtacArg::RetRegI32 => {
