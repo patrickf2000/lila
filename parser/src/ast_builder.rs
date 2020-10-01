@@ -64,6 +64,17 @@ fn build_line(line : String, tree : &mut AstTree) {
         Token::Elif => build_cond(&mut analyzer, tree, Token::Elif),
         Token::Else => build_cond(&mut analyzer, tree, Token::Else),
         Token::While => build_cond(&mut analyzer, tree, Token::While),
+        
+        Token::Break => {
+            let br = ast::create_stmt(AstStmtType::Break);
+            ast::add_stmt(tree, br);
+        },
+        
+        Token::Continue => {
+            let cont = ast::create_stmt(AstStmtType::Continue);
+            ast::add_stmt(tree, cont);
+        },
+        
         Token::Eof => {},
         _ => println!("Error: {:?}", token),
     }

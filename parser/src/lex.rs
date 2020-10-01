@@ -13,6 +13,8 @@ pub enum Token {
     Elif,
     Else,
     While,
+    Break,
+    Continue,
     
     Int,
     TStr,
@@ -221,6 +223,8 @@ impl Lex {
             "elif" => token = Token::Elif,
             "else" => token = Token::Else,
             "while" => token = Token::While,
+            "break" => token = Token::Break,
+            "continue" => token = Token::Continue,
             _ => token = Token::Id(current.clone()),
         };
         

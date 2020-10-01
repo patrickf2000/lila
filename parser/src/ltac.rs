@@ -140,6 +140,7 @@ impl LtacInstr {
             
             LtacType::Label => {
                 println!("lbl {}", self.name);
+                return;
             }
             
             LtacType::Func => {

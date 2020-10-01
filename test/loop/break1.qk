@@ -1,0 +1,37 @@
+#OUTPUT
+#Num: 0
+#Num: 1
+#Num: 2
+#Num: 3
+#Num: 4
+#Num: 5
+#Num: 6
+#Num: 7
+#Num: 8
+#Num: 9
+#Num: 10
+#Num: 11
+#Num: 12
+#Num: 13
+#Num: 14
+#Num: 15
+#END
+
+#RET 0
+
+extern func printf(s:str, ...)
+
+func main
+    int x = 0
+    
+    while x <= 30 
+        if x > 15
+            break
+        end
+        
+        printf("Num: %d\n", x)
+        x = x + 1
+    end
+    
+    return 0
+end

@@ -29,6 +29,11 @@ pub struct LtacBuilder {
     label_stack : Vec<String>,
     top_label_stack : Vec<String>,
     code_stack : Vec<Vec<LtacInstr>>,
+    
+    //For loops
+    loop_layer : i32,
+    loop_labels : Vec<String>,      // Needed for continue
+    end_labels : Vec<String>,       // Needed for break
 }
 
 pub fn new_ltac_builder(name : String) -> LtacBuilder {
@@ -45,6 +50,9 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
         label_stack : Vec::new(),
         top_label_stack : Vec::new(),
         code_stack : Vec::new(),
+        loop_layer : 0,
+        loop_labels : Vec::new(),
+        end_labels : Vec::new(),
     }
 }
 
@@ -108,6 +116,8 @@ impl LtacBuilder {
                 AstStmtType::Elif => self.build_cond(&line),
                 AstStmtType::Else => self.build_cond(&line),
                 AstStmtType::While => self.build_while(&line),
+                AstStmtType::Break => self.build_break(),
+                AstStmtType::Continue => self.build_continue(),
                 AstStmtType::FuncCall => self.build_func_call(&line),
                 AstStmtType::Return => self.build_return(&line),
                 AstStmtType::End => self.build_end(),
@@ -251,6 +261,10 @@ impl LtacBuilder {
         if line.stmt_type == AstStmtType::If {
             self.block_layer += 1;
             self.create_label(true);
+            
+            // A dummy placeholder
+            let code_block : Vec<LtacInstr> = Vec::new();
+            self.code_stack.push(code_block);
         } else {
             let mut jmp = ltac::create_instr(LtacType::Br);
             jmp.name = self.top_label_stack.last().unwrap().to_string();
@@ -347,20 +361,23 @@ impl LtacBuilder {
         }
         
         self.file.code.push(br);
-        
-        // A dummy placeholder
-        let code_block : Vec<LtacInstr> = Vec::new();
-        self.code_stack.push(code_block);
     }
     
     // Builds a while loop block
     fn build_while(&mut self, line : &AstStmt) {
         self.block_layer += 1;
+        self.loop_layer += 1;
+        
+        self.create_label(false);    // Goes at the very end
         self.create_label(false);    // Add a comparison label
         self.create_label(false);   // Add a loop label
         
+        let end_label = self.label_stack.pop().unwrap();
         let loop_label = self.label_stack.pop().unwrap();
         let cmp_label = self.label_stack.pop().unwrap();
+        
+        self.loop_labels.push(cmp_label.clone());
+        self.end_labels.push(end_label.clone());
         
         // Jump to the comparsion label, and add the loop label
         let mut br = ltac::create_instr(LtacType::Br);
@@ -459,7 +476,26 @@ impl LtacBuilder {
         
         cmp_block.push(br);
         
+        // The end label
+        let mut end_lbl = ltac::create_instr(LtacType::Label);
+        end_lbl.name = end_label.clone();
+        cmp_block.push(end_lbl);
+        
         self.code_stack.push(cmp_block);
+    }
+    
+    // Break out of a current loop
+    fn build_break(&mut self) {
+        let mut br = ltac::create_instr(LtacType::Br);
+        br.name = self.end_labels.last().unwrap().to_string();
+        self.file.code.push(br);
+    }
+    
+    // Continue through the rest of the loop
+    fn build_continue(&mut self) {
+        let mut br = ltac::create_instr(LtacType::Br);
+        br.name = self.loop_labels.last().unwrap().to_string();
+        self.file.code.push(br);
     }
 
     // Builds an LTAC function call
@@ -559,6 +595,13 @@ impl LtacBuilder {
             }
         } else {
             self.block_layer -= 1;
+            
+            if self.loop_layer > 0 {
+                self.loop_layer -= 1;
+                
+                self.end_labels.pop();
+                self.loop_labels.pop();
+            }
             
             if self.label_stack.len() > 0 {
                 let mut label = ltac::create_instr(LtacType::Label);
