@@ -7,6 +7,10 @@ mod ast_builder;
 mod ast_func;
 mod ast_utils;
 mod ltac_builder;
+mod ltac_array;
+mod ltac_flow;
+mod ltac_func;
+mod ltac_var;
 mod lex;
 
 // Import what we need
