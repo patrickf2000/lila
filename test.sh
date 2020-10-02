@@ -39,6 +39,7 @@ run_test 'test/math/*.qk' 'clib' $1
 run_test 'test/cond/*.qk' 'clib' $1
 run_test 'test/func/*.qk' 'clib' $1
 run_test 'test/loop/*.qk' 'clib' $1
+run_test 'test/array/*.qk' 'clib' $1
 
 if [[ $1 == "x86-64" ]] ; then
     run_test 'test/syscall/*.qk' 'sys' $1
