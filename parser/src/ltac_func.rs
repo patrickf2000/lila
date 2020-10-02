@@ -81,7 +81,16 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) {
             },
             
             AstArgType::StringL => {},
-            AstArgType::Id => {},
+            
+            AstArgType::Id => {
+                mov.arg2_type = LtacArg::Mem;
+                
+                match builder.vars.get(&arg1.str_val) {
+                    Some(v) => mov.arg2_val = v.pos,
+                    None => mov.arg2_val = 0,
+                }
+            },
+            
             _ => {},
         }
         

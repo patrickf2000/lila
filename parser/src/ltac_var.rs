@@ -1,10 +1,12 @@
 
 use crate::ltac_builder::*;
-use crate::ast::{AstStmt, AstModType, AstArg, AstArgType};
+use crate::ast;
+use crate::ast::{AstStmt, AstStmtType, AstModType, AstArg, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacArg};
 
 use crate::ltac_array::*;
+use crate::ltac_func::*;
 
 // Builds an LTAC variable declaration
 pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) {
@@ -87,7 +89,19 @@ pub fn build_i32var_single_assign(builder : &mut LtacBuilder, args : &Vec<AstArg
                     }
                 },
                 
-                None => instr.arg2_val = 0,
+                None => {
+                    if builder.functions.contains(&arg.str_val) {
+                        // Create a statement to build the rest of the function call
+                        let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
+                        stmt.name = arg.str_val.clone();
+                        stmt.args = arg.sub_args.clone();
+                        build_func_call(builder, &stmt);
+                        
+                        instr.arg2_type = LtacArg::RetRegI32;
+                        builder.file.code.push(instr);
+                        return;
+                    }
+                },
             }
             
             instr.arg2_type = LtacArg::Mem;
@@ -149,19 +163,31 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
             
             AstArgType::Id => {
                 match builder.vars.get(&arg.str_val) {
-                    Some(v) => instr.arg2_val = v.pos,
-                    None => instr.arg2_val = 0,
-                }
+                    Some(v) => {
+                        instr.arg2_type = LtacArg::Mem;
+                        instr.arg2_val = v.pos;
                 
-                instr.arg2_type = LtacArg::Mem;
-                
-                // TODO: Add the rest of the variations
-                if arg.sub_args.len() > 0 {
-                    let first_arg = arg.sub_args.last().unwrap();
+                        // TODO: Add the rest of the variations
+                        if arg.sub_args.len() > 0 {
+                            let first_arg = arg.sub_args.last().unwrap();
+                            
+                            if arg.sub_args.len() == 1 && arg.arg_type == AstArgType::IntL {
+                                instr.instr_type = LtacType::MovOffImm;
+                                instr.arg2_offset = first_arg.i32_val;
+                            }
+                        }
+                    },
                     
-                    if arg.sub_args.len() == 1 && arg.arg_type == AstArgType::IntL {
-                        instr.instr_type = LtacType::MovOffImm;
-                        instr.arg2_offset = first_arg.i32_val;
+                    None => {
+                        if builder.functions.contains(&arg.str_val) {
+                            // Create a statement to build the rest of the function call
+                            let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
+                            stmt.name = arg.str_val.clone();
+                            stmt.args = arg.sub_args.clone();
+                            build_func_call(builder, &stmt);
+                            
+                            instr.arg2_type = LtacArg::RetRegI32;
+                        }
                     }
                 }
                 

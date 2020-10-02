@@ -85,14 +85,14 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
                 args.push(arg);
             },
             
-            Token::LBracket => {
+            Token::LBracket | Token::LParen => {
                 in_array = true;
                 
                 let arg = args.pop().unwrap();
                 current_arg = arg;
             },
             
-            Token::RBracket => {
+            Token::RBracket | Token::RParen => {
                 in_array = false;
                 args.push(current_arg.clone());
             },

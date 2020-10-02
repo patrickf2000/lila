@@ -26,6 +26,9 @@ pub struct LtacBuilder {
     pub file : LtacFile,
     pub str_pos : i32,
     
+    // Function-related values
+    pub functions : Vec<String>,
+    
     // Variable-related values
     pub vars : HashMap<String, Var>,
     pub stack_pos : i32,
@@ -50,6 +53,7 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
             code : Vec::new(),
         },
         str_pos : 0,
+        functions : Vec::new(),
         vars : HashMap::new(),
         stack_pos : 0,
         block_layer : 0,
@@ -74,7 +78,14 @@ impl LtacBuilder {
     }
 
     // Converts AST functions to LTAC functions
+    // Make two passes; the first collects information, and the second does construction
     fn build_functions(&mut self, tree : &AstTree) {
+        // Collect information- for now, only names
+        for func in tree.functions.iter() {
+            self.functions.push(func.name.clone());
+        }
+        
+        // Build everything
         for func in tree.functions.iter() {
             if func.is_extern {
                 let mut fc = ltac::create_instr(LtacType::Extern);
@@ -108,6 +119,7 @@ impl LtacBuilder {
                 }
                 
                 self.file.code.insert(pos, fc);
+                self.stack_pos = 0;
             }
         }
     }
