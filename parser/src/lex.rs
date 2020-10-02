@@ -47,13 +47,24 @@ pub enum Token {
 
 pub struct Lex {
     input : String,
+    line_no : i32,
     pos : usize,
     index : usize,
     all_tokens : Vec<Token>,
 }
 
 impl Lex {
-    pub fn tokenize(&mut self) {
+    pub fn get_current_line(&mut self) -> String {
+        self.input.clone()
+    }
+    
+    pub fn get_line_no(&mut self) -> i32 {
+        self.line_no
+    }
+
+    pub fn tokenize(&mut self, line_no : i32) {
+        self.line_no = line_no;
+    
         self.index = 0;
         let mut current = String::new();
         let mut in_quote = false;
@@ -255,6 +266,7 @@ impl Lex {
 pub fn create_lex(input : String) -> Lex {
     Lex {
         input : input,
+        line_no : 0,
         pos : 0,
         index : 0,
         all_tokens : Vec::new(),

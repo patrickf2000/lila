@@ -31,13 +31,22 @@ fn main() {
     }
     
     if print_ast {
-        let ast = parser::get_ast(&input);
+        let ast = match parser::get_ast(&input) {
+            Ok(ast) => ast,
+            Err(_e) => return,
+        };
+        
         ast.print();
-    } else if print_ltac {
-        let ltac = parser::parse(input);
-        ltac.print();
     } else {
-        let ltac = parser::parse(input);
+        let ltac = match parser::parse(input) {
+            Ok(ltac) => ltac,
+            Err(_e) => return,
+        };
+        
+        if print_ltac {
+            ltac.print();
+            return;
+        }
         
         if amd64 {
             x86::compile(&ltac).expect("Codegen failed with unknown error.");

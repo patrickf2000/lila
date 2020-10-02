@@ -6,6 +6,7 @@ use std::io::{BufRead, BufReader};
 use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex, create_lex};
+use crate::syntax::ErrorManager;
 
 use crate::ast_func::*;
 use crate::ast_utils::*;
@@ -18,7 +19,7 @@ use crate::ast_utils::*;
 // In Quik, each line is a self-contained expression; as a result, we read a line
 // and then lexically analyze and build an AST node from it
 //
-pub fn build_ast(path : String, name : String) -> AstTree {   
+pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
     let mut tree = AstTree {
         file_name : name,
         functions : Vec::new(),
@@ -30,30 +31,40 @@ pub fn build_ast(path : String, name : String) -> AstTree {
     let reader = BufReader::new(file);
     
     // Read the thing line by line
+    let mut line_no = 0;
+    
     for line in reader.lines() {
         let mut current = line.unwrap();
         current = current.trim().to_string();
+        line_no += 1;
         
         if current.len() == 0 {
             continue;
         }
         
-        build_line(current, &mut tree);
+        let ret = build_line(current, line_no, &mut tree, syntax);
+        
+        if ret != 0 {
+            syntax.print_errors();
+            return Err(());
+        }
     }
     
-    tree
+    Ok(tree)
 }
 
 // Converts a line to an AST node
-fn build_line(line : String, tree : &mut AstTree) {
+fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> i32 {
     let mut analyzer = create_lex(line);
-    analyzer.tokenize();
+    analyzer.tokenize(line_no);
+    
+    let mut code = 0;
     
     // Get the first token
     let token = analyzer.get_token();
     
     match token {
-        Token::Extern => build_extern(&mut analyzer, tree),
+        Token::Extern => code = build_extern(&mut analyzer, tree, syntax),
         Token::Func => build_func(&mut analyzer, tree),
         Token::Return => build_return(&mut analyzer, tree),
         Token::End => build_end(tree),
@@ -78,6 +89,8 @@ fn build_line(line : String, tree : &mut AstTree) {
         Token::Eof => {},
         _ => println!("Error: {:?}", token),
     }
+    
+    code
 }
 
 // Builds an integer variable declaration

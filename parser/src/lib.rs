@@ -12,6 +12,7 @@ mod ltac_flow;
 mod ltac_func;
 mod ltac_var;
 mod lex;
+mod syntax;
 
 // Import what we need
 use std::path::Path;
@@ -20,21 +21,31 @@ use ast::AstTree;
 use ltac::LtacFile;
 
 // Returns the ast
-pub fn get_ast(path : &String) -> AstTree {
+pub fn get_ast(path : &String) -> Result<AstTree, ()> {
+    let mut syntax = syntax::create_error_manager();
+
     let name = get_name(path);
-    let tree = ast_builder::build_ast(path.to_string(), name.clone());
-    tree
+    let tree = match ast_builder::build_ast(path.to_string(), name.clone(), &mut syntax) {
+        Ok(tree) => tree,
+        Err(_e) => return Err(()),
+    };
+    
+    Ok(tree)
 }
 
 // The main parse function
-pub fn parse(path : String) -> LtacFile {
-    let tree = get_ast(&path.to_string());
+pub fn parse(path : String) -> Result<LtacFile, ()> {
+    let tree = match get_ast(&path.to_string()) {
+        Ok(tree) => tree,
+        Err(_e) => return Err(()),
+    };
+    
     let name = get_name(&path);
     
     let mut ltac_builder = ltac_builder::new_ltac_builder(name.clone());
     let ltac = ltac_builder.build_ltac(&tree);
     
-    ltac
+    Ok(ltac)
 }
 
 // Returns the file name for a given string
@@ -45,3 +56,4 @@ fn get_name(path : &String) -> String {
         .into_string().unwrap();
     name
 }
+

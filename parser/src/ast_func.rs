@@ -2,11 +2,12 @@
 use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex};
+use crate::syntax::ErrorManager;
 
 use crate::ast_utils::*;
 
 // Builds an external function
-pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
+pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> i32 {
     // Syntax check
     // The first token should be the "func" keyword, and the second token should be an ID
     let token1 = scanner.get_token();
@@ -16,7 +17,10 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
     // TODO: Better syntax error
     match token1 {
         Token::Func => {},
-        _ => println!("Error: Invalid token-> {:?}", token1),
+        _ => { 
+            syntax.syntax_error(scanner, "Expected \"func\" keyword.".to_string());
+            return 1;
+        }
     }
     
     // TODO: Better syntax error
@@ -27,6 +31,8 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
     
     let func = ast::create_extern_func(name);
     tree.functions.push(func);
+    
+    0
 }
 
 // A helper function for the function declaration builder
