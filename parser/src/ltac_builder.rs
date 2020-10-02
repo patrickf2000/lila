@@ -682,8 +682,27 @@ impl LtacBuilder {
         self.file.code.push(fc);
     }
     
+    // An internal function to free any dynamic arrays in the current context
+    fn free_arrays(&mut self) {
+        for (_name, var) in &self.vars {
+            if var.data_type == DataType::IntDynArray {
+                let mut pusharg = ltac::create_instr(LtacType::PushArg);
+                pusharg.arg1_type = LtacArg::Ptr;
+                pusharg.arg1_val = var.pos;
+                pusharg.arg2_val = 1;
+                self.file.code.push(pusharg);
+                
+                let mut call = ltac::create_instr(LtacType::Call);
+                call.name = "free".to_string();
+                self.file.code.push(call);
+            }
+        }
+    }
+    
     // Builds a function return
     fn build_return(&mut self, line : &AstStmt) {
+        self.free_arrays();
+    
         if line.args.len() == 1 {
             let arg1 = line.args.first().unwrap();
             let mut mov = ltac::create_instr(LtacType::Mov);
@@ -715,6 +734,8 @@ impl LtacBuilder {
             let last = self.file.code.last().unwrap();
             
             if last.instr_type != LtacType::Ret {
+                self.free_arrays();
+                
                 let ret = ltac::create_instr(LtacType::Ret);
                 self.file.code.push(ret);
             }

@@ -221,7 +221,14 @@ impl LtacInstr {
             },
             
             LtacArg::I32 => print!("{}", self.arg1_val),
-            LtacArg::Ptr => print!("{}", self.arg1_sval),
+            
+            LtacArg::Ptr => {
+                if self.arg1_sval.len() > 0 {
+                    print!("{}", self.arg1_sval);
+                } else {
+                    print!("[bp-{}]", self.arg1_val);
+                }
+            },
         }
         
         match &self.arg2_type {

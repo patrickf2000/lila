@@ -39,8 +39,15 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         
         LtacArg::Ptr => {
             line.push_str(&reg64);
-            line.push_str(", OFFSET FLAT:");
-            line.push_str(&code.arg1_sval);
+            
+            if code.arg1_sval.len() > 0 {
+                line.push_str(", OFFSET FLAT:");
+                line.push_str(&code.arg1_sval);
+            } else {
+                line.push_str(", [rbp-");
+                line.push_str(&code.arg1_val.to_string());
+                line.push_str("]");
+            }
         },
     }
     
