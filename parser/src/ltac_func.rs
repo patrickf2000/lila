@@ -67,6 +67,10 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) {
 
 // Builds a function return
 pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) {
+    if line.args.len() > 0 && builder.current_type == DataType::Void {
+        println!("Cannot return value in void function: {}", builder.current_func);
+    }
+
     free_arrays(builder);
 
     if line.args.len() == 1 {
@@ -111,6 +115,12 @@ pub fn build_end(builder : &mut LtacBuilder) {
         if last.instr_type != LtacType::Ret {
             free_arrays(builder);
             
+            // See if there was supposed to be a return instruction
+            if builder.current_type != DataType::Void {
+                println!("Error: Expected return in function {}.", builder.current_func);
+            }
+            
+            // Otherwise, create a void instruction
             let ret = ltac::create_instr(LtacType::Ret);
             builder.file.code.push(ret);
         }

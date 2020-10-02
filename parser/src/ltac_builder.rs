@@ -10,8 +10,9 @@ use crate::ltac_flow::*;
 use crate::ltac_func::*;
 use crate::ltac_var::*;
 
-#[derive(PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum DataType {
+    Void,
     Int,
     IntDynArray,
 }
@@ -22,12 +23,15 @@ pub struct Var {
     pub data_type : DataType,
 }
 
+#[derive(Clone)]
 pub struct LtacBuilder {
     pub file : LtacFile,
     pub str_pos : i32,
     
     // Function-related values
-    pub functions : Vec<String>,
+    pub functions : HashMap<String, DataType>,
+    pub current_func : String,
+    pub current_type : DataType,
     
     // Variable-related values
     pub vars : HashMap<String, Var>,
@@ -53,7 +57,9 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
             code : Vec::new(),
         },
         str_pos : 0,
-        functions : Vec::new(),
+        functions : HashMap::new(),
+        current_func : String::new(),
+        current_type : DataType::Void,
         vars : HashMap::new(),
         stack_pos : 0,
         block_layer : 0,
@@ -82,7 +88,18 @@ impl LtacBuilder {
     fn build_functions(&mut self, tree : &AstTree) {
         // Collect information- for now, only names
         for func in tree.functions.iter() {
-            self.functions.push(func.name.clone());
+            let name = func.name.clone();
+            let mut func_type = DataType::Void;
+            
+            if func.modifiers.len() > 0 {
+                let func_mod = func.modifiers.first().unwrap();
+                match &func_mod.mod_type {
+                    AstModType::Int => func_type = DataType::Int,
+                    AstModType::IntDynArray => func_type = DataType::IntDynArray,
+                }
+            }
+        
+            self.functions.insert(name, func_type);
         }
         
         // Build everything
@@ -92,6 +109,14 @@ impl LtacBuilder {
                 fc.name = func.name.clone();
                 self.file.code.push(fc);
             } else {
+                // Set the current function and type
+                self.current_func = func.name.clone();
+                
+                match self.functions.get(&self.current_func) {
+                    Some(t) => self.current_type = t.clone(),
+                    None => self.current_type = DataType::Void,
+                };
+            
                 // Create the function and load the arguments
                 let mut fc = ltac::create_instr(LtacType::Func);
                 fc.name = func.name.clone();

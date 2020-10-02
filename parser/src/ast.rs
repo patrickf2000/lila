@@ -53,6 +53,7 @@ pub struct AstFunc {
     pub is_extern : bool,
     pub statements : Vec<AstStmt>,
     pub args : Vec<AstStmt>,
+    pub modifiers : Vec<AstMod>,
 }
 
 // Represents a statement
@@ -102,7 +103,13 @@ impl AstFunc {
             print!("EXTERN ");
         }
         
-        println!("FUNC {}", self.name);
+        print!("FUNC {}", self.name);
+        
+        for m in self.modifiers.iter() {
+            m.print(true);
+        }
+        
+        println!("");
         
         for arg in self.args.iter() {
             arg.print(true);
@@ -139,7 +146,7 @@ impl AstStmt {
         }
         
         for m in self.modifiers.iter() {
-            m.print();
+            m.print(false);
         }
         
         if self.args.len() > 0 {
@@ -195,12 +202,22 @@ impl AstArg {
 
 // Modifier implementation
 impl AstMod {
-    pub fn print(&self) {
-        print!("        MOD ");
+    pub fn print(&self, is_func : bool) {
+        if is_func {
+            print!(" (");
+        } else {
+            print!("        MOD ");
+        }
         
         match &self.mod_type {
-            AstModType::Int => println!("Int"),
-            AstModType::IntDynArray => println!("IntDynArr"),
+            AstModType::Int => print!("Int"),
+            AstModType::IntDynArray => print!("IntDynArr"),
+        }
+        
+        if is_func {
+            print!(")");
+        } else {
+            println!("");
         }
     }
 }
@@ -212,6 +229,7 @@ pub fn create_extern_func(name : String) -> AstFunc {
         is_extern : true,
         statements : Vec::new(),
         args : Vec::new(),
+        modifiers : Vec::new(),
     }
 }
 
@@ -221,6 +239,7 @@ pub fn create_func(name : String) -> AstFunc {
         is_extern : false,
         statements : Vec::new(),
         args : Vec::new(),
+        modifiers : Vec::new(),
     }
 }
 

@@ -90,16 +90,23 @@ pub fn build_i32var_single_assign(builder : &mut LtacBuilder, args : &Vec<AstArg
                 },
                 
                 None => {
-                    if builder.functions.contains(&arg.str_val) {
-                        // Create a statement to build the rest of the function call
-                        let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
-                        stmt.name = arg.str_val.clone();
-                        stmt.args = arg.sub_args.clone();
-                        build_func_call(builder, &stmt);
+                    match builder.clone().functions.get(&arg.str_val) {
+                        Some(t) => {
+                            // Create a statement to build the rest of the function call
+                            let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
+                            stmt.name = arg.str_val.clone();
+                            stmt.args = arg.sub_args.clone();
+                            build_func_call(builder, &stmt);
+                            
+                            if *t == DataType::Int {
+                                instr.arg2_type = LtacArg::RetRegI32;
+                            }
+                            
+                            builder.file.code.push(instr);
+                            return;
+                        },
                         
-                        instr.arg2_type = LtacArg::RetRegI32;
-                        builder.file.code.push(instr);
-                        return;
+                        None => println!("Invalid function or variable name: {}", &arg.str_val),
                     }
                 },
             }
@@ -179,14 +186,20 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
                     },
                     
                     None => {
-                        if builder.functions.contains(&arg.str_val) {
-                            // Create a statement to build the rest of the function call
-                            let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
-                            stmt.name = arg.str_val.clone();
-                            stmt.args = arg.sub_args.clone();
-                            build_func_call(builder, &stmt);
+                        match builder.clone().functions.get(&arg.str_val) {
+                            Some(t) => {
+                                // Create a statement to build the rest of the function call
+                                let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
+                                stmt.name = arg.str_val.clone();
+                                stmt.args = arg.sub_args.clone();
+                                build_func_call(builder, &stmt);
+                                
+                                if *t == DataType::Int {
+                                    instr.arg2_type = LtacArg::RetRegI32;
+                                }
+                            },
                             
-                            instr.arg2_type = LtacArg::RetRegI32;
+                            None => println!("Invalid function or variable name: {}", &arg.str_val),
                         }
                     }
                 }

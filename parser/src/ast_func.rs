@@ -29,6 +29,20 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree) {
     tree.functions.push(func);
 }
 
+// A helper function for the function declaration builder
+fn build_func_return(scanner : &mut Lex, func : &mut AstFunc) {
+    let token = scanner.get_token();
+        
+    match token {
+        Token::Int => {
+            let func_type = AstMod { mod_type : AstModType::Int, };
+            func.modifiers.push(func_type);
+        },
+        
+        _ => println!("Error: Invalid return type."),
+    }
+}
+
 // Builds a regular function declaration
 pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
     // The first token should be the function name
@@ -47,6 +61,10 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
     token = scanner.get_token();
     
     if token != Token::LParen {
+        if token == Token::Arrow {
+            build_func_return(scanner, &mut func);
+        }
+        
         tree.functions.push(func);
         return;
     }
@@ -86,6 +104,12 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
             println!("Error: Invalid function arguments list.");
             return;
         }
+    }
+    
+    token = scanner.get_token();
+    
+    if token == Token::Arrow {
+        build_func_return(scanner, &mut func);
     }
     
     tree.functions.push(func);

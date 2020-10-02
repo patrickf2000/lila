@@ -27,7 +27,9 @@ pub enum Token {
     Assign,
     Colon,
     Comma,
+    Arrow,
     OpAdd,
+    OpSub,
     OpMul,
     OpEq,
     OpNeq,
@@ -147,6 +149,7 @@ impl Lex {
             ':' => return true,
             ',' => return true,
             '+' => return true,
+            '-' => return true,
             '*' => return true,
             '!' => return true,
             '<' => return true,
@@ -197,6 +200,15 @@ impl Lex {
                 }
                 
                 return Token::OpGt;
+            },
+            
+            '-' => {
+                if c2 == '>' {
+                    self.index += 1;
+                    return Token::Arrow;
+                }
+                
+                return Token::OpSub;
             },
             
             ':' => return Token::Colon,
