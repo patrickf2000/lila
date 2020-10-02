@@ -15,6 +15,7 @@ pub enum LtacType {
     
     Mov,
     MovOffImm,
+    MovOffMem,
     
     LdArgI32,
     
@@ -74,13 +75,13 @@ pub struct LtacInstr {
     pub arg1_val : i32,
     pub arg1_sval : String,
     pub arg1_offset : i32,
-    pub arg1_offset_s : String,
+    pub arg1_offset_size : i32,
     
     pub arg2_type : LtacArg,
     pub arg2_val : i32,
     pub arg2_sval : String,
     pub arg2_offset : i32,
-    pub arg2_offset_s : String,
+    pub arg2_offset_size : i32,
 }
 
 //=====================================
@@ -95,13 +96,13 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         arg1_val : 0,
         arg1_sval : String::new(),
         arg1_offset : 0,
-        arg1_offset_s : String::new(),
+        arg1_offset_size : 0,
         
         arg2_type : LtacArg::Empty,
         arg2_val : 0,
         arg2_sval : String::new(),
         arg2_offset : 0,
-        arg2_offset_s : String::new(),
+        arg2_offset_size : 0,
     }
 }
 
@@ -176,6 +177,7 @@ impl LtacInstr {
             
             LtacType::Mov => print!("  mov "),
             LtacType::MovOffImm => print!("  mov.imm "),
+            LtacType::MovOffMem => print!("  mov.mem "),
             
             LtacType::PushArg => print!("  pusharg "),
             LtacType::KPushArg => print!("  kpusharg "),
@@ -213,7 +215,9 @@ impl LtacInstr {
             LtacArg::RetRegI64 => print!("i64.ret"),
             
             LtacArg::Mem => {
-                if self.arg1_offset > 0 {
+                if self.arg1_offset > 0 && self.arg1_offset_size > 0 {
+                    print!("[bp-{}+({}*{})]", self.arg1_val, self.arg1_offset, self.arg1_offset_size);
+                } else if self.arg1_offset > 0 {
                     print!("[bp-{}+{}]", self.arg1_val, self.arg1_offset);
                 } else {
                     print!("[bp-{}]", self.arg1_val);
@@ -238,7 +242,9 @@ impl LtacInstr {
             LtacArg::RetRegI64 => println!(", i64.ret"),
             
             LtacArg::Mem => {
-                if self.arg2_offset > 0 {
+                if self.arg2_offset > 0 && self.arg2_offset_size > 0 {
+                    println!(", [bp-{}+({}*{})]", self.arg2_val, self.arg2_offset, self.arg2_offset_size);
+                } else if self.arg2_offset > 0 {
                     println!(", [bp-{}+{}]", self.arg2_val, self.arg2_offset);
                 } else {
                     println!(", [bp-{}]", self.arg2_val);

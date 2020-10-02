@@ -175,7 +175,7 @@ impl LtacBuilder {
             if line.args.len() == 1 {
                 self.build_i32var_single_assign(&line.args, &var);
             } else {
-                self.build_i32var_math(&line.args, &var);
+                self.build_i32var_math(&line, &var);
             }
         } else if var.data_type == DataType::IntDynArray {
             self.build_i32dyn_array(&line.sub_args, &var);
@@ -194,7 +194,7 @@ impl LtacBuilder {
             if line.args.len() == 1 {
                 self.build_i32array_single_assign(&line, &var);
             } else {
-                //TODO
+                self.build_i32var_math(&line, &var);
             }
         }
     }
@@ -234,9 +234,29 @@ impl LtacBuilder {
                 if arg.sub_args.len() > 0 {
                     let first_arg = arg.sub_args.last().unwrap();
                     
-                    if arg.sub_args.len() == 1 && first_arg.arg_type == AstArgType::IntL {
-                        instr.instr_type = LtacType::MovOffImm;
-                        instr.arg2_offset = first_arg.i32_val * size;
+                    if arg.sub_args.len() == 1 {
+                        if first_arg.arg_type == AstArgType::IntL {
+                            instr.instr_type = LtacType::MovOffImm;
+                            instr.arg2_offset = first_arg.i32_val * size;
+                        } else if first_arg.arg_type == AstArgType::Id {
+                            let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
+                            instr2.arg1_type = LtacArg::Reg;
+                            instr2.arg1_val = 0;
+                            
+                            instr2.arg2_type = LtacArg::Mem;
+                            instr2.arg2_val = instr.arg2_val;
+                            instr2.arg2_offset_size = size;
+                            
+                            match self.vars.get(&first_arg.str_val) {
+                                Some(v) => instr2.arg2_offset = v.pos,
+                                None => instr2.arg2_offset = 0,
+                            };
+                            
+                            self.file.code.push(instr2);
+                            
+                            instr.arg2_type = LtacArg::Reg;
+                            instr.arg2_val = 0;
+                        }
                     }
                 }
             },
@@ -252,13 +272,28 @@ impl LtacBuilder {
         let arg = &line.args[0];
         let mut instr : LtacInstr;
         
-        if line.sub_args.len() == 1 && line.sub_args.last().unwrap().arg_type == AstArgType::IntL {
-            let imm = line.sub_args.last().unwrap();
+        if line.sub_args.len() == 1 {
+            let sub_arg = line.sub_args.last().unwrap();
             
-            instr = ltac::create_instr(LtacType::MovOffImm);
-            instr.arg1_type = LtacArg::Mem;
-            instr.arg1_val = var.pos;
-            instr.arg1_offset = imm.i32_val * 4;
+            if sub_arg.arg_type == AstArgType::IntL {
+                instr = ltac::create_instr(LtacType::MovOffImm);
+                instr.arg1_type = LtacArg::Mem;
+                instr.arg1_val = var.pos;
+                instr.arg1_offset = sub_arg.i32_val * 4;
+            } else if sub_arg.arg_type == AstArgType::Id {
+                instr = ltac::create_instr(LtacType::MovOffMem);
+                instr.arg1_type = LtacArg::Mem;
+                instr.arg1_val = var.pos;
+                instr.arg1_offset_size = 4;
+                
+                match self.vars.get(&sub_arg.str_val) {
+                    Some(v) => instr.arg1_offset = v.pos,
+                    None => instr.arg1_offset = 0,
+                }
+            } else {
+                // TODO: This is wrong
+                instr = ltac::create_instr(LtacType::Mov);
+            }
         } else {
             // TODO: This is wrong
             instr = ltac::create_instr(LtacType::Mov);
@@ -270,7 +305,22 @@ impl LtacBuilder {
                 instr.arg2_val = arg.i32_val;
             },
             
-            AstArgType::Id => {},
+            AstArgType::Id => {
+                let mut instr2 = ltac::create_instr(LtacType::Mov);
+                instr2.arg1_type = LtacArg::Reg;
+                instr2.arg1_val = 0;
+                instr2.arg2_type = LtacArg::Mem;
+                
+                match self.vars.get(&arg.str_val) {
+                    Some(v) => instr2.arg2_val = v.pos,
+                    None => instr2.arg2_val = 0,
+                }
+                
+                self.file.code.push(instr2);
+                
+                instr.arg2_type = LtacArg::Reg;
+                instr.arg2_val = 0;
+            },
             _ => { /* TODO ERROR */ },
         }
         
@@ -278,7 +328,9 @@ impl LtacBuilder {
     }
     
     // Builds an int32 math assignment
-    fn build_i32var_math(&mut self, args : &Vec<AstArg>, var : &Var) {
+    fn build_i32var_math(&mut self, line : &AstStmt, var : &Var) {
+        let args = &line.args;
+    
         let mut instr = ltac::create_instr(LtacType::Mov);
         instr.arg1_type = LtacArg::Reg;
         instr.arg1_val = 1;
@@ -336,6 +388,26 @@ impl LtacBuilder {
         instr.arg1_val = var.pos;
         instr.arg2_type = LtacArg::Reg;
         instr.arg2_val = 1;
+        
+        if line.sub_args.len() > 0 {
+            let first_arg = line.sub_args.last().unwrap();
+            
+            if line.sub_args.len() == 1 {
+                if first_arg.arg_type == AstArgType::IntL {
+                    instr.instr_type = LtacType::MovOffImm;
+                    instr.arg1_offset = first_arg.i32_val * 4;
+                } else if first_arg.arg_type == AstArgType::Id {
+                    instr.instr_type = LtacType::MovOffMem;
+                    instr.arg1_offset_size = 4;
+                    
+                    match self.vars.get(&first_arg.str_val) {
+                        Some(v) => instr.arg1_offset = v.pos,
+                        None => instr.arg1_offset = 0,
+                    }
+                }
+            }
+        }
+        
         self.file.code.push(instr);
     }
     

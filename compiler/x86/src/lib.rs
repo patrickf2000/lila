@@ -133,6 +133,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
+            LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
@@ -240,6 +241,30 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         line.push_str("  mov r15d, DWORD PTR [r15+");
         line.push_str(&code.arg2_offset.to_string());
         line.push_str("]\n");
+    } else if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffMem {
+        // Load the variable
+        line.push_str("  mov r15d, DWORD PTR [rbp-");
+        line.push_str(&code.arg2_offset.to_string());
+        line.push_str("]\n");
+        
+        // Clear flags
+        line.push_str("  cdqe\n");
+        
+        // Load the effective address
+        line.push_str("  lea r14, [0+r15*");
+        line.push_str(&code.arg2_offset_size.to_string());
+        line.push_str("]\n");
+        
+        // Load the array
+        line.push_str("  mov r15, QWORD PTR [rbp-");
+        line.push_str(&code.arg2_val.to_string());
+        line.push_str("]\n");
+        
+        // Add to get the proper offset
+        line.push_str("  add r15, r14\n");
+        
+        // Store
+        line.push_str("  mov r15d, DWORD PTR [r15]\n");
     }
     
     // The arguments
@@ -267,6 +292,34 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 line.push_str(&code.arg1_offset.to_string());
                 line.push_str("\n");
                 
+                line.push_str("  mov ");
+                if code.arg2_type == LtacArg::I32 {
+                    line.push_str("DWORD PTR ");
+                }
+                line.push_str("[r15], ");
+            } else if code.arg1_offset > 0 && code.instr_type == LtacType::MovOffMem {
+                // Load the variable
+                line.push_str("  mov r15d, DWORD PTR [rbp-");
+                line.push_str(&code.arg1_offset.to_string());
+                line.push_str("]\n");
+                
+                // Clear flags
+                line.push_str("  cdqe\n");
+                
+                // Load the effective address
+                line.push_str("  lea r14, [0+r15*");
+                line.push_str(&code.arg1_offset_size.to_string());
+                line.push_str("]\n");
+                
+                // Load the array
+                line.push_str("  mov r15, QWORD PTR [rbp-");
+                line.push_str(&code.arg1_val.to_string());
+                line.push_str("]\n");
+                
+                // Add to get the proper offset
+                line.push_str("  add r15, r14\n");
+                
+                // Now set up for the final move
                 line.push_str("  mov ");
                 if code.arg2_type == LtacArg::I32 {
                     line.push_str("DWORD PTR ");
@@ -301,7 +354,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI64 => line.push_str("rax"),
         
         LtacArg::Mem => {
-            if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffImm {
+            if code.instr_type == LtacType::MovOffImm || code.instr_type == LtacType::MovOffMem {
                 line.push_str("r15d");
             } else {
                 line.push_str("[rbp-");

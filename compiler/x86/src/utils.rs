@@ -40,7 +40,7 @@ pub fn amd64_arg_reg64(pos : i32) -> String {
 
 // Operation registers
 // EAX -> Return register
-// R15D -> Operations register
+// R15, R14 -> Operations register
 pub fn amd64_op_reg32(pos : i32) -> String {
     match pos {
         0 => return "ebx".to_string(),

@@ -32,7 +32,12 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
             Token::Id(ref val) => {
                 let mut arg = ast::create_arg(AstArgType::Id);
                 arg.str_val = val.to_string();
-                args.push(arg);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
             },
             
             Token::Array => {
