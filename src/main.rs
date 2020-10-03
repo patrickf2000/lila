@@ -1,10 +1,16 @@
+
 use std::env;
+use std::process;
 
 use parser;
-//use x86;
-//use aarch64;
 
+// TODO: Is there a better way to do this?
 fn main() {
+    let code = run();
+    process::exit(code);
+}
+
+fn run() -> i32 {
     let mut args : Vec<String> = env::args().collect();
     args.remove(0);
     
@@ -16,7 +22,7 @@ fn main() {
     
     if args.is_empty() {
         println!("Fatal: No input file specified.");
-        return;
+        return 2;
     }
     
     for arg in args {
@@ -33,19 +39,19 @@ fn main() {
     if print_ast {
         let ast = match parser::get_ast(&input) {
             Ok(ast) => ast,
-            Err(_e) => return,
+            Err(_e) => return 1,
         };
         
         ast.print();
     } else {
         let ltac = match parser::parse(input) {
             Ok(ltac) => ltac,
-            Err(_e) => return,
+            Err(_e) => return 1,
         };
         
         if print_ltac {
             ltac.print();
-            return;
+            return 0;
         }
         
         if amd64 {
@@ -56,4 +62,6 @@ fn main() {
             aarch64::build_asm(&ltac.name, use_c);
         }
     }
+    
+    0
 }

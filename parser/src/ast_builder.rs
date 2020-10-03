@@ -44,7 +44,7 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
         
         let ret = build_line(current, line_no, &mut tree, syntax);
         
-        if ret != 0 {
+        if !ret {
             syntax.print_errors();
             return Err(());
         }
@@ -54,11 +54,11 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
 }
 
 // Converts a line to an AST node
-fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> i32 {
+fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let mut analyzer = create_lex(line);
     analyzer.tokenize(line_no);
     
-    let mut code = 0;
+    let mut code = true;
     
     // Get the first token
     let token = analyzer.get_token();

@@ -7,7 +7,7 @@ use crate::syntax::ErrorManager;
 use crate::ast_utils::*;
 
 // Builds an external function
-pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> i32 {
+pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     // Syntax check
     // The first token should be the "func" keyword, and the second token should be an ID
     let token1 = scanner.get_token();
@@ -18,7 +18,7 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
         Token::Func => {},
         _ => { 
             syntax.syntax_error(scanner, "Expected \"func\" keyword.".to_string());
-            return 1;
+            return false;
         }
     }
     
@@ -26,18 +26,18 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
         Token::Id(ref val) => name = val.to_string(),
         _ => {
             syntax.syntax_error(scanner, "Invalid extern-> Expected function name.".to_string());
-            return 1;
+            return false;
         }
     }
     
     let func = ast::create_extern_func(name);
     tree.functions.push(func);
     
-    0
+    true
 }
 
 // A helper function for the function declaration builder
-fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> i32 {
+fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> bool {
     let token = scanner.get_token();
         
     match token {
@@ -48,15 +48,15 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
         
         _ => {
             syntax.syntax_error(scanner, "Invalid function return type.".to_string());
-            return 1;
+            return false;
         },
     }
     
-    0
+    true
 }
 
 // Builds a regular function declaration
-pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> i32 {
+pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     // The first token should be the function name
     let mut token = scanner.get_token();
     let name : String;
@@ -65,7 +65,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         Token::Id(ref val) => name = val.to_string(),
         _ => {
             syntax.syntax_error(scanner, "Expected function name.".to_string());
-            return 1;
+            return true;
         },
     }
     
@@ -78,13 +78,13 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         if token == Token::Arrow {
             let ret = build_func_return(scanner, &mut func, syntax);
             
-            if ret == 1 {
-                return 1;
+            if !ret {
+                return false;
             }
         }
         
         tree.functions.push(func);
-        return 0;
+        return true;
     }
     
     while token != Token::RParen {
@@ -100,13 +100,13 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
             
             _ => {
                 syntax.syntax_error(scanner, "Expected function argument name.".to_string());
-                return 1;
+                return false;
             },
         }
         
         if sym_token != Token::Colon {
             syntax.syntax_error(scanner, "Arguments should have a colon between name and type.".to_string());
-            return 1;
+            return false;
         }
         
         match type_token {
@@ -124,7 +124,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         token = scanner.get_token();
         if token != Token::Comma && token != Token::RParen {
             println!("Error: Invalid function arguments list.");
-            return 1;
+            return false;
         }
     }
     
@@ -133,14 +133,14 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
     if token == Token::Arrow {
         let ret = build_func_return(scanner, &mut func, syntax);
         
-        if ret == 1 {
-            return 1;
+        if !ret {
+            return false;
         }
     }
     
     tree.functions.push(func);
     
-    0
+    true
 }
 
 // Builds a return statement
