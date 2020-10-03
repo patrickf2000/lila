@@ -65,7 +65,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
     
     match token {
         Token::Extern => code = build_extern(&mut analyzer, tree, syntax),
-        Token::Func => build_func(&mut analyzer, tree),
+        Token::Func => code = build_func(&mut analyzer, tree, syntax),
         Token::Return => build_return(&mut analyzer, tree),
         Token::End => build_end(tree),
         Token::Int => build_i32var_dec(&mut analyzer, tree),

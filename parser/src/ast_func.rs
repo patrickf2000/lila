@@ -12,9 +12,8 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
     // The first token should be the "func" keyword, and the second token should be an ID
     let token1 = scanner.get_token();
     let token2 = scanner.get_token();
-    let mut name = String::new();
+    let name : String;
     
-    // TODO: Better syntax error
     match token1 {
         Token::Func => {},
         _ => { 
@@ -23,10 +22,12 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
         }
     }
     
-    // TODO: Better syntax error
     match token2 {
         Token::Id(ref val) => name = val.to_string(),
-        _ => println!("Error: Invalid extern name-> {:?}", token2),
+        _ => {
+            syntax.syntax_error(scanner, "Invalid extern-> Expected function name.".to_string());
+            return 1;
+        }
     }
     
     let func = ast::create_extern_func(name);
@@ -36,7 +37,7 @@ pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
 }
 
 // A helper function for the function declaration builder
-fn build_func_return(scanner : &mut Lex, func : &mut AstFunc) {
+fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> i32 {
     let token = scanner.get_token();
         
     match token {
@@ -45,20 +46,27 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc) {
             func.modifiers.push(func_type);
         },
         
-        _ => println!("Error: Invalid return type."),
+        _ => {
+            syntax.syntax_error(scanner, "Invalid function return type.".to_string());
+            return 1;
+        },
     }
+    
+    0
 }
 
 // Builds a regular function declaration
-pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
+pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> i32 {
     // The first token should be the function name
     let mut token = scanner.get_token();
-    let mut name = String::new();
+    let name : String;
     
-    // TODO: Better syntax error
     match token {
         Token::Id(ref val) => name = val.to_string(),
-        _ => println!("Error: Invalid function name-> {:?}", token),
+        _ => {
+            syntax.syntax_error(scanner, "Expected function name.".to_string());
+            return 1;
+        },
     }
     
     let mut func = ast::create_func(name);
@@ -68,11 +76,15 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
     
     if token != Token::LParen {
         if token == Token::Arrow {
-            build_func_return(scanner, &mut func);
+            let ret = build_func_return(scanner, &mut func, syntax);
+            
+            if ret == 1 {
+                return 1;
+            }
         }
         
         tree.functions.push(func);
-        return;
+        return 0;
     }
     
     while token != Token::RParen {
@@ -85,12 +97,16 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
         match name_token {
             Token::Id(ref val) => arg.name = val.to_string(),
             Token::RParen => break,
-            _ => println!("Error: Invalid function argument name-> {:?}", name_token),
+            
+            _ => {
+                syntax.syntax_error(scanner, "Expected function argument name.".to_string());
+                return 1;
+            },
         }
         
         if sym_token != Token::Colon {
-            println!("Error: Function arguments should have a colon between name and type.");
-            return;
+            syntax.syntax_error(scanner, "Arguments should have a colon between name and type.".to_string());
+            return 1;
         }
         
         match type_token {
@@ -108,17 +124,23 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree) {
         token = scanner.get_token();
         if token != Token::Comma && token != Token::RParen {
             println!("Error: Invalid function arguments list.");
-            return;
+            return 1;
         }
     }
     
     token = scanner.get_token();
     
     if token == Token::Arrow {
-        build_func_return(scanner, &mut func);
+        let ret = build_func_return(scanner, &mut func, syntax);
+        
+        if ret == 1 {
+            return 1;
+        }
     }
     
     tree.functions.push(func);
+    
+    0
 }
 
 // Builds a return statement
