@@ -1,0 +1,15 @@
+
+#OUTPUT
+#Syntax Error: Invalid extern-> Expected function name.
+# -> [10] extern func (s:str, ...)
+#
+#END
+
+#RET 1
+
+extern func (s:str, ...)
+
+func main -> int
+    return 0
+end
+

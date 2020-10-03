@@ -7,7 +7,7 @@
 
 #RET 1
 
-extern func printf(s:str, ...)
+extern printf(s:str, ...)
 
 func main -> int
     return 0

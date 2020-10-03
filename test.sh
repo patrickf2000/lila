@@ -9,20 +9,33 @@ function run_test() {
     	if [[ $3 == "aarch64" ]] ; then
     	    arch="--arm64"
     	fi
-    	
-    	if [[ $2 == "sys" ]] ; then
-            cargo run $entry $arch
-        elif [[ $2 == "clib" ]] ; then
-            cargo run $entry --use-c $arch
-        fi
         
-    	./test.py $entry ./$name
-    	
-    	if [[ $? != 0 ]] ; then
-    		exit 1
+        if [[ $4 == "error" ]] ; then
+            echo "#!/bin/bash" >> ERROR_TEST.sh
+            echo "cargo run $entry --use-c $arch" >> ERROR_TEST.sh
+            chmod 777 ERROR_TEST.sh
+            ./test.py $entry  ./ERROR_TEST.sh
+            
+            if [[ $? != 0 ]] ; then
+                exit 1
+            fi
+            
+            rm ERROR_TEST.sh
+        else
+            if [[ $2 == "sys" ]] ; then
+                cargo run $entry $arch
+            elif [[ $2 == "clib" ]] ; then
+                cargo run $entry --use-c $arch
+            fi
+        
+    	    ./test.py $entry ./$name
+    	    
+    	    if [[ $? != 0 ]] ; then
+        		exit 1
+        	fi
+        	
+        	rm ./$name
     	fi
-    	
-    	rm ./$name
     done
 }
 
@@ -40,6 +53,7 @@ run_test 'test/cond/*.qk' 'clib' $1
 run_test 'test/func/*.qk' 'clib' $1
 run_test 'test/loop/*.qk' 'clib' $1
 run_test 'test/array/*.qk' 'clib' $1
+run_test 'test/errors/*.qk' 'clib' $1 "error"
 
 if [[ $1 == "x86-64" ]] ; then
     run_test 'test/syscall/*.qk' 'sys' $1
