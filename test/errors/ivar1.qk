@@ -1,7 +1,7 @@
 
 #OUTPUT
-#Syntax Error: Invalid token in expression.
-# -> [13] printf(=)
+#Syntax Error: Expected variable name.
+# -> [13] int = 10
 #
 #END
 
@@ -10,7 +10,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    printf(=)
+    int = 10
     return 0
 end
 

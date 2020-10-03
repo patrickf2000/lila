@@ -159,11 +159,16 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
 }
 
 // Builds a return statement
-pub fn build_return(scanner : &mut Lex, tree : &mut AstTree) {
+pub fn build_return(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let mut ret = ast::create_stmt(AstStmtType::Return);
-    build_args(scanner, &mut ret, Token::Eof);
+    
+    if !build_args(scanner, &mut ret, Token::Eof, syntax) {
+        return false;
+    }
     
     ast::add_stmt(tree, ret);
+    
+    true
 }
 
 // Builds the end statement
@@ -173,14 +178,18 @@ pub fn build_end(tree : &mut AstTree) {
 }
 
 // Builds function calls
-pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
+pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
     let mut fc = ast::create_stmt(AstStmtType::FuncCall);
     fc.name = id_val;
     
     // Build arguments
-    build_args(scanner, &mut fc, Token::RParen);
+    if !build_args(scanner, &mut fc, Token::RParen, syntax) {
+        return false;
+    }
     
     // Add the call
     ast::add_stmt(tree, fc);
+    
+    true
 }
 

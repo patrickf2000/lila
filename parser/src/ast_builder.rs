@@ -66,15 +66,15 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
     match token {
         Token::Extern => code = build_extern(&mut analyzer, tree, syntax),
         Token::Func => code = build_func(&mut analyzer, tree, syntax),
-        Token::Return => build_return(&mut analyzer, tree),
+        Token::Return => code = build_return(&mut analyzer, tree, syntax),
         Token::End => build_end(tree),
-        Token::Int => build_i32var_dec(&mut analyzer, tree),
+        Token::Int => code = build_i32var_dec(&mut analyzer, tree, syntax),
         Token::TStr => println!("TStr: {:?}", token),
-        Token::Id(ref val) => build_id(&mut analyzer, tree, val.to_string()),
-        Token::If => build_cond(&mut analyzer, tree, Token::If),
-        Token::Elif => build_cond(&mut analyzer, tree, Token::Elif),
-        Token::Else => build_cond(&mut analyzer, tree, Token::Else),
-        Token::While => build_cond(&mut analyzer, tree, Token::While),
+        Token::Id(ref val) => code = build_id(&mut analyzer, tree, val.to_string(), syntax),
+        Token::If => code = build_cond(&mut analyzer, tree, Token::If, syntax),
+        Token::Elif => code = build_cond(&mut analyzer, tree, Token::Elif, syntax),
+        Token::Else => code = build_cond(&mut analyzer, tree, Token::Else, syntax),
+        Token::While => code = build_cond(&mut analyzer, tree, Token::While, syntax),
         
         Token::Break => {
             let br = ast::create_stmt(AstStmtType::Break);
@@ -94,7 +94,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
 }
 
 // Builds an integer variable declaration
-fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
+fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec);
     let mut is_array = false;
         
@@ -106,35 +106,46 @@ fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     // The first token should be the name
     let mut token = scanner.get_token();
     
-    // TODO: Better syntax error
     match token {
         Token::Id(ref val) => var_dec.name = val.to_string(),
         
         Token::LBracket => {
             is_array = true;
-            build_args(scanner, &mut var_dec, Token::RBracket);
+            if !build_args(scanner, &mut var_dec, Token::RBracket, syntax) {
+                return false;
+            }
             
             token = scanner.get_token();
             match token {
                 Token::Id(ref val) => var_dec.name = val.to_string(),
-                _ => println!("Error: Invalid array name-> {:?}", token),
+                _ => {
+                    syntax.syntax_error(scanner, "Expected array name.".to_string());
+                    return false;
+                },
             }
         },
         
-        _ => println!("Error: Invalid variable-> {:?}", token),
+        _ => {
+            syntax.syntax_error(scanner, "Expected variable name.".to_string());
+            return false;
+        },
     }
     
     // The next token should be the assign operator
     token = scanner.get_token();
     
-    // TODO: Better syntax error
     match token {
         Token::Assign => {},
-        _ => println!("Error: Missing assignment"),
+        _ => {
+            syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
+            return false;
+        },
     }
     
     // Build the remaining arguments
-    build_args(scanner, &mut var_dec, Token::Eof);
+    if !build_args(scanner, &mut var_dec, Token::Eof, syntax) {
+        return false;
+    }
     
     // If we have the array, check the array type
     if is_array {
@@ -147,49 +158,71 @@ fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree) {
     
     var_dec.modifiers.push(data_type);
     ast::add_stmt(tree, var_dec);
+    
+    true
 }
 
 // Builds a variable assignment
-fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String) {
+fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax : &mut ErrorManager) -> bool {
     let mut var_assign = ast::create_stmt(AstStmtType::VarAssign);
     var_assign.name = name;
     
-    build_args(scanner, &mut var_assign, Token::Eof);
+    if !build_args(scanner, &mut var_assign, Token::Eof, syntax) {
+        return false;
+    }
+    
     ast::add_stmt(tree, var_assign);
+    
+    true
 }
 
 // Builds an array assignment
-fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
+fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
     let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign);
     array_assign.name = id_val;
-    build_args(scanner, &mut array_assign, Token::RBracket);
     
-    // TODO: Better error
-    if scanner.get_token() != Token::Assign {
-        println!("Expected \'=\' in array assignment.");
+    // For the array index
+    if !build_args(scanner, &mut array_assign, Token::RBracket, syntax) {
+        return false;
     }
     
-    build_args(scanner, &mut array_assign, Token::Eof);
+    if scanner.get_token() != Token::Assign {
+        syntax.syntax_error(scanner, "Expected \'=\' in array assignment.".to_string());
+        return false;
+    }
+    
+    // Tokens being assigned to the array
+    if !build_args(scanner, &mut array_assign, Token::Eof, syntax) {
+        return false;
+    }
+    
     ast::add_stmt(tree, array_assign);
+    
+    true
 }
 
 // Handles cases when an identifier is the first token
-fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String) {
+fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
     // If the next token is an assignment, we have a variable assignment
     // If the next token is a parantheses, we have a function call
     let token = scanner.get_token();
+    let code : bool;
     
-    // TODO: Better assignment error
     match token {
-        Token::Assign => build_var_assign(scanner, tree, id_val),
-        Token::LParen => build_func_call(scanner, tree, id_val),
-        Token::LBracket => build_array_assign(scanner, tree, id_val),
-        _ => println!("Invalid declaration or assignment"),
+        Token::Assign => code = build_var_assign(scanner, tree, id_val, syntax),
+        Token::LParen => code = build_func_call(scanner, tree, id_val, syntax),
+        Token::LBracket => code = build_array_assign(scanner, tree, id_val, syntax),
+        _ => {
+            syntax.syntax_error(scanner, "Invalid assignment or call.".to_string());
+            return false;
+        },
     }
+    
+    code
 }
 
 // Builds conditional statements
-fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token) {
+fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token, syntax : &mut ErrorManager) -> bool {
     let mut ast_cond_type : AstStmtType = AstStmtType::If;
     match cond_type {
         Token::If => ast_cond_type = AstStmtType::If,
@@ -201,12 +234,15 @@ fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token) {
     
     let mut cond = ast::create_stmt(ast_cond_type);
     
-    // Build arguments
+    // Build the rest arguments
     if cond_type != Token::Else {
-        build_args(scanner, &mut cond, Token::Eof);
+        if !build_args(scanner, &mut cond, Token::Eof, syntax) {
+            return false;
+        }
     }
     
-    // Add the conditional
     ast::add_stmt(tree, cond);
+    
+    true
 }
 

@@ -2,10 +2,11 @@
 use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex};
+use crate::syntax::*;
 
 // A common function for building statement arguments
 // TODO: If there's a way to not make parts of this so repetative, that would be great
-pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
+pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax : &mut ErrorManager) -> bool {
     let mut token = scanner.get_token();
     let mut args : Vec<AstArg> = Vec::new();
     
@@ -99,8 +100,10 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
             
             Token::Comma => {},
             
-            // TODO: Better syntax error
-            _ => println!("Invalid expression argument: {:?}", token),
+            _ => {
+                syntax.syntax_error(scanner, "Invalid token in expression.".to_string());
+                return false;
+            },
         }
     
         token = scanner.get_token();
@@ -113,5 +116,7 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token) {
             stmt.args.push(arg.clone());
         }
     }
+    
+    true
 }
 

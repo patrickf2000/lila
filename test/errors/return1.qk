@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid token in expression.
-# -> [13] printf(=)
+# -> [13] return =
 #
 #END
 
@@ -10,7 +10,6 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    printf(=)
-    return 0
+    return =
 end
 
