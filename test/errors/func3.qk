@@ -1,7 +1,7 @@
 
 #OUTPUT
-#Syntax Error: Invalid function arguments list.
-# -> [12] func add_two(x:int, )
+#Syntax Error: Expected function argument name.
+# -> [12] func add_two(:int, y:int)
 #
 #END
 
@@ -9,7 +9,7 @@
 
 extern func printf(s:str, ...)
 
-func add_two(x:int, )
+func add_two(:int, y:int)
     x = x + y
 end
 

@@ -65,7 +65,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         Token::Id(ref val) => name = val.to_string(),
         _ => {
             syntax.syntax_error(scanner, "Expected function name.".to_string());
-            return true;
+            return false;
         },
     }
     
@@ -87,6 +87,8 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         return true;
     }
     
+    let mut last_token = Token::LParen;
+    
     while token != Token::RParen {
         let name_token = scanner.get_token();
         let sym_token = scanner.get_token();
@@ -96,13 +98,23 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         
         match name_token {
             Token::Id(ref val) => arg.name = val.to_string(),
-            Token::RParen => break,
+            
+            Token::RParen => {
+                if last_token != Token::LParen {
+                    syntax.syntax_error(scanner, "Invalid function arguments list.".to_string());
+                    return false;
+                } else {
+                    break;
+                }
+            },
             
             _ => {
                 syntax.syntax_error(scanner, "Expected function argument name.".to_string());
                 return false;
             },
         }
+        
+        last_token = name_token.clone();
         
         if sym_token != Token::Colon {
             syntax.syntax_error(scanner, "Arguments should have a colon between name and type.".to_string());
@@ -116,14 +128,17 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
             },
             
             Token::TStr => {},
-            _ => println!("Error: Invalid function argument type."),
+            _ => {
+                syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
+                return false;
+            },
         }
         
         func.args.push(arg);
         
         token = scanner.get_token();
         if token != Token::Comma && token != Token::RParen {
-            println!("Error: Invalid function arguments list.");
+            syntax.syntax_error(scanner, "Invalid function arguments list.".to_string());
             return false;
         }
     }
