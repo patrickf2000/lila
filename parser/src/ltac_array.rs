@@ -33,8 +33,7 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
             pusharg.arg2_val = 1;
             builder.file.code.push(pusharg);
             
-            let mut call = ltac::create_instr(LtacType::Call);
-            call.name = "free".to_string();
+            let call = ltac::create_instr(LtacType::Free);
             builder.file.code.push(call);
         }
     }
@@ -55,8 +54,7 @@ pub fn build_i32dyn_array(builder : &mut LtacBuilder, args : &Vec<AstArg>, var :
         //TODO
     }
     
-    let mut instr = ltac::create_instr(LtacType::Call);
-    instr.name = "malloc".to_string();
+    let mut instr = ltac::create_instr(LtacType::Malloc);
     builder.file.code.push(instr);
     
     // Move the return register back to the variable

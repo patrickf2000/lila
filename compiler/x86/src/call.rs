@@ -69,10 +69,21 @@ pub fn amd64_build_call(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
 // Builds a system call
 pub fn amd64_build_syscall(writer : &mut BufWriter<File>) {
-    let mut line = "  syscall".to_string();
-    line.push_str("\n\n");
-    
-    writer.write(&line.into_bytes())
+    writer.write(b"  syscall\n\n")
         .expect("[AMD64_build_syscall] Write failed.");
+}
+
+// Builds a malloc call
+// TODO: C-library use detection
+pub fn amd64_build_malloc(writer : &mut BufWriter<File>) {
+    writer.write(b"  call malloc\n\n")
+        .expect("[AMD64_build_malloc] Write failed.");
+}
+
+// Builds a free call
+// TODO: C-library use detection
+pub fn amd64_build_free(writer : &mut BufWriter<File>) {
+    writer.write(b"  call free\n\n")
+        .expect("[AMD64_build_free] Write failed.");
 }
 

@@ -23,6 +23,8 @@ pub enum LtacType {
     KPushArg,
     Call,
     Syscall,
+    Malloc,
+    Free,
     
     I32Cmp,
     Br,
@@ -192,6 +194,17 @@ impl LtacInstr {
                 println!("  syscall");
                 println!("");
                 return;
+            },
+            
+            LtacType::Malloc => {
+                println!("  malloc");
+                println!("");
+                return;
+            },
+            
+            LtacType::Free => {
+                println!("  free");
+                println!("");
             },
             
             LtacType::I32Cmp => print!("  i32.cmp "),
