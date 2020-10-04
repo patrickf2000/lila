@@ -4,13 +4,14 @@ import sys
 import subprocess
 import os
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
 	print("Error: Insufficient arguments.")
-	print("Syntax: test.py <test source> <test bin>")
+	print("Syntax: test.py <test source> <test bin> <test_type>")
 	exit()
 	
 test_file = sys.argv[1]
 bin_file = sys.argv[2]
+test_type = sys.argv[3]
 
 basename = os.path.basename(test_file)
 print("[TEST] " + basename)
@@ -48,15 +49,21 @@ if is_output:
 		if output[i] != cmd_output[i]:
 			is_output = False
 			break
+			
+is_ret = True
+if test_type != "error":
+	if rc != ret:
+		is_ret = False
 
 # Print results if wrong
-if (rc != ret) or not is_output:
+if (not is_ret) or (not is_output):
 	print("Expected Output: " + str(output))
 	print("CMD Output: " + str(cmd_output))
 	print("")
-	print("Expected Return: " + str(ret))
-	print("Actual Return: " + str(rc))
-	print("")
+	if test_type != "error":
+		print("Expected Return: " + str(ret))
+		print("Actual Return: " + str(rc))
+		print("")
 	print("Fail")
 	exit(1)
 	

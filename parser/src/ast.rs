@@ -1,4 +1,6 @@
 
+use crate::lex::*;
+
 // Represents AST statement types
 #[derive(PartialEq, Clone)]
 pub enum AstStmtType {
@@ -65,6 +67,9 @@ pub struct AstStmt {
     pub sub_args : Vec<AstArg>,
     pub args : Vec<AstArg>,
     pub modifiers : Vec<AstMod>,
+    
+    pub line : String,
+    pub line_no : i32,
 }
 
 // Represents an argument
@@ -243,7 +248,7 @@ pub fn create_func(name : String) -> AstFunc {
     }
 }
 
-pub fn create_stmt(stmt_type : AstStmtType) -> AstStmt {
+pub fn create_stmt(stmt_type : AstStmtType, scanner : &mut Lex) -> AstStmt {
     AstStmt {
         stmt_type : stmt_type,
         name : String::new(),
@@ -251,6 +256,24 @@ pub fn create_stmt(stmt_type : AstStmtType) -> AstStmt {
         sub_args : Vec::new(),
         args : Vec::new(),
         modifiers : Vec::new(),
+        
+        line_no : scanner.get_line_no(),
+        line : scanner.get_current_line(),
+    }
+}
+
+// This should only be used by the LTAC layer; do not use unless absolutely necessary
+pub fn create_orphan_stmt(stmt_type : AstStmtType) -> AstStmt {
+    AstStmt {
+        stmt_type : stmt_type,
+        name : String::new(),
+        
+        sub_args : Vec::new(),
+        args : Vec::new(),
+        modifiers : Vec::new(),
+        
+        line_no : 0,
+        line : String::new(),
     }
 }
 

@@ -66,9 +66,13 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) {
 }
 
 // Builds a function return
-pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) {
+pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if line.args.len() > 0 && builder.current_type == DataType::Void {
-        println!("Cannot return value in void function: {}", builder.current_func);
+        let mut msg = "Cannot return value in void function: ".to_string();
+        msg.push_str(&builder.current_func);
+         
+        builder.syntax.ltac_error(line, msg);
+        return false;
     }
 
     free_arrays(builder);
@@ -105,10 +109,12 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) {
     
     let ret = ltac::create_instr(LtacType::Ret);
     builder.file.code.push(ret);
+    
+    true
 }
 
 // Builds the end of a block
-pub fn build_end(builder : &mut LtacBuilder) {
+pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if builder.block_layer == 0 {
         let last = builder.file.code.last().unwrap();
         
@@ -117,7 +123,11 @@ pub fn build_end(builder : &mut LtacBuilder) {
             
             // See if there was supposed to be a return instruction
             if builder.current_type != DataType::Void {
-                println!("Error: Expected return in function {}.", builder.current_func);
+                let mut msg = "Expected return in function: ".to_string();
+                msg.push_str(&builder.current_func);
+                
+                builder.syntax.ltac_error(line, msg);
+                return false;
             }
             
             // Otherwise, create a void instruction
@@ -154,5 +164,7 @@ pub fn build_end(builder : &mut LtacBuilder) {
             }
         }
     }
+    
+    true
 }
 

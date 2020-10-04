@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use crate::ast::*;
 use crate::ltac;
 use crate::ltac::*;
+use crate::syntax::*;
 
 use crate::ltac_array::*;
 use crate::ltac_flow::*;
@@ -26,6 +27,7 @@ pub struct Var {
 #[derive(Clone)]
 pub struct LtacBuilder {
     pub file : LtacFile,
+    pub syntax : ErrorManager,
     pub str_pos : i32,
     
     // Function-related values
@@ -49,13 +51,14 @@ pub struct LtacBuilder {
     pub end_labels : Vec<String>,       // Needed for break
 }
 
-pub fn new_ltac_builder(name : String) -> LtacBuilder {
+pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilder {
     LtacBuilder {
         file : LtacFile {
             name : name,
             data : Vec::new(),
             code : Vec::new(),
         },
+        syntax : syntax.clone(),
         str_pos : 0,
         functions : HashMap::new(),
         current_func : String::new(),
@@ -76,16 +79,19 @@ pub fn new_ltac_builder(name : String) -> LtacBuilder {
 impl LtacBuilder {
 
     // Builds the main LTAC file
-    pub fn build_ltac(&mut self, tree : &AstTree) -> LtacFile {
+    pub fn build_ltac(&mut self, tree : &AstTree) -> Result<LtacFile, ()> {
         // Build functions
-        self.build_functions(tree);
+        if !self.build_functions(tree) {
+            self.syntax.print_errors();
+            return Err(());
+        }
         
-        self.file.clone()
+        Ok(self.file.clone())
     }
 
     // Converts AST functions to LTAC functions
     // Make two passes; the first collects information, and the second does construction
-    fn build_functions(&mut self, tree : &AstTree) {
+    fn build_functions(&mut self, tree : &AstTree) -> bool {
         // Collect information- for now, only names
         for func in tree.functions.iter() {
             let name = func.name.clone();
@@ -131,7 +137,9 @@ impl LtacBuilder {
                 }
                 
                 // Build the body and calculate the stack size
-                self.build_block(&func.statements);
+                if !self.build_block(&func.statements) {
+                    return false;
+                }
                 
                 if self.vars.len() > 0 {
                     let mut stack_size = 0;
@@ -147,10 +155,14 @@ impl LtacBuilder {
                 self.stack_pos = 0;
             }
         }
+        
+        true
     }
 
     // Builds function body
-    fn build_block(&mut self, statements : &Vec<AstStmt>) {
+    fn build_block(&mut self, statements : &Vec<AstStmt>) -> bool {
+        let mut code = true;
+    
         for line in statements {
             match &line.stmt_type {
                 AstStmtType::VarDec => build_var_dec(self, &line, 0),
@@ -163,10 +175,16 @@ impl LtacBuilder {
                 AstStmtType::Break => build_break(self),
                 AstStmtType::Continue => build_continue(self),
                 AstStmtType::FuncCall => build_func_call(self, &line),
-                AstStmtType::Return => build_return(self, &line),
-                AstStmtType::End => build_end(self),
+                AstStmtType::Return => code = build_return(self, &line),
+                AstStmtType::End => code = build_end(self, &line),
+            }
+            
+            if !code {
+                break;
             }
         }
+        
+        code
     }
 
     // Builds a string and adds it to the data section

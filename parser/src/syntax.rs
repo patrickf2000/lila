@@ -1,12 +1,15 @@
 
 use crate::lex::*;
+use crate::ast::AstStmt;
 
+#[derive(Clone)]
 pub struct SyntaxError {
     pub line_no : i32,
     pub line : String,
     pub message : String,
 }
 
+#[derive(Clone)]
 pub struct ErrorManager {
     pub errors : Vec<SyntaxError>,
 }
@@ -24,6 +27,17 @@ impl ErrorManager {
         let error = SyntaxError {
             line_no : scanner.get_line_no(),
             line : scanner.get_current_line(),
+            message : msg,
+        };
+        
+        self.errors.push(error);
+    }
+    
+    // Called when the AST is being translated to the LTAC
+    pub fn ltac_error(&mut self, stmt : &AstStmt, msg : String) {
+        let error = SyntaxError {
+            line_no : stmt.line_no,
+            line : stmt.line.clone(),
             message : msg,
         };
         

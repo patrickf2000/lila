@@ -40,10 +40,14 @@ pub fn parse(path : String) -> Result<LtacFile, ()> {
         Err(_e) => return Err(()),
     };
     
+    let mut syntax = syntax::create_error_manager();
     let name = get_name(&path);
     
-    let mut ltac_builder = ltac_builder::new_ltac_builder(name.clone());
-    let ltac = ltac_builder.build_ltac(&tree);
+    let mut ltac_builder = ltac_builder::new_ltac_builder(name.clone(), &mut syntax);
+    let ltac = match ltac_builder.build_ltac(&tree) {
+        Ok(ltac) => ltac,
+        Err(_e) => return Err(()),
+    };
     
     Ok(ltac)
 }

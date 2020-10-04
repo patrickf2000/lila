@@ -91,10 +91,8 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
     
     while token != Token::RParen {
         let name_token = scanner.get_token();
-        let sym_token = scanner.get_token();
-        let type_token = scanner.get_token();
         
-        let mut arg = ast::create_stmt(AstStmtType::VarDec);
+        let mut arg = ast::create_stmt(AstStmtType::VarDec, scanner);
         
         match name_token {
             Token::Id(ref val) => arg.name = val.to_string(),
@@ -113,6 +111,9 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
                 return false;
             },
         }
+        
+        let sym_token = scanner.get_token();
+        let type_token = scanner.get_token();
         
         last_token = name_token.clone();
         
@@ -160,7 +161,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
 
 // Builds a return statement
 pub fn build_return(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
-    let mut ret = ast::create_stmt(AstStmtType::Return);
+    let mut ret = ast::create_stmt(AstStmtType::Return, scanner);
     
     if !build_args(scanner, &mut ret, Token::Eof, syntax) {
         return false;
@@ -172,14 +173,14 @@ pub fn build_return(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
 }
 
 // Builds the end statement
-pub fn build_end(tree : &mut AstTree) {
-    let stmt = ast::create_stmt(AstStmtType::End);
+pub fn build_end(scanner: &mut Lex, tree : &mut AstTree) {
+    let stmt = ast::create_stmt(AstStmtType::End, scanner);
     ast::add_stmt(tree, stmt);
 }
 
 // Builds function calls
 pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
-    let mut fc = ast::create_stmt(AstStmtType::FuncCall);
+    let mut fc = ast::create_stmt(AstStmtType::FuncCall, scanner);
     fc.name = id_val;
     
     // Build arguments

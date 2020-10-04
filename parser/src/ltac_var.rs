@@ -93,7 +93,7 @@ pub fn build_i32var_single_assign(builder : &mut LtacBuilder, args : &Vec<AstArg
                     match builder.clone().functions.get(&arg.str_val) {
                         Some(t) => {
                             // Create a statement to build the rest of the function call
-                            let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
+                            let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
                             stmt.name = arg.str_val.clone();
                             stmt.args = arg.sub_args.clone();
                             build_func_call(builder, &stmt);
@@ -189,7 +189,7 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
                         match builder.clone().functions.get(&arg.str_val) {
                             Some(t) => {
                                 // Create a statement to build the rest of the function call
-                                let mut stmt = ast::create_stmt(AstStmtType::FuncCall);
+                                let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
                                 stmt.name = arg.str_val.clone();
                                 stmt.args = arg.sub_args.clone();
                                 build_func_call(builder, &stmt);

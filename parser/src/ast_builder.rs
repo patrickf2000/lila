@@ -55,34 +55,34 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
 
 // Converts a line to an AST node
 fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
-    let mut analyzer = create_lex(line);
-    analyzer.tokenize(line_no);
+    let mut scanner = create_lex(line);
+    scanner.tokenize(line_no);
     
     let mut code = true;
     
     // Get the first token
-    let token = analyzer.get_token();
+    let token = scanner.get_token();
     
     match token {
-        Token::Extern => code = build_extern(&mut analyzer, tree, syntax),
-        Token::Func => code = build_func(&mut analyzer, tree, syntax),
-        Token::Return => code = build_return(&mut analyzer, tree, syntax),
-        Token::End => build_end(tree),
-        Token::Int => code = build_i32var_dec(&mut analyzer, tree, syntax),
+        Token::Extern => code = build_extern(&mut scanner, tree, syntax),
+        Token::Func => code = build_func(&mut scanner, tree, syntax),
+        Token::Return => code = build_return(&mut scanner, tree, syntax),
+        Token::End => build_end(&mut scanner, tree),
+        Token::Int => code = build_i32var_dec(&mut scanner, tree, syntax),
         Token::TStr => println!("TStr: {:?}", token),
-        Token::Id(ref val) => code = build_id(&mut analyzer, tree, val.to_string(), syntax),
-        Token::If => code = build_cond(&mut analyzer, tree, Token::If, syntax),
-        Token::Elif => code = build_cond(&mut analyzer, tree, Token::Elif, syntax),
-        Token::Else => code = build_cond(&mut analyzer, tree, Token::Else, syntax),
-        Token::While => code = build_cond(&mut analyzer, tree, Token::While, syntax),
+        Token::Id(ref val) => code = build_id(&mut scanner, tree, val.to_string(), syntax),
+        Token::If => code = build_cond(&mut scanner, tree, Token::If, syntax),
+        Token::Elif => code = build_cond(&mut scanner, tree, Token::Elif, syntax),
+        Token::Else => code = build_cond(&mut scanner, tree, Token::Else, syntax),
+        Token::While => code = build_cond(&mut scanner, tree, Token::While, syntax),
         
         Token::Break => {
-            let br = ast::create_stmt(AstStmtType::Break);
+            let br = ast::create_stmt(AstStmtType::Break, &mut scanner);
             ast::add_stmt(tree, br);
         },
         
         Token::Continue => {
-            let cont = ast::create_stmt(AstStmtType::Continue);
+            let cont = ast::create_stmt(AstStmtType::Continue, &mut scanner);
             ast::add_stmt(tree, cont);
         },
         
@@ -95,7 +95,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
 
 // Builds an integer variable declaration
 fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
-    let mut var_dec = ast::create_stmt(AstStmtType::VarDec);
+    let mut var_dec = ast::create_stmt(AstStmtType::VarDec, scanner);
     let mut is_array = false;
         
     let mut data_type = AstMod {
@@ -164,7 +164,7 @@ fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
 
 // Builds a variable assignment
 fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax : &mut ErrorManager) -> bool {
-    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign);
+    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
     var_assign.name = name;
     
     if !build_args(scanner, &mut var_assign, Token::Eof, syntax) {
@@ -178,7 +178,7 @@ fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, synt
 
 // Builds an array assignment
 fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
-    let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign);
+    let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign, scanner);
     array_assign.name = id_val;
     
     // For the array index
@@ -232,7 +232,7 @@ fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token, syntax
         _ => {},
     }
     
-    let mut cond = ast::create_stmt(ast_cond_type);
+    let mut cond = ast::create_stmt(ast_cond_type, scanner);
     
     // Build the rest arguments
     if cond_type != Token::Else {
