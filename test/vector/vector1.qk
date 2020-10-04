@@ -4,6 +4,9 @@
 #[0 2 4 6 8 10 12 14 ]
 #Numbers2:
 #[0 31 62 93 124 155 186 217 ]
+#Result:
+#[0 33 66 99 132 165 198 231 ]
+#
 #END
 
 #RET 0
@@ -46,6 +49,12 @@ func main -> int
     
     puts("Numbers2:")
     print_numbers(numbers2, 8)
+    
+    numbers_sum = numbers1 + numbers2
+    
+    puts("")
+    puts("Result:")
+    print_numbers(numbers_sum, 8)
     
     return 0
 end
