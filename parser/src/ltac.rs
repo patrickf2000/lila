@@ -16,6 +16,7 @@ pub enum LtacType {
     Mov,
     MovOffImm,
     MovOffMem,
+    MovI32Vec,
     
     LdArgI32,
     LdArgPtr,
@@ -38,6 +39,8 @@ pub enum LtacType {
     
     I32Add,
     I32Mul,
+    
+    I32VAdd,
 }
 
 // Represents an instruction argument type
@@ -187,6 +190,7 @@ impl LtacInstr {
             LtacType::Mov => print!("  mov "),
             LtacType::MovOffImm => print!("  mov.imm "),
             LtacType::MovOffMem => print!("  mov.mem "),
+            LtacType::MovI32Vec => print!("  mov.i32.vec "),
             
             LtacType::PushArg => print!("  pusharg "),
             LtacType::KPushArg => print!("  kpusharg "),
@@ -226,6 +230,8 @@ impl LtacInstr {
             
             LtacType::I32Add => print!("  i32.add "),
             LtacType::I32Mul => print!("  i32.mul "),
+            
+            LtacType::I32VAdd => print!("  i32.vadd "),
         }
         
         match &self.arg1_type {

@@ -2,7 +2,7 @@
 use crate::ltac_builder::*;
 use crate::ltac;
 use crate::ltac::{LtacType, LtacArg, LtacInstr};
-use crate::ast::{AstStmt, AstArg, AstArgType};
+use crate::ast::{AstStmt, AstArgType};
 
 use crate::ltac_var::*;
 
@@ -40,9 +40,12 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
 }
 
 // Initializes a 32-bit integer array in the heap
-pub fn build_i32dyn_array(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var) {
-    if args.len() == 1 && args.last().unwrap().arg_type == AstArgType::IntL {
-        let arg = args.last().unwrap();
+pub fn build_i32dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
+    let sub_args = &line.sub_args;
+    
+    // Create the array
+    if sub_args.len() == 1 && sub_args.last().unwrap().arg_type == AstArgType::IntL {
+        let arg = sub_args.last().unwrap();
         
         let mut pusharg = ltac::create_instr(LtacType::PushArg);
         pusharg.arg1_type = LtacArg::I32;
@@ -50,19 +53,27 @@ pub fn build_i32dyn_array(builder : &mut LtacBuilder, args : &Vec<AstArg>, var :
         pusharg.arg2_val = 1;
         
         builder.file.code.push(pusharg);
+        
+        let mut instr = ltac::create_instr(LtacType::Malloc);
+        builder.file.code.push(instr);
+        
+        // Move the return register back to the variable
+        instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = LtacArg::RetRegI64;
+        builder.file.code.push(instr);
+        
+    // Vector math
+    } else if sub_args.len() == 0 && line.args.len() > 1 {
+        if !build_i32array_vector_math(builder, line, var) {
+            return false;
+        }
     } else {
         //TODO
     }
     
-    let mut instr = ltac::create_instr(LtacType::Malloc);
-    builder.file.code.push(instr);
-    
-    // Move the return register back to the variable
-    instr = ltac::create_instr(LtacType::Mov);
-    instr.arg1_type = LtacArg::Mem;
-    instr.arg1_val = var.pos;
-    instr.arg2_type = LtacArg::RetRegI64;
-    builder.file.code.push(instr);
+    true
 }
 
 // Builds a single int32 array assignment
@@ -123,5 +134,52 @@ pub fn build_i32array_single_assign(builder : &mut LtacBuilder, line : &AstStmt,
     }
     
     builder.file.code.push(instr);
+}
+
+// Builds integer vector math
+pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
+    let mut instr = ltac::create_instr(LtacType::MovI32Vec);
+    instr.arg1_type = LtacArg::Reg;
+    instr.arg1_val = 0;
+
+    for arg in line.args.iter() {
+        match &arg.arg_type {
+            AstArgType::Id => {
+                match &builder.vars.get(&arg.str_val) {
+                    Some(v) => instr.arg2_val = v.pos,
+                    None => {
+                        builder.syntax.ltac_error(line, "Invalid variable.".to_string());
+                        return false;
+                    },
+                }
+            
+                instr.arg2_type = LtacArg::Mem;
+                instr.arg2_offset = 0;
+                builder.file.code.push(instr.clone());
+            },
+            
+            AstArgType::OpAdd => {
+                instr = ltac::create_instr(LtacType::I32VAdd);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 0;
+            },
+            
+            _ => {
+                builder.syntax.ltac_error(line, "Invalid expression for vector math.".to_string());
+                return false;
+            }
+        }
+    }
+    
+    // The final move instruction
+    instr = ltac::create_instr(LtacType::MovI32Vec);
+    instr.arg1_type = LtacArg::Mem;
+    instr.arg1_val = var.pos;
+    instr.arg2_type = LtacArg::Reg;
+    instr.arg2_val = 0;
+    
+    builder.file.code.push(instr.clone());
+    
+    true
 }
 

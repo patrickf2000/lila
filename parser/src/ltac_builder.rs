@@ -23,7 +23,6 @@ pub struct Var {
     pub pos : i32,
     pub data_type : DataType,
     pub is_param : bool,
-    pub created : bool,     // Only needed for reference types to prevent NULL pointers
 }
 
 #[derive(Clone)]
@@ -167,8 +166,8 @@ impl LtacBuilder {
     
         for line in statements {
             match &line.stmt_type {
-                AstStmtType::VarDec => build_var_dec(self, &line, 0),
-                AstStmtType::VarAssign => build_var_assign(self, &line),
+                AstStmtType::VarDec => code = build_var_dec(self, &line, 0),
+                AstStmtType::VarAssign => code = build_var_assign(self, &line),
                 AstStmtType::ArrayAssign => build_array_assign(self, &line),
                 AstStmtType::If => build_cond(self, &line),
                 AstStmtType::Elif => build_cond(self, &line),

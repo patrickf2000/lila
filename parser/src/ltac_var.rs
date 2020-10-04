@@ -9,7 +9,7 @@ use crate::ltac_array::*;
 use crate::ltac_func::*;
 
 // Builds an LTAC variable declaration
-pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) {
+pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) -> bool {
     let name = line.name.clone();
     let ast_data_type = &line.modifiers[0];
     let data_type : DataType;
@@ -35,7 +35,6 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) 
         pos : builder.stack_pos,
         data_type : data_type,
         is_param : is_param,
-        created : false,
     };
     
     builder.vars.insert(name, v);
@@ -52,16 +51,20 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) 
         ld.arg2_val = arg_no;
         builder.file.code.push(ld);
     } else {
-        build_var_assign(builder, line);
+        if !build_var_assign(builder, line) {
+            return false;
+        }
     }
+    
+    true
 }
 
 // Builds an LTAC variable assignment
-pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) {
+pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     let var : Var;
     match builder.vars.get(&line.name) {
         Some(v) => var = v.clone(),
-        None => return,
+        None => return false,
     }
     
     if var.data_type == DataType::Int {
@@ -71,8 +74,12 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) {
             build_i32var_math(builder, &line, &var);
         }
     } else if var.data_type == DataType::IntDynArray {
-        build_i32dyn_array(builder, &line.sub_args, &var);
+        if !build_i32dyn_array(builder, &line, &var) {
+            return false;
+        }
     }
+    
+    true
 }
 
 // Builds a single int32 variable assignment
