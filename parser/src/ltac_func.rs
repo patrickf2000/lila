@@ -46,7 +46,14 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) {
                 push.arg1_type = LtacArg::Mem;
                 
                 match &builder.vars.get(&arg.str_val) {
-                    Some(v) => push.arg1_val = v.pos,
+                    Some(v) => {
+                        push.arg1_val = v.pos;
+                        
+                        if v.data_type == DataType::IntDynArray {
+                            push.arg1_type = LtacArg::Ptr;
+                        }
+                    },
+                    
                     None => push.arg1_val = 0,
                 }
                 

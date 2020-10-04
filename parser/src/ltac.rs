@@ -18,6 +18,7 @@ pub enum LtacType {
     MovOffMem,
     
     LdArgI32,
+    LdArgPtr,
     
     PushArg,
     KPushArg,
@@ -173,6 +174,12 @@ impl LtacInstr {
             
             LtacType::LdArgI32 => {
                 println!("  i32.ldarg [bp-{}], r{}", self.arg1_val, self.arg2_val);
+                println!("");
+                return;
+            },
+            
+            LtacType::LdArgPtr => {
+                println!("  ptr.ldarg [bp-{}], r{}", self.arg1_val, self.arg2_val);
                 println!("");
                 return;
             },

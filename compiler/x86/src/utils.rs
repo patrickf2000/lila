@@ -26,6 +26,10 @@ pub fn amd64_arg_reg32(pos : i32) -> String {
     match pos {
         1 => return "edi".to_string(),
         2 => return "esi".to_string(),
+        3 => return "edx".to_string(),
+        4 => return "ecx".to_string(),
+        5 => return "r8d".to_string(),
+        6 => return "r9d".to_string(),
         _ => return String::new(),
     };
 }
@@ -34,6 +38,10 @@ pub fn amd64_arg_reg64(pos : i32) -> String {
     match pos {
         1 => return "rdi".to_string(),
         2 => return "rsi".to_string(),
+        3 => return "rdx".to_string(),
+        4 => return "rcx".to_string(),
+        5 => return "r8".to_string(),
+        6 => return "r9".to_string(),
         _ => return String::new(),
     };
 }

@@ -37,7 +37,7 @@ pub enum AstArgType {
 }
 
 // Represents modifiers
-#[derive(Clone)]
+#[derive(PartialEq, Clone)]
 pub enum AstModType {
     Int,
     IntDynArray,

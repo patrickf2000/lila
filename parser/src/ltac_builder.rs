@@ -22,6 +22,8 @@ pub enum DataType {
 pub struct Var {
     pub pos : i32,
     pub data_type : DataType,
+    pub is_param : bool,
+    pub created : bool,     // Only needed for reference types to prevent NULL pointers
 }
 
 #[derive(Clone)]

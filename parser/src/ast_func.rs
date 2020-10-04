@@ -122,9 +122,25 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
             return false;
         }
         
+        token = scanner.get_token();
+        
         match type_token {
             Token::Int => {
-                let val_type = AstMod { mod_type : AstModType::Int, };
+                let mut data_type = AstModType::Int;
+                
+                if token == Token::LBracket {
+                    token = scanner.get_token();
+                    
+                    if token == Token::RBracket {
+                        data_type = AstModType::IntDynArray;
+                        token = scanner.get_token();
+                    } else {
+                        syntax.syntax_error(scanner, "Expected closing \']\'.".to_string());
+                        return false;
+                    }
+                }
+                
+                let val_type = AstMod { mod_type : data_type, };
                 arg.modifiers.push(val_type);
             },
             
@@ -137,7 +153,6 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         
         func.args.push(arg);
         
-        token = scanner.get_token();
         if token != Token::Comma && token != Token::RParen {
             syntax.syntax_error(scanner, "Invalid function arguments list.".to_string());
             return false;

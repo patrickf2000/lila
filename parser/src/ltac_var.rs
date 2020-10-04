@@ -26,16 +26,28 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) 
         },
     }
     
+    let mut is_param = false;
+    if arg_no > 0 {
+        is_param = true;
+    }
+    
     let v = Var {
         pos : builder.stack_pos,
         data_type : data_type,
+        is_param : is_param,
+        created : false,
     };
     
     builder.vars.insert(name, v);
     
     // If we have a function argument, add the load instruction
-    if arg_no > 0 {
+    if is_param {
         let mut ld = ltac::create_instr(LtacType::LdArgI32);
+        
+        if ast_data_type.mod_type == AstModType::IntDynArray {
+            ld = ltac::create_instr(LtacType::LdArgPtr);
+        }
+        
         ld.arg1_val = builder.stack_pos;
         ld.arg2_val = arg_no;
         builder.file.code.push(ld);
