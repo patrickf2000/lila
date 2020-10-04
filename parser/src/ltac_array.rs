@@ -155,6 +155,7 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
             
                 instr.arg2_type = LtacArg::Mem;
                 instr.arg2_offset = 0;
+                instr.arg2_offset_size = 4;
                 builder.file.code.push(instr.clone());
             },
             
@@ -177,6 +178,7 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
     instr.arg1_val = var.pos;
     instr.arg2_type = LtacArg::Reg;
     instr.arg2_val = 0;
+    instr.arg2_offset_size = 4;
     
     builder.file.code.push(instr.clone());
     

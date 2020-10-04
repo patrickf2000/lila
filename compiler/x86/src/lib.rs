@@ -10,10 +10,12 @@ use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacAr
 mod call;
 mod func;
 mod utils;
+mod vector;
 
 use call::*;
 use func::*;
 use utils::*;
+use vector::*;
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -135,7 +137,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Mov => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
-            LtacType::MovI32Vec => {},
+            LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
@@ -152,7 +154,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bge => amd64_build_jump(writer, &code),
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
-            LtacType::I32VAdd => {},
+            LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
         }
     }
 }
