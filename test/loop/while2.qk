@@ -27,7 +27,7 @@
 extern func printf(s:str, ...)
 extern func puts(s:str)
 
-func main
+func main -> int
     int x = 0
     
     while x < 10 

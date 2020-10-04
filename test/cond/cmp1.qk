@@ -9,7 +9,7 @@
 
 extern func puts(s:str)
 
-func main()
+func main() -> int
     int x = 3
     
     if x == 5
