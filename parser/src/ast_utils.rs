@@ -106,6 +106,31 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 args.push(arg);
             },
             
+            Token::OpAnd => {
+                let arg = ast::create_arg(AstArgType::OpAnd);
+                args.push(arg);
+            },
+            
+            Token::OpOr => {
+                let arg = ast::create_arg(AstArgType::OpOr);
+                args.push(arg);
+            },
+            
+            Token::OpXor => {
+                let arg = ast::create_arg(AstArgType::OpXor);
+                args.push(arg);
+            },
+            
+            Token::OpLeftShift => {
+                let arg = ast::create_arg(AstArgType::OpLeftShift);
+                args.push(arg);
+            },
+            
+            Token::OpRightShift => {
+                let arg = ast::create_arg(AstArgType::OpRightShift);
+                args.push(arg);
+            },
+            
             Token::LBracket | Token::LParen => {
                 in_array = true;
                 

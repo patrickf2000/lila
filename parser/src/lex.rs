@@ -41,6 +41,11 @@ pub enum Token {
     OpGt,
     OpGte,
     OpNot,
+    OpAnd,
+    OpOr,
+    OpXor,
+    OpLeftShift,
+    OpRightShift,
     
     Id(String),
     IntL(i32),
@@ -170,6 +175,9 @@ impl Lex {
             '!' => return true,
             '<' => return true,
             '>' => return true,
+            '&' => return true,
+            '|' => return true,
+            '^' => return true,
             _ => return false,
         }
     }
@@ -204,6 +212,9 @@ impl Lex {
                 if c2 == '=' {
                     self.index += 1;
                     return Token::OpLte;
+                } else if c2 == '<' {
+                    self.index += 1;
+                    return Token::OpLeftShift;
                 }
                 
                 return Token::OpLt;
@@ -213,6 +224,9 @@ impl Lex {
                 if c2 == '=' {
                     self.index += 1;
                     return Token::OpGte;
+                } else if c2 == '>' {
+                    self.index += 1;
+                    return Token::OpRightShift;
                 }
                 
                 return Token::OpGt;
@@ -242,6 +256,10 @@ impl Lex {
             
             '/' => return Token::OpDiv,
             '%' => return Token::OpMod,
+            
+            '&' => return Token::OpAnd,
+            '|' => return Token::OpOr,
+            '^' => return Token::OpXor,
             
             _ => return Token::Unknown,
         }

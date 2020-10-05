@@ -38,6 +38,11 @@ pub enum AstArgType {
     OpGt,
     OpGte,
     OpNot,
+    OpAnd,
+    OpOr,
+    OpXor,
+    OpLeftShift,
+    OpRightShift,
 }
 
 // Represents modifiers
@@ -201,6 +206,11 @@ impl AstArg {
             AstArgType::OpGt => print!("> "),
             AstArgType::OpGte => print!(">= "),
             AstArgType::OpNot => print!("! "),
+            AstArgType::OpAnd => print!("& "),
+            AstArgType::OpOr => print!("| "),
+            AstArgType::OpXor => print!("^ "),
+            AstArgType::OpLeftShift => print!("<< "),
+            AstArgType::OpRightShift => print!(">> "),
         }
         
         if self.sub_args.len() > 0 {

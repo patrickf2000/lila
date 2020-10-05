@@ -260,6 +260,36 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
                 // TODO
             },
             
+            AstArgType::OpAnd => {
+                instr = ltac::create_instr(LtacType::I32And);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpOr => {
+                instr = ltac::create_instr(LtacType::I32Or);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpXor => {
+                instr = ltac::create_instr(LtacType::I32Xor);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpLeftShift => {
+                instr = ltac::create_instr(LtacType::I32Lsh);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpRightShift => {
+                instr = ltac::create_instr(LtacType::I32Rsh);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
             _ => {},
         }
     }
