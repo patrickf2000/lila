@@ -157,11 +157,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I32Mul => amd64_build_instr(writer, &code),
             LtacType::I32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod => amd64_build_div(writer, &code),
-            LtacType::I32And => {},
-            LtacType::I32Or => {},
-            LtacType::I32Xor => {},
-            LtacType::I32Lsh => {},
-            LtacType::I32Rsh => {},
+            LtacType::I32And => amd64_build_instr(writer, &code),
+            LtacType::I32Or => amd64_build_instr(writer, &code),
+            LtacType::I32Xor => amd64_build_instr(writer, &code),
+            LtacType::I32Lsh => amd64_build_instr(writer, &code),
+            LtacType::I32Rsh => amd64_build_instr(writer, &code),
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
         }
     }
@@ -180,6 +180,16 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         line = "  sub".to_string();
     } else if code.instr_type == LtacType::I32Mul {
         line = "  imul".to_string();
+    } else if code.instr_type == LtacType::I32And {
+        line = "  and".to_string();
+    } else if code.instr_type == LtacType::I32Or {
+        line = "  or".to_string();
+    } else if code.instr_type == LtacType::I32Xor {
+        line = "  xor".to_string();
+    } else if code.instr_type == LtacType::I32Lsh {
+        line = "  shl".to_string();
+    } else if code.instr_type == LtacType::I32Rsh {
+        line = "  shr".to_string();
     } else if code.instr_type == LtacType::I32Cmp {
         line = "  cmp".to_string();
     }
