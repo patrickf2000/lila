@@ -257,9 +257,7 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
             },
             
             AstArgType::OpExponent => {
-                instr = ltac::create_instr(LtacType::I32Exp);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                // TODO
             },
             
             _ => {},

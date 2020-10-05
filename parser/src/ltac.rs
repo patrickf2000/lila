@@ -42,7 +42,6 @@ pub enum LtacType {
     I32Mul,
     I32Div,
     I32Mod,
-    I32Exp,
     
     I32VAdd,
 }
@@ -237,7 +236,6 @@ impl LtacInstr {
             LtacType::I32Mul => print!("  i32.mul "),
             LtacType::I32Div => print!("  i32.div "),
             LtacType::I32Mod => print!("  i32.mod "),
-            LtacType::I32Exp => print!("  i32.exp "),
             
             LtacType::I32VAdd => print!("  i32.vadd "),
         }

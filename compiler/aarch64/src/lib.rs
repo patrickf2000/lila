@@ -156,7 +156,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I32Mul => aarch64_build_instr(writer, &code, stack_size),
             LtacType::I32Div => {},
             LtacType::I32Mod => {},
-            LtacType::I32Exp => {},
             LtacType::I32VAdd => {},
         }
     }

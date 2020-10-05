@@ -153,11 +153,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bg => amd64_build_jump(writer, &code),
             LtacType::Bge => amd64_build_jump(writer, &code),
             LtacType::I32Add => amd64_build_instr(writer, &code),
-            LtacType::I32Sub => {},
+            LtacType::I32Sub => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
-            LtacType::I32Div => {},
-            LtacType::I32Mod => {},
-            LtacType::I32Exp => {},
+            LtacType::I32Div => amd64_build_div(writer, &code),
+            LtacType::I32Mod => amd64_build_div(writer, &code),
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
         }
     }
@@ -172,6 +171,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         line = "  mov".to_string();
     } else if code.instr_type == LtacType::I32Add {
         line = "  add".to_string();
+    } else if code.instr_type == LtacType::I32Sub {
+        line = "  sub".to_string();
     } else if code.instr_type == LtacType::I32Mul {
         line = "  imul".to_string();
     } else if code.instr_type == LtacType::I32Cmp {
@@ -385,6 +386,78 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     writer.write(&line.into_bytes())
         .expect("[AMD64_writer_instr] Write failed.");
+}
+
+// Builds the integer and modulus instructions
+// On x86 these are a little weird...
+fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    let mut dest_line = String::new();
+    
+    line.push_str("  xor edx, edx\n");
+    
+    match &code.arg1_type {
+        LtacArg::Reg => {
+            let reg = amd64_op_reg32(code.arg1_val);
+            
+            line.push_str("  mov eax, ");
+            line.push_str(&reg);
+            line.push_str("\n");
+            
+            dest_line.push_str("  mov ");
+            dest_line.push_str(&reg);
+            dest_line.push_str(", ");
+        },
+        
+        LtacArg::Mem => {
+            line.push_str("  mov eax, DWORD PTR [rbp-");
+            line.push_str(&code.arg1_val.to_string());
+            line.push_str("]\n");
+            
+            dest_line.push_str("  mov DWORD PTR [rbp-");
+            dest_line.push_str(&code.arg1_val.to_string());
+            dest_line.push_str("], ");
+        },
+        
+        _ => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg => {
+            let reg = amd64_op_reg32(code.arg2_val);
+            
+            line.push_str("  idiv ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+        
+        LtacArg::Mem => {
+            line.push_str("  idiv DWORD PTR [rbp-");
+            line.push_str(&code.arg2_val.to_string());
+            line.push_str("]\n");
+        },
+        
+        LtacArg::I32 => {
+            line.push_str("  mov r15d, ");
+            line.push_str(&code.arg2_val.to_string());
+            line.push_str("\n");
+            
+            line.push_str("  idiv r15d\n");
+        },
+        
+        _ => {},
+    }
+    
+    line.push_str(&dest_line);
+    
+    if code.instr_type == LtacType::I32Mod {
+        line.push_str("edx\n");
+    } else {
+        line.push_str("eax\n");
+    }
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_div] Write failed.");
 }
 
 // Builds a branch (actually kinda called "jumps" in x86...)
