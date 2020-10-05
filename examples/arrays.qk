@@ -1,4 +1,7 @@
 
+# Creates and prints two arrays
+# Note that the arrays are allocated on the heap and automatically deallocated at exit
+
 #OUTPUT
 #Numbers1:
 #[0 2 4 6 8 10 12 14 ]

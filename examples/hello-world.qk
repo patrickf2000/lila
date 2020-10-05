@@ -5,3 +5,4 @@ func main -> int
     puts("Hello, world!")
     return 0
 end
+
