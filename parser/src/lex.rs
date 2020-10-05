@@ -31,6 +31,9 @@ pub enum Token {
     OpAdd,
     OpSub,
     OpMul,
+    OpDiv,
+    OpMod,
+    OpExponent,
     OpEq,
     OpNeq,
     OpLt,
@@ -162,6 +165,8 @@ impl Lex {
             '+' => return true,
             '-' => return true,
             '*' => return true,
+            '/' => return true,
+            '%' => return true,
             '!' => return true,
             '<' => return true,
             '>' => return true,
@@ -225,7 +230,19 @@ impl Lex {
             ':' => return Token::Colon,
             ',' => return Token::Comma,
             '+' => return Token::OpAdd,
-            '*' => return Token::OpMul,
+            
+            '*' => {
+                if c2 == '*' {
+                    self.index += 1;
+                    return Token::OpExponent;
+                }
+                
+                return Token::OpMul;
+            },
+            
+            '/' => return Token::OpDiv,
+            '%' => return Token::OpMod,
+            
             _ => return Token::Unknown,
         }
     }

@@ -153,7 +153,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bg => amd64_build_jump(writer, &code),
             LtacType::Bge => amd64_build_jump(writer, &code),
             LtacType::I32Add => amd64_build_instr(writer, &code),
+            LtacType::I32Sub => {},
             LtacType::I32Mul => amd64_build_instr(writer, &code),
+            LtacType::I32Div => {},
+            LtacType::I32Mod => {},
+            LtacType::I32Exp => {},
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
         }
     }

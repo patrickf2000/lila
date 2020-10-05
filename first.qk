@@ -1,51 +1,28 @@
 
 #OUTPUT
-#Numbers1:
-#[0 2 4 6 8 10 12 14 ]
-#Numbers2:
-#[0 31 62 93 124 155 186 217 ]
+
 #END
 
 #RET 0
 
-extern func puts(s:str)
 extern func printf(s:str, ...)
 
-func print_numbers(list:int[], length:int)
-    printf("[")
-
-    int i = 0
-    while i < length
-        int x = list[i]
-        printf("%d ", x)
-        
-        i = i + 1
-    end
-    
-    printf("]\n")
-end
-
-func init_numbers(list:int[], length:int, seed:int)
-    int i = 0
-    while i < length
-        list[i] = i * seed
-        i = i + 1
-    end
-end
-
 func main -> int
-    int[8] numbers1 = array
-    int[8] numbers2 = array
-    int[8] numbers_sum = array
+    int x = 20
     
-    init_numbers(numbers1, 8, 2)
-    init_numbers(numbers2, 8, 31)
+    int a1 = x + 5
+    int a2 = x - 5
+    int a3 = x * 5
+    #int a4 = x / 5
+    #int a5 = x % 6
+    #int a6 = x ** 2
     
-    puts("Numbers1:")
-    print_numbers(numbers1, 8)
-    
-    puts("Numbers2:")
-    print_numbers(numbers2, 8)
+    printf("A1: %d\n", a1)
+    printf("A2: %d\n", a2)
+    printf("A3: %d\n", a3)
+    #printf("A4: %d\n", a4)
+    #printf("A5: %d\n", a5)
+    #printf("A6: %d\n", a6)
     
     return 0
 end

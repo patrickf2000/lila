@@ -232,8 +232,32 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
                 instr.arg1_val = 1;
             },
             
+            AstArgType::OpSub => {
+                instr = ltac::create_instr(LtacType::I32Sub);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
             AstArgType::OpMul => {
                 instr = ltac::create_instr(LtacType::I32Mul);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpDiv => {
+                instr = ltac::create_instr(LtacType::I32Div);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpMod => {
+                instr = ltac::create_instr(LtacType::I32Mod);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 1;
+            },
+            
+            AstArgType::OpExponent => {
+                instr = ltac::create_instr(LtacType::I32Exp);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 1;
             },
