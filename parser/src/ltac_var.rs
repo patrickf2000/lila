@@ -175,7 +175,7 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
 
     let mut instr = ltac::create_instr(LtacType::Mov);
     instr.arg1_type = LtacArg::Reg;
-    instr.arg1_val = 1;
+    instr.arg1_val = 0;
     
     for arg in args.iter() {
         match &arg.arg_type {
@@ -229,65 +229,61 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
             AstArgType::OpAdd => {
                 instr = ltac::create_instr(LtacType::I32Add);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpSub => {
                 instr = ltac::create_instr(LtacType::I32Sub);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpMul => {
                 instr = ltac::create_instr(LtacType::I32Mul);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpDiv => {
                 instr = ltac::create_instr(LtacType::I32Div);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpMod => {
                 instr = ltac::create_instr(LtacType::I32Mod);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
-            },
-            
-            AstArgType::OpExponent => {
-                // TODO
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpAnd => {
                 instr = ltac::create_instr(LtacType::I32And);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpOr => {
                 instr = ltac::create_instr(LtacType::I32Or);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpXor => {
                 instr = ltac::create_instr(LtacType::I32Xor);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpLeftShift => {
                 instr = ltac::create_instr(LtacType::I32Lsh);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             AstArgType::OpRightShift => {
                 instr = ltac::create_instr(LtacType::I32Rsh);
                 instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 1;
+                instr.arg1_val = 0;
             },
             
             _ => {},
@@ -299,7 +295,7 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
     instr.arg1_type = LtacArg::Mem;
     instr.arg1_val = var.pos;
     instr.arg2_type = LtacArg::Reg;
-    instr.arg2_val = 1;
+    instr.arg2_val = 0;
     
     if line.sub_args.len() > 0 {
         let first_arg = line.sub_args.last().unwrap();

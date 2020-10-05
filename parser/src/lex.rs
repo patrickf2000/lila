@@ -244,16 +244,7 @@ impl Lex {
             ':' => return Token::Colon,
             ',' => return Token::Comma,
             '+' => return Token::OpAdd,
-            
-            '*' => {
-                if c2 == '*' {
-                    self.index += 1;
-                    return Token::OpExponent;
-                }
-                
-                return Token::OpMul;
-            },
-            
+            '*' => return Token::OpMul,
             '/' => return Token::OpDiv,
             '%' => return Token::OpMod,
             

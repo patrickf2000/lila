@@ -71,11 +71,6 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 args.push(arg);
             },
             
-            Token::OpExponent => {
-                let arg = ast::create_arg(AstArgType::OpExponent);
-                args.push(arg);
-            },
-            
             Token::OpEq => {
                 let arg = ast::create_arg(AstArgType::OpEq);
                 args.push(arg);
