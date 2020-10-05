@@ -172,26 +172,19 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     
     // The instruction
-    if code.instr_type == LtacType::Mov {
-        line = "  mov".to_string();
-    } else if code.instr_type == LtacType::I32Add {
-        line = "  add".to_string();
-    } else if code.instr_type == LtacType::I32Sub {
-        line = "  sub".to_string();
-    } else if code.instr_type == LtacType::I32Mul {
-        line = "  imul".to_string();
-    } else if code.instr_type == LtacType::I32And {
-        line = "  and".to_string();
-    } else if code.instr_type == LtacType::I32Or {
-        line = "  or".to_string();
-    } else if code.instr_type == LtacType::I32Xor {
-        line = "  xor".to_string();
-    } else if code.instr_type == LtacType::I32Lsh {
-        line = "  shl".to_string();
-    } else if code.instr_type == LtacType::I32Rsh {
-        line = "  shr".to_string();
-    } else if code.instr_type == LtacType::I32Cmp {
-        line = "  cmp".to_string();
+    match &code.instr_type {
+        LtacType::Mov => line = "  mov".to_string(),
+        LtacType::I32Add => line = "  add".to_string(),
+        LtacType::I32Sub => line = "  sub".to_string(),
+        LtacType::I32Mul => line = "  imul".to_string(),
+        LtacType::I32And => line = "  and".to_string(),
+        LtacType::I32Or => line = "  or".to_string(),
+        LtacType::I32Xor => line = "  xor".to_string(),
+        LtacType::I32Lsh => line = "  shl".to_string(),
+        LtacType::I32Rsh => line = "  shr".to_string(),
+        LtacType::I32Cmp => line = "  cmp".to_string(),
+        
+        _ => {},
     }
     
     line.push_str(" ");
@@ -200,7 +193,6 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg1_type {
         LtacArg::Empty => {},
         
-        // TODO: We need register indexing
         LtacArg::Reg => {
             let reg = amd64_op_reg32(code.arg1_val);
             line.push_str(&reg);
