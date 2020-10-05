@@ -1,26 +1,26 @@
 
 use crate::ltac_builder::*;
 use crate::ltac;
-use crate::ltac::{LtacType, LtacArg, LtacInstr};
+use crate::ltac::{LtacType, LtacArg};
 use crate::ast::{AstStmt, AstArgType};
 
 use crate::ltac_var::*;
 
 // Assigns a value to an array
-pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) {
+pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     let var : Var;
     match builder.vars.get(&line.name) {
         Some(v) => var = v.clone(),
-        None => return,
+        None => return false,
     }
     
+    let mut code = true;
+    
     if var.data_type == DataType::IntDynArray {
-        if line.args.len() == 1 {
-            build_i32array_single_assign(builder, &line, &var);
-        } else {
-            build_i32var_math(builder, &line, &var);
-        }
+        code = build_i32var_math(builder, &line, &var);
     }
+    
+    code
 }
 
 // An internal function to free any dynamic arrays in the current context
@@ -42,6 +42,7 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
 // Initializes a 32-bit integer array in the heap
 pub fn build_i32dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
     let sub_args = &line.sub_args;
+    let mut code = true;
     
     // Create the array
     if sub_args.len() == 1 && sub_args.last().unwrap().arg_type == AstArgType::IntL {
@@ -66,74 +67,12 @@ pub fn build_i32dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Va
         
     // Vector math
     } else if sub_args.len() == 0 && line.args.len() > 1 {
-        if !build_i32array_vector_math(builder, line, var) {
-            return false;
-        }
+        code = build_i32array_vector_math(builder, line, var);
     } else {
         //TODO
     }
     
-    true
-}
-
-// Builds a single int32 array assignment
-pub fn build_i32array_single_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) {
-    let arg = &line.args[0];
-    let mut instr : LtacInstr;
-    
-    if line.sub_args.len() == 1 {
-        let sub_arg = line.sub_args.last().unwrap();
-        
-        if sub_arg.arg_type == AstArgType::IntL {
-            instr = ltac::create_instr(LtacType::MovOffImm);
-            instr.arg1_type = LtacArg::Mem;
-            instr.arg1_val = var.pos;
-            instr.arg1_offset = sub_arg.i32_val * 4;
-        } else if sub_arg.arg_type == AstArgType::Id {
-            instr = ltac::create_instr(LtacType::MovOffMem);
-            instr.arg1_type = LtacArg::Mem;
-            instr.arg1_val = var.pos;
-            instr.arg1_offset_size = 4;
-            
-            match builder.vars.get(&sub_arg.str_val) {
-                Some(v) => instr.arg1_offset = v.pos,
-                None => instr.arg1_offset = 0,
-            }
-        } else {
-            // TODO: This is wrong
-            instr = ltac::create_instr(LtacType::Mov);
-        }
-    } else {
-        // TODO: This is wrong
-        instr = ltac::create_instr(LtacType::Mov);
-    }
-    
-    match &arg.arg_type {
-        AstArgType::IntL => {
-            instr.arg2_type = LtacArg::I32;
-            instr.arg2_val = arg.i32_val;
-        },
-        
-        AstArgType::Id => {
-            let mut instr2 = ltac::create_instr(LtacType::Mov);
-            instr2.arg1_type = LtacArg::Reg;
-            instr2.arg1_val = 0;
-            instr2.arg2_type = LtacArg::Mem;
-            
-            match builder.vars.get(&arg.str_val) {
-                Some(v) => instr2.arg2_val = v.pos,
-                None => instr2.arg2_val = 0,
-            }
-            
-            builder.file.code.push(instr2);
-            
-            instr.arg2_type = LtacArg::Reg;
-            instr.arg2_val = 0;
-        },
-        _ => { /* TODO ERROR */ },
-    }
-    
-    builder.file.code.push(instr);
+    code
 }
 
 // Builds integer vector math

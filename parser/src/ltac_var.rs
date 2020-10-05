@@ -1,7 +1,7 @@
 
 use crate::ltac_builder::*;
 use crate::ast;
-use crate::ast::{AstStmt, AstStmtType, AstModType, AstArg, AstArgType};
+use crate::ast::{AstStmt, AstStmtType, AstModType, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacArg};
 
@@ -67,111 +67,21 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         None => return false,
     }
     
+    let mut code = true;
+    
     if var.data_type == DataType::Int {
-        if line.args.len() == 1 {
-            build_i32var_single_assign(builder, &line.args, &var);
-        } else {
-            build_i32var_math(builder, &line, &var);
-        }
+        code = build_i32var_math(builder, &line, &var);
     } else if var.data_type == DataType::IntDynArray {
-        if !build_i32dyn_array(builder, &line, &var) {
-            return false;
-        }
+        code = build_i32dyn_array(builder, &line, &var);
     }
     
-    true
-}
-
-// Builds a single int32 variable assignment
-pub fn build_i32var_single_assign(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var) {
-    let arg = &args[0];
-    
-    let mut instr = ltac::create_instr(LtacType::Mov);
-    instr.arg1_type = LtacArg::Mem;
-    instr.arg1_val = var.pos;
-    
-    match &arg.arg_type {
-        AstArgType::IntL => {
-            instr.arg2_type = LtacArg::I32;
-            instr.arg2_val = arg.i32_val;
-        },
-        
-        AstArgType::Id => {
-            let mut size = 1;
-        
-            match builder.vars.get(&arg.str_val) {
-                Some(v) => {
-                    instr.arg2_val = v.pos;
-                    
-                    if v.data_type == DataType::IntDynArray {
-                        size = 4;
-                    }
-                },
-                
-                None => {
-                    match builder.clone().functions.get(&arg.str_val) {
-                        Some(t) => {
-                            // Create a statement to build the rest of the function call
-                            let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
-                            stmt.name = arg.str_val.clone();
-                            stmt.args = arg.sub_args.clone();
-                            build_func_call(builder, &stmt);
-                            
-                            if *t == DataType::Int {
-                                instr.arg2_type = LtacArg::RetRegI32;
-                            }
-                            
-                            builder.file.code.push(instr);
-                            return;
-                        },
-                        
-                        None => println!("Invalid function or variable name: {}", &arg.str_val),
-                    }
-                },
-            }
-            
-            instr.arg2_type = LtacArg::Mem;
-            
-            // TODO: Add the rest of the variations
-            if arg.sub_args.len() > 0 {
-                let first_arg = arg.sub_args.last().unwrap();
-                
-                if arg.sub_args.len() == 1 {
-                    if first_arg.arg_type == AstArgType::IntL {
-                        instr.instr_type = LtacType::MovOffImm;
-                        instr.arg2_offset = first_arg.i32_val * size;
-                    } else if first_arg.arg_type == AstArgType::Id {
-                        let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
-                        instr2.arg1_type = LtacArg::Reg;
-                        instr2.arg1_val = 0;
-                        
-                        instr2.arg2_type = LtacArg::Mem;
-                        instr2.arg2_val = instr.arg2_val;
-                        instr2.arg2_offset_size = size;
-                        
-                        match builder.vars.get(&first_arg.str_val) {
-                            Some(v) => instr2.arg2_offset = v.pos,
-                            None => instr2.arg2_offset = 0,
-                        };
-                        
-                        builder.file.code.push(instr2);
-                        
-                        instr.arg2_type = LtacArg::Reg;
-                        instr.arg2_val = 0;
-                    }
-                }
-            }
-        },
-            
-        _ => { /* TODO ERROR */ },
-    }
-    
-    builder.file.code.push(instr);
+    code
 }
 
 // Builds an int32 math assignment
-pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) {
+pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
     let args = &line.args;
+    let first_type = args.first().unwrap().arg_type.clone();
 
     let mut instr = ltac::create_instr(LtacType::Mov);
     instr.arg1_type = LtacArg::Reg;
@@ -192,14 +102,38 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
                     Some(v) => {
                         instr.arg2_type = LtacArg::Mem;
                         instr.arg2_val = v.pos;
-                
-                        // TODO: Add the rest of the variations
+                        
+                        let mut size = 1;
+                        if v.data_type == DataType::IntDynArray {
+                            size = 4;
+                        }
+                        
                         if arg.sub_args.len() > 0 {
                             let first_arg = arg.sub_args.last().unwrap();
                             
-                            if arg.sub_args.len() == 1 && arg.arg_type == AstArgType::IntL {
-                                instr.instr_type = LtacType::MovOffImm;
-                                instr.arg2_offset = first_arg.i32_val;
+                            if arg.sub_args.len() == 1 {
+                                if first_arg.arg_type == AstArgType::IntL {
+                                    instr.instr_type = LtacType::MovOffImm;
+                                    instr.arg2_offset = first_arg.i32_val * size;
+                                } else if first_arg.arg_type == AstArgType::Id {
+                                    let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
+                                    instr2.arg1_type = LtacArg::Reg;
+                                    instr2.arg1_val = 0;
+                                    
+                                    instr2.arg2_type = LtacArg::Mem;
+                                    instr2.arg2_val = instr.arg2_val;
+                                    instr2.arg2_offset_size = size;
+                                    
+                                    match builder.vars.get(&first_arg.str_val) {
+                                        Some(v) => instr2.arg2_offset = v.pos,
+                                        None => instr2.arg2_offset = 0,
+                                    };
+                                    
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::Reg;
+                                    instr.arg2_val = 0;
+                                }
                             }
                         }
                     },
@@ -218,7 +152,13 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
                                 }
                             },
                             
-                            None => println!("Invalid function or variable name: {}", &arg.str_val),
+                            None => {
+                                let mut msg = "Invalid function or variable name: ".to_string();
+                                msg.push_str(&arg.str_val);
+                            
+                                builder.syntax.ltac_error(line, msg);
+                                return false;
+                            },
                         }
                     }
                 }
@@ -291,11 +231,23 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
     }
     
     //Store the result back
-    instr = ltac::create_instr(LtacType::Mov);
-    instr.arg1_type = LtacArg::Mem;
-    instr.arg1_val = var.pos;
-    instr.arg2_type = LtacArg::Reg;
-    instr.arg2_val = 0;
+    if line.args.len() == 1 && first_type != AstArgType::Id {
+        let top = builder.file.code.pop().unwrap();
+        
+        instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = top.arg2_type;
+        instr.arg2_val = top.arg2_val;
+        instr.arg2_offset = top.arg2_offset;
+        instr.arg2_offset_size = top.arg2_offset_size;
+    } else {
+        instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = LtacArg::Reg;
+        instr.arg2_val = 0;
+    }
     
     if line.sub_args.len() > 0 {
         let first_arg = line.sub_args.last().unwrap();
@@ -317,5 +269,7 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
     }
     
     builder.file.code.push(instr);
+    
+    true
 }
     

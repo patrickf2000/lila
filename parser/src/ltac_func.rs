@@ -7,7 +7,7 @@ use crate::ast::{AstStmt, AstArgType};
 use crate::ltac_array::*;
 
 // Builds an LTAC function call
-pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) {
+pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     let mut arg_type = LtacType::PushArg;
     let mut call_type = LtacType::Call;
     
@@ -54,7 +54,13 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) {
                         }
                     },
                     
-                    None => push.arg1_val = 0,
+                    None => {
+                        let mut msg = "Invalid variable name: ".to_string();
+                        msg.push_str(&arg.str_val);
+                        
+                        builder.syntax.ltac_error(line, msg);
+                        return false;
+                    },
                 }
                 
                 builder.file.code.push(push);
@@ -70,6 +76,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) {
     let mut fc = ltac::create_instr(call_type);
     fc.name = line.name.clone();
     builder.file.code.push(fc);
+    
+    true
 }
 
 // Builds a function return
