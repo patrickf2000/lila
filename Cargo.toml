@@ -9,11 +9,13 @@ edition = "2018"
 [workspace]
 members = [
     "parser",
+    "transform",
     "compiler/x86",
     "compiler/aarch64"
 ]
 
 [dependencies]
 parser = { path = "parser" }
+transform = { path = "transform" }
 x86 = { path = "compiler/x86" }
 aarch64 = { path = "compiler/aarch64" }

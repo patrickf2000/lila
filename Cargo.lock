@@ -17,7 +17,15 @@ version = "0.1.0"
 dependencies = [
  "aarch64",
  "parser",
+ "transform",
  "x86",
+]
+
+[[package]]
+name = "transform"
+version = "0.1.0"
+dependencies = [
+ "parser",
 ]
 
 [[package]]

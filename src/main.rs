@@ -3,6 +3,7 @@ use std::env;
 use std::process;
 
 use parser;
+use transform;
 
 // TODO: Is there a better way to do this?
 fn main() {
@@ -16,6 +17,7 @@ fn run() -> i32 {
     
     let mut print_ast = false;
     let mut print_ltac = false;
+    let mut transform = true;
     let mut use_c = false;
     let mut amd64 = true;
     let mut input = String::new();
@@ -29,6 +31,7 @@ fn run() -> i32 {
         match arg.as_ref() {
             "--ast" => print_ast = true,
             "--ltac" => print_ltac = true,
+            "--no-transform" => transform = false,
             "--use-c" => use_c = true,
             "--amd64" => amd64 = true,
             "--arm64" => amd64 = false,
@@ -44,10 +47,17 @@ fn run() -> i32 {
         
         ast.print();
     } else {
-        let ltac = match parser::parse(input) {
+        let mut ltac = match parser::parse(input) {
             Ok(ltac) => ltac,
             Err(_e) => return 1,
         };
+        
+        if transform {
+            ltac = match transform::run(&ltac, use_c) {
+                Ok(ltac) => ltac,
+                Err(_e) => return 1,
+            }
+        }
         
         if print_ltac {
             ltac.print();
