@@ -1,7 +1,7 @@
 
 #OUTPUT
-#Syntax Error: You can only assign a string to a string.
-# -> [15] str s2 = i
+#Syntax Error: Invalid string assignment.
+# -> [13] str s1 = 5
 #
 #END
 
@@ -10,8 +10,8 @@
 extern func puts(s:str)
 
 func main -> int
-    str s1 = "Hello!"
-    str s2 = s2
+    str s1 = 5
+    str s2 = s1
     
     puts(s1)
     puts(s2)
