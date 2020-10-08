@@ -48,7 +48,8 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) 
     if is_param {
         let mut ld = ltac::create_instr(LtacType::LdArgI32);
         
-        if ast_data_type.mod_type == AstModType::IntDynArray {
+        if ast_data_type.mod_type == AstModType::IntDynArray
+            || ast_data_type.mod_type == AstModType::Str {
             ld = ltac::create_instr(LtacType::LdArgPtr);
         }
         

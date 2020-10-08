@@ -144,7 +144,11 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
                 arg.modifiers.push(val_type);
             },
             
-            Token::TStr => {},
+            Token::TStr => {
+                let val_type = AstMod { mod_type : AstModType::Str, };
+                arg.modifiers.push(val_type);
+            },
+            
             _ => {
                 syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
                 return false;

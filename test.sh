@@ -40,6 +40,8 @@ function run_test() {
         	fi
         	
         	rm ./$name
+        	rm /tmp/$name.o
+        	rm /tmp/$name.asm
     	fi
     done
 }
