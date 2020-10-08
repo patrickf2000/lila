@@ -137,7 +137,7 @@ pub fn build_exit(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     instr.arg1_val = 0;
     
     if line.args.len() == 1 {
-    
+        //TODO
     } else if line.args.len() > 1 {
         builder.syntax.ltac_error(line, "You can only have one argument in the \"exit\" statement.".to_string());
         return false;

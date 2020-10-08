@@ -134,7 +134,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgI32 => amd64_build_ldarg(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
-            LtacType::Exit => {},
             LtacType::Mov => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
@@ -143,8 +142,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
-            LtacType::Malloc => amd64_build_malloc(writer),
-            LtacType::Free => amd64_build_free(writer),
             LtacType::I32Cmp => amd64_build_instr(writer, &code),
             LtacType::StrCmp => amd64_build_strcmp(writer, &code),
             LtacType::Br => amd64_build_jump(writer, &code),
@@ -165,6 +162,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I32Lsh => amd64_build_instr(writer, &code),
             LtacType::I32Rsh => amd64_build_instr(writer, &code),
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
+            
+            // We shouldn't generate any assembly for these
+            LtacType::Exit => {},
+            LtacType::Malloc => {},
+            LtacType::Free => {},
         }
     }
 }

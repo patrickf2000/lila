@@ -40,6 +40,7 @@ fn check_builtins(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile
                     let mut instr = ltac::create_instr(LtacType::PushArg);
                     instr.arg1_type = line.arg1_type.clone();
                     instr.arg1_val = line.arg1_val;
+                    instr.arg2_val = 1;
                     file2.code.push(instr);
                     
                     instr = ltac::create_instr(LtacType::Call);

@@ -76,17 +76,3 @@ pub fn amd64_build_syscall(writer : &mut BufWriter<File>) {
         .expect("[AMD64_build_syscall] Write failed.");
 }
 
-// Builds a malloc call
-// TODO: C-library use detection
-pub fn amd64_build_malloc(writer : &mut BufWriter<File>) {
-    writer.write(b"  call malloc\n\n")
-        .expect("[AMD64_build_malloc] Write failed.");
-}
-
-// Builds a free call
-// TODO: C-library use detection
-pub fn amd64_build_free(writer : &mut BufWriter<File>) {
-    writer.write(b"  call free\n\n")
-        .expect("[AMD64_build_free] Write failed.");
-}
-
