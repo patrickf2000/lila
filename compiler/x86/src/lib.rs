@@ -205,6 +205,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::I32 {
                 line.push_str("DWORD PTR ");
+            } else if code.arg2_type == LtacArg::Ptr {
+                line.push_str("QWORD PTR ");
             }
             
             line.push_str("[rbp-");
@@ -238,7 +240,10 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&code.arg2_val.to_string());
         },
         
-        LtacArg::Ptr => {},
+        LtacArg::Ptr => {
+            line.push_str("OFFSET FLAT:");
+            line.push_str(&code.arg2_sval);
+        },
     }
     
     // Write to the file

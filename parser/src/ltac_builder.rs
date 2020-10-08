@@ -16,6 +16,7 @@ pub enum DataType {
     Void,
     Int,
     IntDynArray,
+    Str,
 }
 
 #[derive(Clone)]
@@ -103,6 +104,7 @@ impl LtacBuilder {
                 match &func_mod.mod_type {
                     AstModType::Int => func_type = DataType::Int,
                     AstModType::IntDynArray => func_type = DataType::IntDynArray,
+                    AstModType::Str => func_type = DataType::Str,
                 }
             }
         

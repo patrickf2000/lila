@@ -24,6 +24,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) 
             data_type = DataType::IntDynArray;
             builder.stack_pos += 8
         },
+        
+        AstModType::Str => {
+            data_type = DataType::Str;
+            builder.stack_pos += 8;
+        },
     }
     
     let mut is_param = false;
@@ -73,6 +78,8 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         code = build_i32var_math(builder, &line, &var);
     } else if var.data_type == DataType::IntDynArray {
         code = build_i32dyn_array(builder, &line, &var);
+    } else if var.data_type == DataType::Str {
+        code = build_str_assign(builder, &line, &var);
     }
     
     code
@@ -272,4 +279,39 @@ pub fn build_i32var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var
     
     true
 }
+
+// Builds a string variable assignment
+pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
+    let mut instr = ltac::create_instr(LtacType::Mov);
+    
+    if line.args.len() == 1 {
+        let arg = line.args.first().unwrap();
+        
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        
+        match &arg.arg_type {
+            AstArgType::StringL => {
+                let name = builder.build_string(arg.str_val.clone());
+                
+                instr.arg2_type = LtacArg::Ptr;
+                instr.arg2_sval = name;
+            },
+            
+            AstArgType::Id => {},
+            
+            _ => {
+                builder.syntax.ltac_error(line, "Invalid string assignment.".to_string());
+                return false;
+            },
+        }
+    } else {
+        //TODO
+    }
+    
+    builder.file.code.push(instr);
+    
+    true
+}
+
     

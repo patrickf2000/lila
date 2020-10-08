@@ -49,6 +49,7 @@ pub enum AstArgType {
 pub enum AstModType {
     Int,
     IntDynArray,
+    Str,
 }
 
 // Represents the top of an AST tree
@@ -233,6 +234,7 @@ impl AstMod {
         match &self.mod_type {
             AstModType::Int => print!("Int"),
             AstModType::IntDynArray => print!("IntDynArr"),
+            AstModType::Str => print!("Str"),
         }
         
         if is_func {

@@ -49,7 +49,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                     Some(v) => {
                         push.arg1_val = v.pos;
                         
-                        if v.data_type == DataType::IntDynArray {
+                        if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
                             push.arg1_type = LtacArg::Ptr;
                         }
                     },

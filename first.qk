@@ -5,16 +5,12 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+extern func puts(s:str)
 
 func main -> int
-    int[10] numbers = array
+    str s1 = "Hello!"
     
-    numbers[3] = 22
-    
-    int x = numbers[3]
-    
-    printf("X: %d\n", x)
+    puts(s1)
     
     return 0
 end

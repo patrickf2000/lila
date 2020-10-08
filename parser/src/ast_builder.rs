@@ -68,8 +68,8 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::Func => code = build_func(&mut scanner, tree, syntax),
         Token::Return => code = build_return(&mut scanner, tree, syntax),
         Token::End => build_end(&mut scanner, tree),
-        Token::Int => code = build_i32var_dec(&mut scanner, tree, syntax),
-        Token::TStr => println!("TStr: {:?}", token),
+        Token::Int => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int),
+        Token::TStr => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
         Token::Id(ref val) => code = build_id(&mut scanner, tree, val.to_string(), syntax),
         Token::If => code = build_cond(&mut scanner, tree, Token::If, syntax),
         Token::Elif => code = build_cond(&mut scanner, tree, Token::Elif, syntax),
@@ -94,12 +94,12 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
 }
 
 // Builds an integer variable declaration
-fn build_i32var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, dtype : AstModType) -> bool {
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec, scanner);
     let mut is_array = false;
         
     let mut data_type = AstMod {
-        mod_type : AstModType::Int,
+        mod_type : dtype,
     };
     
     // Gather information
