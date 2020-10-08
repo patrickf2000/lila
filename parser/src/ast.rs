@@ -15,6 +15,7 @@ pub enum AstStmtType {
     Continue,
     FuncCall,
     Return,
+    Exit,
     End,
 }
 
@@ -156,6 +157,7 @@ impl AstStmt {
             AstStmtType::Continue => println!("CONTINUE"),
             AstStmtType::FuncCall => println!("FUNC CALL {}", self.name),
             AstStmtType::Return => println!("RETURN"),
+            AstStmtType::Exit => println!("EXIT"),
             AstStmtType::End => println!("END"),
         }
         

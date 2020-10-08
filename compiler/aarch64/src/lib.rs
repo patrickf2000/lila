@@ -133,6 +133,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgI32 => aarch64_build_ldarg(writer, &code, stack_size),
             LtacType::LdArgPtr => {},
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
+            LtacType::Exit => {},
             LtacType::Mov => aarch64_build_mov(writer, &code, stack_size),
             LtacType::MovOffImm => {},
             LtacType::MovOffMem => {},

@@ -9,7 +9,7 @@ func free -> int
     return 0
 end
 
-func main
+func _start
     int[10] numbers = array
     
     numbers[3] = 22
@@ -20,10 +20,7 @@ func main
         syscall(1, 1, "Correct!\n", 9)
     end
     
+    exit
 end
 
-func _start
-    main()
-    syscall(60, 0)
-end
 

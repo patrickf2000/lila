@@ -10,7 +10,7 @@ use parser::ltac::{LtacFile, LtacType, LtacArg};
 
 // The main transformation function
 pub fn run(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
-    let file2 = match check_malloc(file, arch, use_c) {
+    let file2 = match check_builtins(file, arch, use_c) {
         Ok(ltac) => ltac,
         Err(_e) => return Err(()),
     };
@@ -18,8 +18,10 @@ pub fn run(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
     Ok(file2)
 }
 
-// Searches for the malloc and free functions and replaces it with the proper info
-fn check_malloc(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
+// Scans the code for malloc, free, and exit instructions
+// If we are using the C libraries, these are simply transforms to a function call
+// Otherwise, we must transform them to a system call
+fn check_builtins(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
     let mut file2 = LtacFile {
         name : file.name.clone(),
         data : file.data.clone(),
@@ -33,6 +35,42 @@ fn check_malloc(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, 
     
     for line in code.iter() {
         match &line.instr_type {
+            LtacType::Exit => {
+                if use_c {
+                    let mut instr = ltac::create_instr(LtacType::PushArg);
+                    instr.arg1_type = line.arg1_type.clone();
+                    instr.arg1_val = line.arg1_val;
+                    file2.code.push(instr);
+                    
+                    instr = ltac::create_instr(LtacType::Call);
+                    instr.name = "exit".to_string();
+                    file2.code.push(instr);
+                } else {
+                    // System call number (for exit)
+                    let mut instr = ltac::create_instr(LtacType::KPushArg);
+                    instr.arg1_type = LtacArg::I32;
+                    instr.arg2_val = 1;
+                    
+                    match arch {
+                        1 => instr.arg1_val = 60,       // Linux x86-64
+                        2 => instr.arg1_val = 93,       // Linux AArch64
+                        _ => {},
+                    };
+                    
+                    file2.code.push(instr.clone());
+                    
+                    // Exit code
+                    instr.arg1_type = line.arg1_type.clone();
+                    instr.arg1_val = line.arg1_val;
+                    instr.arg2_val = 2;
+                    file2.code.push(instr.clone());
+                    
+                    // The system call
+                    instr = ltac::create_instr(LtacType::Syscall);
+                    file2.code.push(instr.clone());
+                }
+            },
+        
             LtacType::Malloc => {
                 if use_c {
                     let mut instr = ltac::create_instr(LtacType::Call);

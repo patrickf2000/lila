@@ -191,6 +191,20 @@ pub fn build_return(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
     true
 }
 
+// Builds the exit statement
+pub fn build_exit(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+    let mut exit = ast::create_stmt(AstStmtType::Exit, scanner);
+    
+    // Build arguments
+    if !build_args(scanner, &mut exit, Token::Eof, syntax) {
+        return false;
+    }
+    
+    ast::add_stmt(tree, exit);
+    
+    true
+}
+
 // Builds the end statement
 pub fn build_end(scanner: &mut Lex, tree : &mut AstTree) {
     let stmt = ast::create_stmt(AstStmtType::End, scanner);

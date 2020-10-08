@@ -7,6 +7,7 @@ pub enum Token {
     Extern,
     Func,
     Return,
+    Exit,
     End,
     
     If,
@@ -272,6 +273,7 @@ impl Lex {
             "extern" => token = Token::Extern,
             "func" => token = Token::Func,
             "return" => token = Token::Return,
+            "exit" => token = Token::Exit,
             "end" => token = Token::End,
             "int" => token = Token::Int,
             "str" => token = Token::TStr,

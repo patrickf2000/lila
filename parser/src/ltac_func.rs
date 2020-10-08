@@ -128,12 +128,32 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     true
 }
 
+// Builds the exit keyword
+pub fn build_exit(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
+    free_arrays(builder);
+    
+    let mut instr = ltac::create_instr(LtacType::Exit);
+    instr.arg1_type = LtacArg::I32;
+    instr.arg1_val = 0;
+    
+    if line.args.len() == 1 {
+    
+    } else if line.args.len() > 1 {
+        builder.syntax.ltac_error(line, "You can only have one argument in the \"exit\" statement.".to_string());
+        return false;
+    }
+    
+    builder.file.code.push(instr);
+
+    true
+}
+
 // Builds the end of a block
 pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if builder.block_layer == 0 {
         let last = builder.file.code.last().unwrap();
         
-        if last.instr_type != LtacType::Ret {
+        if last.instr_type != LtacType::Ret && last.instr_type != LtacType::Exit {
             free_arrays(builder);
             
             // See if there was supposed to be a return instruction

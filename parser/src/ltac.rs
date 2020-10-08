@@ -25,8 +25,10 @@ pub enum LtacType {
     KPushArg,
     Call,
     Syscall,
+    
     Malloc,
     Free,
+    Exit,
     
     I32Cmp,
     StrCmp,
@@ -229,6 +231,8 @@ impl LtacInstr {
                 println!("  free");
                 println!("");
             },
+            
+            LtacType::Exit => print!("  exit "),
             
             LtacType::I32Cmp => print!("  i32.cmp "),
             LtacType::StrCmp => {

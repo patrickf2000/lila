@@ -180,6 +180,7 @@ impl LtacBuilder {
                 AstStmtType::Continue => build_continue(self),
                 AstStmtType::FuncCall => code = build_func_call(self, &line),
                 AstStmtType::Return => code = build_return(self, &line),
+                AstStmtType::Exit => code = build_exit(self, &line),
                 AstStmtType::End => code = build_end(self, &line),
             }
             
