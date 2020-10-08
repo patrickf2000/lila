@@ -156,6 +156,7 @@ impl LtacBuilder {
                 
                 self.file.code.insert(pos, fc);
                 self.stack_pos = 0;
+                self.vars.clear();
             }
         }
         

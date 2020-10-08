@@ -53,7 +53,12 @@ fn run() -> i32 {
         };
         
         if transform {
-            ltac = match transform::run(&ltac, use_c) {
+            let mut arch = 1;
+            if !amd64 {
+                arch = 2;
+            }
+            
+            ltac = match transform::run(&ltac, arch, use_c) {
                 Ok(ltac) => ltac,
                 Err(_e) => return 1,
             }

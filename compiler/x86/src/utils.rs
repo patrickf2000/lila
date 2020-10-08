@@ -7,6 +7,9 @@ pub fn amd64_karg_reg32(pos : i32) -> String {
         2 => return "edi".to_string(),
         3 => return "esi".to_string(),
         4 => return "edx".to_string(),
+        5 => return "r10d".to_string(),
+        6 => return "r8d".to_string(),
+        7 => return "r9d".to_string(),
         _ => return String::new(),
     };
 }
@@ -17,6 +20,9 @@ pub fn amd64_karg_reg64(pos : i32) -> String {
         2 => return "rdi".to_string(),
         3 => return "rsi".to_string(),
         4 => return "rdx".to_string(),
+        5 => return "r10".to_string(),
+        6 => return "r8".to_string(),
+        7 => return "r9".to_string(),
         _ => return String::new(),
     };
 }
