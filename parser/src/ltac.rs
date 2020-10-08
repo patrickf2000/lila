@@ -29,6 +29,8 @@ pub enum LtacType {
     Free,
     
     I32Cmp,
+    StrCmp,
+    
     Br,
     Be,
     Bne,
@@ -229,6 +231,10 @@ impl LtacInstr {
             },
             
             LtacType::I32Cmp => print!("  i32.cmp "),
+            LtacType::StrCmp => {
+                println!("  str.cmp");
+                return;
+            },
             
             LtacType::Br => println!("  br {}\n", self.name),
             LtacType::Be => println!("  be {}\n", self.name),

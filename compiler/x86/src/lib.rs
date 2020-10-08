@@ -145,6 +145,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Malloc => amd64_build_malloc(writer),
             LtacType::Free => amd64_build_free(writer),
             LtacType::I32Cmp => amd64_build_instr(writer, &code),
+            LtacType::StrCmp => amd64_build_strcmp(writer, &code),
             LtacType::Br => amd64_build_jump(writer, &code),
             LtacType::Be => amd64_build_jump(writer, &code),
             LtacType::Bne => amd64_build_jump(writer, &code),
@@ -515,5 +516,15 @@ fn amd64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_jump] Write failed.");
+}
+
+// Builds a string comparison
+fn amd64_build_strcmp(writer : &mut BufWriter<File>, _code : &LtacInstr) {
+    let mut line = String::new();
+    line.push_str("  call strcmp\n");
+    line.push_str("  cmp eax, 0\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_strcmp] Write failed.");
 }
 

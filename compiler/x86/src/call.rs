@@ -21,7 +21,9 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     match &code.arg1_type {
         LtacArg::Empty => {},
         LtacArg::Reg => {},
+        
         LtacArg::Reg64 => {},
+        
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
         

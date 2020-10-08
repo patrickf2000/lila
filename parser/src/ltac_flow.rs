@@ -65,6 +65,8 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
     let mut cmp = ltac::create_instr(LtacType::I32Cmp);
     
+    // Although we assume its integer comparison by default, the first operand
+    // determines the comparison type
     match &arg1.arg_type {
         AstArgType::IntL => {
             cmp.arg1_type = LtacArg::I32;
@@ -80,7 +82,19 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg1.str_val) {
-                Some(v) => mov.arg2_val = v.pos,
+                Some(v) => {
+                    if v.data_type == DataType::Str {
+                        cmp = ltac::create_instr(LtacType::StrCmp);
+                        
+                        mov = ltac::create_instr(LtacType::PushArg);
+                        mov.arg1_type = LtacArg::Ptr;
+                        mov.arg1_val = v.pos;
+                        mov.arg2_val = 1;
+                    } else {
+                        mov.arg2_val = v.pos;
+                    }
+                },
+                
                 None => mov.arg2_val = 0,
             }
             
@@ -104,11 +118,21 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg;
-            mov.arg1_val = 0;
+            mov.arg1_val = 1;
             mov.arg2_type = LtacArg::Mem;
             
-            match &builder.vars.get(&arg1.str_val) {
-                Some(v) => mov.arg2_val = v.pos,
+            match &builder.vars.get(&arg2.str_val) {
+                Some(v) => {
+                    if v.data_type == DataType::Str {
+                        mov = ltac::create_instr(LtacType::PushArg);
+                        mov.arg1_type = LtacArg::Ptr;
+                        mov.arg1_val = v.pos;
+                        mov.arg2_val = 2;
+                    } else {
+                        mov.arg2_val = v.pos;
+                    }
+                },
+                
                 None => mov.arg2_val = 0,
             }
             
