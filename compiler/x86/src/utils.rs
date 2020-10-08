@@ -60,6 +60,17 @@ pub fn amd64_op_reg32(pos : i32) -> String {
     };
 }
 
+pub fn amd64_op_reg64(pos : i32) -> String {
+    match pos {
+        0 => return "rbx".to_string(),
+        1 => return "rcx".to_string(),
+        2 => return "r10".to_string(),
+        3 => return "r11".to_string(),
+        4 => return "r12".to_string(),
+        _ => return String::new(),
+    };
+}
+
 // Vector registers
 // ymm0 and ymm1 are reserved for internal operations
 pub fn amd64_vector_i32(pos : i32) -> String {

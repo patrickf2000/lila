@@ -57,6 +57,7 @@ pub enum LtacType {
 pub enum LtacArg {
     Empty,
     Reg,
+    Reg64,
     RetRegI32,
     RetRegI64,
     Mem,
@@ -255,6 +256,7 @@ impl LtacInstr {
         match &self.arg1_type {
             LtacArg::Empty => print!(" "),
             LtacArg::Reg => print!("r{}", self.arg1_val),
+            LtacArg::Reg64 => print!("xr{}", self.arg1_val),
             LtacArg::RetRegI32 => print!("i32.ret"),
             LtacArg::RetRegI64 => print!("i64.ret"),
             
@@ -282,6 +284,7 @@ impl LtacInstr {
         match &self.arg2_type {
             LtacArg::Empty => println!(""),
             LtacArg::Reg => println!(", r{}", self.arg2_val),
+            LtacArg::Reg64 => println!(", xr{}", self.arg2_val),
             LtacArg::RetRegI32 => println!(", i32.ret"),
             LtacArg::RetRegI64 => println!(", i64.ret"),
             

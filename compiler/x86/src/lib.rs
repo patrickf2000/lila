@@ -199,6 +199,12 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
+        LtacArg::Reg64 => {
+            let reg = amd64_op_reg64(code.arg1_val);
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
+        
         LtacArg::RetRegI32 => line.push_str("eax, "),
         LtacArg::RetRegI64 => line.push_str("rax, "),
         
@@ -221,9 +227,13 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg2_type {
         LtacArg::Empty => {},
         
-        // TODO: We need register indexing
         LtacArg::Reg => {
             let reg = amd64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg64 => {
+            let reg = amd64_op_reg64(code.arg2_val);
             line.push_str(&reg);
         },
         
@@ -303,6 +313,14 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
+        LtacArg::Reg64 => {
+            let reg = amd64_op_reg64(code.arg1_val);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
+        
         LtacArg::RetRegI32 => line.push_str("  mov eax, "),
         LtacArg::RetRegI64 => line.push_str("  mov rax, "),
         
@@ -371,6 +389,11 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacArg::Reg => {
             let reg = amd64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg64 => {
+            let reg = amd64_op_reg64(code.arg2_val);
             line.push_str(&reg);
         },
         

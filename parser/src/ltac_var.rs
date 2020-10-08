@@ -298,7 +298,31 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                 instr.arg2_sval = name;
             },
             
-            AstArgType::Id => {},
+            AstArgType::Id => {
+                match &builder.vars.get(&arg.str_val) {
+                    Some(v) => {
+                        if v.data_type != DataType::Str {
+                            builder.syntax.ltac_error(line, "You can only assign a string to a string.".to_string());
+                            return false;
+                        }
+                        
+                        instr.arg2_type = LtacArg::Reg64;
+                        instr.arg2_val = 0;
+                        
+                        let mut instr2 = ltac::create_instr(LtacType::Mov);
+                        instr2.arg1_type = LtacArg::Reg64;
+                        instr2.arg1_val = 0;
+                        instr2.arg2_type = LtacArg::Mem;
+                        instr2.arg2_val = v.pos;
+                        builder.file.code.push(instr2);
+                    },
+                    
+                    None => {
+                        builder.syntax.ltac_error(line, "Invalid string variable.".to_string());
+                        return false;
+                    },
+                }
+            },
             
             _ => {
                 builder.syntax.ltac_error(line, "Invalid string assignment.".to_string());
