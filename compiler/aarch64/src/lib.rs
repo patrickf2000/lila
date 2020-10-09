@@ -146,7 +146,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Malloc => {},
             LtacType::Free => {},
             LtacType::I32Cmp => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::StrCmp => {},
+            LtacType::StrCmp => aarch64_build_strcmp(writer, &code),
             LtacType::Br => aarch64_build_branch(writer, &code),
             LtacType::Be => aarch64_build_branch(writer, &code),
             LtacType::Bne => aarch64_build_branch(writer, &code),
@@ -198,7 +198,18 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
                 line.push_str("\n");
             },
             
-            LtacArg::Ptr => {},
+            LtacArg::Ptr => {
+                line.push_str("  adrp x4, ");
+                line.push_str(&code.arg2_sval);
+                line.push_str("\n");
+                
+                line.push_str("  add x4, x4, :lo12:");
+                line.push_str(&code.arg2_sval);
+                line.push_str("\n");
+                
+                reg = "x4".to_string();
+            },
+            
             _ => {},
         }
         
@@ -533,3 +544,15 @@ fn aarch64_build_branch(writer : &mut BufWriter<File>, code : &LtacInstr) {
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_branch] Write failed.");
 }
+
+// Generates the string comparison instructions
+fn aarch64_build_strcmp(writer : &mut BufWriter<File>, _code : &LtacInstr) {
+    let mut line = String::new();
+    
+    line.push_str("  bl strcmp\n");
+    line.push_str("  cmp w0, 0\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_strcmp] Write failed.");
+}
+
