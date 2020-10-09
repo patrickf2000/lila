@@ -37,18 +37,28 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
         },
         
         LtacArg::Ptr => {
-            line.push_str("  adrp ");
-            line.push_str(&reg64);
-            line.push_str(", ");
-            line.push_str(&code.arg1_sval);
-            
-            line.push_str("\n  add ");
-            line.push_str(&reg64);
-            line.push_str(", ");
-            line.push_str(&reg64);
-            line.push_str(", :lo12:");
-            line.push_str(&code.arg1_sval);
-            line.push_str("\n");
+            if code.arg1_sval.len() > 0 {
+                line.push_str("  adrp ");
+                line.push_str(&reg64);
+                line.push_str(", ");
+                line.push_str(&code.arg1_sval);
+                
+                line.push_str("\n  add ");
+                line.push_str(&reg64);
+                line.push_str(", ");
+                line.push_str(&reg64);
+                line.push_str(", :lo12:");
+                line.push_str(&code.arg1_sval);
+                line.push_str("\n");
+            } else {
+                let pos = stack_size - code.arg1_val;
+                
+                line.push_str("  ldr ");
+                line.push_str(&reg64);
+                line.push_str(", [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            }
         },
         
         _ => {},

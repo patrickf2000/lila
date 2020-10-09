@@ -132,12 +132,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
                 stack_size = aarch64_build_func(writer, &code);
             },
             LtacType::LdArgI32 => aarch64_build_ldarg(writer, &code, stack_size),
-            LtacType::LdArgPtr => {},
+            LtacType::LdArgPtr => aarch64_build_ldarg(writer, &code, stack_size),
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
             LtacType::Exit => {},
             LtacType::Mov => aarch64_build_mov(writer, &code, stack_size),
-            LtacType::MovOffImm => {},
-            LtacType::MovOffMem => {},
+            LtacType::MovOffImm => aarch64_build_mov_offset(writer, &code, stack_size),
+            LtacType::MovOffMem => aarch64_build_mov_offset(writer, &code, stack_size),
             LtacType::MovI32Vec => {},
             LtacType::PushArg => aarch64_build_pusharg(writer, &code, false, stack_size),
             LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true, stack_size),
@@ -182,7 +182,14 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
                 reg = aarch64_op_reg32(code.arg2_val);
             },
             
-            LtacArg::RetRegI32 => {},
+            LtacArg::RetRegI32 => {
+                reg = "w0".to_string();
+            },
+            
+            LtacArg::RetRegI64 => {
+                reg = "x0".to_string();
+            },
+            
             LtacArg::Mem => {},
             
             LtacArg::I32 => {
@@ -246,6 +253,13 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
         }
         
         match &code.arg2_type {
+            LtacArg::Reg => {
+                let reg = aarch64_op_reg32(code.arg2_val);
+                
+                line.push_str(&reg);
+                line.push_str("\n");
+            },
+        
             LtacArg::RetRegI32 => {
                 line.push_str("w0\n");
             },
@@ -263,6 +277,125 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_mov] Write failed.");
+}
+
+// A move with offset instruction
+fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+    let mut line = String::new();
+    let mut dest_reg = "w5".to_string();
+    
+    match &code.arg1_type {
+        LtacArg::Reg => {
+            dest_reg = aarch64_op_reg32(code.arg1_val);
+        },
+        
+        LtacArg::Reg64 => {},
+        
+        LtacArg::RetRegI32 => {},
+        LtacArg::RetRegI64 => {},
+        
+        // Load to x6
+        LtacArg::Mem => {
+            let pos = stack_size - code.arg1_val;
+            
+            if code.instr_type == LtacType::MovOffImm {
+                line.push_str("  ldr x6, [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  add x6, x6, ");
+                line.push_str(&code.arg1_offset.to_string());
+                line.push_str("\n");
+            } else if code.instr_type == LtacType::MovOffMem {
+                let index_pos = stack_size - code.arg1_offset;
+            
+                // Load the variable to x7
+                // Then load the array as above
+                line.push_str("  ldrsw x7, [sp, ");
+                line.push_str(&index_pos.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  lsl x7, x7, 2\n");
+                
+                line.push_str("  ldr x6, [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  add x6, x6, x7\n");
+            }
+        },
+        
+        _ => {},
+    }
+    
+    // Whatever happens here should go to x5
+    match &code.arg2_type {
+        LtacArg::Reg => {
+            dest_reg = aarch64_op_reg32(code.arg2_val);
+        },
+        
+        LtacArg::Reg64 => {},
+        
+        LtacArg::RetRegI32 => {},
+        LtacArg::RetRegI64 => {},
+        
+        LtacArg::Mem => {
+            let pos = stack_size - code.arg2_val;
+            
+            if code.instr_type == LtacType::MovOffImm {
+                line.push_str("  ldr x6, [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  ldr ");
+                line.push_str(&dest_reg);
+                line.push_str(", [x6, ");
+                line.push_str(&code.arg2_offset.to_string());
+                line.push_str("]\n");
+            } else if code.instr_type == LtacType::MovOffMem {
+                let index_pos = stack_size - code.arg2_offset;
+            
+                // Load the variable to x7
+                // Then load the array as above
+                line.push_str("  ldrsw x7, [sp, ");
+                line.push_str(&index_pos.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  lsl x7, x7, 2\n");
+                
+                line.push_str("  ldr x6, [sp, ");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+                
+                line.push_str("  add x6, x6, x7\n");
+                
+                // ldr <dest>, [x6]
+                line.push_str("  ldr ");
+                line.push_str(&dest_reg);
+                line.push_str(", [x6]\n");
+            }
+        },
+        
+        LtacArg::I32 => {
+            line.push_str("  mov ");
+            line.push_str(&dest_reg);
+            line.push_str(", ");
+            line.push_str(&code.arg2_val.to_string());
+            line.push_str("\n");
+        },
+        
+        _ => {},
+    }
+    
+    // Store back
+    if code.arg1_type == LtacArg::Mem {
+        line.push_str("  str ");
+        line.push_str(&dest_reg);
+        line.push_str(", [x6]\n");
+    }
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_mov_offset] Write failed.");
 }
 
 // A common function for several instructions

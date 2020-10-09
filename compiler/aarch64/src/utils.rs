@@ -58,6 +58,7 @@ pub fn aarch64_karg_reg64(pos : i32) -> String {
 // Operation registers
 // We can use x9-x15
 // x4 and x5 are for internal uses
+// x6 and x7 are for offset moves
 pub fn aarch64_op_reg32(pos : i32) -> String {
     match pos {
         0 => "w9".to_string(),

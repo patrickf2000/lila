@@ -60,6 +60,9 @@ pub fn aarch64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, sta
     if code.instr_type == LtacType::LdArgI32 {
         let reg = aarch64_arg_reg32(code.arg2_val);
         line.push_str(&reg);
+    } else if code.instr_type == LtacType::LdArgPtr {
+        let reg = aarch64_arg_reg64(code.arg2_val);
+        line.push_str(&reg);
     }
     
     let pos = stack_size - code.arg1_val;
