@@ -52,6 +52,20 @@ pub fn amd64_arg_reg64(pos : i32) -> String {
     };
 }
 
+pub fn amd64_reg_flt(pos : i32) -> String {
+    match pos {
+        1 => return "xmm0".to_string(),
+        2 => return "xmm1".to_string(),
+        3 => return "xmm2".to_string(),
+        4 => return "xmm3".to_string(),
+        5 => return "xmm4".to_string(),
+        6 => return "xmm5".to_string(),
+        7 => return "xmm6".to_string(),
+        8 => return "xmm7".to_string(),
+        _ => return String::new(),
+    };
+}
+
 // Operation registers
 // EAX -> Return register
 // R15, R14 -> Operations register

@@ -25,6 +25,16 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 }
             },
             
+            Token::FloatL(val) => {
+                let arg = ast::create_float(val as f32);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
+            },
+            
             Token::StringL(ref val) => {
                 let arg = ast::create_string(val.to_string());
                 args.push(arg);

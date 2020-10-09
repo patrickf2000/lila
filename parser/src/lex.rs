@@ -18,6 +18,7 @@ pub enum Token {
     Continue,
     
     Int,
+    Float,
     TStr,
     Array,
     
@@ -276,6 +277,7 @@ impl Lex {
             "exit" => token = Token::Exit,
             "end" => token = Token::End,
             "int" => token = Token::Int,
+            "float" => token = Token::Float,
             "str" => token = Token::TStr,
             "if" => token = Token::If,
             "elif" => token = Token::Elif,

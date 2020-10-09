@@ -111,6 +111,13 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
                 line.push_str(&data.val);
                 line.push_str("\"\n");
             },
+            
+            LtacDataType::FloatL => {
+                line.push_str(&data.name);
+                line.push_str(": .long ");
+                line.push_str(&data.val);
+                line.push_str("\n");
+            },
         }
     }
     
@@ -135,6 +142,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
+            LtacType::MovF32 => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
@@ -209,6 +217,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
+        LtacArg::FltReg => {},
+        
         LtacArg::RetRegI32 => line.push_str("eax, "),
         LtacArg::RetRegI64 => line.push_str("rax, "),
         
@@ -225,6 +235,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::I32 => {},
+        LtacArg::F32 => {},
         LtacArg::Ptr => {},
     }
     
@@ -241,6 +252,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
+        LtacArg::FltReg => {},
+        
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
         
@@ -253,6 +266,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::I32 => {
             line.push_str(&code.arg2_val.to_string());
         },
+        
+        LtacArg::F32 => {},
         
         LtacArg::Ptr => {
             line.push_str("OFFSET FLAT:");
@@ -325,6 +340,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
+        LtacArg::FltReg => {},
+        
         LtacArg::RetRegI32 => line.push_str("  mov eax, "),
         LtacArg::RetRegI64 => line.push_str("  mov rax, "),
         
@@ -385,6 +402,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::I32 => {},
+        LtacArg::F32 => {},
         LtacArg::Ptr => {},
     }
     
@@ -400,6 +418,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             let reg = amd64_op_reg64(code.arg2_val);
             line.push_str(&reg);
         },
+        
+        LtacArg::FltReg => {},
         
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
@@ -417,6 +437,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::I32 => {
             line.push_str(&code.arg2_val.to_string());
         },
+        
+        LtacArg::F32 => {},
         
         LtacArg::Ptr => {},
     }

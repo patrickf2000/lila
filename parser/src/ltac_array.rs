@@ -17,7 +17,7 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     let mut code = true;
     
     if var.data_type == DataType::IntDynArray {
-        code = build_i32var_math(builder, &line, &var);
+        code = build_var_math(builder, &line, &var);
     }
     
     code

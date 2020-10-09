@@ -3,6 +3,7 @@
 #[derive(Clone, PartialEq)]
 pub enum LtacDataType {
     StringL,
+    FloatL,
 }
 
 // Represents an instruction type
@@ -14,6 +15,7 @@ pub enum LtacType {
     Ret,
     
     Mov,
+    MovF32,
     MovOffImm,
     MovOffMem,
     MovI32Vec,
@@ -62,10 +64,12 @@ pub enum LtacArg {
     Empty,
     Reg,
     Reg64,
+    FltReg,
     RetRegI32,
     RetRegI64,
     Mem,
     I32,
+    F32,
     Ptr,
 }
 
@@ -157,6 +161,7 @@ impl LtacData {
         
         match &self.data_type {
             LtacDataType::StringL => println!("{} .string \"{}\"", self.name, self.val),
+            LtacDataType::FloatL => println!("{} .float {}", self.name, self.val),
         }
     }
 }
@@ -202,6 +207,7 @@ impl LtacInstr {
             },
             
             LtacType::Mov => print!("  mov "),
+            LtacType::MovF32 => print!("  mov.f32 "),
             LtacType::MovOffImm => print!("  mov.imm "),
             LtacType::MovOffMem => print!("  mov.mem "),
             LtacType::MovI32Vec => print!("  mov.i32.vec "),
@@ -265,8 +271,11 @@ impl LtacInstr {
         
         match &self.arg1_type {
             LtacArg::Empty => print!(" "),
+            
             LtacArg::Reg => print!("r{}", self.arg1_val),
             LtacArg::Reg64 => print!("xr{}", self.arg1_val),
+            LtacArg::FltReg => print!("fr{}", self.arg1_val),
+            
             LtacArg::RetRegI32 => print!("i32.ret"),
             LtacArg::RetRegI64 => print!("i64.ret"),
             
@@ -281,6 +290,7 @@ impl LtacInstr {
             },
             
             LtacArg::I32 => print!("{}", self.arg1_val),
+            LtacArg::F32 => print!("{}", self.arg1_sval),
             
             LtacArg::Ptr => {
                 if self.arg1_sval.len() > 0 {
@@ -293,8 +303,11 @@ impl LtacInstr {
         
         match &self.arg2_type {
             LtacArg::Empty => println!(""),
+            
             LtacArg::Reg => println!(", r{}", self.arg2_val),
             LtacArg::Reg64 => println!(", xr{}", self.arg2_val),
+            LtacArg::FltReg => println!(", fr{}", self.arg2_val),
+            
             LtacArg::RetRegI32 => println!(", i32.ret"),
             LtacArg::RetRegI64 => println!(", i64.ret"),
             
@@ -309,6 +322,7 @@ impl LtacInstr {
             },
             
             LtacArg::I32 => println!(", {}", self.arg2_val),
+            LtacArg::F32 => println!(", {}", self.arg2_sval),
             LtacArg::Ptr => println!(", {}", self.arg2_sval),
         }
     }

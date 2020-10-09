@@ -70,6 +70,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::Exit => code = build_exit(&mut scanner, tree, syntax),
         Token::End => build_end(&mut scanner, tree),
         Token::Int => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int),
+        Token::Float => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Float),
         Token::TStr => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
         Token::Id(ref val) => code = build_id(&mut scanner, tree, val.to_string(), syntax),
         Token::If => code = build_cond(&mut scanner, tree, Token::If, syntax),

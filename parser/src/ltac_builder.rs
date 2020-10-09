@@ -1,5 +1,6 @@
 
 use std::collections::HashMap;
+use std::mem;
 
 use crate::ast::*;
 use crate::ltac;
@@ -16,6 +17,7 @@ pub enum DataType {
     Void,
     Int,
     IntDynArray,
+    Float,
     Str,
 }
 
@@ -30,7 +32,9 @@ pub struct Var {
 pub struct LtacBuilder {
     pub file : LtacFile,
     pub syntax : ErrorManager,
+    
     pub str_pos : i32,
+    pub flt_pos : i32,
     
     // Function-related values
     pub functions : HashMap<String, DataType>,
@@ -62,6 +66,7 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         },
         syntax : syntax.clone(),
         str_pos : 0,
+        flt_pos : 0,
         functions : HashMap::new(),
         current_func : String::new(),
         current_type : DataType::Void,
@@ -104,6 +109,7 @@ impl LtacBuilder {
                 match &func_mod.mod_type {
                     AstModType::Int => func_type = DataType::Int,
                     AstModType::IntDynArray => func_type = DataType::IntDynArray,
+                    AstModType::Float => func_type = DataType::Float,
                     AstModType::Str => func_type = DataType::Str,
                 }
             }
@@ -209,6 +215,30 @@ impl LtacBuilder {
         };
         
         self.file.data.push(string);
+        
+        name
+    }
+    
+    // Builds a float literal and adds it to the data section
+    // https://stackoverflow.com/questions/40030551/how-to-decode-and-encode-a-float-in-rust
+    pub fn build_float(&mut self, val : f32) -> String {
+        // Create the float name
+        let fpos = self.flt_pos.to_string();
+        self.flt_pos = self.flt_pos + 1;
+        
+        let mut name = "FLT".to_string();
+        name.push_str(&fpos);
+        
+        let as_int: u32 = unsafe { mem::transmute(val) };
+        
+        // Create the data
+        let flt = LtacData {
+            data_type : LtacDataType::FloatL,
+            name : name.clone(),
+            val : as_int.to_string(),
+        };
+        
+        self.file.data.push(flt);
         
         name
     }

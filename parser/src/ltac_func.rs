@@ -51,6 +51,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         
                         if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
                             push.arg1_type = LtacArg::Ptr;
+                        } else if v.data_type == DataType::Float {
+                            push.arg2_type = LtacArg::FltReg;
                         }
                     },
                     
