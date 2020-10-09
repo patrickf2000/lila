@@ -55,3 +55,19 @@ pub fn aarch64_karg_reg64(pos : i32) -> String {
     }
 }
 
+// Operation registers
+// We can use x9-x15
+// x4 and x5 are for internal uses
+pub fn aarch64_op_reg32(pos : i32) -> String {
+    match pos {
+        0 => "w9".to_string(),
+        1 => "w10".to_string(),
+        2 => "w11".to_string(),
+        3 => "w12".to_string(),
+        4 => "w13".to_string(),
+        5 => "w14".to_string(),
+        6 => "w15".to_string(),
+        _ => String::new(),
+    }
+}
+

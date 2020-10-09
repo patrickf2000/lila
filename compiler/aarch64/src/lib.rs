@@ -13,6 +13,7 @@ mod utils;
 
 use func::*;
 use call::*;
+use utils::*;
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -174,13 +175,18 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
     
     // Check if we're storing to a variable
     if code.arg1_type == LtacArg::Mem {
+        let mut reg = "w4".to_string();
+    
         match &code.arg2_type {
-            LtacArg::Reg => {},
+            LtacArg::Reg => {
+                reg = aarch64_op_reg32(code.arg2_val);
+            },
+            
             LtacArg::RetRegI32 => {},
             LtacArg::Mem => {},
             
             LtacArg::I32 => {
-                line.push_str("  mov w1, ");
+                line.push_str("  mov w4, ");
                 line.push_str(&code.arg2_val.to_string());
                 line.push_str("\n");
             },
@@ -191,7 +197,9 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
         
         let pos = stack_size - code.arg1_val;
         
-        line.push_str("  str w1, [sp, ");
+        line.push_str("  str ");
+        line.push_str(&reg);
+        line.push_str(", [sp, ");
         line.push_str(&pos.to_string());
         line.push_str("]\n");
         
@@ -201,7 +209,11 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
         
         match &code.arg1_type {
             LtacArg::Reg => {
-                line.push_str("  ldr w1, [sp, ");
+                let reg = aarch64_op_reg32(code.arg1_val);
+            
+                line.push_str("  ldr ");
+                line.push_str(&reg);
+                line.push_str(", [sp, ");
                 line.push_str(&pos.to_string());
                 line.push_str("]\n");
             },
@@ -219,7 +231,11 @@ fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_siz
     } else {
         match &code.arg1_type {
             LtacArg::Reg => {
-                line.push_str("  mov w1, ");
+                let reg = aarch64_op_reg32(code.arg1_val);
+                
+                line.push_str("  mov ");
+                line.push_str(&reg);
+                line.push_str(", ");
             },
             
             LtacArg::RetRegI32 => {
@@ -269,14 +285,26 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
         _ => {},
     }
     
+    // Only needed for mod
+    let mut dest = "w1".to_string();
+    
     match &code.arg1_type {
         LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg1_val);
+            dest = reg.clone();
+        
             if code.instr_type == LtacType::I32Cmp {
-                line.push_str("w1, ");
+                line.push_str(&reg);
+                line.push_str(", ");
             } else if code.instr_type == LtacType::I32Mod {
-                line.push_str("  mov w3, w1\n");
+                line.push_str("  mov w3, ");
+                line.push_str(&reg);
+                line.push_str("\n");
             } else {
-                line.push_str("w1, w1, ");
+                line.push_str(&reg);
+                line.push_str(", ");
+                line.push_str(&reg);
+                line.push_str(", ");
             }
         },
         
@@ -287,7 +315,13 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
     }
     
     match &code.arg2_type {
-        LtacArg::Reg => {},
+        LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg2_val);
+            
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+        
         LtacArg::Reg64 => {},
         
         LtacArg::RetRegI32 => {
@@ -304,7 +338,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
             let pos = stack_size - &code.arg2_val;
             
             let mut mov = String::new();
-            mov.push_str("  ldr w2, [sp, ");
+            mov.push_str("  ldr w5, [sp, ");
             mov.push_str(&pos.to_string());
             mov.push_str("]\n");
             line.insert_str(0, &mov);
@@ -313,12 +347,12 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
                 line.push_str("  mov w4, ");
             }
             
-            line.push_str("w2\n");
+            line.push_str("w5\n");
         },
         
         LtacArg::I32 => {
             let mut mov = String::new();
-            mov.push_str("  mov w2, ");
+            mov.push_str("  mov w5, ");
             mov.push_str(&code.arg2_val.to_string());
             mov.push_str("\n");
             line.insert_str(0, &mov);
@@ -327,20 +361,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
                 line.push_str("  mov w4, ");
             }
             
-            line.push_str("w2\n");
-        
-            /*if code.instr_type == LtacType::I32Mul || code.instr_type == LtacType::I32And {
-                let mut mov = String::new();
-                mov.push_str("  mov w1, ");
-                mov.push_str(&code.arg2_val.to_string());
-                mov.push_str("\n");
-                line.insert_str(0, &mov);
-                
-                line.push_str("w1\n");
-            } else {
-                line.push_str(&code.arg2_val.to_string());
-                line.push_str("\n");
-            }*/
+            line.push_str("w5\n");
         },
         
         _ => {},
@@ -348,7 +369,10 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
     
     if code.instr_type == LtacType::I32Mod {
         line.push_str("  sdiv w2, w3, w4\n");
-        line.push_str("  msub w1, w2, w4, w3\n");
+        
+        line.push_str("  msub ");
+        line.push_str(&dest);
+        line.push_str(", w2, w4, w3\n");
     }
     
     writer.write(&line.into_bytes())
