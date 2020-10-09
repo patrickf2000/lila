@@ -33,6 +33,21 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 arg_no += 1;
             },
             
+            AstArgType::FloatL if call_type == LtacType::Syscall => {
+                builder.syntax.ltac_error(line, "Only integers and strings are valid in system calls.".to_string());
+                return false;
+            },
+            
+            AstArgType::FloatL => {
+                let mut push = ltac::create_instr(LtacType::PushArg);
+                push.arg1_type = LtacArg::F32;
+                push.arg1_sval = builder.build_float(arg.f32_val);
+                push.arg2_val = flt_arg_no;
+                builder.file.code.push(push);
+                
+                flt_arg_no += 1;  
+            },
+            
             AstArgType::StringL => {
                 let name = builder.build_string(arg.str_val.clone());
                 

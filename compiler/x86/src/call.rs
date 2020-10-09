@@ -18,7 +18,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         reg64 = amd64_karg_reg64(code.arg2_val);
     }
     
-    if code.arg2_type == LtacArg::FltReg {
+    if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
         line = "  movss ".to_string();
     }
     
@@ -51,7 +51,12 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&code.arg1_val.to_string());
         },
         
-        LtacArg::F32 => {},
+        LtacArg::F32 => {
+            line.push_str(&reg_flt);
+            line.push_str(", DWORD PTR ");
+            line.push_str(&code.arg1_sval);
+            line.push_str("[rip]");
+        },
         
         LtacArg::Ptr => {
             line.push_str(&reg64);
@@ -70,7 +75,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     line.push_str("\n");
     
     // If we have a 32-bit float variable, we have to convert it to a double
-    if code.arg2_type == LtacArg::FltReg {
+    if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
         line.push_str("  cvtss2sd ");
         line.push_str(&reg_flt);
         line.push_str(", ");
