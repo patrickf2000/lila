@@ -59,29 +59,12 @@ pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
 pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     
-    if code.instr_type == LtacType::LdArgF32 {
-        let reg = amd64_arg_flt(code.arg2_val);
-        
-        line.push_str("  cvtsd2ss ");
-        line.push_str(&reg);
-        line.push_str(", ");
-        line.push_str(&reg);
-        line.push_str("\n");
-        
-        line.push_str("  movss ");
-    } else {
-        line.push_str("  mov ");
-    }
-    
-    line.push_str("[rbp-");
+    line.push_str("  mov [rbp-");
     line.push_str(&code.arg1_val.to_string());
     line.push_str("], ");
     
     if code.instr_type == LtacType::LdArgI32 {
         let reg = amd64_arg_reg32(code.arg2_val);
-        line.push_str(&reg);
-    } else if code.instr_type == LtacType::LdArgF32 {
-        let reg = amd64_arg_flt(code.arg2_val);
         line.push_str(&reg);
     } else if code.instr_type == LtacType::LdArgPtr {
         let reg = amd64_arg_reg64(code.arg2_val);
@@ -92,6 +75,30 @@ pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_ldarg] Write failed.");
+}
+
+// Loads a 32-bit floating point argument to a variable
+// In the LtacInstr:
+//      -> arg1_val = memory location
+//      -> arg2_val = register position
+pub fn amd64_build_ldarg_f32(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    let reg = amd64_arg_flt(code.arg2_val);
+    
+    line.push_str("  cvtsd2ss ");
+    line.push_str(&reg);
+    line.push_str(", ");
+    line.push_str(&reg);
+    line.push_str("\n");
+        
+    line.push_str("  movss [rbp-");
+    line.push_str(&code.arg1_val.to_string());
+    line.push_str("], ");
+    line.push_str(&reg);
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_ldarg_f32] Write failed.");
 }
 
 // Builds a return statement
