@@ -52,7 +52,7 @@ pub fn amd64_arg_reg64(pos : i32) -> String {
     };
 }
 
-pub fn amd64_reg_flt(pos : i32) -> String {
+pub fn amd64_arg_flt(pos : i32) -> String {
     match pos {
         1 => return "xmm0".to_string(),
         2 => return "xmm1".to_string(),

@@ -139,10 +139,12 @@ impl LtacBuilder {
                 
                 let pos = self.file.code.len();        // The position of the code before we add anything
                 let mut arg_pos = 1;                   // Needed for function arguments
+                let mut flt_arg_pos = 1;               // Needed for floating-point function arguments
                 
                 for arg in func.args.iter() {
-                    build_var_dec(self, &arg, arg_pos);
-                    arg_pos += 1;
+                    let ret = build_var_dec(self, &arg, arg_pos, flt_arg_pos);
+                    arg_pos = ret.1;
+                    flt_arg_pos = ret.2;
                 }
                 
                 // Build the body and calculate the stack size
@@ -175,7 +177,7 @@ impl LtacBuilder {
     
         for line in statements {
             match &line.stmt_type {
-                AstStmtType::VarDec => code = build_var_dec(self, &line, 0),
+                AstStmtType::VarDec => code = build_var_dec(self, &line, 0, 0).0,
                 AstStmtType::VarAssign => code = build_var_assign(self, &line),
                 AstStmtType::ArrayAssign => code = build_array_assign(self, &line),
                 AstStmtType::If => build_cond(self, &line),

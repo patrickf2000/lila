@@ -139,6 +139,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Label => amd64_build_label(writer, &code),
             LtacType::Func => amd64_build_func(writer, &code),
             LtacType::LdArgI32 => amd64_build_ldarg(writer, &code),
+            LtacType::LdArgF32 => amd64_build_ldarg(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
             LtacType::Mov => amd64_build_instr(writer, &code),
@@ -183,23 +184,29 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
 fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     
+    // Specific for float literals
+    if code.arg2_type == LtacArg::F32 {
+        line.push_str("  movss xmm0, DWORD PTR ");
+        line.push_str(&code.arg2_sval);
+        line.push_str("[rip]\n");
+    }
+    
     // The instruction
     match &code.instr_type {
-        LtacType::Mov => line = "  mov".to_string(),
-        LtacType::I32Add => line = "  add".to_string(),
-        LtacType::I32Sub => line = "  sub".to_string(),
-        LtacType::I32Mul => line = "  imul".to_string(),
-        LtacType::I32And => line = "  and".to_string(),
-        LtacType::I32Or => line = "  or".to_string(),
-        LtacType::I32Xor => line = "  xor".to_string(),
-        LtacType::I32Lsh => line = "  shl".to_string(),
-        LtacType::I32Rsh => line = "  shr".to_string(),
-        LtacType::I32Cmp => line = "  cmp".to_string(),
+        LtacType::Mov => line.push_str("  mov "),
+        LtacType::MovF32 => line.push_str("  movss "),
+        LtacType::I32Add => line.push_str("  add "),
+        LtacType::I32Sub => line.push_str("  sub "),
+        LtacType::I32Mul => line.push_str("  imul "),
+        LtacType::I32And => line.push_str("  and "),
+        LtacType::I32Or => line.push_str("  or "),
+        LtacType::I32Xor => line.push_str("  xor "),
+        LtacType::I32Lsh => line.push_str("  shl "),
+        LtacType::I32Rsh => line.push_str("  shr "),
+        LtacType::I32Cmp => line.push_str("  cmp "),
         
         _ => {},
     }
-    
-    line.push_str(" ");
 
     // The arguments
     match &code.arg1_type {
@@ -223,7 +230,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI64 => line.push_str("rax, "),
         
         LtacArg::Mem => {
-            if code.arg2_type == LtacArg::I32 {
+            if code.arg2_type == LtacArg::I32 || code.arg2_type == LtacArg::F32 {
                 line.push_str("DWORD PTR ");
             } else if code.arg2_type == LtacArg::Ptr {
                 line.push_str("QWORD PTR ");
@@ -267,7 +274,9 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&code.arg2_val.to_string());
         },
         
-        LtacArg::F32 => {},
+        LtacArg::F32 => {
+            line.push_str("xmm0\n");
+        },
         
         LtacArg::Ptr => {
             line.push_str("OFFSET FLAT:");

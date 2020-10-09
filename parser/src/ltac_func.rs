@@ -18,6 +18,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     
     // Represents the current argument position
     let mut arg_no : i32 = 1;
+    let mut flt_arg_no : i32 = 1;
 
     // Build the arguments
     for arg in line.args.iter() {
@@ -28,6 +29,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 push.arg1_val = arg.i32_val.clone();
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
+                
+                arg_no += 1;
             },
             
             AstArgType::StringL => {
@@ -38,6 +41,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 push.arg1_sval = name;
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
+                
+                arg_no += 1;
             },
             
             AstArgType::Id => {
@@ -53,6 +58,15 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                             push.arg1_type = LtacArg::Ptr;
                         } else if v.data_type == DataType::Float {
                             push.arg2_type = LtacArg::FltReg;
+                        }
+                        
+                        // For the proper registers
+                        if v.data_type == DataType::Float {
+                            push.arg2_val = flt_arg_no;
+                            flt_arg_no += 1;
+                        } else {
+                            push.arg2_val = arg_no;
+                            arg_no += 1;
                         }
                     },
                     
@@ -70,8 +84,6 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             _ => {},
         }
-        
-        arg_no = arg_no + 1;
     }
     
     // Build the call

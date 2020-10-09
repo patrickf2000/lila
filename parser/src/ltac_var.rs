@@ -9,7 +9,10 @@ use crate::ltac_array::*;
 use crate::ltac_func::*;
 
 // Builds an LTAC variable declaration
-pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) -> bool {
+pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32, flt_arg_no_o : i32) -> (bool, i32, i32) {
+    let mut arg_no = arg_no_o;
+    let mut flt_arg_no = flt_arg_no_o;
+    
     let name = line.name.clone();
     let ast_data_type = &line.modifiers[0];
     let data_type : DataType;
@@ -53,21 +56,29 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no : i32) 
     if is_param {
         let mut ld = ltac::create_instr(LtacType::LdArgI32);
         
-        if ast_data_type.mod_type == AstModType::IntDynArray
+        if ast_data_type.mod_type == AstModType::Float {
+            ld = ltac::create_instr(LtacType::LdArgF32);
+            ld.arg2_val = flt_arg_no;
+            flt_arg_no += 1;
+        } else if ast_data_type.mod_type == AstModType::IntDynArray
             || ast_data_type.mod_type == AstModType::Str {
             ld = ltac::create_instr(LtacType::LdArgPtr);
+            ld.arg2_val = arg_no;
+            arg_no += 1;
+        } else {
+            ld.arg2_val = arg_no;
+            arg_no += 1;
         }
         
         ld.arg1_val = builder.stack_pos;
-        ld.arg2_val = arg_no;
         builder.file.code.push(ld);
     } else {
         if !build_var_assign(builder, line) {
-            return false;
+            return (false, arg_no, flt_arg_no);
         }
     }
     
-    true
+    (true, arg_no, flt_arg_no)
 }
 
 // Builds an LTAC variable assignment

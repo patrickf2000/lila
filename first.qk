@@ -1,9 +1,12 @@
 
 extern func printf(s:str, ...)
 
+func print_float(f:float)
+    printf("Your float : %f\n", f)
+end
+
 func main
-    float x = 3.14
-    
-    printf("X : %f\n", x)
+    float x = 4.232
+    print_float(x)
 end
 
