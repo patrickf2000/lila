@@ -4,12 +4,18 @@ use std::collections::HashMap;
 use parser::ltac;
 use parser::ltac::{LtacFile, LtacType, LtacArg};
 
+#[derive(PartialEq, Clone, Copy)]
+pub enum Arch {
+    X86_64,
+    AArch64,
+}
+
 // Architectures
 // 1-> x86-64
 // 2-> AArch64
 
 // The main transformation function
-pub fn run(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
+pub fn run(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> {
     let file2 = match check_builtins(file, arch, use_c) {
         Ok(ltac) => ltac,
         Err(_e) => return Err(()),
@@ -21,7 +27,7 @@ pub fn run(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
 // Scans the code for malloc, free, and exit instructions
 // If we are using the C libraries, these are simply transforms to a function call
 // Otherwise, we must transform them to a system call
-fn check_builtins(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile, ()> {
+fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> {
     let mut file2 = LtacFile {
         name : file.name.clone(),
         data : file.data.clone(),
@@ -53,9 +59,8 @@ fn check_builtins(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile
                     instr.arg2_val = 1;
                     
                     match arch {
-                        1 => instr.arg1_val = 60,       // Linux x86-64
-                        2 => instr.arg1_val = 93,       // Linux AArch64
-                        _ => {},
+                        Arch::X86_64 => instr.arg1_val = 60,       // Linux x86-64
+                        Arch::AArch64 => instr.arg1_val = 93,       // Linux AArch64
                     };
                     
                     file2.code.push(instr.clone());
@@ -91,9 +96,8 @@ fn check_builtins(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile
                     instr.arg2_val = 1;
                     
                     match arch {
-                        1 => instr.arg1_val = 9,
-                        2 => instr.arg1_val = 222,
-                        _ => {},
+                        Arch::X86_64 => instr.arg1_val = 9,
+                        Arch::AArch64 => instr.arg1_val = 222,
                     };
                     
                     file2.code.push(instr.clone());
@@ -146,9 +150,8 @@ fn check_builtins(file : &LtacFile, arch : i32, use_c : bool) -> Result<LtacFile
                     instr.arg2_val = 1;
                     
                     match arch {
-                        1 => instr.arg1_val = 11,
-                        2 => instr.arg1_val = 215,
-                        _ => {},
+                        Arch::X86_64 => instr.arg1_val = 11,
+                        Arch::AArch64 => instr.arg1_val = 215,
                     };
                     
                     file2.code.push(instr.clone());

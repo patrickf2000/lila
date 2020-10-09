@@ -7,7 +7,7 @@ function run_test() {
     	arch="--amd64"
     	
     	if [[ $3 == "aarch64" ]] ; then
-    	    arch="--arm64"
+    	    arch="--aarch64"
     	fi
         
         if [[ $4 == "error" ]] ; then

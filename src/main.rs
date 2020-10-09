@@ -4,6 +4,7 @@ use std::process;
 
 use parser;
 use transform;
+use transform::Arch;
 
 // TODO: Is there a better way to do this?
 fn main() {
@@ -17,9 +18,8 @@ fn run() -> i32 {
     
     let mut print_ast = false;
     let mut print_ltac = false;
-    let mut transform = true;
     let mut use_c = false;
-    let mut amd64 = true;
+    let mut arch = Arch::X86_64;
     let mut input = String::new();
     
     if args.is_empty() {
@@ -31,10 +31,9 @@ fn run() -> i32 {
         match arg.as_ref() {
             "--ast" => print_ast = true,
             "--ltac" => print_ltac = true,
-            "--no-transform" => transform = false,
             "--use-c" => use_c = true,
-            "--amd64" => amd64 = true,
-            "--arm64" => amd64 = false,
+            "--amd64" => arch = Arch::X86_64,
+            "--aarch64" => arch = Arch::AArch64,
             _ => input = arg.clone(),
         }
     }
@@ -52,27 +51,22 @@ fn run() -> i32 {
             Err(_e) => return 1,
         };
         
-        if transform {
-            let mut arch = 1;
-            if !amd64 {
-                arch = 2;
-            }
+        // Do any needed transformations or optimizations
+        ltac = match transform::run(&ltac, arch, use_c) {
+            Ok(ltac) => ltac,
+            Err(_e) => return 1,
+        };
             
-            ltac = match transform::run(&ltac, arch, use_c) {
-                Ok(ltac) => ltac,
-                Err(_e) => return 1,
-            }
-        }
-        
+        // Print if the user wants
         if print_ltac {
             ltac.print();
             return 0;
         }
         
-        if amd64 {
+        if arch == Arch::X86_64 {
             x86::compile(&ltac).expect("Codegen failed with unknown error.");
             x86::build_asm(&ltac.name, use_c);
-        } else {
+        } else if arch == Arch::AArch64 {
             aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
             aarch64::build_asm(&ltac.name, use_c);
         }
