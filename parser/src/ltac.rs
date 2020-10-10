@@ -24,6 +24,7 @@ pub enum LtacType {
     
     LdArgI32,
     LdArgF32,
+    LdArgF64,
     LdArgPtr,
     
     PushArg,
@@ -208,6 +209,12 @@ impl LtacInstr {
             
             LtacType::LdArgF32 => {
                 println!("  f32.ldarg [bp-{}], fr{}", self.arg1_val, self.arg2_val);
+                println!("");
+                return;
+            },
+            
+            LtacType::LdArgF64 => {
+                println!("  f64.ldarg [bp-{}], dr{}", self.arg1_val, self.arg2_val);
                 println!("");
                 return;
             },

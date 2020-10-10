@@ -81,17 +81,23 @@ pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
 // In the LtacInstr:
 //      -> arg1_val = memory location
 //      -> arg2_val = register position
-pub fn amd64_build_ldarg_f32(writer : &mut BufWriter<File>, code : &LtacInstr) {
+pub fn amd64_build_ldarg_float(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     let reg = amd64_arg_flt(code.arg2_val);
     
-    line.push_str("  cvtsd2ss ");
-    line.push_str(&reg);
-    line.push_str(", ");
-    line.push_str(&reg);
-    line.push_str("\n");
+    if code.instr_type == LtacType::LdArgF32 {
+        line.push_str("  cvtsd2ss ");
+        line.push_str(&reg);
+        line.push_str(", ");
+        line.push_str(&reg);
+        line.push_str("\n");
         
-    line.push_str("  movss [rbp-");
+        line.push_str("  movss ");
+    } else {
+        line.push_str("  movsd ");
+    }
+       
+    line.push_str("[rbp-");
     line.push_str(&code.arg1_val.to_string());
     line.push_str("], ");
     line.push_str(&reg);

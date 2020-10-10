@@ -149,6 +149,11 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
                 arg.modifiers.push(val_type);
             },
             
+            Token::Double => {
+                let val_type = AstMod { mod_type : AstModType::Double, };
+                arg.modifiers.push(val_type);
+            },
+            
             Token::TStr => {
                 let val_type = AstMod { mod_type : AstModType::Str, };
                 arg.modifiers.push(val_type);
