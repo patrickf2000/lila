@@ -126,13 +126,36 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if line.args.len() == 1 {
         let arg1 = line.args.first().unwrap();
         let mut mov = ltac::create_instr(LtacType::Mov);
-        mov.arg1_type = LtacArg::RetRegI32;
+        
+        match &builder.current_type {
+            DataType::Float => {
+                mov = ltac::create_instr(LtacType::MovF32);
+                mov.arg1_type = LtacArg::RetRegF32;
+            },
+            
+            DataType::Double => {
+                mov = ltac::create_instr(LtacType::MovF64);
+                mov.arg1_type = LtacArg::RetRegF64;
+            },
+            
+            _ => mov.arg1_type = LtacArg::RetRegI32,
+        }
         
         match &arg1.arg_type {
             AstArgType::IntL => {
                 mov.arg2_type = LtacArg::I32;
                 mov.arg2_val = arg1.i32_val;
             },
+            
+            AstArgType::FloatL => {
+                if builder.current_type == DataType::Float {
+                    mov.arg2_type = LtacArg::F32;
+                    mov.arg2_sval = builder.build_float(arg1.f64_val, false);
+                } else {
+                    mov.arg2_type = LtacArg::F64;
+                    mov.arg2_sval = builder.build_float(arg1.f64_val, true);
+                }
+            }
             
             AstArgType::StringL => {},
             

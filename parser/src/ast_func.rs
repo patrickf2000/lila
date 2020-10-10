@@ -46,6 +46,16 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
             func.modifiers.push(func_type);
         },
         
+        Token::Float => {
+            let func_type = AstMod { mod_type : AstModType::Float, };
+            func.modifiers.push(func_type);
+        },
+        
+        Token::Double => {
+            let func_type = AstMod { mod_type : AstModType::Double, };
+            func.modifiers.push(func_type);
+        },
+        
         _ => {
             syntax.syntax_error(scanner, "Invalid function return type.".to_string());
             return false;

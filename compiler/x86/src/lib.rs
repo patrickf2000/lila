@@ -295,6 +295,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI32 => line.push_str("eax, "),
         LtacArg::RetRegI64 => line.push_str("rax, "),
         
+        LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0, "),
+        
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::I32 || code.arg2_type == LtacArg::F32 {
                 line.push_str("DWORD PTR ");
@@ -336,6 +338,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
+        
+        LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0"),
         
         LtacArg::Mem => {
             line.push_str("[rbp-");
@@ -428,6 +432,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI32 => line.push_str("  mov eax, "),
         LtacArg::RetRegI64 => line.push_str("  mov rax, "),
         
+        LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0, "),
+        
         LtacArg::Mem => {
             if code.arg1_offset > 0 && code.instr_type == LtacType::MovOffImm {
                 line.push_str("  mov r15, QWORD PTR [rbp-");
@@ -508,6 +514,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
+        
+        LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0"),
         
         LtacArg::Mem => {
             if code.instr_type == LtacType::MovOffImm || code.instr_type == LtacType::MovOffMem {

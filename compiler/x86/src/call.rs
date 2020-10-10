@@ -36,6 +36,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
         
+        LtacArg::RetRegF32 | LtacArg::RetRegF64 => {},
+        
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::FltReg || code.arg2_type == LtacArg::FltReg64 {
                 line.push_str(&reg_flt);

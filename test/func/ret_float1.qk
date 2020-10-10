@@ -1,7 +1,7 @@
 
 #OUTPUT
-#F: 132.322220
-#D: 1234.567800
+#F: 5.443000
+#D: 2.000010
 #END
 
 #RET 0
@@ -10,13 +10,11 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func get_float -> float
-    float x = 132.32222
-    return x
+    return 5.443
 end
 
 func get_double -> double
-    double x = 1234.5678
-    return x
+    return 2.00001
 end
 
 func main -> int

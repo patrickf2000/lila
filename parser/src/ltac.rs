@@ -88,6 +88,8 @@ pub enum LtacArg {
     FltReg64,
     RetRegI32,
     RetRegI64,
+    RetRegF32,
+    RetRegF64,
     Mem,
     I32,
     F32,
@@ -331,6 +333,8 @@ impl LtacInstr {
             
             LtacArg::RetRegI32 => print!("i32.ret"),
             LtacArg::RetRegI64 => print!("i64.ret"),
+            LtacArg::RetRegF32 => print!("f32.ret"),
+            LtacArg::RetRegF64 => print!("f64.ret"),
             
             LtacArg::Mem => {
                 if self.arg1_offset > 0 && self.arg1_offset_size > 0 {
@@ -365,6 +369,8 @@ impl LtacInstr {
             
             LtacArg::RetRegI32 => println!(", i32.ret"),
             LtacArg::RetRegI64 => println!(", i64.ret"),
+            LtacArg::RetRegF32 => println!(", f32.ret"),
+            LtacArg::RetRegF64 => println!(", f64.ret"),
             
             LtacArg::Mem => {
                 if self.arg2_offset > 0 && self.arg2_offset_size > 0 {

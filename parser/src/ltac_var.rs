@@ -208,6 +208,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                 
                                 if *t == DataType::Int {
                                     instr.arg2_type = LtacArg::RetRegI32;
+                                } else if *t == DataType::Float {
+                                    instr.arg2_type = LtacArg::RetRegF32;
+                                } else if *t == DataType::Double {
+                                    instr.arg2_type = LtacArg::RetRegF64;
                                 }
                             },
                             
