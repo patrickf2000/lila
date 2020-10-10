@@ -1,8 +1,10 @@
 
 #OUTPUT
-#Syntax Error: Modulo is only valid with integer values.
-# -> [19] double a5 = x % 5.4
-#
+#X: 3.140000
+#X + 5.4 = 8.540000
+#X - 5.4 = -2.260000
+#X * 5.4 = 16.956000
+#X / 5.4 = 0.581481
 #END
 
 #RET 0
@@ -16,7 +18,6 @@ func main -> int
     double a2 = x - 5.4
     double a3 = x * 5.4
     double a4 = x / 5.4
-    double a5 = x % 5.4
     
     printf("X: %f\n", x)
     printf("X + 5.4 = %f\n", a1)

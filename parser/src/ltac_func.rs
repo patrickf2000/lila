@@ -78,7 +78,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         }
                         
                         // For the proper registers
-                        if v.data_type == DataType::Float {
+                        if v.data_type == DataType::Float || v.data_type == DataType::Double {
                             push.arg2_val = flt_arg_no;
                             flt_arg_no += 1;
                         } else {

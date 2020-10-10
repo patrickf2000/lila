@@ -184,6 +184,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::F32Mul => amd64_build_instr(writer, &code),
             LtacType::F32Div => amd64_build_instr(writer, &code),
             
+            LtacType::F64Add => amd64_build_instr(writer, &code),
+            LtacType::F64Sub => amd64_build_instr(writer, &code),
+            LtacType::F64Mul => amd64_build_instr(writer, &code),
+            LtacType::F64Div => amd64_build_instr(writer, &code),
+            
             LtacType::I32And => amd64_build_instr(writer, &code),
             LtacType::I32Or => amd64_build_instr(writer, &code),
             LtacType::I32Xor => amd64_build_instr(writer, &code),
@@ -228,6 +233,11 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::F32Sub => line.push_str("  subss "),
         LtacType::F32Mul => line.push_str("  mulss "),
         LtacType::F32Div => line.push_str("  divss "),
+        
+        LtacType::F64Add => line.push_str("  addsd "),
+        LtacType::F64Sub => line.push_str("  subsd "),
+        LtacType::F64Mul => line.push_str("  mulsd "),
+        LtacType::F64Div => line.push_str("  divsd "),
         
         LtacType::I32And => line.push_str("  and "),
         LtacType::I32Or => line.push_str("  or "),

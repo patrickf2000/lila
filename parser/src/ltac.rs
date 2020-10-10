@@ -58,6 +58,11 @@ pub enum LtacType {
     F32Mul,
     F32Div,
     
+    F64Add,
+    F64Sub,
+    F64Mul,
+    F64Div,
+    
     I32And,
     I32Or,
     I32Xor,
@@ -289,6 +294,11 @@ impl LtacInstr {
             LtacType::F32Sub => print!("  f32.sub "),
             LtacType::F32Mul => print!("  f32.mul "),
             LtacType::F32Div => print!("  f32.div "),
+            
+            LtacType::F64Add => print!("  f64.add "),
+            LtacType::F64Sub => print!("  f64.sub "),
+            LtacType::F64Mul => print!("  f64.mul "),
+            LtacType::F64Div => print!("  f64.div "),
             
             LtacType::I32And => print!("  i32.and "),
             LtacType::I32Or => print!("  i32.or "),
