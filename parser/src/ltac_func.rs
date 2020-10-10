@@ -41,7 +41,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             AstArgType::FloatL => {
                 let mut push = ltac::create_instr(LtacType::PushArg);
                 push.arg1_type = LtacArg::F32;
-                push.arg1_sval = builder.build_float(arg.f32_val);
+                push.arg1_sval = builder.build_float(arg.f64_val, false);
                 push.arg2_val = flt_arg_no;
                 builder.file.code.push(push);
                 
@@ -73,6 +73,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                             push.arg1_type = LtacArg::Ptr;
                         } else if v.data_type == DataType::Float {
                             push.arg2_type = LtacArg::FltReg;
+                        } else if v.data_type == DataType::Double {
+                            push.arg2_type = LtacArg::FltReg64;
                         }
                         
                         // For the proper registers

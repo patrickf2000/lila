@@ -20,6 +20,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     
     if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
         line = "  movss ".to_string();
+    } else if code.arg2_type == LtacArg::FltReg64 || code.arg2_type == LtacArg::F64 {
+        line = "  movsd ".to_string();
     }
     
     // Assemble
@@ -29,12 +31,13 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Reg => {},
         LtacArg::Reg64 => {},
         LtacArg::FltReg => {},
+        LtacArg::FltReg64 => {},
         
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
         
         LtacArg::Mem => {
-            if code.arg2_type == LtacArg::FltReg {
+            if code.arg2_type == LtacArg::FltReg || code.arg2_type == LtacArg::FltReg64 {
                 line.push_str(&reg_flt);
             } else {
                 line.push_str(&reg32);
@@ -54,6 +57,13 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::F32 => {
             line.push_str(&reg_flt);
             line.push_str(", DWORD PTR ");
+            line.push_str(&code.arg1_sval);
+            line.push_str("[rip]");
+        },
+        
+        LtacArg::F64 => {
+            line.push_str(&reg_flt);
+            line.push_str(", QWORD PTR ");
             line.push_str(&code.arg1_sval);
             line.push_str("[rip]");
         },

@@ -18,6 +18,7 @@ pub enum DataType {
     Int,
     IntDynArray,
     Float,
+    Double,
     Str,
 }
 
@@ -110,6 +111,7 @@ impl LtacBuilder {
                     AstModType::Int => func_type = DataType::Int,
                     AstModType::IntDynArray => func_type = DataType::IntDynArray,
                     AstModType::Float => func_type = DataType::Float,
+                    AstModType::Double => func_type = DataType::Double,
                     AstModType::Str => func_type = DataType::Str,
                 }
             }
@@ -223,7 +225,7 @@ impl LtacBuilder {
     
     // Builds a float literal and adds it to the data section
     // https://stackoverflow.com/questions/40030551/how-to-decode-and-encode-a-float-in-rust
-    pub fn build_float(&mut self, val : f32) -> String {
+    pub fn build_float(&mut self, val : f64, is_double : bool) -> String {
         // Create the float name
         let fpos = self.flt_pos.to_string();
         self.flt_pos = self.flt_pos + 1;
@@ -231,13 +233,24 @@ impl LtacBuilder {
         let mut name = "FLT".to_string();
         name.push_str(&fpos);
         
-        let as_int: u32 = unsafe { mem::transmute(val) };
+        let value : String;
+        let data_type : LtacDataType;
+        
+        if is_double {
+            data_type = LtacDataType::DoubleL;
+            let as_int : u64 = unsafe { mem::transmute(val) };
+            value = as_int.to_string();
+        } else {
+            data_type = LtacDataType::FloatL;
+            let as_int: u32 = unsafe { mem::transmute(val as f32) };
+            value = as_int.to_string();
+        }
         
         // Create the data
         let flt = LtacData {
-            data_type : LtacDataType::FloatL,
+            data_type : data_type,
             name : name.clone(),
-            val : as_int.to_string(),
+            val : value,
         };
         
         self.file.data.push(flt);

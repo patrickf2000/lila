@@ -71,6 +71,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::End => build_end(&mut scanner, tree),
         Token::Int => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int),
         Token::Float => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Float),
+        Token::Double => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Double),
         Token::TStr => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
         Token::Id(ref val) => code = build_id(&mut scanner, tree, val.to_string(), syntax),
         Token::If => code = build_cond(&mut scanner, tree, Token::If, syntax),
@@ -89,7 +90,11 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         },
         
         Token::Eof => {},
-        _ => println!("Error: {:?}", token),
+        
+        _ => {
+            syntax.syntax_error(&mut scanner, "Invalid token.".to_string());
+            code = false;
+        }
     }
     
     code

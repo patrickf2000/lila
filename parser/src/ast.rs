@@ -52,6 +52,7 @@ pub enum AstModType {
     Int,
     IntDynArray,
     Float,
+    Double,
     Str,
 }
 
@@ -91,7 +92,7 @@ pub struct AstArg {
     pub arg_type : AstArgType,
     pub str_val : String,
     pub i32_val : i32,
-    pub f32_val : f32,
+    pub f64_val : f64,
     
     pub sub_args : Vec<AstArg>,
 }
@@ -195,7 +196,7 @@ impl AstArg {
     pub fn print(&self) {
         match &self.arg_type {
             AstArgType::IntL => print!("{} ", self.i32_val),
-            AstArgType::FloatL => print!("{} ", self.f32_val),
+            AstArgType::FloatL => print!("{} ", self.f64_val),
             AstArgType::StringL => print!("\"{}\" ", self.str_val),
             AstArgType::Id => print!("{} ", self.str_val),
             AstArgType::Array => print!("ARRAY "),
@@ -241,6 +242,7 @@ impl AstMod {
             AstModType::Int => print!("Int"),
             AstModType::IntDynArray => print!("IntDynArr"),
             AstModType::Float => print!("Float"),
+            AstModType::Double => print!("Double"),
             AstModType::Str => print!("Str"),
         }
         
@@ -313,17 +315,17 @@ pub fn create_int(val : i32) -> AstArg {
         arg_type : AstArgType::IntL,
         str_val : String::new(),
         i32_val : val,
-        f32_val : 0.0,
+        f64_val : 0.0,
         sub_args : Vec::new(),
     }
 }
 
-pub fn create_float(val : f32) -> AstArg {
+pub fn create_float(val : f64) -> AstArg {
     AstArg {
         arg_type : AstArgType::FloatL,
         str_val : String::new(),
         i32_val : 0,
-        f32_val : val,
+        f64_val : val,
         sub_args : Vec::new(),
     }
 }
@@ -333,7 +335,7 @@ pub fn create_string(val : String) -> AstArg {
         arg_type : AstArgType::StringL,
         str_val : val,
         i32_val : 0,
-        f32_val : 0.0,
+        f64_val : 0.0,
         sub_args : Vec::new(),
     }
 }
@@ -343,7 +345,7 @@ pub fn create_arg(arg_type : AstArgType) -> AstArg {
         arg_type : arg_type,
         str_val : String::new(),
         i32_val : 0,
-        f32_val : 0.0,
+        f64_val : 0.0,
         sub_args : Vec::new(),
     }
 }

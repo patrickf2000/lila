@@ -33,6 +33,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 4;
         },
         
+        AstModType::Double => {
+            data_type = DataType::Double;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Str => {
             data_type = DataType::Str;
             builder.stack_pos += 8;
@@ -60,6 +65,8 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             ld = ltac::create_instr(LtacType::LdArgF32);
             ld.arg2_val = flt_arg_no;
             flt_arg_no += 1;
+        } else if ast_data_type.mod_type == AstModType::Double {
+            //TODO
         } else if ast_data_type.mod_type == AstModType::IntDynArray
             || ast_data_type.mod_type == AstModType::Str {
             ld = ltac::create_instr(LtacType::LdArgPtr);
@@ -89,16 +96,14 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         None => return false,
     }
     
-    let mut code = true;
+    let code : bool;
     
-    if var.data_type == DataType::Int {
-        code = build_var_math(builder, &line, &var);
-    } else if var.data_type == DataType::IntDynArray {
+    if var.data_type == DataType::IntDynArray {
         code = build_i32dyn_array(builder, &line, &var);
-    } else if var.data_type == DataType::Float {
-        code = build_var_math(builder, &line, &var);
     } else if var.data_type == DataType::Str {
         code = build_str_assign(builder, &line, &var);
+    } else {
+        code = build_var_math(builder, &line, &var);
     }
     
     code
@@ -117,6 +122,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::FltReg;
         instr.arg1_val = 0;
+    } else if var.data_type == DataType::Double {
+        instr = ltac::create_instr(LtacType::MovF64);
+        instr.arg1_type = LtacArg::FltReg64;
+        instr.arg1_val = 0;
     }
     
     for arg in args.iter() {
@@ -131,7 +140,13 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::FloatL if var.data_type == DataType::Float => {
                 instr.arg2_type = LtacArg::F32;
-                instr.arg2_sval = builder.build_float(arg.f32_val);
+                instr.arg2_sval = builder.build_float(arg.f64_val, false);
+                builder.file.code.push(instr.clone());
+            },
+            
+            AstArgType::FloatL if var.data_type == DataType::Double => {
+                instr.arg2_type = LtacArg::F64;
+                instr.arg2_sval = builder.build_float(arg.f64_val, true);
                 builder.file.code.push(instr.clone());
             },
             

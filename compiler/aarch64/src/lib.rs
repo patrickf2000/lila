@@ -112,6 +112,7 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
             },
             
             LtacDataType::FloatL => {},
+            LtacDataType::DoubleL => {},
         }
         
         writer.write(&line.into_bytes())
@@ -142,6 +143,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Exit => {},
             LtacType::Mov => aarch64_build_mov(writer, &code, stack_size),
             LtacType::MovF32 => {},
+            LtacType::MovF64 => {},
             LtacType::MovOffImm => aarch64_build_mov_offset(writer, &code, stack_size),
             LtacType::MovOffMem => aarch64_build_mov_offset(writer, &code, stack_size),
             LtacType::MovI32Vec => {},
