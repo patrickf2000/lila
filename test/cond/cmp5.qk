@@ -13,28 +13,32 @@ extern func puts(s:str)
 
 func main -> int
     double x = 3.14
+    double y = 3.14
     
-    if x == 3.14
+    if x == y
         puts("Equal")
     else
         puts("Not equal")
     end
     
-    if x != 4.44
+    y = 4.44
+    if x != y
         puts("Not equal")
     else
         puts("Equal")
     end
     
-    if x == 5.5532
+    y = 5.5532
+    if x == y
         puts("Equal")
-    elif x < 5.5532
+    elif x < y
         puts("Less")
     else
         puts("Idk")
     end
     
-    if x > 1.1000009
+    y = 1.1000009
+    if x > y
         puts("Greater")
     else
         puts("Idk")

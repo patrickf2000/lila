@@ -103,6 +103,19 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp = ltac::create_instr(LtacType::F32Cmp);
                         cmp.arg1_type = LtacArg::FltReg;
                         cmp.arg1_val = 0;
+                        
+                    // Float-64 comparisons
+                    } else if v.data_type == DataType::Double {
+                        mov = ltac::create_instr(LtacType::MovF64);
+                        mov.arg1_type = LtacArg::FltReg64;
+                        mov.arg1_val = 0;
+                        mov.arg2_type = LtacArg::Mem;
+                        mov.arg2_val = v.pos;
+                        
+                        cmp = ltac::create_instr(LtacType::F64Cmp);
+                        cmp.arg1_type = LtacArg::FltReg64;
+                        cmp.arg1_val = 0;
+                        
                     // Integer comparisons
                     } else {
                         mov.arg2_val = v.pos;
@@ -128,8 +141,13 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         },
         
         AstArgType::FloatL => {
-            cmp.arg2_type = LtacArg::F32;
-            cmp.arg2_sval = builder.build_float(arg2.f64_val, false);
+            if cmp.instr_type == LtacType::F64Cmp {
+                cmp.arg2_type = LtacArg::F64;
+                cmp.arg2_sval = builder.build_float(arg2.f64_val, true);
+            } else {
+                cmp.arg2_type = LtacArg::F32;
+                cmp.arg2_sval = builder.build_float(arg2.f64_val, false);
+            }
         },
         
         AstArgType::StringL => {},
@@ -147,6 +165,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_type = LtacArg::Ptr;
                         mov.arg1_val = v.pos;
                         mov.arg2_val = 2;
+                        
                     } else if v.data_type == DataType::Float {
                         mov = ltac::create_instr(LtacType::MovF32);
                         mov.arg1_type = LtacArg::FltReg;
@@ -156,6 +175,17 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                         cmp.arg2_type = LtacArg::FltReg;
                         cmp.arg2_val = 1;
+                        
+                    } else if v.data_type == DataType::Double {
+                        mov = ltac::create_instr(LtacType::MovF64);
+                        mov.arg1_type = LtacArg::FltReg64;
+                        mov.arg1_val = 1;
+                        mov.arg2_type = LtacArg::Mem;
+                        mov.arg2_val = v.pos;
+                        
+                        cmp.arg2_type = LtacArg::FltReg64;
+                        cmp.arg2_val = 1;
+                        
                     } else {
                         mov.arg2_val = v.pos;
                         
@@ -186,19 +216,23 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::OpNeq => br.instr_type = LtacType::Be,
         
         AstArgType::OpLt 
-            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfge,
+            if (cmp_type == LtacType::F32Cmp || cmp_type == LtacType::F64Cmp)
+            => br.instr_type = LtacType::Bfge,
         AstArgType::OpLt => br.instr_type = LtacType::Bge,
         
         AstArgType::OpLte
-            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfg,
+            if (cmp_type == LtacType::F32Cmp || cmp_type == LtacType::F64Cmp)
+            => br.instr_type = LtacType::Bfg,
         AstArgType::OpLte => br.instr_type = LtacType::Bg,
         
         AstArgType::OpGt
-            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfle,
+            if (cmp_type == LtacType::F32Cmp || cmp_type == LtacType::F64Cmp)
+            => br.instr_type = LtacType::Bfle,
         AstArgType::OpGt => br.instr_type = LtacType::Ble,
         
         AstArgType::OpGte
-            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfl,
+            if (cmp_type == LtacType::F32Cmp || cmp_type == LtacType::F64Cmp)
+            => br.instr_type = LtacType::Bfl,
         AstArgType::OpGte => br.instr_type = LtacType::Bl,
         
         _ => {},
