@@ -305,13 +305,21 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 return false;
             },
             
-            // Other operators
+            // Modulo
             
-            AstArgType::OpMod => {
+            AstArgType::OpMod
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Mod);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
+            
+            AstArgType::OpMod => {
+                builder.syntax.ltac_error(line, "Modulo is only valid with integer values.".to_string());
+                return false;
+            },
+            
+            // Other operators
             
             AstArgType::OpAnd => {
                 instr = ltac::create_instr(LtacType::I32And);
