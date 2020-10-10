@@ -1,6 +1,7 @@
 
 #OUTPUT
 #Equal
+#Not equal
 #Less
 #Greater
 #END
@@ -17,6 +18,12 @@ func main -> int
         puts("Equal")
     else
         puts("Not equal")
+    end
+    
+    if x != 4.44
+        puts("Not equal")
+    else
+        puts("Equal")
     end
     
     if x == 5.5532

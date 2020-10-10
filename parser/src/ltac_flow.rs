@@ -147,18 +147,27 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_type = LtacArg::Ptr;
                         mov.arg1_val = v.pos;
                         mov.arg2_val = 2;
+                    } else if v.data_type == DataType::Float {
+                        mov = ltac::create_instr(LtacType::MovF32);
+                        mov.arg1_type = LtacArg::FltReg;
+                        mov.arg1_val = 1;
+                        mov.arg2_type = LtacArg::Mem;
+                        mov.arg2_val = v.pos;
+                        
+                        cmp.arg2_type = LtacArg::FltReg;
+                        cmp.arg2_val = 1;
                     } else {
                         mov.arg2_val = v.pos;
+                        
+                        cmp.arg1_type = LtacArg::Reg;
+                        cmp.arg1_val = 0;
                     }
+                    
+                    builder.file.code.push(mov);
                 },
                 
                 None => mov.arg2_val = 0,
             }
-            
-            builder.file.code.push(mov);
-            
-            cmp.arg1_type = LtacArg::Reg;
-            cmp.arg1_val = 0;
         },
         
         _ => {},
