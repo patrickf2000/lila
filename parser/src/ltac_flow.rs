@@ -83,6 +83,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             
             match &builder.vars.get(&arg1.str_val) {
                 Some(v) => {
+                    // String comparisons
                     if v.data_type == DataType::Str {
                         cmp = ltac::create_instr(LtacType::StrCmp);
                         
@@ -90,18 +91,31 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_type = LtacArg::Ptr;
                         mov.arg1_val = v.pos;
                         mov.arg2_val = 1;
+                        
+                    // Float-32 comparisons
+                    } else if v.data_type == DataType::Float {
+                        mov = ltac::create_instr(LtacType::MovF32);
+                        mov.arg1_type = LtacArg::FltReg;
+                        mov.arg1_val = 0;
+                        mov.arg2_type = LtacArg::Mem;
+                        mov.arg2_val = v.pos;
+                        
+                        cmp = ltac::create_instr(LtacType::F32Cmp);
+                        cmp.arg1_type = LtacArg::FltReg;
+                        cmp.arg1_val = 0;
+                    // Integer comparisons
                     } else {
                         mov.arg2_val = v.pos;
+                        
+                        cmp.arg1_type = LtacArg::Reg;
+                        cmp.arg1_val = 0;
                     }
+                    
+                    builder.file.code.push(mov);
                 },
                 
                 None => mov.arg2_val = 0,
             }
-            
-            builder.file.code.push(mov);
-            
-            cmp.arg1_type = LtacArg::Reg;
-            cmp.arg1_val = 0;
         },
         
         _ => {},
@@ -111,6 +125,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::IntL => {
             cmp.arg2_type = LtacArg::I32;
             cmp.arg2_val = arg2.i32_val;
+        },
+        
+        AstArgType::FloatL => {
+            cmp.arg2_type = LtacArg::F32;
+            cmp.arg2_sval = builder.build_float(arg2.f64_val, false);
         },
         
         AstArgType::StringL => {},
@@ -145,6 +164,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         _ => {},
     }
     
+    let cmp_type = cmp.instr_type.clone();
     builder.file.code.push(cmp);
     
     // Now the operator
@@ -155,10 +175,23 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     match &op.arg_type {
         AstArgType::OpEq => br.instr_type = LtacType::Bne,
         AstArgType::OpNeq => br.instr_type = LtacType::Be,
+        
+        AstArgType::OpLt 
+            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfge,
         AstArgType::OpLt => br.instr_type = LtacType::Bge,
+        
+        AstArgType::OpLte
+            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfg,
         AstArgType::OpLte => br.instr_type = LtacType::Bg,
+        
+        AstArgType::OpGt
+            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfle,
         AstArgType::OpGt => br.instr_type = LtacType::Ble,
+        
+        AstArgType::OpGte
+            if cmp_type == LtacType::F32Cmp => br.instr_type = LtacType::Bfl,
         AstArgType::OpGte => br.instr_type = LtacType::Bl,
+        
         _ => {},
     }
     

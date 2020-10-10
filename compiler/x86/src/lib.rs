@@ -162,7 +162,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
+            
             LtacType::I32Cmp => amd64_build_instr(writer, &code),
+            LtacType::F32Cmp => amd64_build_instr(writer, &code),
             LtacType::StrCmp => amd64_build_strcmp(writer, &code),
             
             LtacType::Br => amd64_build_jump(writer, &code),
@@ -170,8 +172,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bne => amd64_build_jump(writer, &code),
             LtacType::Bl => amd64_build_jump(writer, &code),
             LtacType::Ble => amd64_build_jump(writer, &code),
+            LtacType::Bfl => amd64_build_jump(writer, &code),
+            LtacType::Bfle => amd64_build_jump(writer, &code),
             LtacType::Bg => amd64_build_jump(writer, &code),
             LtacType::Bge => amd64_build_jump(writer, &code),
+            LtacType::Bfg => amd64_build_jump(writer, &code),
+            LtacType::Bfge => amd64_build_jump(writer, &code),
             
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Sub => amd64_build_instr(writer, &code),
@@ -246,6 +252,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::I32Rsh => line.push_str("  shr "),
         
         LtacType::I32Cmp => line.push_str("  cmp "),
+        LtacType::F32Cmp => line.push_str("  ucomiss "),
         
         _ => {},
     }
@@ -595,8 +602,12 @@ fn amd64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::Bne => line.push_str("jne "),
         LtacType::Bl => line.push_str("jl "),
         LtacType::Ble => line.push_str("jle "),
+        LtacType::Bfl => line.push_str("jb "),
+        LtacType::Bfle => line.push_str("jbe "),
         LtacType::Bg => line.push_str("jg "),
         LtacType::Bge => line.push_str("jge "),
+        LtacType::Bfg => line.push_str("ja "),
+        LtacType::Bfge => line.push_str("jae "),
         _ => {},
     }
     

@@ -37,6 +37,7 @@ pub enum LtacType {
     Exit,
     
     I32Cmp,
+    F32Cmp,
     StrCmp,
     
     Br,
@@ -44,8 +45,12 @@ pub enum LtacType {
     Bne,
     Bl,
     Ble,
+    Bfl,        // Jump if float is less
+    Bfle,       // Jump if float is less or equal
     Bg,
     Bge,
+    Bfg,        // Jump if float is greater
+    Bfge,       // Jump if float is greater or equal
     
     I32Add,
     I32Sub,
@@ -271,6 +276,7 @@ impl LtacInstr {
             LtacType::Exit => print!("  exit "),
             
             LtacType::I32Cmp => print!("  i32.cmp "),
+            LtacType::F32Cmp => print!("  f32.cmp "),
             LtacType::StrCmp => {
                 println!("  str.cmp");
                 return;
@@ -281,8 +287,12 @@ impl LtacInstr {
             LtacType::Bne => println!("  bne {}\n", self.name),
             LtacType::Bl => println!("  bl {}\n", self.name),
             LtacType::Ble => println!("  ble {}\n", self.name),
+            LtacType::Bfl => println!("  bfl {}\n", self.name),
+            LtacType::Bfle => println!("  bfle {}\n", self.name),
             LtacType::Bg => println!("  bg {}\n", self.name),
             LtacType::Bge => println!("  bge {}\n", self.name),
+            LtacType::Bfg => println!("  bfg {}\n", self.name),
+            LtacType::Bfge => println!("  bfge {}\n", self.name),
             
             LtacType::I32Add => print!("  i32.add "),
             LtacType::I32Sub => print!("  i32.sub "),
