@@ -216,11 +216,22 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     
     // Specific for float literals
+    if code.arg1_type == LtacArg::F32 {
+        line.push_str("  movss xmm1, DWORD PTR ");
+        line.push_str(&code.arg1_sval);
+        line.push_str("[rip]\n");
+    }
     if code.arg2_type == LtacArg::F32 {
         line.push_str("  movss xmm0, DWORD PTR ");
         line.push_str(&code.arg2_sval);
         line.push_str("[rip]\n");
-    } else if code.arg2_type == LtacArg::F64 {
+    }
+    if code.arg1_type == LtacArg::F64 {
+        line.push_str("  movsd xmm1, QWORD PTR ");
+        line.push_str(&code.arg1_sval);
+        line.push_str("[rip]\n");
+    }
+    if code.arg2_type == LtacArg::F64 {
         line.push_str("  movsd xmm0, QWORD PTR ");
         line.push_str(&code.arg2_sval);
         line.push_str("[rip]\n");
@@ -297,8 +308,11 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::I32 => {},
-        LtacArg::F32 => {},
-        LtacArg::F64 => {},
+        
+        LtacArg::F32 | LtacArg::F64 => {
+            line.push_str("xmm1, ");
+        },
+        
         LtacArg::Ptr => {},
     }
     

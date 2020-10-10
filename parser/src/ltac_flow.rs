@@ -73,6 +73,12 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             cmp.arg1_val = arg1.i32_val;
         },
         
+        AstArgType::FloatL => {
+            cmp = ltac::create_instr(LtacType::F32Cmp);
+            cmp.arg1_type = LtacArg::F32;
+            cmp.arg1_sval = builder.build_float(arg1.f64_val, false);
+        },
+        
         AstArgType::StringL => {},
         
         AstArgType::Id => {
@@ -182,6 +188,12 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_val = 1;
                         mov.arg2_type = LtacArg::Mem;
                         mov.arg2_val = v.pos;
+                        
+                        if cmp.arg1_type == LtacArg::F32 {
+                            cmp = ltac::create_instr(LtacType::F64Cmp);
+                            cmp.arg1_type = LtacArg::F64;
+                            cmp.arg1_sval = builder.build_float(arg1.f64_val, true);
+                        }
                         
                         cmp.arg2_type = LtacArg::FltReg64;
                         cmp.arg2_val = 1;
