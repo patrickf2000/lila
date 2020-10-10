@@ -150,18 +150,21 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
             LtacType::Ret => amd64_build_ret(writer),
+            
             LtacType::Mov => amd64_build_instr(writer, &code),
             LtacType::MovF32 => amd64_build_instr(writer, &code),
             LtacType::MovF64 => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
+            
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
             LtacType::I32Cmp => amd64_build_instr(writer, &code),
             LtacType::StrCmp => amd64_build_strcmp(writer, &code),
+            
             LtacType::Br => amd64_build_jump(writer, &code),
             LtacType::Be => amd64_build_jump(writer, &code),
             LtacType::Bne => amd64_build_jump(writer, &code),
@@ -169,11 +172,18 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Ble => amd64_build_jump(writer, &code),
             LtacType::Bg => amd64_build_jump(writer, &code),
             LtacType::Bge => amd64_build_jump(writer, &code),
+            
             LtacType::I32Add => amd64_build_instr(writer, &code),
             LtacType::I32Sub => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
             LtacType::I32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod => amd64_build_div(writer, &code),
+            
+            LtacType::F32Add => amd64_build_instr(writer, &code),
+            LtacType::F32Sub => amd64_build_instr(writer, &code),
+            LtacType::F32Mul => amd64_build_instr(writer, &code),
+            LtacType::F32Div => amd64_build_instr(writer, &code),
+            
             LtacType::I32And => amd64_build_instr(writer, &code),
             LtacType::I32Or => amd64_build_instr(writer, &code),
             LtacType::I32Xor => amd64_build_instr(writer, &code),
@@ -209,14 +219,22 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::Mov => line.push_str("  mov "),
         LtacType::MovF32 => line.push_str("  movss "),
         LtacType::MovF64 => line.push_str("  movsd "),
+        
         LtacType::I32Add => line.push_str("  add "),
         LtacType::I32Sub => line.push_str("  sub "),
         LtacType::I32Mul => line.push_str("  imul "),
+        
+        LtacType::F32Add => line.push_str("  addss "),
+        LtacType::F32Sub => line.push_str("  subss "),
+        LtacType::F32Mul => line.push_str("  mulss "),
+        LtacType::F32Div => line.push_str("  divss "),
+        
         LtacType::I32And => line.push_str("  and "),
         LtacType::I32Or => line.push_str("  or "),
         LtacType::I32Xor => line.push_str("  xor "),
         LtacType::I32Lsh => line.push_str("  shl "),
         LtacType::I32Rsh => line.push_str("  shr "),
+        
         LtacType::I32Cmp => line.push_str("  cmp "),
         
         _ => {},
@@ -238,8 +256,11 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::FltReg => {},
-        LtacArg::FltReg64 => {},
+        LtacArg::FltReg | LtacArg::FltReg64 => {
+            let reg = amd64_op_flt(code.arg1_val);
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         LtacArg::RetRegI32 => line.push_str("eax, "),
         LtacArg::RetRegI64 => line.push_str("rax, "),
@@ -275,8 +296,10 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::FltReg => {},
-        LtacArg::FltReg64 => {},
+        LtacArg::FltReg | LtacArg::FltReg64 => {
+            let reg = amd64_op_flt(code.arg2_val);
+            line.push_str(&reg);
+        },
         
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),

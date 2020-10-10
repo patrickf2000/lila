@@ -225,29 +225,87 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 builder.file.code.push(instr.clone());
             },
             
-            AstArgType::OpAdd => {
+            // Addition
+            
+            AstArgType::OpAdd if var.data_type == DataType::Float => {
+                instr = ltac::create_instr(LtacType::F32Add);
+                instr.arg1_type = LtacArg::FltReg;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpAdd 
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Add);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpSub => {
+            AstArgType::OpAdd => {
+                builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
+                return false;
+            },
+            
+            // Subtraction
+            
+            AstArgType::OpSub if var.data_type == DataType::Float => {
+                instr = ltac::create_instr(LtacType::F32Sub);
+                instr.arg1_type = LtacArg::FltReg;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpSub
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Sub);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpMul => {
+            AstArgType::OpSub => {
+                builder.syntax.ltac_error(line, "Invalid use of subtraction operator.".to_string());
+                return false;
+            },
+            
+            // Multiplication
+            
+            AstArgType::OpMul if var.data_type == DataType::Float => {
+                instr = ltac::create_instr(LtacType::F32Mul);
+                instr.arg1_type = LtacArg::FltReg;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpMul
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Mul);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpDiv => {
+            AstArgType::OpMul => {
+                builder.syntax.ltac_error(line, "Invalid use of multiplication operator.".to_string());
+                return false;
+            },
+            
+            // Division
+            
+            AstArgType::OpDiv if var.data_type == DataType::Float => {
+                instr = ltac::create_instr(LtacType::F32Div);
+                instr.arg1_type = LtacArg::FltReg;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpDiv
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Div);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
+            
+            AstArgType::OpDiv => {
+                builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
+                return false;
+            },
+            
+            // Other operators
             
             AstArgType::OpMod => {
                 instr = ltac::create_instr(LtacType::I32Mod);
@@ -301,6 +359,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg2_sval = top.arg2_sval;
         instr.arg2_offset = top.arg2_offset;
         instr.arg2_offset_size = top.arg2_offset_size;
+    } else if var.data_type == DataType::Float {
+        instr = ltac::create_instr(LtacType::MovF32);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = LtacArg::FltReg;
+        instr.arg2_val = 0;
     } else {
         instr = ltac::create_instr(LtacType::Mov);
         instr.arg1_type = LtacArg::Mem;
