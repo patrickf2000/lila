@@ -16,12 +16,58 @@ pub enum Arch {
 
 // The main transformation function
 pub fn run(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> {
-    let file2 = match check_builtins(file, arch, use_c) {
+    let mut file2 = match check_builtins(file, arch, use_c) {
         Ok(ltac) => ltac,
         Err(_e) => return Err(()),
     };
     
+    if arch == Arch::AArch64 {
+        file2 = match risc_optimize(file) {
+            Ok(ltac) => ltac,
+            Err(_e) => return Err(()),
+        };
+    }
+    
     Ok(file2)
+}
+
+// Scans the code and optimizes expressions for RISC architectures
+fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
+    let mut file = LtacFile {
+        name : original.name.clone(),
+        data : original.data.clone(),
+        code : Vec::new(),
+    };
+    
+    let code = original.code.clone();
+    
+    // Note: Intermediate moves should go in r2 (r0 and r1 for math)
+    for line in code.iter() {
+        match &line.instr_type {
+        
+            // Store immediate to variable
+            LtacType::Mov 
+            if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::I32 => {
+                let mut instr = ltac::create_instr(LtacType::Mov);
+                instr.arg1_type = LtacArg::Reg;
+                instr.arg1_val = 2;
+                instr.arg2_type = LtacArg::I32;
+                instr.arg2_val = line.arg2_val;
+                
+                file.code.push(instr.clone());
+                
+                instr = line.clone();
+                instr.arg2_type = LtacArg::Reg;
+                instr.arg2_val = 2;
+                
+                file.code.push(instr.clone());
+            },
+            
+            _ => file.code.push(line.clone()),
+        }
+    }
+    
+    Ok(file)
 }
 
 // Scans the code for malloc, free, and exit instructions
