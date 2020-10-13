@@ -5,18 +5,20 @@ use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
 // Builds a load/store instruction
-pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32, load : bool) {
+pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line : String;
     let pos = stack_size - code.arg1_val;
     
-    if load {
-        line = "  ldr ".to_string();
-    } else {
-        line = "  str ".to_string();
+    match &code.instr_type {
+        LtacType::Ld => line = "  ldr ".to_string(),
+        LtacType::StrB => line = "  strb ".to_string(),
+        LtacType::Str => line = "  str ".to_string(),
+        
+        _ => line = String::new(),
     }
     
     match &code.arg2_type {
-        LtacArg::Reg => {
+        LtacArg::Reg | LtacArg::Reg8 => {
             let reg = aarch64_op_reg32(code.arg2_val);
             line.push_str(&reg);
         },
@@ -66,7 +68,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "  mov ".to_string();
     
     match &code.arg1_type {
-        LtacArg::Reg => {
+        LtacArg::Reg | LtacArg::Reg8 => {
             let reg = aarch64_op_reg32(code.arg1_val);
         
             line.push_str(&reg);
@@ -93,6 +95,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI32 => line.push_str("w0"),
         LtacArg::RetRegI64 => line.push_str("x0"),
         
+        LtacArg::Byte => line.push_str(&code.arg2_bval.to_string()),
         LtacArg::I32 => line.push_str(&code.arg2_val.to_string()),
         
         _ => {},
