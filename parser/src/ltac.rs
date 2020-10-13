@@ -22,6 +22,9 @@ pub enum LtacType {
     MovOffMem,
     MovI32Vec,
     
+    Ld,
+    Str,
+    
     LdArgI32,
     LdArgF32,
     LdArgF64,
@@ -249,6 +252,9 @@ impl LtacInstr {
             LtacType::MovOffImm => print!("  mov.imm "),
             LtacType::MovOffMem => print!("  mov.mem "),
             LtacType::MovI32Vec => print!("  mov.i32.vec "),
+            
+            LtacType::Ld => print!("  ld "),
+            LtacType::Str => print!("  str "),
             
             LtacType::PushArg => print!("  pusharg "),
             LtacType::KPushArg => print!("  kpusharg "),

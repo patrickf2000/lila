@@ -207,6 +207,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Exit => {},
             LtacType::Malloc => {},
             LtacType::Free => {},
+            
+            // These are RISC-specific. At some point, we should generate instructions for them
+            LtacType::Ld => {},
+            LtacType::Str => {},
         }
     }
 }

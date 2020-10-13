@@ -4,8 +4,78 @@ use std::io::{Write, BufWriter};
 use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
+// Should we eventually combine the load/store instructions?
+
+// Builds a load/store instruction
+pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32, load : bool) {
+    let mut line : String;
+    let pos = stack_size - code.arg1_val;
+    
+    if load {
+        line = "  ldr ".to_string();
+    } else {
+        line = "  str ".to_string();
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::RetRegI32 => line.push_str("w0"),
+        LtacArg::RetRegI64 => line.push_str("x0"),
+        
+        _ => {},
+    }
+    
+    line.push_str(", [sp, ");
+    line.push_str(&pos.to_string());
+    line.push_str("]\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_ld_str] Write failed.");
+}
+
 // A common function for data moves
-pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = "  mov ".to_string();
+    
+    match &code.arg1_type {
+        LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg1_val);
+        
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
+        
+        LtacArg::RetRegI32 => line.push_str("w0, "),
+        LtacArg::RetRegI64 => line.push_str("x0, "),
+        
+        _ => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::RetRegI32 => line.push_str("w0"),
+        LtacArg::RetRegI64 => line.push_str("x0"),
+        
+        LtacArg::I32 => line.push_str(&code.arg2_val.to_string()),
+        
+        _ => {},
+    }
+    
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_mov] Write failed.");
+}
+
+/*pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line = "".to_string();
     
     // Check if we're storing to a variable
@@ -123,7 +193,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr, stack
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_mov] Write failed.");
-}
+}*/
 
 // A move with offset instruction
 pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {

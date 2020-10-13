@@ -56,11 +56,36 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                 
                 file.code.push(instr.clone());
                 
-                instr = line.clone();
+                instr = ltac::create_instr(LtacType::Str);
+                instr.arg1_type = LtacArg::Mem;
+                instr.arg1_val = line.arg1_val;
                 instr.arg2_type = LtacArg::Reg;
                 instr.arg2_val = 2;
                 
                 file.code.push(instr.clone());
+            },
+            
+            // Store memory to register
+            LtacType::Mov if line.arg2_type == LtacArg::Mem => {
+                let mut instr = ltac::create_instr(LtacType::Ld);
+                instr.arg1_type = LtacArg::Mem;
+                instr.arg1_val = line.arg2_val;
+                instr.arg2_type = line.arg1_type.clone();
+                instr.arg2_val = line.arg1_val;
+                
+                file.code.push(instr.clone());
+            },
+            
+            // Store register to variable
+            LtacType::Mov if line.arg1_type == LtacArg::Mem => {
+                if line.arg2_type == LtacArg::Reg
+                    || line.arg2_type == LtacArg::RetRegI32 || line.arg2_type == LtacArg::RetRegI64 {
+                    let mut instr = line.clone();
+                    instr.instr_type = LtacType::Ld;
+                    file.code.push(instr);   
+                } else {
+                    file.code.push(line.clone());
+                }
             },
             
             _ => file.code.push(line.clone()),

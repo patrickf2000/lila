@@ -1,6 +1,10 @@
 
-func main
+func main -> int
     int x = 20
+    int y = x * 2
     
     printf("X: %d\n", x)
+    printf("Y: %d\n", y)
+    
+    return 5
 end
