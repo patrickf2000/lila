@@ -91,6 +91,17 @@ pub fn amd64_op_reg64(pos : i32) -> String {
     };
 }
 
+pub fn amd64_op_reg8(pos : i32) -> String {
+    match pos {
+        0 => return "bl".to_string(),
+        1 => return "cl".to_string(),
+        2 => return "r10b".to_string(),
+        3 => return "r11b".to_string(),
+        4 => return "r12b".to_string(),
+        _ => return String::new(),
+    };
+}
+
 // xmm0 and xmm1 are reserved for internal operations
 pub fn amd64_op_flt(pos : i32) -> String {
     match pos {

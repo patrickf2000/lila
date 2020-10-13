@@ -18,7 +18,9 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         reg64 = amd64_karg_reg64(code.arg2_val);
     }
     
-    if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
+    if code.arg1_type == LtacArg::Reg8 {
+        line = "  movzx ".to_string();
+    } else if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
         line = "  movss ".to_string();
     } else if code.arg2_type == LtacArg::FltReg64 || code.arg2_type == LtacArg::F64 {
         line = "  movsd ".to_string();
@@ -29,7 +31,15 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Empty => {},
         
         LtacArg::Reg => {},
-        LtacArg::Reg8 => {},
+        
+        LtacArg::Reg8 => {
+            let reg = amd64_op_reg8(code.arg1_val);
+            
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&reg);
+        },
+        
         LtacArg::Reg64 => {},
         LtacArg::FltReg => {},
         LtacArg::FltReg64 => {},
@@ -51,7 +61,11 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str("]");
         },
         
-        LtacArg::Byte => {},
+        LtacArg::Byte => {
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&code.arg1_bval.to_string());
+        },
         
         LtacArg::I32 => {
             line.push_str(&reg32);

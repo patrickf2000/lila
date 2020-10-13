@@ -152,7 +152,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Ret => amd64_build_ret(writer),
             
             LtacType::Mov => amd64_build_instr(writer, &code),
-            LtacType::MovB => {},
+            LtacType::MovB => amd64_build_instr(writer, &code),
             LtacType::MovF32 => amd64_build_instr(writer, &code),
             LtacType::MovF64 => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
@@ -247,7 +247,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     // The instruction
     match &code.instr_type {
-        LtacType::Mov => line.push_str("  mov "),
+        LtacType::Mov | LtacType::MovB => line.push_str("  mov "),
         LtacType::MovF32 => line.push_str("  movss "),
         LtacType::MovF64 => line.push_str("  movsd "),
         
@@ -288,7 +288,11 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::Reg8 => {},
+        LtacArg::Reg8 => {
+            let reg = amd64_op_reg8(code.arg1_val);
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         LtacArg::Reg64 => {
             let reg = amd64_op_reg64(code.arg1_val);
@@ -308,7 +312,9 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0, "),
         
         LtacArg::Mem => {
-            if code.arg2_type == LtacArg::I32 || code.arg2_type == LtacArg::F32 {
+            if code.arg2_type == LtacArg::Byte {
+                line.push_str("BYTE PTR ");
+            } else if code.arg2_type == LtacArg::I32 || code.arg2_type == LtacArg::F32 {
                 line.push_str("DWORD PTR ");
             } else if code.arg2_type == LtacArg::F64 || code.arg2_type == LtacArg::Ptr {
                 line.push_str("QWORD PTR ");
@@ -337,7 +343,10 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::Reg8 => {},
+        LtacArg::Reg8 => {
+            let reg = amd64_op_reg8(code.arg2_val);
+            line.push_str(&reg);
+        },
         
         LtacArg::Reg64 => {
             let reg = amd64_op_reg64(code.arg2_val);
@@ -360,7 +369,9 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("]");
         },
         
-        LtacArg::Byte => {},
+        LtacArg::Byte => {
+            line.push_str(&code.arg2_bval.to_string());
+        },
         
         LtacArg::I32 => {
             line.push_str(&code.arg2_val.to_string());
