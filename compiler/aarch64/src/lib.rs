@@ -157,7 +157,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Malloc => {},
             LtacType::Free => {},
             
-            LtacType::I32Cmp => aarch64_build_instr(writer, &code, stack_size),
+            LtacType::I32Cmp => aarch64_build_instr(writer, &code),
             LtacType::F32Cmp => {},
             LtacType::F64Cmp => {},
             LtacType::StrCmp => aarch64_build_strcmp(writer, &code),
@@ -174,11 +174,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => {},
             LtacType::Bfge => {},
             
-            LtacType::I32Add => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Sub => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Mul => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Div => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Mod => aarch64_build_instr(writer, &code, stack_size),
+            LtacType::I32Add => aarch64_build_instr(writer, &code),
+            LtacType::I32Sub => aarch64_build_instr(writer, &code),
+            LtacType::I32Mul => aarch64_build_instr(writer, &code),
+            LtacType::I32Div => aarch64_build_instr(writer, &code),
+            LtacType::I32Mod => aarch64_build_instr(writer, &code),
             
             LtacType::F32Add => {},
             LtacType::F32Sub => {},
@@ -190,18 +190,95 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::F64Mul => {},
             LtacType::F64Div => {},
             
-            LtacType::I32And => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Or => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Xor => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Lsh => aarch64_build_instr(writer, &code, stack_size),
-            LtacType::I32Rsh => aarch64_build_instr(writer, &code, stack_size),
+            LtacType::I32And => aarch64_build_instr(writer, &code),
+            LtacType::I32Or => aarch64_build_instr(writer, &code),
+            LtacType::I32Xor => aarch64_build_instr(writer, &code),
+            LtacType::I32Lsh => aarch64_build_instr(writer, &code),
+            LtacType::I32Rsh => aarch64_build_instr(writer, &code),
             LtacType::I32VAdd => {},
         }
     }
 }
 
 // A common function for several instructions
-fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    let mut dest_line = String::new();
+    
+    let mut dest = "w0".to_string();
+    let mut src = "w0".to_string();
+    
+    match &code.instr_type {
+        LtacType::I32Add => line.push_str("  add "),
+        LtacType::I32Sub => line.push_str("  sub "),
+        LtacType::I32Mul => line.push_str("  mul "),
+        LtacType::I32Div => line.push_str("  sdiv "),
+        LtacType::I32Mod => line.push_str("  udiv "),
+        LtacType::I32And => line.push_str("  and "),
+        LtacType::I32Or => line.push_str("  orr "),
+        LtacType::I32Xor => line.push_str("  eor "),
+        LtacType::I32Lsh => line.push_str("  lsl "),
+        LtacType::I32Rsh => line.push_str("  lsr "),
+        LtacType::I32Cmp => line.push_str("  cmp "),
+        
+        _ => {},
+    }
+    
+    match &code.arg1_type {
+        LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg1_val);
+            dest = reg.clone();
+        
+            dest_line.push_str(&reg);
+            dest_line.push_str(", ");
+        },
+        
+        LtacArg::RetRegI32 => dest_line.push_str("w0, "),
+        LtacArg::RetRegI64 => dest_line.push_str("x0, "),
+        
+        _ => {},
+    }
+    
+    if code.instr_type == LtacType::I32Mod {
+        line.push_str("w4, ");
+    } else if code.instr_type != LtacType::I32Cmp {
+        line.push_str(&dest_line);
+    }
+    
+    line.push_str(&dest_line);
+    
+    match &code.arg2_type {
+        LtacArg::Reg => {
+            let reg = aarch64_op_reg32(code.arg2_val);
+            src = reg.clone();
+            
+            line.push_str(&reg);
+        },
+        
+        LtacArg::RetRegI32 => line.push_str("w0"),
+        LtacArg::RetRegI64 => line.push_str("x0"),
+        
+        _ => {},
+    }
+    
+    line.push_str("\n");
+    
+    // For modulo
+    if code.instr_type == LtacType::I32Mod {
+        line.push_str("  msub ");
+        line.push_str(&dest);
+        line.push_str(", w4, ");
+        line.push_str(&src);
+        line.push_str(", ");
+        line.push_str(&dest);
+        line.push_str("\n");
+    }
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_instr] Write failed.");
+}
+
+/*fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line = String::new();
     
     match &code.instr_type {
@@ -312,7 +389,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_s
     
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_math] Write failed.");
-}
+}*/
 
 // Generates the flow control instructions
 fn aarch64_build_branch(writer : &mut BufWriter<File>, code : &LtacInstr) {

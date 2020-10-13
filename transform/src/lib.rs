@@ -32,6 +32,10 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> 
 }
 
 // Scans the code and optimizes expressions for RISC architectures
+// Although some RISC architectures support more advanced instructions (ie, math with immediates),
+//    we are creating a MIPS-like structure to be sure everything is supported. This should not affect
+//    code density too much, but if its a problem you can create another layer to further optimize for
+//    your architecture.
 fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
     let mut file = LtacFile {
         name : original.name.clone(),
@@ -81,11 +85,41 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                 if line.arg2_type == LtacArg::Reg
                     || line.arg2_type == LtacArg::RetRegI32 || line.arg2_type == LtacArg::RetRegI64 {
                     let mut instr = line.clone();
-                    instr.instr_type = LtacType::Ld;
+                    instr.instr_type = LtacType::Str;
                     file.code.push(instr);   
                 } else {
                     file.code.push(line.clone());
                 }
+            },
+            
+            // Integer arithmetic instructions
+            LtacType::I32Add | LtacType::I32Sub | LtacType::I32Mul | LtacType::I32Div | LtacType::I32Mod |
+            LtacType::I32And | LtacType::I32Or | LtacType::I32Xor | LtacType::I32Lsh | LtacType::I32Rsh |
+            LtacType::I32Cmp
+            if (line.arg2_type == LtacArg::I32 || line.arg2_type == LtacArg::Mem) => {
+                let mut instr = ltac::create_instr(LtacType::Mov);
+            
+                if line.arg2_type == LtacArg::I32 {
+                    instr = ltac::create_instr(LtacType::Mov);
+                    instr.arg1_type = LtacArg::Reg;
+                    instr.arg1_val = 1;
+                    instr.arg2_type = LtacArg::I32;
+                    instr.arg2_val = line.arg2_val;
+                } else if line.arg2_type == LtacArg::Mem {
+                    instr = ltac::create_instr(LtacType::Ld);
+                    instr.arg1_type = LtacArg::Mem;
+                    instr.arg1_val = line.arg2_val;
+                    instr.arg2_type = LtacArg::Reg;
+                    instr.arg2_val = 1;
+                }
+                
+                file.code.push(instr);
+                
+                instr = line.clone();
+                instr.arg2_type = LtacArg::Reg;
+                instr.arg2_val = 1;
+                
+                file.code.push(instr);
             },
             
             _ => file.code.push(line.clone()),
