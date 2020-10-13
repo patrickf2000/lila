@@ -211,6 +211,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // These are RISC-specific. At some point, we should generate instructions for them
             LtacType::Ld => {},
+            LtacType::LdB => {},
             LtacType::Str => {},
             LtacType::StrB => {},
             LtacType::StrPtr => {},

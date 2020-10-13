@@ -11,6 +11,7 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
     
     match &code.instr_type {
         LtacType::Ld => line = "  ldr ".to_string(),
+        LtacType::LdB => line = "  ldrb ".to_string(),
         LtacType::StrB => line = "  strb ".to_string(),
         LtacType::Str => line = "  str ".to_string(),
         

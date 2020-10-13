@@ -23,6 +23,16 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     // Build the arguments
     for arg in line.args.iter() {
         match &arg.arg_type {
+            AstArgType::ByteL => {
+                let mut push = ltac::create_instr(arg_type.clone());
+                push.arg1_type = LtacArg::Byte;
+                push.arg1_bval = arg.u8_val.clone();
+                push.arg2_val = arg_no;
+                builder.file.code.push(push);
+                
+                arg_no += 1;
+            },
+            
             AstArgType::IntL => {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg1_type = LtacArg::I32;
@@ -69,7 +79,17 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                     Some(v) => {
                         push.arg1_val = v.pos;
                         
-                        if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
+                        if v.data_type == DataType::Byte {
+                            push.arg1_type = LtacArg::Reg8;
+                            push.arg1_val = 2;
+                            
+                            let mut instr = ltac::create_instr(LtacType::MovB);
+                            instr.arg1_type = LtacArg::Reg8;
+                            instr.arg1_val = 2;
+                            instr.arg2_type = LtacArg::Mem;
+                            instr.arg2_val = v.pos;
+                            builder.file.code.push(instr);
+                        } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
                             push.arg1_type = LtacArg::Ptr;
                         } else if v.data_type == DataType::Float {
                             push.arg2_type = LtacArg::FltReg;

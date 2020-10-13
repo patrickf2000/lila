@@ -144,6 +144,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Exit => {},
             
             LtacType::Ld => aarch64_build_ld_str(writer, &code, stack_size),
+            LtacType::LdB => aarch64_build_ld_str(writer, &code, stack_size),
             LtacType::Str => aarch64_build_ld_str(writer, &code, stack_size),
             LtacType::StrB => aarch64_build_ld_str(writer, &code, stack_size),
             LtacType::StrPtr => aarch64_build_strptr(writer, &code, stack_size),

@@ -4,6 +4,8 @@ extern func puts(s:str)
 func main -> int
     byte x = 0x45
     
+    printf("%x\n", x)
+    printf("%x\n", 0xAA)
     
     return 0
 end

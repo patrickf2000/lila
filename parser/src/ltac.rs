@@ -24,6 +24,7 @@ pub enum LtacType {
     MovI32Vec,
     
     Ld,
+    LdB,
     Str,
     StrB,
     StrPtr,
@@ -264,6 +265,7 @@ impl LtacInstr {
             LtacType::MovI32Vec => print!("  mov.i32.vec "),
             
             LtacType::Ld => print!("  ld "),
+            LtacType::LdB => print!("  ld.b "),
             LtacType::Str => print!("  str "),
             LtacType::StrB => print!("  str.b "),
             LtacType::StrPtr => print!("  str.ptr "),

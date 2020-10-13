@@ -17,8 +17,16 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
     }
     
     match &code.arg1_type {
-        LtacArg::Reg => {},
-        
+        LtacArg::Reg | LtacArg::Reg8 => {
+            let reg = aarch64_op_reg32(code.arg1_val);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+    
         LtacArg::Mem => {
             let pos = stack_size - code.arg1_val;
             line.push_str("  ldr ");
@@ -26,6 +34,14 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
             line.push_str(", [sp, ");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
+        },
+        
+        LtacArg::Byte => {
+            line.push_str("  mov ");
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&code.arg1_bval.to_string());
+            line.push_str("\n");
         },
         
         LtacArg::I32 => {
