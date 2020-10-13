@@ -49,6 +49,26 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
     for line in code.iter() {
         match &line.instr_type {
         
+            // Store byte to variable
+            LtacType::MovB
+            if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::Byte => {
+                let mut instr = ltac::create_instr(LtacType::MovB);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 2;
+                instr.arg2_type = LtacArg::Byte;
+                instr.arg2_bval = line.arg2_bval;
+                
+                file.code.push(instr.clone());
+                
+                instr = ltac::create_instr(LtacType::StrB);
+                instr.arg1_type = LtacArg::Mem;
+                instr.arg1_val = line.arg1_val;
+                instr.arg2_type = LtacArg::Reg8;
+                instr.arg2_val = 2;
+                
+                file.code.push(instr.clone()); 
+            },
+        
             // Store immediate to variable
             LtacType::Mov 
             if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::I32 => {

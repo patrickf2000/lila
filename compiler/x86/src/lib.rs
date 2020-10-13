@@ -152,6 +152,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Ret => amd64_build_ret(writer),
             
             LtacType::Mov => amd64_build_instr(writer, &code),
+            LtacType::MovB => {},
             LtacType::MovF32 => amd64_build_instr(writer, &code),
             LtacType::MovF64 => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
@@ -211,6 +212,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // These are RISC-specific. At some point, we should generate instructions for them
             LtacType::Ld => {},
             LtacType::Str => {},
+            LtacType::StrB => {},
             LtacType::StrPtr => {},
         }
     }
@@ -285,6 +287,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
+        LtacArg::Reg8 => {},
+        
         LtacArg::Reg64 => {
             let reg = amd64_op_reg64(code.arg1_val);
             line.push_str(&reg);
@@ -314,6 +318,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("], ");
         },
         
+        LtacArg::Byte => {},
         LtacArg::I32 => {},
         
         LtacArg::F32 | LtacArg::F64 => {
@@ -330,6 +335,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             let reg = amd64_op_reg32(code.arg2_val);
             line.push_str(&reg);
         },
+        
+        LtacArg::Reg8 => {},
         
         LtacArg::Reg64 => {
             let reg = amd64_op_reg64(code.arg2_val);
@@ -351,6 +358,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&code.arg2_val.to_string());
             line.push_str("]");
         },
+        
+        LtacArg::Byte => {},
         
         LtacArg::I32 => {
             line.push_str(&code.arg2_val.to_string());
@@ -422,6 +431,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
             line.push_str(", ");
         },
+        
+        LtacArg::Reg8 => {},
         
         LtacArg::Reg64 => {
             let reg = amd64_op_reg64(code.arg1_val);
@@ -495,6 +506,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             }
         },
         
+        LtacArg::Byte => {},
         LtacArg::I32 => {},
         LtacArg::F32 => {},
         LtacArg::F64 => {},
@@ -514,6 +526,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
+        LtacArg::Reg8 => {},
+        
         LtacArg::FltReg => {},
         LtacArg::FltReg64 => {},
         
@@ -531,6 +545,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 line.push_str("]");
             }
         },
+        
+        LtacArg::Byte => {},
         
         LtacArg::I32 => {
             line.push_str(&code.arg2_val.to_string());

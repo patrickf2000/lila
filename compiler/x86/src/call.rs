@@ -29,6 +29,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Empty => {},
         
         LtacArg::Reg => {},
+        LtacArg::Reg8 => {},
         LtacArg::Reg64 => {},
         LtacArg::FltReg => {},
         LtacArg::FltReg64 => {},
@@ -49,6 +50,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&code.arg1_val.to_string());
             line.push_str("]");
         },
+        
+        LtacArg::Byte => {},
         
         LtacArg::I32 => {
             line.push_str(&reg32);

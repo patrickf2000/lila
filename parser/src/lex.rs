@@ -17,6 +17,7 @@ pub enum Token {
     Break,
     Continue,
     
+    Byte,
     Int,
     Float,
     Double,
@@ -51,6 +52,7 @@ pub enum Token {
     OpRightShift,
     
     Id(String),
+    ByteL(u8),
     IntL(i32),
     FloatL(f64),
     StringL(String),
@@ -262,6 +264,17 @@ impl Lex {
     // Returns a keyword for a given buffer
     fn get_keyword(&self, current : String) -> Token {
         // Check to see if we have a literal
+        // Start with hex
+        match current.get(..2) {
+            Some("0x") => {
+                let base = current.trim_start_matches("0x");
+                return Token::ByteL(u8::from_str_radix(base, 16).unwrap());
+            },
+            
+            _ => {},
+        }
+        
+        // Check other literals
         if current.parse::<i32>().is_ok() {
             return Token::IntL(current.parse::<i32>().unwrap());
         } else if current.parse::<f64>().is_ok() {
@@ -277,6 +290,7 @@ impl Lex {
             "return" => token = Token::Return,
             "exit" => token = Token::Exit,
             "end" => token = Token::End,
+            "byte" => token = Token::Byte,
             "int" => token = Token::Int,
             "float" => token = Token::Float,
             "double" => token = Token::Double,

@@ -18,6 +18,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
     let data_type : DataType;
     
     match &ast_data_type.mod_type {
+        AstModType::Byte => {
+            data_type = DataType::Byte;
+            builder.stack_pos += 1;
+        },
+    
         AstModType::Int => {
             data_type = DataType::Int;
             builder.stack_pos += 4;
@@ -120,7 +125,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     instr.arg1_type = LtacArg::Reg;
     instr.arg1_val = 0;
     
-    if var.data_type == DataType::Float {
+    if var.data_type == DataType::Byte {
+        instr = ltac::create_instr(LtacType::MovB);
+        instr.arg1_type = LtacArg::Reg8;
+        instr.arg1_val = 0;
+    } else if var.data_type == DataType::Float {
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::FltReg;
         instr.arg1_val = 0;
@@ -132,6 +141,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     
     for arg in args.iter() {
         match &arg.arg_type {
+            AstArgType::ByteL if var.data_type == DataType::Byte => {
+                instr.arg2_type = LtacArg::Byte;
+                instr.arg2_bval = arg.u8_val;
+                builder.file.code.push(instr.clone());
+            },
+            
+            AstArgType::ByteL => {},
+        
             AstArgType::IntL if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray => {
                 instr.arg2_type = LtacArg::I32;
                 instr.arg2_val = arg.i32_val;
@@ -393,6 +410,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg1_val = var.pos;
         instr.arg2_type = top.arg2_type;
         instr.arg2_val = top.arg2_val;
+        instr.arg2_bval = top.arg2_bval;
         instr.arg2_sval = top.arg2_sval;
         instr.arg2_offset = top.arg2_offset;
         instr.arg2_offset_size = top.arg2_offset_size;

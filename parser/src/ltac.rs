@@ -16,6 +16,7 @@ pub enum LtacType {
     Ret,
     
     Mov,
+    MovB,
     MovF32,
     MovF64,
     MovOffImm,
@@ -24,6 +25,7 @@ pub enum LtacType {
     
     Ld,
     Str,
+    StrB,
     StrPtr,
     
     LdArgI32,
@@ -87,6 +89,7 @@ pub enum LtacType {
 pub enum LtacArg {
     Empty,
     Reg,
+    Reg8,
     Reg64,
     FltReg,
     FltReg64,
@@ -95,6 +98,7 @@ pub enum LtacArg {
     RetRegF32,
     RetRegF64,
     Mem,
+    Byte,
     I32,
     F32,
     F64,
@@ -125,12 +129,14 @@ pub struct LtacInstr {
     
     pub arg1_type : LtacArg,
     pub arg1_val : i32,
+    pub arg1_bval : u8,
     pub arg1_sval : String,
     pub arg1_offset : i32,
     pub arg1_offset_size : i32,
     
     pub arg2_type : LtacArg,
     pub arg2_val : i32,
+    pub arg2_bval : u8,
     pub arg2_sval : String,
     pub arg2_offset : i32,
     pub arg2_offset_size : i32,
@@ -146,12 +152,14 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         
         arg1_type : LtacArg::Empty,
         arg1_val : 0,
+        arg1_bval : 0,
         arg1_sval : String::new(),
         arg1_offset : 0,
         arg1_offset_size : 0,
         
         arg2_type : LtacArg::Empty,
         arg2_val : 0,
+        arg2_bval : 0,
         arg2_sval : String::new(),
         arg2_offset : 0,
         arg2_offset_size : 0,
@@ -248,6 +256,7 @@ impl LtacInstr {
             },
             
             LtacType::Mov => print!("  mov "),
+            LtacType::MovB => print!("  mov.b "),
             LtacType::MovF32 => print!("  mov.f32 "),
             LtacType::MovF64 => print!("  mov.f64 "),
             LtacType::MovOffImm => print!("  mov.imm "),
@@ -256,6 +265,7 @@ impl LtacInstr {
             
             LtacType::Ld => print!("  ld "),
             LtacType::Str => print!("  str "),
+            LtacType::StrB => print!("  str.b "),
             LtacType::StrPtr => print!("  str.ptr "),
             
             LtacType::PushArg => print!("  pusharg "),
@@ -335,6 +345,7 @@ impl LtacInstr {
             LtacArg::Empty => print!(" "),
             
             LtacArg::Reg => print!("r{}", self.arg1_val),
+            LtacArg::Reg8 => print!("rl{}", self.arg1_val),
             LtacArg::Reg64 => print!("xr{}", self.arg1_val),
             LtacArg::FltReg => print!("fr{}", self.arg1_val),
             LtacArg::FltReg64 => print!("dr{}", self.arg1_val),
@@ -354,6 +365,7 @@ impl LtacInstr {
                 }
             },
             
+            LtacArg::Byte => print!("{}", self.arg1_bval),
             LtacArg::I32 => print!("{}", self.arg1_val),
             LtacArg::F32 => print!("{}", self.arg1_sval),
             LtacArg::F64 => print!("{}", self.arg1_sval),
@@ -371,6 +383,7 @@ impl LtacInstr {
             LtacArg::Empty => println!(""),
             
             LtacArg::Reg => println!(", r{}", self.arg2_val),
+            LtacArg::Reg8 => println!(", rl{}", self.arg2_val),
             LtacArg::Reg64 => println!(", xr{}", self.arg2_val),
             LtacArg::FltReg => println!(", fr{}", self.arg2_val),
             LtacArg::FltReg64 => println!(", dr{}", self.arg2_val),
@@ -390,6 +403,7 @@ impl LtacInstr {
                 }
             },
             
+            LtacArg::Byte => println!(", {}", self.arg2_bval),
             LtacArg::I32 => println!(", {}", self.arg2_val),
             LtacArg::F32 => println!(", {}", self.arg2_sval),
             LtacArg::F64 => println!(", {}", self.arg2_sval),
