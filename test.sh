@@ -60,12 +60,12 @@ run_test 'test/cond/*.qk' 'clib' $1
 run_test 'test/func/*.qk' 'clib' $1
 run_test 'test/loop/*.qk' 'clib' $1
 run_test 'test/array/*.qk' 'clib' $1
-run_test 'test/float/*.qk' 'clib' $1
 run_test 'test/string/*.qk' 'clib' $1
 run_test 'test/errors/*.qk' 'clib' $1 "error"
 run_test 'test/errors/ltac/*.qk' "clib" $1 "error"
 
 if [[ $1 == "x86-64" ]] ; then
+    run_test 'test/float/*.qk' 'clib' $1
     run_test 'test/vector/*.qk' 'clib' $1
     run_test 'test/syscall/x86-64/*.qk' 'sys' $1
 elif [[ $1 == "aarch64" ]] ; then
