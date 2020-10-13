@@ -72,3 +72,16 @@ pub fn aarch64_op_reg32(pos : i32) -> String {
     }
 }
 
+pub fn aarch64_op_reg64(pos : i32) -> String {
+    match pos {
+        0 => "x9".to_string(),
+        1 => "x10".to_string(),
+        2 => "x11".to_string(),
+        3 => "x12".to_string(),
+        4 => "x13".to_string(),
+        5 => "x14".to_string(),
+        6 => "x15".to_string(),
+        _ => String::new(),
+    }
+}
+

@@ -22,7 +22,7 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> 
     };
     
     if arch == Arch::AArch64 {
-        file2 = match risc_optimize(file) {
+        file2 = match risc_optimize(&file2) {
             Ok(ltac) => ltac,
             Err(_e) => return Err(()),
         };
@@ -69,6 +69,14 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                 file.code.push(instr.clone());
             },
             
+            // Store pointer to variable
+            LtacType::Mov
+            if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::Ptr => {
+                let mut instr = line.clone();
+                instr.instr_type = LtacType::StrPtr;
+                file.code.push(instr.clone());
+            },
+            
             // Store memory to register
             LtacType::Mov if line.arg2_type == LtacArg::Mem => {
                 let mut instr = ltac::create_instr(LtacType::Ld);
@@ -82,7 +90,7 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             
             // Store register to variable
             LtacType::Mov if line.arg1_type == LtacArg::Mem => {
-                if line.arg2_type == LtacArg::Reg
+                if line.arg2_type == LtacArg::Reg || line.arg2_type == LtacArg::Reg64
                     || line.arg2_type == LtacArg::RetRegI32 || line.arg2_type == LtacArg::RetRegI64 {
                     let mut instr = line.clone();
                     instr.instr_type = LtacType::Str;

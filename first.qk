@@ -1,41 +1,25 @@
 
 #OUTPUT
-#2 ** 4 = 16
+#Hi!
+#Hi!
+#How are you?
 #END
 
 #RET 0
 
-extern func printf(s:str, ...)
+extern func puts(s:str)
 
-# Raises the base to a power
-func pow(base:int, n:int) -> int
-    int base = 2
-    int n = 4
-    int result = 1
-    
-    # Calculate
-    while n != 0
-        int i = n & 1
-        if i != 0
-            result = result * base
-        end
-        
-        n = n >> 1
-        base = base * base
-    end
-    
-    return result
+func println(s:str)
+    puts(s)
 end
 
 func main -> int
-    # 2 ** 4 = 16
+    str s1 = "Hi!"
+    str s2 = s1
     
-    int base = 2
-    int n = 4
-    int result = pow(base, n)
-    
-    printf("%d ** %d = %d\n", base, n, result)
+    println(s1)
+    println(s2)
+    println("How are you?")
     
     return 0
 end
-

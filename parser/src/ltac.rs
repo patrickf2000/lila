@@ -24,6 +24,7 @@ pub enum LtacType {
     
     Ld,
     Str,
+    StrPtr,
     
     LdArgI32,
     LdArgF32,
@@ -255,6 +256,7 @@ impl LtacInstr {
             
             LtacType::Ld => print!("  ld "),
             LtacType::Str => print!("  str "),
+            LtacType::StrPtr => print!("  str.ptr "),
             
             LtacType::PushArg => print!("  pusharg "),
             LtacType::KPushArg => print!("  kpusharg "),

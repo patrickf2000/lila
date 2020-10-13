@@ -4,8 +4,6 @@ use std::io::{Write, BufWriter};
 use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
-// Should we eventually combine the load/store instructions?
-
 // Builds a load/store instruction
 pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32, load : bool) {
     let mut line : String;
@@ -23,6 +21,11 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             line.push_str(&reg);
         },
         
+        LtacArg::Reg64 => {
+            let reg = aarch64_op_reg64(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
         LtacArg::RetRegI32 => line.push_str("w0"),
         LtacArg::RetRegI64 => line.push_str("x0"),
         
@@ -37,6 +40,27 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         .expect("[AARCH64_build_ld_str] Write failed.");
 }
 
+// Builds the store-pointer instruction
+pub fn aarch64_build_strptr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+    let mut line = String::new();
+    let pos = stack_size - code.arg1_val;
+    
+    line.push_str("  adrp x4, ");
+    line.push_str(&code.arg2_sval);
+    line.push_str("\n");
+    
+    line.push_str("  add x4, x4, :lo12:");
+    line.push_str(&code.arg2_sval);
+    line.push_str("\n");
+    
+    line.push_str("  str x4, [sp, ");
+    line.push_str(&pos.to_string());
+    line.push_str("]\n\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AARCH64_build_strptr] Write failed.");
+}
+
 // A common function for data moves
 pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "  mov ".to_string();
@@ -47,6 +71,11 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
             line.push_str(&reg);
             line.push_str(", ");
+        },
+        
+        LtacArg::Reg64 => {
+            let reg = aarch64_op_reg64(code.arg2_val);
+            line.push_str(&reg);
         },
         
         LtacArg::RetRegI32 => line.push_str("w0, "),

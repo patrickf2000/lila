@@ -142,14 +142,17 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgPtr => aarch64_build_ldarg(writer, &code, stack_size),
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
             LtacType::Exit => {},
+            
             LtacType::Ld => aarch64_build_ld_str(writer, &code, stack_size, true),
             LtacType::Str => aarch64_build_ld_str(writer, &code, stack_size, false),
+            LtacType::StrPtr => aarch64_build_strptr(writer, &code, stack_size),
             LtacType::Mov => aarch64_build_mov(writer, &code),
             LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovOffImm => aarch64_build_mov_offset(writer, &code, stack_size),
             LtacType::MovOffMem => aarch64_build_mov_offset(writer, &code, stack_size),
             LtacType::MovI32Vec => {},
+            
             LtacType::PushArg => aarch64_build_pusharg(writer, &code, false, stack_size),
             LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true, stack_size),
             LtacType::Call => aarch64_build_call(writer, &code),
