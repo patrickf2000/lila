@@ -1,4 +1,6 @@
 
+use std::mem;
+
 use crate::ltac_builder::*;
 use crate::ast;
 use crate::ast::{AstStmt, AstStmtType, AstModType, AstArgType};
@@ -147,7 +149,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 builder.file.code.push(instr.clone());
             },
             
-            AstArgType::ByteL => {},
+            AstArgType::ByteL => {
+                builder.syntax.ltac_error(&line, "Invalid use of byte literal.".to_string());
+                return false;
+            },
         
             AstArgType::IntL if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray => {
                 instr.arg2_type = LtacArg::I32;
@@ -155,7 +160,26 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 builder.file.code.push(instr.clone());
             },
             
-            AstArgType::IntL => {},
+            AstArgType::IntL if var.data_type == DataType::Byte => {
+                let val = arg.i32_val;
+                
+                if mem::size_of::<u8>() > (val as usize) {
+                    builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
+                    return false;
+                }
+                
+                let parts = unsafe { mem::transmute::<i32, [u8; 4]>(val) };
+                let result = parts[0];
+                
+                instr.arg2_type = LtacArg::Byte;
+                instr.arg2_bval = result;
+                builder.file.code.push(instr.clone());
+            },
+            
+            AstArgType::IntL => {
+                builder.syntax.ltac_error(&line, "Invalid use of integer.".to_string());
+                return false;
+            },
             
             AstArgType::FloatL if var.data_type == DataType::Float => {
                 instr.arg2_type = LtacArg::F32;
@@ -260,6 +284,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 instr.arg1_val = 0;
             },
             
+            AstArgType::OpAdd if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BAdd);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
             AstArgType::OpAdd 
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Add);
@@ -286,6 +316,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 instr.arg1_val = 0;
             },
             
+            AstArgType::OpSub if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BSub);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
             AstArgType::OpSub
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Sub);
@@ -309,6 +345,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpMul if var.data_type == DataType::Double => {
                 instr = ltac::create_instr(LtacType::F64Mul);
                 instr.arg1_type = LtacArg::FltReg64;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpMul if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BMul);
+                instr.arg1_type = LtacArg::Reg8;
                 instr.arg1_val = 0;
             },
             
@@ -345,12 +387,24 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 instr.arg1_val = 0;
             },
             
+            AstArgType::OpDiv if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BDiv);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
             AstArgType::OpDiv => {
                 builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
                 return false;
             },
             
             // Modulo
+            
+            AstArgType::OpMod if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BMod);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
             
             AstArgType::OpMod
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
@@ -414,6 +468,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg2_sval = top.arg2_sval;
         instr.arg2_offset = top.arg2_offset;
         instr.arg2_offset_size = top.arg2_offset_size;
+        
+    // Store back a byte
+    } else if var.data_type == DataType::Byte {
+        instr = ltac::create_instr(LtacType::MovB);
+        instr.arg1_type = LtacArg::Mem;
+        instr.arg1_val = var.pos;
+        instr.arg2_type = LtacArg::Reg8;
+        instr.arg2_val = 0;
         
     // Store back a float
     } else if var.data_type == DataType::Float {

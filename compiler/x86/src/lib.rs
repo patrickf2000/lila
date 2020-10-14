@@ -181,8 +181,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => amd64_build_jump(writer, &code),
             LtacType::Bfge => amd64_build_jump(writer, &code),
             
-            LtacType::I32Add => amd64_build_instr(writer, &code),
-            LtacType::I32Sub => amd64_build_instr(writer, &code),
+            LtacType::BMul => amd64_build_byte_mul(writer, &code),
+            LtacType::BDiv | LtacType::BMod => amd64_build_byte_div(writer, &code),
+            
+            LtacType::BAdd | LtacType::I32Add => amd64_build_instr(writer, &code),
+            LtacType::BSub | LtacType::I32Sub => amd64_build_instr(writer, &code),
             LtacType::I32Mul => amd64_build_instr(writer, &code),
             LtacType::I32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod => amd64_build_div(writer, &code),
@@ -251,8 +254,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::MovF32 => line.push_str("  movss "),
         LtacType::MovF64 => line.push_str("  movsd "),
         
-        LtacType::I32Add => line.push_str("  add "),
-        LtacType::I32Sub => line.push_str("  sub "),
+        LtacType::BAdd | LtacType::I32Add => line.push_str("  add "),
+        LtacType::BSub | LtacType::I32Sub => line.push_str("  sub "),
         LtacType::I32Mul => line.push_str("  imul "),
         
         LtacType::F32Add => line.push_str("  addss "),
@@ -575,6 +578,125 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     writer.write(&line.into_bytes())
         .expect("[AMD64_writer_instr] Write failed.");
+}
+
+// Builds multiplication for byte values
+// On x86 this is also a little strange...
+fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    
+    line.push_str("  xor eax, eax\n");
+    
+    match &code.arg1_type {
+        LtacArg::Reg8 => {
+            let reg = amd64_op_reg8(code.arg1_val);
+            
+            line.push_str("  mov al, ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+        
+        _ => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg8 => {
+            let reg = amd64_op_reg8(code.arg2_val);
+            
+            line.push_str("  mul ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+        
+        LtacArg::Mem => {
+            line.push_str("  mul [rbp-");
+            line.push_str(&code.arg2_val.to_string());
+            line.push_str("]\n");
+        },
+        
+        LtacArg::Byte => {
+            line.push_str("  mov r15b, ");
+            line.push_str(&code.arg2_bval.to_string());
+            line.push_str("\n");
+            
+            line.push_str("  mul r15b\n");
+        },
+        
+        _ => {},
+    }
+    
+    // Move the result back to the proper register
+    let reg = amd64_op_reg16(code.arg1_val);
+    
+    line.push_str("  mov ");
+    line.push_str(&reg);
+    line.push_str(", ax\n");
+    
+    // Write
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_byte_mul] Write failed.");
+}
+
+// Builds division for byte values
+fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    let mut dest = String::new();
+    
+    line.push_str("  xor eax, eax\n");
+    line.push_str("  xor edx, edx\n");
+    
+    match &code.arg1_type {
+        LtacArg::Reg8 => {
+            dest = amd64_op_reg8(code.arg1_val);
+            
+            line.push_str("  mov al, ");
+            line.push_str(&dest);
+            line.push_str("\n");
+        },
+        
+        _ => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg8 => {
+            let reg = amd64_op_reg8(code.arg2_val);
+            
+            line.push_str("  div ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+        
+        LtacArg::Mem => {
+            line.push_str("  div BYTE PTR [rbp-");
+            line.push_str(&code.arg2_val.to_string());
+            line.push_str("]\n");
+        },
+        
+        LtacArg::Byte => {
+            line.push_str("  mov r15b, ");
+            line.push_str(&code.arg2_bval.to_string());
+            line.push_str("\n");
+            
+            line.push_str("  div r15b\n");
+        },
+        
+        _ => {},
+    }
+    
+    // Move the result back to the proper register
+    line.push_str("  mov ");
+    line.push_str(&dest);
+    line.push_str(", ");
+    
+    if code.instr_type == LtacType::BMod {
+        line.push_str("ah\n");
+    } else {
+        line.push_str("al\n");
+    }
+    
+    // Write
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_byte_div] Write failed.");
 }
 
 // Builds the integer and modulus instructions

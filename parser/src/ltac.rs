@@ -60,6 +60,12 @@ pub enum LtacType {
     Bfg,        // Jump if float is greater
     Bfge,       // Jump if float is greater or equal
     
+    BAdd,
+    BSub,
+    BMul,
+    BDiv,
+    BMod,
+    
     I32Add,
     I32Sub,
     I32Mul,
@@ -317,6 +323,12 @@ impl LtacInstr {
             LtacType::Bge => println!("  bge {}\n", self.name),
             LtacType::Bfg => println!("  bfg {}\n", self.name),
             LtacType::Bfge => println!("  bfge {}\n", self.name),
+            
+            LtacType::BAdd => print!("  b.add "),
+            LtacType::BSub => print!("  b.sub "),
+            LtacType::BMul => print!("  b.mul "),
+            LtacType::BDiv => print!("  b.div "),
+            LtacType::BMod => print!("  b.mod "),
             
             LtacType::I32Add => print!("  i32.add "),
             LtacType::I32Sub => print!("  i32.sub "),

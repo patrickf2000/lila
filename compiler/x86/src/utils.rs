@@ -69,6 +69,28 @@ pub fn amd64_arg_flt(pos : i32) -> String {
 // Operation registers
 // EAX -> Return register
 // R15, R14 -> Operations register
+pub fn amd64_op_reg8(pos : i32) -> String {
+    match pos {
+        0 => return "bl".to_string(),
+        1 => return "cl".to_string(),
+        2 => return "r10b".to_string(),
+        3 => return "r11b".to_string(),
+        4 => return "r12b".to_string(),
+        _ => return String::new(),
+    };
+}
+
+pub fn amd64_op_reg16(pos : i32) -> String {
+    match pos {
+        0 => return "bx".to_string(),
+        1 => return "cx".to_string(),
+        2 => return "r10w".to_string(),
+        3 => return "r11w".to_string(),
+        4 => return "r12w".to_string(),
+        _ => return String::new(),
+    };
+}
+
 pub fn amd64_op_reg32(pos : i32) -> String {
     match pos {
         0 => return "ebx".to_string(),
@@ -87,17 +109,6 @@ pub fn amd64_op_reg64(pos : i32) -> String {
         2 => return "r10".to_string(),
         3 => return "r11".to_string(),
         4 => return "r12".to_string(),
-        _ => return String::new(),
-    };
-}
-
-pub fn amd64_op_reg8(pos : i32) -> String {
-    match pos {
-        0 => return "bl".to_string(),
-        1 => return "cl".to_string(),
-        2 => return "r10b".to_string(),
-        3 => return "r11b".to_string(),
-        4 => return "r12b".to_string(),
         _ => return String::new(),
     };
 }
