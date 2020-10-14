@@ -88,6 +88,12 @@ pub enum LtacType {
     I32Lsh,
     I32Rsh,
     
+    BAnd,
+    BOr,
+    BXor,
+    BLsh,
+    BRsh,
+    
     I32VAdd,
 }
 
@@ -351,6 +357,12 @@ impl LtacInstr {
             LtacType::I32Xor => print!("  i32.xor "),
             LtacType::I32Lsh => print!("  i32.lsh "),
             LtacType::I32Rsh => print!("  i32.rsh "),
+            
+            LtacType::BAnd => print!("  b.and "),
+            LtacType::BOr => print!("  b.or "),
+            LtacType::BXor => print!("  b.xor "),
+            LtacType::BLsh => print!("  b.lsh "),
+            LtacType::BRsh => print!("  b.rsh "),
             
             LtacType::I32VAdd => print!("  i32.vadd "),
         }

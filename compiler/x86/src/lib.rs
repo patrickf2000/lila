@@ -200,11 +200,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::F64Mul => amd64_build_instr(writer, &code),
             LtacType::F64Div => amd64_build_instr(writer, &code),
             
-            LtacType::I32And => amd64_build_instr(writer, &code),
-            LtacType::I32Or => amd64_build_instr(writer, &code),
-            LtacType::I32Xor => amd64_build_instr(writer, &code),
-            LtacType::I32Lsh => amd64_build_instr(writer, &code),
-            LtacType::I32Rsh => amd64_build_instr(writer, &code),
+            LtacType::BAnd | LtacType::I32And => amd64_build_instr(writer, &code),
+            LtacType::BOr | LtacType::I32Or => amd64_build_instr(writer, &code),
+            LtacType::BXor | LtacType::I32Xor => amd64_build_instr(writer, &code),
+            LtacType::BLsh | LtacType::I32Lsh => amd64_build_instr(writer, &code),
+            LtacType::BRsh | LtacType::I32Rsh => amd64_build_instr(writer, &code),
+            
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
             
             // We shouldn't generate any assembly for these
@@ -268,11 +269,11 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::F64Mul => line.push_str("  mulsd "),
         LtacType::F64Div => line.push_str("  divsd "),
         
-        LtacType::I32And => line.push_str("  and "),
-        LtacType::I32Or => line.push_str("  or "),
-        LtacType::I32Xor => line.push_str("  xor "),
-        LtacType::I32Lsh => line.push_str("  shl "),
-        LtacType::I32Rsh => line.push_str("  shr "),
+        LtacType::BAnd | LtacType::I32And => line.push_str("  and "),
+        LtacType::BOr | LtacType::I32Or => line.push_str("  or "),
+        LtacType::BXor | LtacType::I32Xor => line.push_str("  xor "),
+        LtacType::BLsh | LtacType::I32Lsh => line.push_str("  shl "),
+        LtacType::BRsh | LtacType::I32Rsh => line.push_str("  shr "),
         
         LtacType::I32Cmp => line.push_str("  cmp "),
         LtacType::F32Cmp => line.push_str("  ucomiss "),

@@ -418,36 +418,104 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 return false;
             },
             
-            // Other operators
+            // Logical and
             
-            AstArgType::OpAnd => {
+            AstArgType::OpAnd if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BAnd);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpAnd
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32And);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpOr => {
+            AstArgType::OpAnd => {
+                builder.syntax.ltac_error(line, "Invalid use of logical and.".to_string());
+                return false;
+            },
+            
+            // Logical OR
+            
+            AstArgType::OpOr if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BOr);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpOr
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Or);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpXor => {
+            AstArgType::OpOr => {
+                builder.syntax.ltac_error(line, "Invalid use of logical or.".to_string());
+                return false;
+            },
+            
+            // Logical XOR
+            
+            AstArgType::OpXor if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BXor);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpXor
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Xor);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpLeftShift => {
+            AstArgType::OpXor => {
+                builder.syntax.ltac_error(line, "Invalid use of logical xor.".to_string());
+                return false;
+            },
+            
+            // Left shift
+            
+            AstArgType::OpLeftShift if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BLsh);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpLeftShift
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Lsh);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
             },
             
-            AstArgType::OpRightShift => {
+            AstArgType::OpLeftShift => {
+                builder.syntax.ltac_error(line, "Invalid use of left shift.".to_string());
+                return false;
+            },
+            
+            // Right shift
+            
+            AstArgType::OpRightShift if var.data_type == DataType::Byte => {
+                instr = ltac::create_instr(LtacType::BRsh);
+                instr.arg1_type = LtacArg::Reg8;
+                instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpRightShift
+            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Rsh);
                 instr.arg1_type = LtacArg::Reg;
                 instr.arg1_val = 0;
+            },
+            
+            AstArgType::OpRightShift => {
+                builder.syntax.ltac_error(line, "Invalid use of right shift.".to_string());
+                return false;
             },
             
             _ => {},
