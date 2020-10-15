@@ -136,6 +136,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovB);
         instr.arg1_type = LtacArg::Reg8;
         instr.arg1_val = 0;
+    } else if var.data_type == DataType::Short {
+        instr = ltac::create_instr(LtacType::MovW);
+        instr.arg1_type = LtacArg::Reg16;
+        instr.arg1_val = 0;
     } else if var.data_type == DataType::Float {
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::FltReg;
@@ -156,6 +160,17 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::ByteL => {
                 builder.syntax.ltac_error(&line, "Invalid use of byte literal.".to_string());
+                return false;
+            },
+            
+            AstArgType::ShortL if var.data_type == DataType::Short => {
+                instr.arg2_type = LtacArg::I16;
+                instr.arg2_wval = arg.u16_val;
+                builder.file.code.push(instr.clone());
+            },
+            
+            AstArgType::ShortL => {
+                builder.syntax.ltac_error(&line, "Invalid use of short literal.".to_string());
                 return false;
             },
         
@@ -538,6 +553,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg2_type = top.arg2_type;
         instr.arg2_val = top.arg2_val;
         instr.arg2_bval = top.arg2_bval;
+        instr.arg2_wval = top.arg2_wval;
         instr.arg2_sval = top.arg2_sval;
         instr.arg2_offset = top.arg2_offset;
         instr.arg2_offset_size = top.arg2_offset_size;

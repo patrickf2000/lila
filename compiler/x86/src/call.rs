@@ -20,6 +20,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     
     if code.arg1_type == LtacArg::Reg8 {
         line = "  movzx ".to_string();
+    } else if code.arg2_type == LtacArg::I16 {
+        line = "  movsx ".to_string();
     } else if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
         line = "  movss ".to_string();
     } else if code.arg2_type == LtacArg::FltReg64 || code.arg2_type == LtacArg::F64 {
@@ -40,6 +42,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&reg);
         },
         
+        LtacArg::Reg16 => {},
+        
         LtacArg::Reg64 => {},
         LtacArg::FltReg => {},
         LtacArg::FltReg64 => {},
@@ -52,11 +56,16 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Mem => {
             if code.arg2_type == LtacArg::FltReg || code.arg2_type == LtacArg::FltReg64 {
                 line.push_str(&reg_flt);
+                line.push_str(", ");
+            } else if code.arg2_type == LtacArg::I16 {
+                line.push_str(&reg32);
+                line.push_str(", WORD PTR ");
             } else {
                 line.push_str(&reg32);
+                line.push_str(", ");
             }
             
-            line.push_str(", [rbp-");
+            line.push_str("[rbp-");
             line.push_str(&code.arg1_val.to_string());
             line.push_str("]");
         },
@@ -65,6 +74,12 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&reg32);
             line.push_str(", ");
             line.push_str(&code.arg1_bval.to_string());
+        },
+        
+        LtacArg::I16 => {
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&code.arg1_wval.to_string());
         },
         
         LtacArg::I32 => {
