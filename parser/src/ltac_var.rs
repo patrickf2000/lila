@@ -139,19 +139,16 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     // The byte types
     if var.data_type == DataType::Byte {
         instr = ltac::create_instr(LtacType::MovB);
-        instr.arg1_type = LtacArg::Reg8;
-        instr.arg1_val = 0;
+        instr.arg1_type = LtacArg::Reg8(0);
         
     } else if var.data_type == DataType::UByte {
         instr = ltac::create_instr(LtacType::MovUB);
-        instr.arg1_type = LtacArg::Reg8;
-        instr.arg1_val = 0;
+        instr.arg1_type = LtacArg::Reg8(0);
     
     // The short types
     } else if var.data_type == DataType::Short {
         instr = ltac::create_instr(LtacType::MovW);
-        instr.arg1_type = LtacArg::Reg16;
-        instr.arg1_val = 0;
+        instr.arg1_type = LtacArg::Reg16(0);
         
     // The float types
     } else if var.data_type == DataType::Float {
@@ -317,8 +314,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpAdd if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BAdd);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpAdd 
@@ -348,8 +344,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpSub if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BSub);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpSub
@@ -379,8 +374,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpMul if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BMul);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpMul
@@ -416,8 +410,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpDiv if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BDiv);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpDiv => {
@@ -429,8 +422,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpMod if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BMod);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpMod
@@ -448,8 +440,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpAnd if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BAnd);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpAnd
@@ -467,8 +458,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpOr if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BOr);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpOr
@@ -486,8 +476,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpXor if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BXor);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpXor
@@ -505,8 +494,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpLeftShift if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BLsh);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpLeftShift
@@ -524,8 +512,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpRightShift if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BRsh);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg8(0);
             },
             
             AstArgType::OpRightShift
@@ -563,8 +550,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovB);
         instr.arg1_type = LtacArg::Mem;
         instr.arg1_val = var.pos;
-        instr.arg2_type = LtacArg::Reg8;
-        instr.arg2_val = 0;
+        instr.arg2_type = LtacArg::Reg8(0);
         
     // Store back a float
     } else if var.data_type == DataType::Float {

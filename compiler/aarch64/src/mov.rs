@@ -18,14 +18,8 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         _ => line = String::new(),
     }
     
-    // TODO: Combine
     match &code.arg2_type {
-        LtacArg::Reg8 => {
-            let reg = aarch64_op_reg32(code.arg2_val);
-            line.push_str(&reg);
-        },
-        
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             line.push_str(&reg);
         },
@@ -75,14 +69,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "  mov ".to_string();
     
     match &code.arg1_type {
-        LtacArg::Reg8 => {
-            let reg = aarch64_op_reg32(code.arg1_val);
-        
-            line.push_str(&reg);
-            line.push_str(", ");
-        },
-        
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
         
             line.push_str(&reg);

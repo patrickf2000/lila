@@ -90,12 +90,10 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         
                         //TODO: Clean up the byte code so its like the short type
                         if v.data_type == DataType::Byte {
-                            push.arg1_type = LtacArg::Reg8;
-                            push.arg1_val = 2;
+                            push.arg1_type = LtacArg::Reg8(2);
                             
                             let mut instr = ltac::create_instr(LtacType::MovB);
-                            instr.arg1_type = LtacArg::Reg8;
-                            instr.arg1_val = 2;
+                            instr.arg1_type = LtacArg::Reg8(2);
                             instr.arg2_type = LtacArg::Mem;
                             instr.arg2_val = v.pos;
                             builder.file.code.push(instr);

@@ -291,13 +291,13 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg1_type {
         LtacArg::Empty => {},
         
-        LtacArg::Reg8 => {
-            let reg = amd64_op_reg8(code.arg1_val);
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
             line.push_str(&reg);
             line.push_str(", ");
         },
         
-        LtacArg::Reg16 => {},
+        LtacArg::Reg16(_p) => {},
         
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
@@ -350,17 +350,17 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg2_type {
         LtacArg::Empty => {},
         
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg16(_p) => {},
+        
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
             line.push_str(&reg);
         },
-        
-        LtacArg::Reg8 => {
-            let reg = amd64_op_reg8(code.arg2_val);
-            line.push_str(&reg);
-        },
-        
-        LtacArg::Reg16 => {},
         
         LtacArg::Reg64 => {
             let reg = amd64_op_reg64(code.arg2_val);
@@ -455,8 +455,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg1_type {
         LtacArg::Empty => {},
         
-        LtacArg::Reg8 => {},
-        LtacArg::Reg16 => {},
+        LtacArg::Reg8(_p) => {},
+        LtacArg::Reg16(_p) => {},
         
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
@@ -549,8 +549,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg2_type {
         LtacArg::Empty => {},
         
-        LtacArg::Reg8 => {},
-        LtacArg::Reg16 => {},
+        LtacArg::Reg8(_p) => {},
+        LtacArg::Reg16(_p) => {},
         
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
@@ -608,8 +608,8 @@ fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str("  xor eax, eax\n");
     
     match &code.arg1_type {
-        LtacArg::Reg8 => {
-            let reg = amd64_op_reg8(code.arg1_val);
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
             
             line.push_str("  mov al, ");
             line.push_str(&reg);
@@ -620,8 +620,8 @@ fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
     }
     
     match &code.arg2_type {
-        LtacArg::Reg8 => {
-            let reg = amd64_op_reg8(code.arg2_val);
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
             
             line.push_str("  mul ");
             line.push_str(&reg);
@@ -666,8 +666,8 @@ fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str("  xor edx, edx\n");
     
     match &code.arg1_type {
-        LtacArg::Reg8 => {
-            dest = amd64_op_reg8(code.arg1_val);
+        LtacArg::Reg8(pos) => {
+            dest = amd64_op_reg8(*pos);
             
             line.push_str("  mov al, ");
             line.push_str(&dest);
@@ -678,8 +678,8 @@ fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     }
     
     match &code.arg2_type {
-        LtacArg::Reg8 => {
-            let reg = amd64_op_reg8(code.arg2_val);
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
             
             line.push_str("  div ");
             line.push_str(&reg);

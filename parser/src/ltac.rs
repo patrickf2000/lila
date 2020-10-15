@@ -107,8 +107,8 @@ pub enum LtacType {
 #[derive(Clone, PartialEq)]
 pub enum LtacArg {
     Empty,
-    Reg8,
-    Reg16,
+    Reg8(i32),
+    Reg16(i32),
     Reg32(i32),
     Reg64,
     FltReg,
@@ -384,8 +384,8 @@ impl LtacInstr {
         match &self.arg1_type {
             LtacArg::Empty => print!(" "),
             
-            LtacArg::Reg8 => print!("rl{}", self.arg1_val),
-            LtacArg::Reg16 => print!("w.r{}", self.arg1_val),
+            LtacArg::Reg8(val) => print!("i8.r{}", val),
+            LtacArg::Reg16(val) => print!("i16.r{}", val),
             LtacArg::Reg32(val) => print!("i32.r{}", val),
             LtacArg::Reg64 => print!("xr{}", self.arg1_val),
             LtacArg::FltReg => print!("fr{}", self.arg1_val),
@@ -424,8 +424,8 @@ impl LtacInstr {
         match &self.arg2_type {
             LtacArg::Empty => println!(""),
             
-            LtacArg::Reg8 => println!(", rl{}", self.arg2_val),
-            LtacArg::Reg16 => println!(", w.r{}", self.arg2_val),
+            LtacArg::Reg8(val) => println!(", i8.r{}", val),
+            LtacArg::Reg16(val) => println!(", i16.r{}", val),
             LtacArg::Reg32(val) => println!(", i32.r{}", val),
             LtacArg::Reg64 => println!(", xr{}", self.arg2_val),
             LtacArg::FltReg => println!(", fr{}", self.arg2_val),

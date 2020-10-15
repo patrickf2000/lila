@@ -16,19 +16,8 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
         reg64 = aarch64_karg_reg64(code.arg2_val);
     }
     
-    // TODO: Combine
     match &code.arg1_type {
-        LtacArg::Reg8 => {
-            let reg = aarch64_op_reg32(code.arg1_val);
-            
-            line.push_str("  mov ");
-            line.push_str(&reg32);
-            line.push_str(", ");
-            line.push_str(&reg);
-            line.push_str("\n");
-        },
-        
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             
             line.push_str("  mov ");
