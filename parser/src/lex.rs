@@ -18,6 +18,7 @@ pub enum Token {
     Continue,
     
     Byte,
+    Short,
     Int,
     Float,
     Double,
@@ -53,6 +54,7 @@ pub enum Token {
     
     Id(String),
     ByteL(u8),
+    ShortL(u16),
     IntL(i32),
     FloatL(f64),
     StringL(String),
@@ -268,7 +270,12 @@ impl Lex {
         match current.get(..2) {
             Some("0x") => {
                 let base = current.trim_start_matches("0x");
-                return Token::ByteL(u8::from_str_radix(base, 16).unwrap());
+                
+                if base.len() == 4 || base.len() == 3 {
+                    return Token::ShortL(u16::from_str_radix(base, 16).unwrap());
+                } else {
+                    return Token::ByteL(u8::from_str_radix(base, 16).unwrap());
+                }
             },
             
             _ => {},
@@ -291,6 +298,7 @@ impl Lex {
             "exit" => token = Token::Exit,
             "end" => token = Token::End,
             "byte" => token = Token::Byte,
+            "short" => token = Token::Short,
             "int" => token = Token::Int,
             "float" => token = Token::Float,
             "double" => token = Token::Double,

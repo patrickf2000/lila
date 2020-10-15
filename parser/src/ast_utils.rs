@@ -25,6 +25,16 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 }
             },
             
+            Token::ShortL(val) => {
+                let arg = ast::create_short(val);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
+            },
+            
             Token::IntL(val) => {
                 let arg = ast::create_int(val);
                 

@@ -24,6 +24,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             data_type = DataType::Byte;
             builder.stack_pos += 1;
         },
+        
+        AstModType::Short => {
+            data_type = DataType::Short;
+            builder.stack_pos += 2;
+        },
     
         AstModType::Int => {
             data_type = DataType::Int;
