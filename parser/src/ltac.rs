@@ -120,7 +120,7 @@ pub enum LtacArg {
     Mem,
     Byte(i8),
     I16,
-    I32,
+    I32(i32),
     F32,
     F64,
     Ptr,
@@ -408,7 +408,7 @@ impl LtacInstr {
             
             LtacArg::Byte(val) => print!("{}", val),
             LtacArg::I16 => print!("{}", self.arg1_wval),
-            LtacArg::I32 => print!("{}", self.arg1_val),
+            LtacArg::I32(val) => print!("{}", val),
             LtacArg::F32 => print!("{}", self.arg1_sval),
             LtacArg::F64 => print!("{}", self.arg1_sval),
             
@@ -448,7 +448,7 @@ impl LtacInstr {
             
             LtacArg::Byte(val) => println!(", {}", val),
             LtacArg::I16 => println!(", {}", self.arg2_wval),
-            LtacArg::I32 => println!(", {}", self.arg2_val),
+            LtacArg::I32(val) => println!(", {}", val),
             LtacArg::F32 => println!(", {}", self.arg2_sval),
             LtacArg::F64 => println!(", {}", self.arg2_sval),
             LtacArg::Ptr => println!(", {}", self.arg2_sval),

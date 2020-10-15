@@ -69,8 +69,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     // determines the comparison type
     match &arg1.arg_type {
         AstArgType::IntL => {
-            cmp.arg1_type = LtacArg::I32;
-            cmp.arg1_val = arg1.i32_val;
+            cmp.arg1_type = LtacArg::I32(arg1.i32_val);
         },
         
         AstArgType::FloatL => {
@@ -140,8 +139,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg2.arg_type {
         AstArgType::IntL => {
-            cmp.arg2_type = LtacArg::I32;
-            cmp.arg2_val = arg2.i32_val;
+            cmp.arg2_type = LtacArg::I32(arg2.i32_val);
         },
         
         AstArgType::FloatL => {
@@ -289,8 +287,7 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg1.arg_type {
         AstArgType::IntL => {
-            cmp.arg1_type = LtacArg::I32;
-            cmp.arg1_val = arg1.i32_val;
+            cmp.arg1_type = LtacArg::I32(arg1.i32_val);
         },
         
         AstArgType::StringL => {},
@@ -315,8 +312,7 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg2.arg_type {
         AstArgType::IntL => {
-            cmp.arg2_type = LtacArg::I32;
-            cmp.arg2_val = arg2.i32_val;
+            cmp.arg2_type = LtacArg::I32(arg2.i32_val);
         },
         
         AstArgType::StringL => {},

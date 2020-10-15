@@ -97,7 +97,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI64 => line.push_str("x0"),
         
         LtacArg::Byte(val) => line.push_str(&val.to_string()),
-        LtacArg::I32 => line.push_str(&code.arg2_val.to_string()),
+        LtacArg::I32(val) => line.push_str(&val.to_string()),
         
         _ => {},
     }
@@ -325,11 +325,11 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
             }
         },
         
-        LtacArg::I32 => {
+        LtacArg::I32(val) => {
             line.push_str("  mov ");
             line.push_str(&dest_reg);
             line.push_str(", ");
-            line.push_str(&code.arg2_val.to_string());
+            line.push_str(&val.to_string());
             line.push_str("\n");
         },
         

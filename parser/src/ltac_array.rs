@@ -49,8 +49,7 @@ pub fn build_i32dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Va
         let arg = sub_args.last().unwrap();
         
         let mut pusharg = ltac::create_instr(LtacType::PushArg);
-        pusharg.arg1_type = LtacArg::I32;
-        pusharg.arg1_val = arg.i32_val * 4;
+        pusharg.arg1_type = LtacArg::I32(arg.i32_val * 4);
         pusharg.arg2_val = 1;
         
         builder.file.code.push(pusharg);

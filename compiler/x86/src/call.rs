@@ -85,10 +85,10 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&code.arg1_wval.to_string());
         },
         
-        LtacArg::I32 => {
+        LtacArg::I32(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
-            line.push_str(&code.arg1_val.to_string());
+            line.push_str(&val.to_string());
         },
         
         LtacArg::F32 => {

@@ -186,8 +186,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             },
         
             AstArgType::IntL if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray => {
-                instr.arg2_type = LtacArg::I32;
-                instr.arg2_val = arg.i32_val;
+                instr.arg2_type = LtacArg::I32(arg.i32_val);
                 builder.file.code.push(instr.clone());
             },
             
