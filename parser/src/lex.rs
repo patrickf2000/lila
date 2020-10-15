@@ -18,6 +18,7 @@ pub enum Token {
     Continue,
     
     Byte,
+    UByte,
     Short,
     Int,
     Float,
@@ -298,6 +299,7 @@ impl Lex {
             "exit" => token = Token::Exit,
             "end" => token = Token::End,
             "byte" => token = Token::Byte,
+            "ubyte" => token = Token::UByte,
             "short" => token = Token::Short,
             "int" => token = Token::Int,
             "float" => token = Token::Float,

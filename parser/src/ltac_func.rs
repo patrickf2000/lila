@@ -25,8 +25,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         match &arg.arg_type {
             AstArgType::ByteL => {
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::Byte;
-                push.arg1_bval = arg.u8_val.clone();
+                push.arg1_type = LtacArg::Byte(arg.u8_val as i8);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 

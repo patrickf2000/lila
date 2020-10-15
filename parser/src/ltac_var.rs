@@ -25,6 +25,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 1;
         },
         
+        AstModType::UByte => {
+            data_type = DataType::UByte;
+            builder.stack_pos += 1;
+        },
+        
         AstModType::Short => {
             data_type = DataType::Short;
             builder.stack_pos += 2;
@@ -132,18 +137,29 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     instr.arg1_type = LtacArg::Reg;
     instr.arg1_val = 0;
     
+    // The byte types
     if var.data_type == DataType::Byte {
         instr = ltac::create_instr(LtacType::MovB);
         instr.arg1_type = LtacArg::Reg8;
         instr.arg1_val = 0;
+        
+    } else if var.data_type == DataType::UByte {
+        instr = ltac::create_instr(LtacType::MovUB);
+        instr.arg1_type = LtacArg::Reg8;
+        instr.arg1_val = 0;
+    
+    // The short types
     } else if var.data_type == DataType::Short {
         instr = ltac::create_instr(LtacType::MovW);
         instr.arg1_type = LtacArg::Reg16;
         instr.arg1_val = 0;
+        
+    // The float types
     } else if var.data_type == DataType::Float {
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::FltReg;
         instr.arg1_val = 0;
+        
     } else if var.data_type == DataType::Double {
         instr = ltac::create_instr(LtacType::MovF64);
         instr.arg1_type = LtacArg::FltReg64;
@@ -153,8 +169,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     for arg in args.iter() {
         match &arg.arg_type {
             AstArgType::ByteL if var.data_type == DataType::Byte => {
-                instr.arg2_type = LtacArg::Byte;
-                instr.arg2_bval = arg.u8_val;
+                instr.arg2_type = LtacArg::Byte(arg.u8_val as i8);
                 builder.file.code.push(instr.clone());
             },
             
@@ -188,11 +203,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     return false;
                 }
                 
-                let parts = unsafe { mem::transmute::<i32, [u8; 4]>(val) };
+                let parts = unsafe { mem::transmute::<i32, [i8; 4]>(val) };
                 let result = parts[0];
                 
-                instr.arg2_type = LtacArg::Byte;
-                instr.arg2_bval = result;
+                instr.arg2_type = LtacArg::Byte(result);
                 builder.file.code.push(instr.clone());
             },
             

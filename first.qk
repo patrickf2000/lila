@@ -1,22 +1,14 @@
 
-#OUTPUT
-#ffff8234
-#aa
-#88
-#END
 
-#RET 0
-
-extern func puts(s:str)
+extern func printf(s:str, ...)
 
 func main -> int
-    short x = 0x8234
+    byte x1 = 0x81
+    #ubyte x2 = 0x81
     
-    printf("%x\n", x)
-    printf("%x\n", 0x00AA)
-    
-    x = 0x0088
-    printf("%x\n", x)
+    printf("X1: %d\n", x1)
+    #printf("X2: %d\n", x2)
+    printf("Raw: %d\n", 0x81)
     
     return 0
 end

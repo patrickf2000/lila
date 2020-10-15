@@ -36,11 +36,11 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
             line.push_str("]\n");
         },
         
-        LtacArg::Byte => {
+        LtacArg::Byte(val) => {
             line.push_str("  mov ");
             line.push_str(&reg32);
             line.push_str(", ");
-            line.push_str(&code.arg1_bval.to_string());
+            line.push_str(&val.to_string());
             line.push_str("\n");
         },
         

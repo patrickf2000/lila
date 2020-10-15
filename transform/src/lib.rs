@@ -51,50 +51,51 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
         
             // Store byte to variable
             LtacType::MovB
-            if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::Byte => {
-                let mut instr = ltac::create_instr(LtacType::MovB);
-                instr.arg1_type = LtacArg::Reg8;
-                instr.arg1_val = 2;
-                instr.arg2_type = LtacArg::Byte;
-                instr.arg2_bval = line.arg2_bval;
-                
-                file.code.push(instr.clone());
-                
-                instr = ltac::create_instr(LtacType::StrB);
-                instr.arg1_type = LtacArg::Mem;
-                instr.arg1_val = line.arg1_val;
-                instr.arg2_type = LtacArg::Reg8;
-                instr.arg2_val = 2;
-                
-                file.code.push(instr.clone()); 
-            },
-        
-            // Store immediate to variable
-            LtacType::Mov 
-            if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::I32 => {
-                let mut instr = ltac::create_instr(LtacType::Mov);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 2;
-                instr.arg2_type = LtacArg::I32;
-                instr.arg2_val = line.arg2_val;
-                
-                file.code.push(instr.clone());
-                
-                instr = ltac::create_instr(LtacType::Str);
-                instr.arg1_type = LtacArg::Mem;
-                instr.arg1_val = line.arg1_val;
-                instr.arg2_type = LtacArg::Reg;
-                instr.arg2_val = 2;
-                
-                file.code.push(instr.clone());
-            },
-            
-            // Store pointer to variable
-            LtacType::Mov
-            if line.arg1_type == LtacArg::Mem && line.arg2_type == LtacArg::Ptr => {
-                let mut instr = line.clone();
-                instr.instr_type = LtacType::StrPtr;
-                file.code.push(instr.clone());
+            if line.arg1_type == LtacArg::Mem => {
+                match &line.arg2_type {
+                    LtacArg::Byte(val) => {
+                        let mut instr = ltac::create_instr(LtacType::MovB);
+                        instr.arg1_type = LtacArg::Reg8;
+                        instr.arg1_val = 2;
+                        instr.arg2_type = LtacArg::Byte(*val);
+                        
+                        file.code.push(instr.clone());
+                        
+                        instr = ltac::create_instr(LtacType::StrB);
+                        instr.arg1_type = LtacArg::Mem;
+                        instr.arg1_val = line.arg1_val;
+                        instr.arg2_type = LtacArg::Reg8;
+                        instr.arg2_val = 2;
+                        
+                        file.code.push(instr.clone()); 
+                    },
+                    
+                    LtacArg::I32 => {
+                        let mut instr = ltac::create_instr(LtacType::Mov);
+                        instr.arg1_type = LtacArg::Reg;
+                        instr.arg1_val = 2;
+                        instr.arg2_type = LtacArg::I32;
+                        instr.arg2_val = line.arg2_val;
+                        
+                        file.code.push(instr.clone());
+                        
+                        instr = ltac::create_instr(LtacType::Str);
+                        instr.arg1_type = LtacArg::Mem;
+                        instr.arg1_val = line.arg1_val;
+                        instr.arg2_type = LtacArg::Reg;
+                        instr.arg2_val = 2;
+                        
+                        file.code.push(instr.clone());
+                    },
+                    
+                    LtacArg::Ptr => {
+                        let mut instr = line.clone();
+                        instr.instr_type = LtacType::StrPtr;
+                        file.code.push(instr.clone());
+                    },
+                    
+                    _ => file.code.push(line.clone()),
+                }
             },
             
             // Store memory to register

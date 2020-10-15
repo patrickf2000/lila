@@ -17,6 +17,7 @@ pub enum LtacType {
     
     Mov,
     MovB,
+    MovUB,
     MovW,
     MovF32,
     MovF64,
@@ -26,9 +27,11 @@ pub enum LtacType {
     
     Ld,
     LdB,
+    LdUB,
     LdW,
     Str,
     StrB,
+    StrUB,
     StrW,
     StrPtr,
     
@@ -115,7 +118,7 @@ pub enum LtacArg {
     RetRegF32,
     RetRegF64,
     Mem,
-    Byte,
+    Byte(i8),
     I16,
     I32,
     F32,
@@ -279,6 +282,7 @@ impl LtacInstr {
             
             LtacType::Mov => print!("  mov "),
             LtacType::MovB => print!("  mov.b "),
+            LtacType::MovUB => print!("  mov.ub "),
             LtacType::MovW => print!("  mov.w "),
             LtacType::MovF32 => print!("  mov.f32 "),
             LtacType::MovF64 => print!("  mov.f64 "),
@@ -288,9 +292,11 @@ impl LtacInstr {
             
             LtacType::Ld => print!("  ld "),
             LtacType::LdB => print!("  ld.b "),
+            LtacType::LdUB => print!("  ld.ub "),
             LtacType::LdW => print!("  ld.w "),
             LtacType::Str => print!("  str "),
             LtacType::StrB => print!("  str.b "),
+            LtacType::StrUB => print!("  str.ub "),
             LtacType::StrW => print!("  str.w "),
             LtacType::StrPtr => print!("  str.ptr "),
             
@@ -404,7 +410,7 @@ impl LtacInstr {
                 }
             },
             
-            LtacArg::Byte => print!("{}", self.arg1_bval),
+            LtacArg::Byte(val) => print!("{}", val),
             LtacArg::I16 => print!("{}", self.arg1_wval),
             LtacArg::I32 => print!("{}", self.arg1_val),
             LtacArg::F32 => print!("{}", self.arg1_sval),
@@ -444,7 +450,7 @@ impl LtacInstr {
                 }
             },
             
-            LtacArg::Byte => println!(", {}", self.arg2_bval),
+            LtacArg::Byte(val) => println!(", {}", val),
             LtacArg::I16 => println!(", {}", self.arg2_wval),
             LtacArg::I32 => println!(", {}", self.arg2_val),
             LtacArg::F32 => println!(", {}", self.arg2_sval),

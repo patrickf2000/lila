@@ -96,7 +96,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI32 => line.push_str("w0"),
         LtacArg::RetRegI64 => line.push_str("x0"),
         
-        LtacArg::Byte => line.push_str(&code.arg2_bval.to_string()),
+        LtacArg::Byte(val) => line.push_str(&val.to_string()),
         LtacArg::I32 => line.push_str(&code.arg2_val.to_string()),
         
         _ => {},

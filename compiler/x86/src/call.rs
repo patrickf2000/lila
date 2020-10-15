@@ -70,10 +70,12 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str("]");
         },
         
-        LtacArg::Byte => {
+        // TODO: We need to revist this
+        LtacArg::Byte(val) => {
+            let v = *val as u8;
             line.push_str(&reg32);
             line.push_str(", ");
-            line.push_str(&code.arg1_bval.to_string());
+            line.push_str(&v.to_string());
         },
         
         LtacArg::I16 => {
