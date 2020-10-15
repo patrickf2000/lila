@@ -101,14 +101,13 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
                             push.arg1_type = LtacArg::Ptr;
                         } else if v.data_type == DataType::Float {
-                            push.arg2_type = LtacArg::FltReg;
+                            push.arg2_type = LtacArg::FltReg(flt_arg_no);
                         } else if v.data_type == DataType::Double {
-                            push.arg2_type = LtacArg::FltReg64;
+                            push.arg2_type = LtacArg::FltReg64(flt_arg_no);
                         }
                         
                         // For the proper registers
                         if v.data_type == DataType::Float || v.data_type == DataType::Double {
-                            push.arg2_val = flt_arg_no;
                             flt_arg_no += 1;
                         } else {
                             push.arg2_val = arg_no;

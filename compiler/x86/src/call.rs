@@ -11,24 +11,34 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     // Get the argument registers
     let mut reg32 = amd64_arg_reg32(code.arg2_val);
     let mut reg64 = amd64_arg_reg64(code.arg2_val);
-    let reg_flt = amd64_arg_flt(code.arg2_val);
+    let mut reg_flt = amd64_arg_flt(code.arg2_val);
     
     if is_karg {
         reg32 = amd64_karg_reg32(code.arg2_val);
         reg64 = amd64_karg_reg64(code.arg2_val);
     }
     
+    // Determine move type
     match code.arg1_type {
         LtacArg::Reg8(_p) => line = "  movzx ".to_string(),
+        LtacArg::F32 => line = "  movss ".to_string(),
+        LtacArg::F64 => line = "  movsd ".to_string(),
         _ => {},
     }
     
-    if code.arg2_type == LtacArg::I16 {
-        line = "  movsx ".to_string();
-    } else if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
-        line = "  movss ".to_string();
-    } else if code.arg2_type == LtacArg::FltReg64 || code.arg2_type == LtacArg::F64 {
-        line = "  movsd ".to_string();
+    match code.arg2_type {
+        LtacArg::I16 => line = "  movsx ".to_string(),
+        LtacArg::FltReg(pos) => {
+            line = "  movss ".to_string();
+            reg_flt = amd64_arg_flt(pos);
+        },
+        
+        LtacArg::FltReg64(pos) => {
+            line = "  movsd ".to_string();
+            reg_flt = amd64_arg_flt(pos);
+        },
+        
+        _ => {},
     }
     
     // Assemble
@@ -46,8 +56,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Reg16(_p) => {},
         LtacArg::Reg32(_p) => {},
         LtacArg::Reg64(_p) => {},
-        LtacArg::FltReg => {},
-        LtacArg::FltReg64 => {},
+        LtacArg::FltReg(_p) => {},
+        LtacArg::FltReg64(_p) => {},
         
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
@@ -55,15 +65,21 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => {},
         
         LtacArg::Mem => {
-            if code.arg2_type == LtacArg::FltReg || code.arg2_type == LtacArg::FltReg64 {
-                line.push_str(&reg_flt);
-                line.push_str(", ");
-            } else if code.arg2_type == LtacArg::I16 {
-                line.push_str(&reg32);
-                line.push_str(", WORD PTR ");
-            } else {
-                line.push_str(&reg32);
-                line.push_str(", ");
+            match code.arg2_type {
+                LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => {
+                    line.push_str(&reg_flt);
+                    line.push_str(", ");
+                },
+                
+                LtacArg::I16 => {
+                    line.push_str(&reg32);
+                    line.push_str(", WORD PTR ");
+                },
+            
+                _ => {
+                    line.push_str(&reg32);
+                    line.push_str(", ");
+                },
             }
             
             line.push_str("[rbp-");
@@ -122,7 +138,20 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     line.push_str("\n");
     
     // If we have a 32-bit float variable, we have to convert it to a double
-    if code.arg2_type == LtacArg::FltReg || code.arg1_type == LtacArg::F32 {
+    //TODO: combine
+    match code.arg2_type {
+        LtacArg::FltReg(_p) => {
+            line.push_str("  cvtss2sd ");
+            line.push_str(&reg_flt);
+            line.push_str(", ");
+            line.push_str(&reg_flt);
+            line.push_str("\n");
+        },
+        
+        _ => {},
+    }
+    
+    if code.arg1_type == LtacArg::F32 {
         line.push_str("  cvtss2sd ");
         line.push_str(&reg_flt);
         line.push_str(", ");

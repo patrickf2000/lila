@@ -153,13 +153,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     // The float types
     } else if var.data_type == DataType::Float {
         instr = ltac::create_instr(LtacType::MovF32);
-        instr.arg1_type = LtacArg::FltReg;
-        instr.arg1_val = 0;
+        instr.arg1_type = LtacArg::FltReg(0);
         
     } else if var.data_type == DataType::Double {
         instr = ltac::create_instr(LtacType::MovF64);
-        instr.arg1_type = LtacArg::FltReg64;
-        instr.arg1_val = 0;
+        instr.arg1_type = LtacArg::FltReg64(0);
     }
     
     for arg in args.iter() {
@@ -301,14 +299,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpAdd if var.data_type == DataType::Float => {
                 instr = ltac::create_instr(LtacType::F32Add);
-                instr.arg1_type = LtacArg::FltReg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg(0);
             },
             
             AstArgType::OpAdd if var.data_type == DataType::Double => {
                 instr = ltac::create_instr(LtacType::F64Add);
-                instr.arg1_type = LtacArg::FltReg64;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg64(0);
             },
             
             AstArgType::OpAdd if var.data_type == DataType::Byte => {
@@ -331,14 +327,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpSub if var.data_type == DataType::Float => {
                 instr = ltac::create_instr(LtacType::F32Sub);
-                instr.arg1_type = LtacArg::FltReg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg(0);
             },
             
             AstArgType::OpSub if var.data_type == DataType::Double => {
                 instr = ltac::create_instr(LtacType::F64Sub);
-                instr.arg1_type = LtacArg::FltReg64;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg64(0);
             },
             
             AstArgType::OpSub if var.data_type == DataType::Byte => {
@@ -361,14 +355,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpMul if var.data_type == DataType::Float => {
                 instr = ltac::create_instr(LtacType::F32Mul);
-                instr.arg1_type = LtacArg::FltReg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg(0);
             },
             
             AstArgType::OpMul if var.data_type == DataType::Double => {
                 instr = ltac::create_instr(LtacType::F64Mul);
-                instr.arg1_type = LtacArg::FltReg64;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg64(0);
             },
             
             AstArgType::OpMul if var.data_type == DataType::Byte => {
@@ -391,14 +383,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpDiv if var.data_type == DataType::Float => {
                 instr = ltac::create_instr(LtacType::F32Div);
-                instr.arg1_type = LtacArg::FltReg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg(0);
             },
             
             AstArgType::OpDiv if var.data_type == DataType::Double => {
                 instr = ltac::create_instr(LtacType::F64Div);
-                instr.arg1_type = LtacArg::FltReg64;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::FltReg64(0);
             },
             
             AstArgType::OpDiv
@@ -556,16 +546,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::Mem;
         instr.arg1_val = var.pos;
-        instr.arg2_type = LtacArg::FltReg;
-        instr.arg2_val = 0;
+        instr.arg2_type = LtacArg::FltReg(0);
         
     // Store back a double
     } else if var.data_type == DataType::Double {
         instr = ltac::create_instr(LtacType::MovF64);
         instr.arg1_type = LtacArg::Mem;
         instr.arg1_val = var.pos;
-        instr.arg2_type = LtacArg::FltReg64;
-        instr.arg2_val = 0;
+        instr.arg2_type = LtacArg::FltReg64(0);
         
     // Store back everything else
     } else {
