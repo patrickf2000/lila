@@ -119,13 +119,12 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             // TODO: Re-combine this
             LtacType::Mov if line.arg1_type == LtacArg::Mem => {
                 match line.arg2_type {
-                    LtacArg::Reg32(_p) => {
+                    LtacArg::Reg32(_p) | LtacArg::Reg64(_p) => {
                         let mut instr = line.clone();
                         instr.instr_type = LtacType::Str;
                         file.code.push(instr);
                     },
                     
-                    LtacArg::Reg64 |
                     LtacArg::RetRegI32 | LtacArg::RetRegI64 => {
                         let mut instr = line.clone();
                         instr.instr_type = LtacType::Str;

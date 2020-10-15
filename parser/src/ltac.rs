@@ -110,7 +110,7 @@ pub enum LtacArg {
     Reg8(i32),
     Reg16(i32),
     Reg32(i32),
-    Reg64,
+    Reg64(i32),
     FltReg,
     FltReg64,
     RetRegI32,
@@ -387,7 +387,7 @@ impl LtacInstr {
             LtacArg::Reg8(val) => print!("i8.r{}", val),
             LtacArg::Reg16(val) => print!("i16.r{}", val),
             LtacArg::Reg32(val) => print!("i32.r{}", val),
-            LtacArg::Reg64 => print!("xr{}", self.arg1_val),
+            LtacArg::Reg64(val) => print!("i64.r{}", val),
             LtacArg::FltReg => print!("fr{}", self.arg1_val),
             LtacArg::FltReg64 => print!("dr{}", self.arg1_val),
             
@@ -427,7 +427,7 @@ impl LtacInstr {
             LtacArg::Reg8(val) => println!(", i8.r{}", val),
             LtacArg::Reg16(val) => println!(", i16.r{}", val),
             LtacArg::Reg32(val) => println!(", i32.r{}", val),
-            LtacArg::Reg64 => println!(", xr{}", self.arg2_val),
+            LtacArg::Reg64(val) => println!(", i64.r{}", val),
             LtacArg::FltReg => println!(", fr{}", self.arg2_val),
             LtacArg::FltReg64 => println!(", dr{}", self.arg2_val),
             

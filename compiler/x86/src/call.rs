@@ -45,7 +45,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         
         LtacArg::Reg16(_p) => {},
         LtacArg::Reg32(_p) => {},
-        LtacArg::Reg64 => {},
+        LtacArg::Reg64(_p) => {},
         LtacArg::FltReg => {},
         LtacArg::FltReg64 => {},
         

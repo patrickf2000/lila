@@ -625,12 +625,10 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                             return false;
                         }
                         
-                        instr.arg2_type = LtacArg::Reg64;
-                        instr.arg2_val = 0;
+                        instr.arg2_type = LtacArg::Reg64(0);
                         
                         let mut instr2 = ltac::create_instr(LtacType::Mov);
-                        instr2.arg1_type = LtacArg::Reg64;
-                        instr2.arg1_val = 0;
+                        instr2.arg1_type = LtacArg::Reg64(0);
                         instr2.arg2_type = LtacArg::Mem;
                         instr2.arg2_val = v.pos;
                         builder.file.code.push(instr2);

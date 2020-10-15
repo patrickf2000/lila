@@ -305,8 +305,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::Reg64 => {
-            let reg = amd64_op_reg64(code.arg1_val);
+        LtacArg::Reg64(pos) => {
+            let reg = amd64_op_reg64(*pos);
             line.push_str(&reg);
             line.push_str(", ");
         },
@@ -363,8 +363,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::Reg64 => {
-            let reg = amd64_op_reg64(code.arg2_val);
+        LtacArg::Reg64(pos) => {
+            let reg = amd64_op_reg64(*pos);
             line.push_str(&reg);
         },
         
@@ -467,8 +467,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::Reg64 => {
-            let reg = amd64_op_reg64(code.arg1_val);
+        LtacArg::Reg64(pos) => {
+            let reg = amd64_op_reg64(*pos);
             
             line.push_str("  mov ");
             line.push_str(&reg);
@@ -559,8 +559,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::Reg64 => {
-            let reg = amd64_op_reg64(code.arg2_val);
+        LtacArg::Reg64(pos) => {
+            let reg = amd64_op_reg64(*pos);
             line.push_str(&reg);
         },
         

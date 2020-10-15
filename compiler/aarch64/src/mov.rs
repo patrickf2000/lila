@@ -24,8 +24,8 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             line.push_str(&reg);
         },
         
-        LtacArg::Reg64 => {
-            let reg = aarch64_op_reg64(code.arg2_val);
+        LtacArg::Reg64(pos) => {
+            let reg = aarch64_op_reg64(*pos);
             line.push_str(&reg);
         },
         
@@ -76,8 +76,8 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::Reg64 => {
-            let reg = aarch64_op_reg64(code.arg2_val);
+        LtacArg::Reg64(pos) => {
+            let reg = aarch64_op_reg64(*pos);
             line.push_str(&reg);
         },
         
@@ -238,7 +238,7 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
             dest_reg = aarch64_op_reg32(*pos);
         },
         
-        LtacArg::Reg64 => {},
+        LtacArg::Reg64(_p) => {},
         
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
@@ -283,7 +283,7 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
             dest_reg = aarch64_op_reg32(*pos);
         },
         
-        LtacArg::Reg64 => {},
+        LtacArg::Reg64(_p) => {},
         
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
