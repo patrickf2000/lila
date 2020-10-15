@@ -35,8 +35,8 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
             line.push_str("], ");
         },
         
-        LtacArg::Reg => {
-            let reg = amd64_vector_i32(code.arg1_val);
+        LtacArg::Reg32(pos) => {
+            let reg = amd64_vector_i32(*pos);
             
             line.push_str(&instr);
             line.push_str(&reg);
@@ -64,8 +64,8 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
         
         LtacArg::I32 => {},
         
-        LtacArg::Reg => {
-            let reg = amd64_vector_i32(code.arg2_val);
+        LtacArg::Reg32(pos) => {
+            let reg = amd64_vector_i32(*pos);
             
             line.push_str(&reg);
             line.push_str("\n");

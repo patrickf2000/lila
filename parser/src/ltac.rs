@@ -107,9 +107,9 @@ pub enum LtacType {
 #[derive(Clone, PartialEq)]
 pub enum LtacArg {
     Empty,
-    Reg,
     Reg8,
     Reg16,
+    Reg32(i32),
     Reg64,
     FltReg,
     FltReg64,
@@ -150,7 +150,6 @@ pub struct LtacInstr {
     
     pub arg1_type : LtacArg,
     pub arg1_val : i32,
-    pub arg1_bval : u8,
     pub arg1_wval : u16,
     pub arg1_sval : String,
     pub arg1_offset : i32,
@@ -158,7 +157,6 @@ pub struct LtacInstr {
     
     pub arg2_type : LtacArg,
     pub arg2_val : i32,
-    pub arg2_bval : u8,
     pub arg2_wval : u16,
     pub arg2_sval : String,
     pub arg2_offset : i32,
@@ -175,7 +173,6 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         
         arg1_type : LtacArg::Empty,
         arg1_val : 0,
-        arg1_bval : 0,
         arg1_wval : 0,
         arg1_sval : String::new(),
         arg1_offset : 0,
@@ -183,7 +180,6 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         
         arg2_type : LtacArg::Empty,
         arg2_val : 0,
-        arg2_bval : 0,
         arg2_wval : 0,
         arg2_sval : String::new(),
         arg2_offset : 0,
@@ -388,9 +384,9 @@ impl LtacInstr {
         match &self.arg1_type {
             LtacArg::Empty => print!(" "),
             
-            LtacArg::Reg => print!("r{}", self.arg1_val),
             LtacArg::Reg8 => print!("rl{}", self.arg1_val),
             LtacArg::Reg16 => print!("w.r{}", self.arg1_val),
+            LtacArg::Reg32(val) => print!("i32.r{}", val),
             LtacArg::Reg64 => print!("xr{}", self.arg1_val),
             LtacArg::FltReg => print!("fr{}", self.arg1_val),
             LtacArg::FltReg64 => print!("dr{}", self.arg1_val),
@@ -428,9 +424,9 @@ impl LtacInstr {
         match &self.arg2_type {
             LtacArg::Empty => println!(""),
             
-            LtacArg::Reg => println!(", r{}", self.arg2_val),
             LtacArg::Reg8 => println!(", rl{}", self.arg2_val),
             LtacArg::Reg16 => println!(", w.r{}", self.arg2_val),
+            LtacArg::Reg32(val) => println!(", i32.r{}", val),
             LtacArg::Reg64 => println!(", xr{}", self.arg2_val),
             LtacArg::FltReg => println!(", fr{}", self.arg2_val),
             LtacArg::FltReg64 => println!(", dr{}", self.arg2_val),

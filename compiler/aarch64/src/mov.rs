@@ -18,9 +18,15 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         _ => line = String::new(),
     }
     
+    // TODO: Combine
     match &code.arg2_type {
-        LtacArg::Reg | LtacArg::Reg8 => {
+        LtacArg::Reg8 => {
             let reg = aarch64_op_reg32(code.arg2_val);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
             line.push_str(&reg);
         },
         
@@ -69,8 +75,15 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "  mov ".to_string();
     
     match &code.arg1_type {
-        LtacArg::Reg | LtacArg::Reg8 => {
+        LtacArg::Reg8 => {
             let reg = aarch64_op_reg32(code.arg1_val);
+        
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
+        
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
         
             line.push_str(&reg);
             line.push_str(", ");
@@ -88,8 +101,8 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     }
     
     match &code.arg2_type {
-        LtacArg::Reg => {
-            let reg = aarch64_op_reg32(code.arg2_val);
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
             line.push_str(&reg);
         },
         
@@ -234,8 +247,8 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     let mut dest_reg = "w5".to_string();
     
     match &code.arg1_type {
-        LtacArg::Reg => {
-            dest_reg = aarch64_op_reg32(code.arg1_val);
+        LtacArg::Reg32(pos) => {
+            dest_reg = aarch64_op_reg32(*pos);
         },
         
         LtacArg::Reg64 => {},
@@ -279,8 +292,8 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     
     // Whatever happens here should go to x5
     match &code.arg2_type {
-        LtacArg::Reg => {
-            dest_reg = aarch64_op_reg32(code.arg2_val);
+        LtacArg::Reg32(pos) => {
+            dest_reg = aarch64_op_reg32(*pos);
         },
         
         LtacArg::Reg64 => {},

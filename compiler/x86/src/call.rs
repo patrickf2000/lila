@@ -32,8 +32,6 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     match &code.arg1_type {
         LtacArg::Empty => {},
         
-        LtacArg::Reg => {},
-        
         LtacArg::Reg8 => {
             let reg = amd64_op_reg8(code.arg1_val);
             
@@ -43,7 +41,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         },
         
         LtacArg::Reg16 => {},
-        
+        LtacArg::Reg32(_p) => {},
         LtacArg::Reg64 => {},
         LtacArg::FltReg => {},
         LtacArg::FltReg64 => {},

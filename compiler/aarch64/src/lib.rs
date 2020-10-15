@@ -250,8 +250,8 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     }
     
     match &code.arg1_type {
-        LtacArg::Reg => {
-            let reg = aarch64_op_reg32(code.arg1_val);
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
             dest = reg.clone();
         
             dest_line.push_str(&reg);
@@ -273,8 +273,8 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str(&dest_line);
     
     match &code.arg2_type {
-        LtacArg::Reg => {
-            let reg = aarch64_op_reg32(code.arg2_val);
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
             src = reg.clone();
             
             line.push_str(&reg);

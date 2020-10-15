@@ -134,8 +134,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     let first_type = args.first().unwrap().arg_type.clone();
 
     let mut instr = ltac::create_instr(LtacType::Mov);
-    instr.arg1_type = LtacArg::Reg;
-    instr.arg1_val = 0;
+    instr.arg1_type = LtacArg::Reg32(0);
     
     // The byte types
     if var.data_type == DataType::Byte {
@@ -251,8 +250,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     instr.arg2_offset = first_arg.i32_val * size;
                                 } else if first_arg.arg_type == AstArgType::Id {
                                     let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
-                                    instr2.arg1_type = LtacArg::Reg;
-                                    instr2.arg1_val = 0;
+                                    instr2.arg1_type = LtacArg::Reg32(0);
                                     
                                     instr2.arg2_type = LtacArg::Mem;
                                     instr2.arg2_val = instr.arg2_val;
@@ -265,8 +263,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     
                                     builder.file.code.push(instr2);
                                     
-                                    instr.arg2_type = LtacArg::Reg;
-                                    instr.arg2_val = 0;
+                                    instr.arg2_type = LtacArg::Reg32(0);
                                 }
                             }
                         }
@@ -327,8 +324,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpAdd 
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Add);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpAdd => {
@@ -359,8 +355,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpSub
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Sub);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpSub => {
@@ -391,8 +386,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpMul
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Mul);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpMul => {
@@ -417,8 +411,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpDiv
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Div);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpDiv if var.data_type == DataType::Byte => {
@@ -443,8 +436,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpMod
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Mod);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpMod => {
@@ -463,8 +455,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpAnd
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32And);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpAnd => {
@@ -483,8 +474,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpOr
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Or);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpOr => {
@@ -503,8 +493,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpXor
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Xor);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpXor => {
@@ -523,8 +512,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpLeftShift
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Lsh);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpLeftShift => {
@@ -543,8 +531,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::OpRightShift
             if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
                 instr = ltac::create_instr(LtacType::I32Rsh);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             AstArgType::OpRightShift => {
@@ -566,7 +553,6 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg1_val = var.pos;
         instr.arg2_type = top.arg2_type;
         instr.arg2_val = top.arg2_val;
-        instr.arg2_bval = top.arg2_bval;
         instr.arg2_wval = top.arg2_wval;
         instr.arg2_sval = top.arg2_sval;
         instr.arg2_offset = top.arg2_offset;
@@ -601,8 +587,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::Mov);
         instr.arg1_type = LtacArg::Mem;
         instr.arg1_val = var.pos;
-        instr.arg2_type = LtacArg::Reg;
-        instr.arg2_val = 0;
+        instr.arg2_type = LtacArg::Reg32(0);
     }
     
     if line.sub_args.len() > 0 {

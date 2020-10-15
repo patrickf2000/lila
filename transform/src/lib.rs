@@ -72,8 +72,7 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                     
                     LtacArg::I32 => {
                         let mut instr = ltac::create_instr(LtacType::Mov);
-                        instr.arg1_type = LtacArg::Reg;
-                        instr.arg1_val = 2;
+                        instr.arg1_type = LtacArg::Reg32(2);
                         instr.arg2_type = LtacArg::I32;
                         instr.arg2_val = line.arg2_val;
                         
@@ -82,8 +81,7 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                         instr = ltac::create_instr(LtacType::Str);
                         instr.arg1_type = LtacArg::Mem;
                         instr.arg1_val = line.arg1_val;
-                        instr.arg2_type = LtacArg::Reg;
-                        instr.arg2_val = 2;
+                        instr.arg2_type = LtacArg::Reg32(2);
                         
                         file.code.push(instr.clone());
                     },
@@ -121,14 +119,23 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             },
             
             // Store register to variable
+            // TODO: Re-combine this
             LtacType::Mov if line.arg1_type == LtacArg::Mem => {
-                if line.arg2_type == LtacArg::Reg || line.arg2_type == LtacArg::Reg64
-                    || line.arg2_type == LtacArg::RetRegI32 || line.arg2_type == LtacArg::RetRegI64 {
-                    let mut instr = line.clone();
-                    instr.instr_type = LtacType::Str;
-                    file.code.push(instr);   
-                } else {
-                    file.code.push(line.clone());
+                match line.arg2_type {
+                    LtacArg::Reg32(_p) => {
+                        let mut instr = line.clone();
+                        instr.instr_type = LtacType::Str;
+                        file.code.push(instr);
+                    },
+                    
+                    LtacArg::Reg64 |
+                    LtacArg::RetRegI32 | LtacArg::RetRegI64 => {
+                        let mut instr = line.clone();
+                        instr.instr_type = LtacType::Str;
+                        file.code.push(instr);
+                    },
+                    
+                    _ => file.code.push(line.clone()),
                 }
             },
             
@@ -141,23 +148,20 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             
                 if line.arg2_type == LtacArg::I32 {
                     instr = ltac::create_instr(LtacType::Mov);
-                    instr.arg1_type = LtacArg::Reg;
-                    instr.arg1_val = 1;
+                    instr.arg1_type = LtacArg::Reg32(1);
                     instr.arg2_type = LtacArg::I32;
                     instr.arg2_val = line.arg2_val;
                 } else if line.arg2_type == LtacArg::Mem {
                     instr = ltac::create_instr(LtacType::Ld);
                     instr.arg1_type = LtacArg::Mem;
                     instr.arg1_val = line.arg2_val;
-                    instr.arg2_type = LtacArg::Reg;
-                    instr.arg2_val = 1;
+                    instr.arg2_type = LtacArg::Reg32(1);
                 }
                 
                 file.code.push(instr);
                 
                 instr = line.clone();
-                instr.arg2_type = LtacArg::Reg;
-                instr.arg2_val = 1;
+                instr.arg2_type = LtacArg::Reg32(1);
                 
                 file.code.push(instr);
             },

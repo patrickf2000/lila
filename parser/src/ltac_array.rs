@@ -78,8 +78,7 @@ pub fn build_i32dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Va
 // Builds integer vector math
 pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
     let mut instr = ltac::create_instr(LtacType::MovI32Vec);
-    instr.arg1_type = LtacArg::Reg;
-    instr.arg1_val = 0;
+    instr.arg1_type = LtacArg::Reg32(0);
 
     for arg in line.args.iter() {
         match &arg.arg_type {
@@ -100,8 +99,7 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
             
             AstArgType::OpAdd => {
                 instr = ltac::create_instr(LtacType::I32VAdd);
-                instr.arg1_type = LtacArg::Reg;
-                instr.arg1_val = 0;
+                instr.arg1_type = LtacArg::Reg32(0);
             },
             
             _ => {
@@ -115,8 +113,7 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
     instr = ltac::create_instr(LtacType::MovI32Vec);
     instr.arg1_type = LtacArg::Mem;
     instr.arg1_val = var.pos;
-    instr.arg2_type = LtacArg::Reg;
-    instr.arg2_val = 0;
+    instr.arg2_type = LtacArg::Reg32(0);
     instr.arg2_offset_size = 4;
     
     builder.file.code.push(instr.clone());
