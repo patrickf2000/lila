@@ -31,6 +31,21 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> 
     Ok(file2)
 }
 
+// Check to see if a given argument is memory
+fn is_mem(arg : &LtacArg) -> bool {
+    match arg {
+        LtacArg::Mem(_p) => return true,
+        _ => return false,
+    }
+}
+
+fn get_mem(arg : &LtacArg) -> i32 {
+    match arg {
+        LtacArg::Mem(pos) => return *pos,
+        _ => return 0,
+    }
+}
+
 // Scans the code and optimizes expressions for RISC architectures
 // Although some RISC architectures support more advanced instructions (ie, math with immediates),
 //    we are creating a MIPS-like structure to be sure everything is supported. This should not affect
@@ -50,59 +65,42 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
         match &line.instr_type {
         
             // Store byte to variable
-            LtacType::MovB => {
-                match &line.arg1_type {
-                    LtacArg::Mem(pos) => {
-                        match &line.arg2_type {
-                            LtacArg::Byte(val) => {
-                                let mut instr = ltac::create_instr(LtacType::MovB);
-                                instr.arg1_type = LtacArg::Reg8(2);
-                                instr.arg2_type = LtacArg::Byte(*val);
-                                
-                                file.code.push(instr.clone());
-                                
-                                instr = ltac::create_instr(LtacType::StrB);
-                                instr.arg1_type = LtacArg::Mem(*pos);
-                                instr.arg2_type = LtacArg::Reg8(2);
-                                
-                                file.code.push(instr.clone()); 
-                            },
-                            
-                            LtacArg::I32(val) => {
-                                let mut instr = ltac::create_instr(LtacType::Mov);
-                                instr.arg1_type = LtacArg::Reg32(2);
-                                instr.arg2_type = LtacArg::I32(*val);
-                                
-                                file.code.push(instr.clone());
-                                
-                                instr = ltac::create_instr(LtacType::Str);
-                                instr.arg1_type = LtacArg::Mem(*pos);
-                                instr.arg2_type = LtacArg::Reg32(2);
-                                
-                                file.code.push(instr.clone());
-                            },
-                            
-                            LtacArg::Ptr => {
-                                let mut instr = line.clone();
-                                instr.instr_type = LtacType::StrPtr;
-                                file.code.push(instr.clone());
-                            },
-                            
-                            _ => {},
-                        }
+            LtacType::MovB
+            if is_mem(&line.arg1_type) => {
+                let pos = get_mem(&line.arg1_type);
+            
+                match &line.arg2_type {
+                    LtacArg::Byte(val) => {
+                        let mut instr = ltac::create_instr(LtacType::MovB);
+                        instr.arg1_type = LtacArg::Reg8(2);
+                        instr.arg2_type = LtacArg::Byte(*val);
+                        
+                        file.code.push(instr.clone());
+                        
+                        instr = ltac::create_instr(LtacType::StrB);
+                        instr.arg1_type = LtacArg::Mem(pos);
+                        instr.arg2_type = LtacArg::Reg8(2);
+                        
+                        file.code.push(instr.clone()); 
                     },
                     
-                    _ => {},
-                }
-                
-                // Store memory to byte register
-                match line.arg2_type {
-                    LtacArg::Mem(pos) => {
-                        let mut instr = ltac::create_instr(LtacType::LdB);
-                        instr.arg1_type = LtacArg::Mem(pos);
-                        instr.arg2_type = line.arg1_type.clone();
-                        instr.arg2_val = line.arg1_val;
+                    LtacArg::I32(val) => {
+                        let mut instr = ltac::create_instr(LtacType::Mov);
+                        instr.arg1_type = LtacArg::Reg32(2);
+                        instr.arg2_type = LtacArg::I32(*val);
                         
+                        file.code.push(instr.clone());
+                        
+                        instr = ltac::create_instr(LtacType::Str);
+                        instr.arg1_type = LtacArg::Mem(pos);
+                        instr.arg2_type = LtacArg::Reg32(2);
+                        
+                        file.code.push(instr.clone());
+                    },
+                    
+                    LtacArg::Ptr => {
+                        let mut instr = line.clone();
+                        instr.instr_type = LtacType::StrPtr;
                         file.code.push(instr.clone());
                     },
                     
@@ -111,33 +109,55 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             },
             
             // Store memory to register
-            LtacType::Mov => {
-                match line.arg1_type {
-                    LtacArg::Reg32(_p) | LtacArg::Reg64(_p) => {
-                        let mut instr = line.clone();
-                        instr.instr_type = LtacType::Str;
-                        file.code.push(instr);
-                    },
-                    
-                    LtacArg::RetRegI32 | LtacArg::RetRegI64 => {
-                        let mut instr = line.clone();
-                        instr.instr_type = LtacType::Str;
-                        file.code.push(instr);
-                    },
-                    
-                    _ => {},
-                }
+            LtacType::Mov if is_mem(&line.arg2_type) => {
+                let pos = get_mem(&line.arg2_type);
             
-                match line.arg2_type {
-                    LtacArg::Mem(pos) => {
-                        let mut instr = ltac::create_instr(LtacType::Ld);
-                        instr.arg1_type = LtacArg::Mem(pos);
-                        instr.arg2_type = line.arg1_type.clone();
-                        instr.arg2_val = line.arg1_val;
-                    },
+                let mut instr = ltac::create_instr(LtacType::Ld);
+                instr.arg1_type = LtacArg::Mem(pos);
+                instr.arg2_type = line.arg1_type.clone();
+                instr.arg2_val = line.arg1_val;
                 
-                    _ => file.code.push(line.clone()),
+                file.code.push(instr.clone());
+            },
+            
+            // Store memory to byte register
+            LtacType::MovB if is_mem(&line.arg2_type) => {
+                let pos = get_mem(&line.arg2_type);
+                
+                let mut instr = ltac::create_instr(LtacType::LdB);
+                instr.arg1_type = LtacArg::Mem(pos);
+                instr.arg2_type = line.arg1_type.clone();
+                instr.arg2_val = line.arg1_val;
+                
+                file.code.push(instr.clone());
+            },
+            
+            // Store value to variable
+            LtacType::Mov if is_mem(&line.arg1_type) => {
+                let arg2_val : LtacArg;
+            
+                match &line.arg2_type {
+                    LtacArg::RetRegI64 => {
+                        let mut instr = line.clone();
+                        instr.arg1_type = LtacArg::Reg64(2);
+                        file.code.push(instr.clone());
+                        
+                        arg2_val = LtacArg::Reg64(2);
+                    },
+                    
+                    _ => {
+                        let mut instr = line.clone();
+                        instr.arg1_type = LtacArg::Reg32(2);
+                        file.code.push(instr.clone());
+                        
+                        arg2_val = LtacArg::Reg32(2);
+                    },
                 }
+                
+                let mut instr = ltac::create_instr(LtacType::Str);
+                instr.arg1_type = line.arg1_type.clone();
+                instr.arg2_type = arg2_val;
+                file.code.push(instr.clone());
             },
             
             // Integer arithmetic instructions
@@ -338,4 +358,5 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
     
     Ok(file2)
 }
+
 

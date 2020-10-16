@@ -1,29 +1,32 @@
 
 #OUTPUT
-#X: 3.140000
-#X + 5.4 = 8.540000
-#X - 5.4 = -2.260000
-#X * 5.4 = 16.956000
-#X / 5.4 = 0.581481
+#X = 4
+#x & 5 = 4
+#x | 5 = 5
+#x ^ 5 = 1
+#x << 2 = 10
+#x >> 2 = 1
 #END
 
 #RET 0
 
 extern func printf(s:str, ...)
 
-
 func main -> int
-    double x = 3.14
-    double a1 = x + 5.4
-    double a2 = x - 5.4
-    double a3 = x * 5.4
-    double a4 = x / 5.4
+    byte x = 4
     
-    printf("X: %f\n", x)
-    printf("X + 5.4 = %f\n", a1)
-    printf("X - 5.4 = %f\n", a2)
-    printf("X * 5.4 = %f\n", a3)
-    printf("X / 5.4 = %f\n", a4)
+    byte a1 = x & 5
+    #byte a2 = x | 5
+    #byte a3 = x ^ 5
+    #byte a4 = x << 2
+    #byte a5 = x >> 2
+    
+    printf("X = %d\n", x)
+    printf("x & 5 = %x\n", a1)
+    #printf("x | 5 = %x\n", a2)
+    #printf("x ^ 5 = %x\n", a3)
+    #printf("x << 2 = %x\n", a4)
+    #printf("x >> 2 = %x\n", a5)
     
     return 0
 end
