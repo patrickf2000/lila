@@ -74,8 +74,9 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         
         AstArgType::FloatL => {
             cmp = ltac::create_instr(LtacType::F32Cmp);
-            cmp.arg1_type = LtacArg::F32;
-            cmp.arg1_sval = builder.build_float(arg1.f64_val, false);
+            
+            let name = builder.build_float(arg1.f64_val, false);
+            cmp.arg1_type = LtacArg::F32(name);
         },
         
         AstArgType::StringL => {},
@@ -138,11 +139,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         
         AstArgType::FloatL => {
             if cmp.instr_type == LtacType::F64Cmp {
-                cmp.arg2_type = LtacArg::F64;
-                cmp.arg2_sval = builder.build_float(arg2.f64_val, true);
+                let name = builder.build_float(arg2.f64_val, true);
+                cmp.arg2_type = LtacArg::F64(name);
             } else {
-                cmp.arg2_type = LtacArg::F32;
-                cmp.arg2_sval = builder.build_float(arg2.f64_val, false);
+                let name = builder.build_float(arg2.f64_val, false);
+                cmp.arg2_type = LtacArg::F32(name);
             }
         },
         
@@ -173,10 +174,14 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_type = LtacArg::FltReg64(1);
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
-                        if cmp.arg1_type == LtacArg::F32 {
-                            cmp = ltac::create_instr(LtacType::F64Cmp);
-                            cmp.arg1_type = LtacArg::F64;
-                            cmp.arg1_sval = builder.build_float(arg1.f64_val, true);
+                        match cmp.arg1_type {
+                            LtacArg::F32(ref _v) => {
+                                cmp = ltac::create_instr(LtacType::F64Cmp);
+                                let name = builder.build_float(arg1.f64_val, true);
+                                cmp.arg1_type = LtacArg::F64(name);
+                            },
+                            
+                            _ => {},
                         }
                         
                         cmp.arg2_type = LtacArg::FltReg64(1);

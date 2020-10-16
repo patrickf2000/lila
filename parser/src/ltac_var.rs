@@ -209,14 +209,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             },
             
             AstArgType::FloatL if var.data_type == DataType::Float => {
-                instr.arg2_type = LtacArg::F32;
-                instr.arg2_sval = builder.build_float(arg.f64_val, false);
+                let name = builder.build_float(arg.f64_val, false);
+                instr.arg2_type = LtacArg::F32(name);
                 builder.file.code.push(instr.clone());
             },
             
             AstArgType::FloatL if var.data_type == DataType::Double => {
-                instr.arg2_type = LtacArg::F64;
-                instr.arg2_sval = builder.build_float(arg.f64_val, true);
+                let name = builder.build_float(arg.f64_val, true);
+                instr.arg2_type = LtacArg::F64(name);
                 builder.file.code.push(instr.clone());
             },
             

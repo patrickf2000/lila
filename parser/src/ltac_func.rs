@@ -58,8 +58,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::FloatL => {
                 let mut push = ltac::create_instr(LtacType::PushArg);
-                push.arg1_type = LtacArg::F32;
-                push.arg1_sval = builder.build_float(arg.f64_val, false);
+                let name = builder.build_float(arg.f64_val, false);
+                push.arg1_type = LtacArg::F32(name);
                 push.arg2_val = flt_arg_no;
                 builder.file.code.push(push);
                 
@@ -175,11 +175,11 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::FloatL => {
                 if builder.current_type == DataType::Float {
-                    mov.arg2_type = LtacArg::F32;
-                    mov.arg2_sval = builder.build_float(arg1.f64_val, false);
+                    let name = builder.build_float(arg1.f64_val, false);
+                    mov.arg2_type = LtacArg::F32(name);
                 } else {
-                    mov.arg2_type = LtacArg::F64;
-                    mov.arg2_sval = builder.build_float(arg1.f64_val, true);
+                    let name = builder.build_float(arg1.f64_val, true);
+                    mov.arg2_type = LtacArg::F64(name);
                 }
             }
             

@@ -19,10 +19,10 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     }
     
     // Determine move type
-    match code.arg1_type {
+    match &code.arg1_type {
         LtacArg::Reg8(_p) => line = "  movzx ".to_string(),
-        LtacArg::F32 => line = "  movss ".to_string(),
-        LtacArg::F64 => line = "  movsd ".to_string(),
+        LtacArg::F32(_p) => line = "  movss ".to_string(),
+        LtacArg::F64(_p) => line = "  movsd ".to_string(),
         _ => {},
     }
     
@@ -107,17 +107,17 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&val.to_string());
         },
         
-        LtacArg::F32 => {
+        LtacArg::F32(ref val) => {
             line.push_str(&reg_flt);
             line.push_str(", DWORD PTR ");
-            line.push_str(&code.arg1_sval);
+            line.push_str(&val);
             line.push_str("[rip]");
         },
         
-        LtacArg::F64 => {
+        LtacArg::F64(ref val) => {
             line.push_str(&reg_flt);
             line.push_str(", QWORD PTR ");
-            line.push_str(&code.arg1_sval);
+            line.push_str(&val);
             line.push_str("[rip]");
         },
         
@@ -151,12 +151,16 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         _ => {},
     }
     
-    if code.arg1_type == LtacArg::F32 {
-        line.push_str("  cvtss2sd ");
-        line.push_str(&reg_flt);
-        line.push_str(", ");
-        line.push_str(&reg_flt);
-        line.push_str("\n");
+    match &code.arg1_type {
+        LtacArg::F32(_v) => {
+            line.push_str("  cvtss2sd ");
+            line.push_str(&reg_flt);
+            line.push_str(", ");
+            line.push_str(&reg_flt);
+            line.push_str("\n");
+        },
+        
+        _ => {},
     }
     
     writer.write(&line.into_bytes())
