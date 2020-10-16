@@ -65,8 +65,7 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
         match &line.instr_type {
         
             // Store byte to variable
-            LtacType::MovB
-            if is_mem(&line.arg1_type) => {
+            LtacType::MovB if is_mem(&line.arg1_type) => {
                 let pos = get_mem(&line.arg1_type);
             
                 match &line.arg2_type {
@@ -95,6 +94,12 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                         instr.arg1_type = LtacArg::Mem(pos);
                         instr.arg2_type = LtacArg::Reg32(2);
                         
+                        file.code.push(instr.clone());
+                    },
+                    
+                    LtacArg::Reg8(_p) => {
+                        let mut instr = line.clone();
+                        instr.instr_type = LtacType::StrB;
                         file.code.push(instr.clone());
                     },
                     
@@ -164,8 +169,23 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             // TODO: Can we clean this up?
             LtacType::I32Add | LtacType::I32Sub | LtacType::I32Mul | LtacType::I32Div | LtacType::I32Mod |
             LtacType::I32And | LtacType::I32Or | LtacType::I32Xor | LtacType::I32Lsh | LtacType::I32Rsh |
-            LtacType::I32Cmp => {
+            LtacType::I32Cmp |
+            LtacType::BAdd | LtacType::BSub | LtacType::BMul | LtacType::BDiv | LtacType::BMod |
+            LtacType::BAnd | LtacType::BOr | LtacType::BXor | LtacType::BLsh | LtacType::BRsh => {
                 match line.arg2_type {
+                    LtacArg::Byte(val) => {
+                        let mut instr = ltac::create_instr(LtacType::MovB);
+                        instr.arg1_type = LtacArg::Reg8(1);
+                        instr.arg2_type = LtacArg::Byte(val);
+                        
+                        file.code.push(instr);
+                        
+                        instr = line.clone();
+                        instr.arg2_type = LtacArg::Reg8(1);
+                        
+                        file.code.push(instr);
+                    },
+                    
                     LtacArg::I32(val) => {
                         let mut instr = ltac::create_instr(LtacType::Mov);
                         instr.arg1_type = LtacArg::Reg32(1);

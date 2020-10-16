@@ -16,14 +16,14 @@ func main -> int
     byte x = 4
     
     byte a1 = x & 5
-    #byte a2 = x | 5
+    byte a2 = x | 5
     #byte a3 = x ^ 5
     #byte a4 = x << 2
     #byte a5 = x >> 2
     
     printf("X = %d\n", x)
     printf("x & 5 = %x\n", a1)
-    #printf("x | 5 = %x\n", a2)
+    printf("x | 5 = %x\n", a2)
     #printf("x ^ 5 = %x\n", a3)
     #printf("x << 2 = %x\n", a4)
     #printf("x >> 2 = %x\n", a5)
