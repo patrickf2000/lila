@@ -7,7 +7,12 @@ use crate::utils::*;
 // Builds a load/store instruction
 pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line : String;
-    let pos = stack_size - code.arg1_val;
+    let mut pos = 0;
+    
+    match &code.arg1_type {
+        LtacArg::Mem(p) => pos = stack_size - p,
+        _ => {},
+    }
     
     match &code.instr_type {
         LtacType::Ld => line = "  ldr ".to_string(),
@@ -46,7 +51,12 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
 // Builds the store-pointer instruction
 pub fn aarch64_build_strptr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line = String::new();
-    let pos = stack_size - code.arg1_val;
+    let mut pos = 0;
+    
+    match &code.arg1_type {
+        LtacArg::Mem(p) => pos = stack_size - p,
+        _ => {},
+    }
     
     line.push_str("  adrp x4, ");
     line.push_str(&code.arg2_sval);
@@ -244,8 +254,8 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
         LtacArg::RetRegI64 => {},
         
         // Load to x6
-        LtacArg::Mem => {
-            let pos = stack_size - code.arg1_val;
+        LtacArg::Mem(p) => {
+            let pos = stack_size - p;
             
             if code.instr_type == LtacType::MovOffImm {
                 line.push_str("  ldr x6, [sp, ");
@@ -288,8 +298,8 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
         LtacArg::RetRegI32 => {},
         LtacArg::RetRegI64 => {},
         
-        LtacArg::Mem => {
-            let pos = stack_size - code.arg2_val;
+        LtacArg::Mem(p) => {
+            let pos = stack_size - p;
             
             if code.instr_type == LtacType::MovOffImm {
                 line.push_str("  ldr x6, [sp, ");
@@ -337,10 +347,14 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     }
     
     // Store back
-    if code.arg1_type == LtacArg::Mem {
-        line.push_str("  str ");
-        line.push_str(&dest_reg);
-        line.push_str(", [x6]\n");
+    match &code.arg1_type {
+        LtacArg::Mem(_p) => {
+            line.push_str("  str ");
+            line.push_str(&dest_reg);
+            line.push_str(", [x6]\n");
+        },
+        
+        _ => {},
     }
     
     writer.write(&line.into_bytes())

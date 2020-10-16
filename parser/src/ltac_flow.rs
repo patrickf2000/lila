@@ -83,7 +83,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg32(0);
-            mov.arg2_type = LtacArg::Mem;
+            //mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg1.str_val) {
                 Some(v) => {
@@ -100,8 +100,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     } else if v.data_type == DataType::Float {
                         mov = ltac::create_instr(LtacType::MovF32);
                         mov.arg1_type = LtacArg::FltReg(0);
-                        mov.arg2_type = LtacArg::Mem;
-                        mov.arg2_val = v.pos;
+                        mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp = ltac::create_instr(LtacType::F32Cmp);
                         cmp.arg1_type = LtacArg::FltReg(0);
@@ -110,15 +109,14 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     } else if v.data_type == DataType::Double {
                         mov = ltac::create_instr(LtacType::MovF64);
                         mov.arg1_type = LtacArg::FltReg64(0);
-                        mov.arg2_type = LtacArg::Mem;
-                        mov.arg2_val = v.pos;
+                        mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp = ltac::create_instr(LtacType::F64Cmp);
                         cmp.arg1_type = LtacArg::FltReg64(0);
                         
                     // Integer comparisons
                     } else {
-                        mov.arg2_val = v.pos;
+                        mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg1_type = LtacArg::Reg32(0);
                     }
@@ -153,7 +151,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg32(1);
-            mov.arg2_type = LtacArg::Mem;
+            //mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg2.str_val) {
                 Some(v) => {
@@ -166,16 +164,14 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     } else if v.data_type == DataType::Float {
                         mov = ltac::create_instr(LtacType::MovF32);
                         mov.arg1_type = LtacArg::FltReg(1);
-                        mov.arg2_type = LtacArg::Mem;
-                        mov.arg2_val = v.pos;
+                        mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg2_type = LtacArg::FltReg(1);
                         
                     } else if v.data_type == DataType::Double {
                         mov = ltac::create_instr(LtacType::MovF64);
                         mov.arg1_type = LtacArg::FltReg64(1);
-                        mov.arg2_type = LtacArg::Mem;
-                        mov.arg2_val = v.pos;
+                        mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         if cmp.arg1_type == LtacArg::F32 {
                             cmp = ltac::create_instr(LtacType::F64Cmp);
@@ -186,7 +182,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp.arg2_type = LtacArg::FltReg64(1);
                         
                     } else {
-                        mov.arg2_val = v.pos;
+                        mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg1_type = LtacArg::Reg32(0);
                     }
@@ -287,11 +283,10 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg32(0);
-            mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg1.str_val) {
-                Some(v) => mov.arg2_val = v.pos,
-                None => mov.arg2_val = 0,
+                Some(v) => mov.arg2_type = LtacArg::Mem(v.pos),
+                None => {/* TODO: Syntax error */},
             }
             
             cmp_block.push(mov);
@@ -312,11 +307,10 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg32(1);
-            mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg2.str_val) {
-                Some(v) => mov.arg2_val = v.pos,
-                None => mov.arg2_val = 0,
+                Some(v) => mov.arg2_type = LtacArg::Mem(v.pos),
+                None => {/* TODO: Syntax error */},
             }
             
             cmp_block.push(mov);

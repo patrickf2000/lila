@@ -227,8 +227,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::Id => {
                 match builder.vars.get(&arg.str_val) {
                     Some(v) => {
-                        instr.arg2_type = LtacArg::Mem;
-                        instr.arg2_val = v.pos;
+                        instr.arg2_type = LtacArg::Mem(v.pos);
                         
                         let mut size = 1;
                         if v.data_type == DataType::IntDynArray {
@@ -246,8 +245,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
                                     instr2.arg1_type = LtacArg::Reg32(0);
                                     
-                                    instr2.arg2_type = LtacArg::Mem;
-                                    instr2.arg2_val = instr.arg2_val;
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
                                     instr2.arg2_offset_size = size;
                                     
                                     match builder.vars.get(&first_arg.str_val) {
@@ -525,8 +523,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         let top = builder.file.code.pop().unwrap();
         
         instr = ltac::create_instr(top.instr_type);
-        instr.arg1_type = LtacArg::Mem;
-        instr.arg1_val = var.pos;
+        instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = top.arg2_type;
         instr.arg2_val = top.arg2_val;
         instr.arg2_wval = top.arg2_wval;
@@ -537,29 +534,25 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     // Store back a byte
     } else if var.data_type == DataType::Byte {
         instr = ltac::create_instr(LtacType::MovB);
-        instr.arg1_type = LtacArg::Mem;
-        instr.arg1_val = var.pos;
+        instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::Reg8(0);
         
     // Store back a float
     } else if var.data_type == DataType::Float {
         instr = ltac::create_instr(LtacType::MovF32);
-        instr.arg1_type = LtacArg::Mem;
-        instr.arg1_val = var.pos;
+        instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::FltReg(0);
         
     // Store back a double
     } else if var.data_type == DataType::Double {
         instr = ltac::create_instr(LtacType::MovF64);
-        instr.arg1_type = LtacArg::Mem;
-        instr.arg1_val = var.pos;
+        instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::FltReg64(0);
         
     // Store back everything else
     } else {
         instr = ltac::create_instr(LtacType::Mov);
-        instr.arg1_type = LtacArg::Mem;
-        instr.arg1_val = var.pos;
+        instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::Reg32(0);
     }
     
@@ -594,8 +587,7 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
     if line.args.len() == 1 {
         let arg = line.args.first().unwrap();
         
-        instr.arg1_type = LtacArg::Mem;
-        instr.arg1_val = var.pos;
+        instr.arg1_type = LtacArg::Mem(var.pos);
         
         match &arg.arg_type {
             AstArgType::StringL => {
@@ -617,8 +609,7 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                         
                         let mut instr2 = ltac::create_instr(LtacType::Mov);
                         instr2.arg1_type = LtacArg::Reg64(0);
-                        instr2.arg2_type = LtacArg::Mem;
-                        instr2.arg2_val = v.pos;
+                        instr2.arg2_type = LtacArg::Mem(v.pos);
                         builder.file.code.push(instr2);
                     },
                     

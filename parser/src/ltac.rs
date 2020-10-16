@@ -120,7 +120,7 @@ pub enum LtacArg {
     RetRegF32,
     RetRegF64,
     
-    Mem,
+    Mem(i32),
     
     Byte(i8),
     I16,
@@ -400,13 +400,13 @@ impl LtacInstr {
             LtacArg::RetRegF32 => print!("f32.ret"),
             LtacArg::RetRegF64 => print!("f64.ret"),
             
-            LtacArg::Mem => {
+            LtacArg::Mem(val) => {
                 if self.arg1_offset > 0 && self.arg1_offset_size > 0 {
-                    print!("[bp-{}+({}*{})]", self.arg1_val, self.arg1_offset, self.arg1_offset_size);
+                    print!("[bp-{}+({}*{})]", val, self.arg1_offset, self.arg1_offset_size);
                 } else if self.arg1_offset > 0 {
-                    print!("[bp-{}+{}]", self.arg1_val, self.arg1_offset);
+                    print!("[bp-{}+{}]", val, self.arg1_offset);
                 } else {
-                    print!("[bp-{}]", self.arg1_val);
+                    print!("[bp-{}]", val);
                 }
             },
             
@@ -440,13 +440,13 @@ impl LtacInstr {
             LtacArg::RetRegF32 => println!(", f32.ret"),
             LtacArg::RetRegF64 => println!(", f64.ret"),
             
-            LtacArg::Mem => {
+            LtacArg::Mem(val) => {
                 if self.arg2_offset > 0 && self.arg2_offset_size > 0 {
-                    println!(", [bp-{}+({}*{})]", self.arg2_val, self.arg2_offset, self.arg2_offset_size);
+                    println!(", [bp-{}+({}*{})]", val, self.arg2_offset, self.arg2_offset_size);
                 } else if self.arg2_offset > 0 {
-                    println!(", [bp-{}+{}]", self.arg2_val, self.arg2_offset);
+                    println!(", [bp-{}+{}]", val, self.arg2_offset);
                 } else {
-                    println!(", [bp-{}]", self.arg2_val);
+                    println!(", [bp-{}]", val);
                 }
             },
             

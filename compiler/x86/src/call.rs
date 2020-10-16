@@ -64,7 +64,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => {},
         
-        LtacArg::Mem => {
+        LtacArg::Mem(pos) => {
             match code.arg2_type {
                 LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => {
                     line.push_str(&reg_flt);
@@ -83,7 +83,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             }
             
             line.push_str("[rbp-");
-            line.push_str(&code.arg1_val.to_string());
+            line.push_str(&pos.to_string());
             line.push_str("]");
         },
         

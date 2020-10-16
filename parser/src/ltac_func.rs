@@ -81,11 +81,10 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             AstArgType::Id => {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg2_val = arg_no;
-                push.arg1_type = LtacArg::Mem;
                 
                 match &builder.vars.get(&arg.str_val) {
                     Some(v) => {
-                        push.arg1_val = v.pos;
+                        push.arg1_type = LtacArg::Mem(v.pos);
                         
                         //TODO: Clean up the byte code so its like the short type
                         if v.data_type == DataType::Byte {
@@ -93,13 +92,13 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                             
                             let mut instr = ltac::create_instr(LtacType::MovB);
                             instr.arg1_type = LtacArg::Reg8(2);
-                            instr.arg2_type = LtacArg::Mem;
-                            instr.arg2_val = v.pos;
+                            instr.arg2_type = LtacArg::Mem(v.pos);
                             builder.file.code.push(instr);
                         } else if v.data_type == DataType::Short {
                             push.arg2_type = LtacArg::I16;
                         } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
                             push.arg1_type = LtacArg::Ptr;
+                            push.arg1_val = v.pos;
                         } else if v.data_type == DataType::Float {
                             push.arg2_type = LtacArg::FltReg(flt_arg_no);
                         } else if v.data_type == DataType::Double {
@@ -187,11 +186,9 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             AstArgType::StringL => {},
             
             AstArgType::Id => {
-                mov.arg2_type = LtacArg::Mem;
-                
                 match builder.vars.get(&arg1.str_val) {
-                    Some(v) => mov.arg2_val = v.pos,
-                    None => mov.arg2_val = 0,
+                    Some(v) => mov.arg2_type = LtacArg::Mem(v.pos),
+                    None => {/* TODO: Syntax error */},
                 }
             },
             

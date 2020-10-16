@@ -27,8 +27,8 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
             line.push_str("\n");
         },
     
-        LtacArg::Mem => {
-            let pos = stack_size - code.arg1_val;
+        LtacArg::Mem(p) => {
+            let pos = stack_size - *p;
             line.push_str("  ldr ");
             line.push_str(&reg32);
             line.push_str(", [sp, ");
