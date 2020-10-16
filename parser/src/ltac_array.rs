@@ -28,8 +28,7 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
     for (_name, var) in &builder.vars {
         if var.data_type == DataType::IntDynArray && !var.is_param {
             let mut pusharg = ltac::create_instr(LtacType::PushArg);
-            pusharg.arg1_type = LtacArg::Ptr;
-            pusharg.arg1_val = var.pos;
+            pusharg.arg1_type = LtacArg::Ptr(var.pos);
             pusharg.arg2_val = 1;
             builder.file.code.push(pusharg);
             

@@ -173,8 +173,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             },
             
             AstArgType::ShortL if var.data_type == DataType::Short => {
-                instr.arg2_type = LtacArg::I16;
-                instr.arg2_wval = arg.u16_val;
+                instr.arg2_type = LtacArg::I16(arg.u16_val as i16);
                 builder.file.code.push(instr.clone());
             },
             
@@ -592,9 +591,7 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
         match &arg.arg_type {
             AstArgType::StringL => {
                 let name = builder.build_string(arg.str_val.clone());
-                
-                instr.arg2_type = LtacArg::Ptr;
-                instr.arg2_sval = name;
+                instr.arg2_type = LtacArg::PtrLcl(name);
             },
             
             AstArgType::Id => {

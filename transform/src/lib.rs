@@ -82,9 +82,10 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                                 file.code.push(instr.clone());
                             },
                             
-                            LtacArg::Ptr => {
+                            LtacArg::PtrLcl(ref val) => {
                                 let mut instr = line.clone();
                                 instr.instr_type = LtacType::StrPtr;
+                                instr.arg2_sval = val.clone();
                                 file.code.push(instr.clone());
                             },
                             

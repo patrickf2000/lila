@@ -93,8 +93,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp = ltac::create_instr(LtacType::StrCmp);
                         
                         mov = ltac::create_instr(LtacType::PushArg);
-                        mov.arg1_type = LtacArg::Ptr;
-                        mov.arg1_val = v.pos;
+                        mov.arg1_type = LtacArg::Ptr(v.pos);
                         mov.arg2_val = 1;
                         
                     // Float-32 comparisons
@@ -158,8 +157,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                 Some(v) => {
                     if v.data_type == DataType::Str {
                         mov = ltac::create_instr(LtacType::PushArg);
-                        mov.arg1_type = LtacArg::Ptr;
-                        mov.arg1_val = v.pos;
+                        mov.arg1_type = LtacArg::Ptr(v.pos);
                         mov.arg2_val = 2;
                         
                     } else if v.data_type == DataType::Float {

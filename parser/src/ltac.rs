@@ -123,11 +123,12 @@ pub enum LtacArg {
     Mem(i32),
     
     Byte(i8),
-    I16,
+    I16(i16),
     I32(i32),
     F32(String),
     F64(String),
-    Ptr,
+    Ptr(i32),
+    PtrLcl(String)
 }
 
 // Represents an LTAC file
@@ -411,18 +412,13 @@ impl LtacInstr {
             },
             
             LtacArg::Byte(val) => print!("{}", val),
-            LtacArg::I16 => print!("{}", self.arg1_wval),
+            LtacArg::I16(val) => print!("{}", val),
             LtacArg::I32(val) => print!("{}", val),
             LtacArg::F32(ref val) => print!("{}", val),
             LtacArg::F64(ref val) => print!("{}", val),
             
-            LtacArg::Ptr => {
-                if self.arg1_sval.len() > 0 {
-                    print!("{}", self.arg1_sval);
-                } else {
-                    print!("[bp-{}]", self.arg1_val);
-                }
-            },
+            LtacArg::Ptr(val) => print!("[bp-{}]", val),
+            LtacArg::PtrLcl(val) => print!("{}", val),
         }
         
         match &self.arg2_type {
@@ -451,11 +447,12 @@ impl LtacInstr {
             },
             
             LtacArg::Byte(val) => println!(", {}", val),
-            LtacArg::I16 => println!(", {}", self.arg2_wval),
+            LtacArg::I16(val) => println!(", {}", val),
             LtacArg::I32(val) => println!(", {}", val),
             LtacArg::F32(val) => println!(", {}", val),
             LtacArg::F64(val) => println!(", {}", val),
-            LtacArg::Ptr => println!(", {}", self.arg2_sval),
+            LtacArg::Ptr(val) => println!(", [bp-{}]", val),
+            LtacArg::PtrLcl(val) => println!(", {}", val),
         }
     }
 }

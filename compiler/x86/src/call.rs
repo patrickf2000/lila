@@ -27,7 +27,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     }
     
     match code.arg2_type {
-        LtacArg::I16 => line = "  movsx ".to_string(),
+        LtacArg::I16(_v) => line = "  movsx ".to_string(),
+        
         LtacArg::FltReg(pos) => {
             line = "  movss ".to_string();
             reg_flt = amd64_arg_flt(pos);
@@ -71,7 +72,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
                     line.push_str(", ");
                 },
                 
-                LtacArg::I16 => {
+                LtacArg::I16(_v) => {
                     line.push_str(&reg32);
                     line.push_str(", WORD PTR ");
                 },
@@ -95,10 +96,10 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&v.to_string());
         },
         
-        LtacArg::I16 => {
+        LtacArg::I16(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
-            line.push_str(&code.arg1_wval.to_string());
+            line.push_str(&val.to_string());
         },
         
         LtacArg::I32(val) => {
@@ -121,17 +122,17 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str("[rip]");
         },
         
-        LtacArg::Ptr => {
+        LtacArg::Ptr(pos) => {
             line.push_str(&reg64);
-            
-            if code.arg1_sval.len() > 0 {
-                line.push_str(", OFFSET FLAT:");
-                line.push_str(&code.arg1_sval);
-            } else {
-                line.push_str(", [rbp-");
-                line.push_str(&code.arg1_val.to_string());
-                line.push_str("]");
-            }
+            line.push_str(", [rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
+        
+        LtacArg::PtrLcl(ref val) => {
+            line.push_str(&reg64);
+            line.push_str(", OFFSET FLAT:");
+            line.push_str(&val);
         },
     }
     
