@@ -89,6 +89,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg64(pos) => {
             let reg = aarch64_op_reg64(*pos);
             line.push_str(&reg);
+            line.push_str(", ");
         },
         
         LtacArg::RetRegI32 => line.push_str("w0, "),

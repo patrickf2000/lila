@@ -104,7 +104,7 @@ pub enum LtacType {
 }
 
 // Represents an instruction argument type
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LtacArg {
     Empty,
     
