@@ -1,5 +1,5 @@
 [package]
-name = "quik"
+name = "dash"
 version = "0.1.0"
 authors = ["Patrick Flynn <patrickf4664@protonmail.com>"]
 edition = "2018"
