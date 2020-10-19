@@ -46,6 +46,14 @@ fn get_mem(arg : &LtacArg) -> i32 {
     }
 }
 
+// Check to see if a given argument is a local pointer
+fn is_ptr_lcl(arg : &LtacArg) -> bool {
+    match arg {
+        LtacArg::PtrLcl(_v) => return true,
+        _ => return false,
+    }
+}
+
 // Scans the code and optimizes expressions for RISC architectures
 // Although some RISC architectures support more advanced instructions (ie, math with immediates),
 //    we are creating a MIPS-like structure to be sure everything is supported. This should not affect
@@ -138,11 +146,19 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             },
             
             // Store value to variable
-            LtacType::Mov if is_mem(&line.arg1_type) => {
+            LtacType::Mov if is_mem(&line.arg1_type) && !is_ptr_lcl(&line.arg2_type) => {
                 let arg2_val : LtacArg;
             
                 match &line.arg2_type {
                     LtacArg::RetRegI64 => {
+                        let mut instr = line.clone();
+                        instr.arg1_type = LtacArg::Reg64(2);
+                        file.code.push(instr.clone());
+                        
+                        arg2_val = LtacArg::Reg64(2);
+                    },
+                    
+                    LtacArg::Reg64(_p) => {
                         let mut instr = line.clone();
                         instr.arg1_type = LtacArg::Reg64(2);
                         file.code.push(instr.clone());
@@ -162,6 +178,14 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                 let mut instr = ltac::create_instr(LtacType::Str);
                 instr.arg1_type = line.arg1_type.clone();
                 instr.arg2_type = arg2_val;
+                file.code.push(instr.clone());
+            },
+            
+            // Store string to variable
+            LtacType::Mov if is_mem(&line.arg1_type) && is_ptr_lcl(&line.arg2_type) => {
+                let mut instr = ltac::create_instr(LtacType::StrPtr);
+                instr.arg1_type = line.arg1_type.clone();
+                instr.arg2_type = line.arg2_type.clone();
                 file.code.push(instr.clone());
             },
             

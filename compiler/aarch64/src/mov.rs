@@ -52,18 +52,24 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
 pub fn aarch64_build_strptr(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line = String::new();
     let mut pos = 0;
+    let name : String;
     
     match &code.arg1_type {
         LtacArg::Mem(p) => pos = stack_size - p,
         _ => {},
     }
     
+    match &code.arg2_type {
+        LtacArg::PtrLcl(ref val) => name = val.clone(),
+        _ => name = String::new(),
+    }
+    
     line.push_str("  adrp x4, ");
-    line.push_str(&code.arg2_sval);
+    line.push_str(&name);
     line.push_str("\n");
     
     line.push_str("  add x4, x4, :lo12:");
-    line.push_str(&code.arg2_sval);
+    line.push_str(&name);
     line.push_str("\n");
     
     line.push_str("  str x4, [sp, ");
@@ -101,6 +107,11 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg2_type {
         LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg64(pos) => {
+            let reg = aarch64_op_reg64(*pos);
             line.push_str(&reg);
         },
         
