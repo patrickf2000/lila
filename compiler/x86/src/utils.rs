@@ -28,6 +28,18 @@ pub fn amd64_karg_reg64(pos : i32) -> String {
 }
 
 // Function argument registers
+pub fn amd64_arg_reg8(pos : i32) -> String {
+    match pos {
+        1 => return "dil".to_string(),
+        2 => return "sil".to_string(),
+        3 => return "dl".to_string(),
+        4 => return "cl".to_string(),
+        5 => return "r8b".to_string(),
+        6 => return "r9b".to_string(),
+        _ => return String::new(),
+    };
+}
+
 pub fn amd64_arg_reg32(pos : i32) -> String {
     match pos {
         1 => return "edi".to_string(),

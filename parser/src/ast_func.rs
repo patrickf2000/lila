@@ -122,6 +122,11 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         token = scanner.get_token();
         
         match type_token {
+            Token::Byte => {
+                let val_type = AstMod { mod_type : AstModType::Byte, };
+                arg.modifiers.push(val_type);
+            },
+            
             Token::Int => {
                 let mut data_type = AstModType::Int;
                 

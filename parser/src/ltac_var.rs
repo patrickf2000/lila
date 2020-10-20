@@ -87,15 +87,23 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             ld = ltac::create_instr(LtacType::LdArgF32);
             ld.arg2_val = flt_arg_no;
             flt_arg_no += 1;
+            
         } else if ast_data_type.mod_type == AstModType::Double {
             ld = ltac::create_instr(LtacType::LdArgF64);
             ld.arg2_val = flt_arg_no;
             flt_arg_no += 1;
+            
         } else if ast_data_type.mod_type == AstModType::IntDynArray
             || ast_data_type.mod_type == AstModType::Str {
             ld = ltac::create_instr(LtacType::LdArgPtr);
             ld.arg2_val = arg_no;
             arg_no += 1;
+            
+        } else if ast_data_type.mod_type == AstModType::Byte {
+            ld = ltac::create_instr(LtacType::LdArgI8);
+            ld.arg2_val = arg_no;
+            arg_no += 1;
+            
         } else {
             ld.arg2_val = arg_no;
             arg_no += 1;

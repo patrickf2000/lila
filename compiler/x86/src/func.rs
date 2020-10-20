@@ -63,7 +63,10 @@ pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str(&code.arg1_val.to_string());
     line.push_str("], ");
     
-    if code.instr_type == LtacType::LdArgI32 {
+    if code.instr_type == LtacType::LdArgI8 {
+        let reg = amd64_arg_reg8(code.arg2_val);
+        line.push_str(&reg);
+    } else if code.instr_type == LtacType::LdArgI32 {
         let reg = amd64_arg_reg32(code.arg2_val);
         line.push_str(&reg);
     } else if code.instr_type == LtacType::LdArgPtr {

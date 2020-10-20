@@ -35,6 +35,7 @@ pub enum LtacType {
     StrW,
     StrPtr,
     
+    LdArgI8,
     LdArgI32,
     LdArgF32,
     LdArgF64,
@@ -254,6 +255,12 @@ impl LtacInstr {
             LtacType::Ret => {
                 println!("  leave");
                 println!("  ret");
+                println!("");
+                return;
+            },
+            
+            LtacType::LdArgI8 => {
+                println!("  i8.ldarg [bp-{}], r{}", self.arg1_val, self.arg2_val);
                 println!("");
                 return;
             },
