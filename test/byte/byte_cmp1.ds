@@ -1,0 +1,27 @@
+
+#OUTPUT
+#Correct
+#Wrong
+#END
+
+#RET 0
+
+extern func puts(s:str, ...)
+
+func main -> int
+    byte b1 = 0xA1
+    
+    if b1 == 0xA1
+        puts("Correct")
+    else
+        puts("Wrong")
+    end
+    
+    if b1 == 0xA2
+        puts("Correct")
+    else
+        puts("Wrong")
+    end
+    
+    return 0
+end
