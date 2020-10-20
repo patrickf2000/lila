@@ -16,6 +16,7 @@ use crate::ltac_var::*;
 pub enum DataType {
     Void,
     Byte,
+    ByteDynArray,
     UByte,
     Short,
     Int,
@@ -112,6 +113,7 @@ impl LtacBuilder {
                 let func_mod = func.modifiers.first().unwrap();
                 match &func_mod.mod_type {
                     AstModType::Byte => func_type = DataType::Byte,
+                    AstModType::ByteDynArray => func_type = DataType::ByteDynArray,
                     AstModType::UByte => func_type = DataType::UByte,
                     AstModType::Short => func_type = DataType::Short,
                     AstModType::Int => func_type = DataType::Int,

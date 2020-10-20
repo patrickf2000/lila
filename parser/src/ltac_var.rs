@@ -25,6 +25,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 1;
         },
         
+        AstModType::ByteDynArray => {
+            data_type = DataType::ByteDynArray;
+            builder.stack_pos += 8
+        },
+        
         AstModType::UByte => {
             data_type = DataType::UByte;
             builder.stack_pos += 1;
@@ -117,8 +122,9 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     
     let code : bool;
     
-    if var.data_type == DataType::IntDynArray {
-        code = build_i32dyn_array(builder, &line, &var);
+    if var.data_type == DataType::ByteDynArray ||
+       var.data_type == DataType::IntDynArray {
+        code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
         code = build_str_assign(builder, &line, &var);
     } else {
@@ -162,7 +168,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     
     for arg in args.iter() {
         match &arg.arg_type {
-            AstArgType::ByteL if var.data_type == DataType::Byte => {
+            AstArgType::ByteL if var.data_type == DataType::Byte || var.data_type == DataType::ByteDynArray => {
                 instr.arg2_type = LtacArg::Byte(arg.u8_val as i8);
                 builder.file.code.push(instr.clone());
             },
@@ -557,14 +563,19 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     
     if line.sub_args.len() > 0 {
         let first_arg = line.sub_args.last().unwrap();
+        let mut offset_size = 4;
+        
+        if var.data_type == DataType::ByteDynArray {
+            offset_size = 1;
+        }
         
         if line.sub_args.len() == 1 {
             if first_arg.arg_type == AstArgType::IntL {
                 instr.instr_type = LtacType::MovOffImm;
-                instr.arg1_offset = first_arg.i32_val * 4;
+                instr.arg1_offset = first_arg.i32_val * offset_size;
             } else if first_arg.arg_type == AstArgType::Id {
                 instr.instr_type = LtacType::MovOffMem;
-                instr.arg1_offset_size = 4;
+                instr.arg1_offset_size = offset_size;
                 
                 match builder.vars.get(&first_arg.str_val) {
                     Some(v) => instr.arg1_offset = v.pos,

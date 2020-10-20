@@ -52,6 +52,7 @@ pub enum AstArgType {
 #[derive(PartialEq, Clone)]
 pub enum AstModType {
     Byte,
+    ByteDynArray,
     UByte,
     Short,
     Int,
@@ -249,6 +250,7 @@ impl AstMod {
         
         match &self.mod_type {
             AstModType::Byte => print!("Byte"),
+            AstModType::ByteDynArray => print!("ByteDynArr"),
             AstModType::UByte => print!("UByte"),
             AstModType::Short => print!("Short"),
             AstModType::Int => print!("Int"),

@@ -121,7 +121,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
     let mut is_array = false;
         
     let mut data_type = AstMod {
-        mod_type : dtype,
+        mod_type : dtype.clone(),
     };
     
     // Gather information
@@ -172,7 +172,12 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
     // If we have the array, check the array type
     if is_array {
         if var_dec.args.len() == 1 && var_dec.args.last().unwrap().arg_type == AstArgType::Array {
-            data_type.mod_type = AstModType::IntDynArray;
+            match &dtype {
+                AstModType::Byte => data_type.mod_type = AstModType::ByteDynArray,
+                AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
+                
+                _ => {},
+            }
         } else {
             //TODO
         }

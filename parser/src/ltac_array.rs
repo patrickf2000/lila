@@ -14,11 +14,7 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         None => return false,
     }
     
-    let mut code = true;
-    
-    if var.data_type == DataType::IntDynArray {
-        code = build_var_math(builder, &line, &var);
-    }
+    let code = build_var_math(builder, &line, &var);
     
     code
 }
@@ -38,8 +34,8 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
     }
 }
 
-// Initializes a 32-bit integer array in the heap
-pub fn build_i32dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
+// Initializes a an array in the heap
+pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
     let sub_args = &line.sub_args;
     let mut code = true;
     
