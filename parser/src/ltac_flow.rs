@@ -68,6 +68,10 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     // Although we assume its integer comparison by default, the first operand
     // determines the comparison type
     match &arg1.arg_type {
+        AstArgType::ByteL => {
+            cmp.arg1_type = LtacArg::Byte(arg1.u8_val as i8);
+        },
+    
         AstArgType::IntL => {
             cmp.arg1_type = LtacArg::I32(arg1.i32_val);
         },
@@ -84,7 +88,6 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg32(0);
-            //mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg1.str_val) {
                 Some(v) => {
@@ -114,6 +117,14 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp = ltac::create_instr(LtacType::F64Cmp);
                         cmp.arg1_type = LtacArg::FltReg64(0);
                         
+                    } else if v.data_type == DataType::Byte {
+                        cmp.instr_type = LtacType::I8Cmp;
+                        cmp.arg1_type = LtacArg::Reg8(0);
+                        
+                        mov = ltac::create_instr(LtacType::MovB);
+                        mov.arg1_type = LtacArg::Reg8(0);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
                     // Integer comparisons
                     } else {
                         mov.arg2_type = LtacArg::Mem(v.pos);
@@ -132,6 +143,10 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     }
     
     match &arg2.arg_type {
+        AstArgType::ByteL => {
+            cmp.arg2_type = LtacArg::Byte(arg2.u8_val as i8);
+        },
+    
         AstArgType::IntL => {
             cmp.arg2_type = LtacArg::I32(arg2.i32_val);
         },

@@ -49,6 +49,7 @@ pub enum LtacType {
     Free,
     Exit,
     
+    I8Cmp,
     I32Cmp,
     F32Cmp,
     F64Cmp,
@@ -329,6 +330,7 @@ impl LtacInstr {
             
             LtacType::Exit => print!("  exit "),
             
+            LtacType::I8Cmp => print!("  i8.cmp "),
             LtacType::I32Cmp => print!("  i32.cmp "),
             LtacType::F32Cmp => print!("  f32.cmp "),
             LtacType::F64Cmp => print!("  f64.cmp "),
