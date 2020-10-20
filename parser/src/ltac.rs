@@ -157,15 +157,11 @@ pub struct LtacInstr {
     
     pub arg1_type : LtacArg,
     pub arg1_val : i32,
-    pub arg1_wval : u16,
-    pub arg1_sval : String,
     pub arg1_offset : i32,
     pub arg1_offset_size : i32,
     
     pub arg2_type : LtacArg,
     pub arg2_val : i32,
-    pub arg2_wval : u16,
-    pub arg2_sval : String,
     pub arg2_offset : i32,
     pub arg2_offset_size : i32,
 }
@@ -180,15 +176,11 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         
         arg1_type : LtacArg::Empty,
         arg1_val : 0,
-        arg1_wval : 0,
-        arg1_sval : String::new(),
         arg1_offset : 0,
         arg1_offset_size : 0,
         
         arg2_type : LtacArg::Empty,
         arg2_val : 0,
-        arg2_wval : 0,
-        arg2_sval : String::new(),
         arg2_offset : 0,
         arg2_offset_size : 0,
     }

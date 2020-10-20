@@ -539,8 +539,6 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = top.arg2_type;
         instr.arg2_val = top.arg2_val;
-        instr.arg2_wval = top.arg2_wval;
-        instr.arg2_sval = top.arg2_sval;
         instr.arg2_offset = top.arg2_offset;
         instr.arg2_offset_size = top.arg2_offset_size;
         

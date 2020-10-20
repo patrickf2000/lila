@@ -193,15 +193,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod => amd64_build_div(writer, &code),
             
-            LtacType::F32Add => amd64_build_instr(writer, &code),
-            LtacType::F32Sub => amd64_build_instr(writer, &code),
-            LtacType::F32Mul => amd64_build_instr(writer, &code),
-            LtacType::F32Div => amd64_build_instr(writer, &code),
-            
-            LtacType::F64Add => amd64_build_instr(writer, &code),
-            LtacType::F64Sub => amd64_build_instr(writer, &code),
-            LtacType::F64Mul => amd64_build_instr(writer, &code),
-            LtacType::F64Div => amd64_build_instr(writer, &code),
+            LtacType::F32Add | LtacType::F64Add => amd64_build_instr(writer, &code),
+            LtacType::F32Sub | LtacType::F64Sub => amd64_build_instr(writer, &code),
+            LtacType::F32Mul | LtacType::F64Mul => amd64_build_instr(writer, &code),
+            LtacType::F32Div | LtacType::F64Div => amd64_build_instr(writer, &code),
             
             LtacType::BAnd | LtacType::I32And => amd64_build_instr(writer, &code),
             LtacType::BOr | LtacType::I32Or => amd64_build_instr(writer, &code),
@@ -355,12 +350,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::I16(_v) => {},
         LtacArg::I32(_v) => {},
         
-        // TODO: Combine
-        LtacArg::F32(_v) => {
-            line.push_str("xmm1, ");
-        },
-        
-        LtacArg::F64(_v) => {
+        LtacArg::F32(_v) | LtacArg::F64(_v) => {
             line.push_str("xmm1, ");
         },
         
