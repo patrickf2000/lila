@@ -61,11 +61,23 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
     let mut code = true;
     
     // Get the first token
-    let token = scanner.get_token();
+    let mut token = scanner.get_token();
     
     match token {
-        Token::Extern => code = build_extern(&mut scanner, tree, syntax),
-        Token::Func => code = build_func(&mut scanner, tree, syntax),
+        Token::Extern => {
+            token = scanner.get_token();
+            match token {
+                Token::Func => {},
+                _ => {
+                    syntax.syntax_error(&mut scanner, "Expected \"func\" keyword.".to_string());
+                    return false;
+                }
+            }
+                
+            code = build_func(&mut scanner, tree, syntax, true)
+        },
+        
+        Token::Func => code = build_func(&mut scanner, tree, syntax, false),
         Token::Return => code = build_return(&mut scanner, tree, syntax),
         Token::Exit => code = build_exit(&mut scanner, tree, syntax),
         Token::End => build_end(&mut scanner, tree),

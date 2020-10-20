@@ -6,36 +6,6 @@ use crate::syntax::ErrorManager;
 
 use crate::ast_utils::*;
 
-// Builds an external function
-pub fn build_extern(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
-    // Syntax check
-    // The first token should be the "func" keyword, and the second token should be an ID
-    let token1 = scanner.get_token();
-    let token2 = scanner.get_token();
-    let name : String;
-    
-    match token1 {
-        Token::Func => {},
-        _ => { 
-            syntax.syntax_error(scanner, "Expected \"func\" keyword.".to_string());
-            return false;
-        }
-    }
-    
-    match token2 {
-        Token::Id(ref val) => name = val.to_string(),
-        _ => {
-            syntax.syntax_error(scanner, "Invalid extern-> Expected function name.".to_string());
-            return false;
-        }
-    }
-    
-    let func = ast::create_extern_func(name);
-    tree.functions.push(func);
-    
-    true
-}
-
 // A helper function for the function declaration builder
 fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> bool {
     let token = scanner.get_token();
@@ -66,7 +36,7 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
 }
 
 // Builds a regular function declaration
-pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, is_extern : bool) -> bool {
     // The first token should be the function name
     let mut token = scanner.get_token();
     let name : String;
@@ -79,7 +49,13 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         },
     }
     
-    let mut func = ast::create_func(name);
+    let mut func : AstFunc;
+    
+    if is_extern {
+        func = ast::create_extern_func(name)
+    } else {
+        func = ast::create_func(name)
+    }
     
     // Check for arguments, and get them if so
     token = scanner.get_token();
@@ -99,13 +75,24 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
     
     let mut last_token = Token::LParen;
     
-    while token != Token::RParen {
+    while token != Token::RParen && token != Token::Eof {
         let name_token = scanner.get_token();
         
         let mut arg = ast::create_stmt(AstStmtType::VarDec, scanner);
         
         match name_token {
             Token::Id(ref val) => arg.name = val.to_string(),
+            
+            Token::Any => {
+                token = scanner.get_token();
+                
+                if token == Token::Comma || token == Token::RParen || token == Token::Eof {
+                    continue;
+                } else {
+                    syntax.syntax_error(scanner, "The \"..\" token has no type or name.".to_string());
+                    return false;
+                }
+            },
             
             Token::RParen => {
                 if last_token != Token::LParen {

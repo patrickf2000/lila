@@ -1,6 +1,6 @@
 
 #OUTPUT
-#Syntax Error: Invalid extern-> Expected function name.
+#Syntax Error: Expected function name.
 # -> [10] extern func (s:str, ...)
 #
 #END

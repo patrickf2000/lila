@@ -34,6 +34,7 @@ pub enum Token {
     Colon,
     Comma,
     Arrow,
+    Any,
     OpAdd,
     OpSub,
     OpMul,
@@ -293,6 +294,7 @@ impl Lex {
         let token : Token;
         
         match current.as_ref() {
+            "..." => token = Token::Any,
             "extern" => token = Token::Extern,
             "func" => token = Token::Func,
             "return" => token = Token::Return,
