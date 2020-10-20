@@ -438,24 +438,24 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     
     // Needed if the source is an array index
-    if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffImm {
+    if code.instr_type == LtacType::MovOffImm {
         match code.arg2_type {
             LtacArg::Mem(pos) => {
                 line.push_str("  mov r15, QWORD PTR [rbp-");
                 line.push_str(&pos.to_string());
                 line.push_str("]\n");
+                
+                match code.arg1_type {
+                    LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15+"),
+                    _ => line.push_str("  mov r15d, DWORD PTR [r15+"),
+                }
+                
+                line.push_str(&code.arg2_offset.to_string());
+                line.push_str("]\n");
             },
             
             _ => {},
         }
-        
-        match code.arg1_type {
-            LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15+"),
-            _ => line.push_str("  mov r15d, DWORD PTR [r15+"),
-        }
-        
-        line.push_str(&code.arg2_offset.to_string());
-        line.push_str("]\n");
     } else if code.arg2_offset > 0 && code.instr_type == LtacType::MovOffMem {
         // Load the variable
         line.push_str("  mov r15d, DWORD PTR [rbp-");
