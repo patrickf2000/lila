@@ -1,6 +1,6 @@
 [package]
-name = "dash"
-version = "0.1.0"
+name = "dashc"
+version = "0.0.2"
 authors = ["Patrick Flynn <patrickf4664@protonmail.com>"]
 edition = "2018"
 
@@ -11,11 +11,15 @@ members = [
     "parser",
     "transform",
     "compiler/x86",
-    "compiler/aarch64"
+    "compiler/aarch64",
+    "compiler/ltac"
 ]
 
 [dependencies]
 parser = { path = "parser" }
 transform = { path = "transform" }
+example = { path = "compiler/example" }
 x86 = { path = "compiler/x86" }
 aarch64 = { path = "compiler/aarch64" }
+ltac_printer = { path = "compiler/ltac" }
+

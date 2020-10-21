@@ -1,0 +1,11 @@
+[package]
+name = "ltac_printer"
+version = "0.0.2"
+authors = ["Patrick Flynn <patrickf4664@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+parser = { path = "../../parser" }
+

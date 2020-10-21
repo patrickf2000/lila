@@ -8,13 +8,29 @@ dependencies = [
 ]
 
 [[package]]
-name = "dash"
-version = "0.1.0"
+name = "dashc"
+version = "0.0.2"
 dependencies = [
  "aarch64",
+ "example",
+ "ltac_printer",
  "parser",
  "transform",
  "x86",
+]
+
+[[package]]
+name = "example"
+version = "0.0.2"
+dependencies = [
+ "parser",
+]
+
+[[package]]
+name = "ltac_printer"
+version = "0.0.2"
+dependencies = [
+ "parser",
 ]
 
 [[package]]

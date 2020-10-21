@@ -56,19 +56,17 @@ fn run() -> i32 {
             Ok(ltac) => ltac,
             Err(_e) => return 1,
         };
-            
-        // Print if the user wants
-        if print_ltac {
-            ltac.print();
-            return 0;
-        }
         
-        if arch == Arch::X86_64 {
-            x86::compile(&ltac).expect("Codegen failed with unknown error.");
-            x86::build_asm(&ltac.name, use_c);
-        } else if arch == Arch::AArch64 {
-            aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
-            aarch64::build_asm(&ltac.name, use_c);
+        if print_ltac {
+           ltac_printer::compile(&ltac).expect("LTAC Codegen failed with unknown error."); 
+        } else {
+            if arch == Arch::X86_64 {
+                x86::compile(&ltac).expect("Codegen failed with unknown error.");
+                x86::build_asm(&ltac.name, use_c);
+            } else if arch == Arch::AArch64 {
+                aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
+                aarch64::build_asm(&ltac.name, use_c);
+            }
         }
     }
     
