@@ -187,8 +187,15 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::BMul => amd64_build_byte_mul(writer, &code),
             LtacType::BDiv | LtacType::BMod => amd64_build_byte_div(writer, &code),
             
-            LtacType::BAdd | LtacType::I32Add => amd64_build_instr(writer, &code),
-            LtacType::BSub | LtacType::I32Sub => amd64_build_instr(writer, &code),
+            LtacType::I16Mul => {},
+            LtacType::I16Div | LtacType::I16Mod => {},
+            
+            LtacType::BAdd | LtacType::I16Add |
+            LtacType::I32Add => amd64_build_instr(writer, &code),
+            
+            LtacType::BSub | LtacType::I16Sub |
+            LtacType::I32Sub => amd64_build_instr(writer, &code),
+            
             LtacType::I32Mul => amd64_build_instr(writer, &code),
             LtacType::I32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod => amd64_build_div(writer, &code),
@@ -268,8 +275,12 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::MovF32 => line.push_str("  movss "),
         LtacType::MovF64 => line.push_str("  movsd "),
         
-        LtacType::BAdd | LtacType::I32Add => line.push_str("  add "),
-        LtacType::BSub | LtacType::I32Sub => line.push_str("  sub "),
+        LtacType::BAdd | LtacType::I16Add |
+        LtacType::I32Add => line.push_str("  add "),
+        
+        LtacType::BSub | LtacType::I16Sub |
+        LtacType::I32Sub => line.push_str("  sub "),
+        
         LtacType::I32Mul => line.push_str("  imul "),
         
         LtacType::F32Add => line.push_str("  addss "),
@@ -305,7 +316,11 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::Reg16(_p) => {},
+        LtacArg::Reg16(pos) => {
+            let reg = amd64_op_reg16(*pos);
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
@@ -370,7 +385,10 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::Reg16(_p) => {},
+        LtacArg::Reg16(pos) => {
+            let reg = amd64_op_reg16(*pos);
+            line.push_str(&reg);
+        },
         
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);

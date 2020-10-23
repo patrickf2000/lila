@@ -124,6 +124,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::BLsh => ltac_build_instr(writer, code),
             LtacType::BRsh => ltac_build_instr(writer, code),
             
+            LtacType::I16Add => ltac_build_instr(writer, code),
+            LtacType::I16Sub => ltac_build_instr(writer, code),
+            LtacType::I16Mul => ltac_build_instr(writer, code),
+            LtacType::I16Div => ltac_build_instr(writer, code),
+            LtacType::I16Mod => ltac_build_instr(writer, code),
+            
             LtacType::I32Add => ltac_build_instr(writer, code),
             LtacType::I32Sub => ltac_build_instr(writer, code),
             LtacType::I32Mul => ltac_build_instr(writer, code),
@@ -264,6 +270,13 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::BXor => line.push_str("  i8.xor "),
         LtacType::BLsh => line.push_str("  i8.lsh "),
         LtacType::BRsh => line.push_str("  i8.rsh "),
+        
+        // Signed short (i16) operations
+        LtacType::I16Add => line.push_str("  i16.add "),
+        LtacType::I16Sub => line.push_str("  i16.sub "),
+        LtacType::I16Mul => line.push_str("  i16.mul "),
+        LtacType::I16Div => line.push_str("  i16.div "),
+        LtacType::I16Mod => line.push_str("  i16.mod "),
         
         // Integer (i32) operations
         LtacType::I32Add => line.push_str("  i32.add "),
