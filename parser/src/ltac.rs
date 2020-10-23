@@ -75,6 +75,11 @@ pub enum LtacType {
     BDiv,
     BMod,
     
+    U8Add,
+    U8Mul,
+    U8Div,
+    U8Mod,
+    
     I16Add,
     I16Sub,
     I16Mul,

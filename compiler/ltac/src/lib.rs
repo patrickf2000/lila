@@ -112,11 +112,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => ltac_build_jump(writer, code),
             LtacType::Bfge => ltac_build_jump(writer, code),
             
-            LtacType::BAdd => ltac_build_instr(writer, code),
+            LtacType::BAdd | LtacType::U8Add => ltac_build_instr(writer, code),
             LtacType::BSub => ltac_build_instr(writer, code),
-            LtacType::BMul => ltac_build_instr(writer, code),
-            LtacType::BDiv => ltac_build_instr(writer, code),
-            LtacType::BMod => ltac_build_instr(writer, code),
+            LtacType::BMul | LtacType::U8Mul => ltac_build_instr(writer, code),
+            LtacType::BDiv | LtacType::U8Div => ltac_build_instr(writer, code),
+            LtacType::BMod | LtacType::U8Mod => ltac_build_instr(writer, code),
             
             LtacType::BAnd => ltac_build_instr(writer, code),
             LtacType::BOr => ltac_build_instr(writer, code),
@@ -270,6 +270,12 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::BXor => line.push_str("  i8.xor "),
         LtacType::BLsh => line.push_str("  i8.lsh "),
         LtacType::BRsh => line.push_str("  i8.rsh "),
+        
+        // Unsigned byte (u8) operations
+        LtacType::U8Add => line.push_str("  u8.add "),
+        LtacType::U8Mul => line.push_str("  u8.mul "),
+        LtacType::U8Div => line.push_str("  u8.div "),
+        LtacType::U8Mod => line.push_str("  u8.mod "),
         
         // Signed short (i16) operations
         LtacType::I16Add => line.push_str("  i16.add "),

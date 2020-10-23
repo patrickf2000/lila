@@ -238,6 +238,22 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 builder.file.code.push(instr.clone());
             },
             
+            // UByte
+            AstArgType::IntL if var.data_type == DataType::UByte => {
+                let val = arg.i32_val as u32;
+                
+                if mem::size_of::<u8>() > (val as usize) {
+                    builder.syntax.ltac_error(&line, "Integer is too big to fit into ubyte.".to_string());
+                    return false;
+                }
+                
+                let parts = unsafe { mem::transmute::<u32, [u8; 4]>(val) };
+                let result = parts[0];
+                
+                instr.arg2_type = LtacArg::UByte(result);
+                builder.file.code.push(instr.clone());
+            },
+            
             // Short
             AstArgType::IntL if var.data_type == DataType::Short => {
                 let val = arg.i32_val;
@@ -259,7 +275,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 let val = arg.i32_val as u32;
                 
                 if mem::size_of::<u16>() > (val as usize) {
-                    builder.syntax.ltac_error(&line, "Integer is too big to fit into short.".to_string());
+                    builder.syntax.ltac_error(&line, "Integer is too big to fit into ushort.".to_string());
                     return false;
                 }
                 
@@ -380,6 +396,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 instr.arg1_type = LtacArg::Reg8(0);
             },
             
+            AstArgType::OpAdd if var.data_type == DataType::UByte => {
+                instr = ltac::create_instr(LtacType::U8Add);
+                instr.arg1_type = LtacArg::Reg8(0);
+            },
+            
             AstArgType::OpAdd if var.data_type == DataType::Short => {
                 instr = ltac::create_instr(LtacType::I16Add);
                 instr.arg1_type = LtacArg::Reg16(0);
@@ -451,6 +472,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 instr.arg1_type = LtacArg::Reg8(0);
             },
             
+            AstArgType::OpMul if var.data_type == DataType::UByte => {
+                instr = ltac::create_instr(LtacType::U8Mul);
+                instr.arg1_type = LtacArg::Reg8(0);
+            },
+            
             AstArgType::OpMul if var.data_type == DataType::Short => {
                 instr = ltac::create_instr(LtacType::I16Mul);
                 instr.arg1_type = LtacArg::Reg16(0);
@@ -495,6 +521,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 instr.arg1_type = LtacArg::Reg8(0);
             },
             
+            AstArgType::OpDiv if var.data_type == DataType::UByte => {
+                instr = ltac::create_instr(LtacType::U8Div);
+                instr.arg1_type = LtacArg::Reg8(0);
+            },
+            
             AstArgType::OpDiv if var.data_type == DataType::Short => {
                 instr = ltac::create_instr(LtacType::I16Div);
                 instr.arg1_type = LtacArg::Reg16(0);
@@ -514,6 +545,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::OpMod if var.data_type == DataType::Byte => {
                 instr = ltac::create_instr(LtacType::BMod);
+                instr.arg1_type = LtacArg::Reg8(0);
+            },
+            
+            AstArgType::OpMod if var.data_type == DataType::UByte => {
+                instr = ltac::create_instr(LtacType::U8Mod);
                 instr.arg1_type = LtacArg::Reg8(0);
             },
             
@@ -647,6 +683,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     // Store back a byte
     } else if var.data_type == DataType::Byte {
         instr = ltac::create_instr(LtacType::MovB);
+        instr.arg1_type = LtacArg::Mem(var.pos);
+        instr.arg2_type = LtacArg::Reg8(0);
+        
+    // Store back a ubyte
+    } else if var.data_type == DataType::UByte {
+        instr = ltac::create_instr(LtacType::MovUB);
         instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::Reg8(0);
         

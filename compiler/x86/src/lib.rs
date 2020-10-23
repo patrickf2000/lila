@@ -186,13 +186,14 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => amd64_build_jump(writer, &code),
             LtacType::Bfge => amd64_build_jump(writer, &code),
             
-            LtacType::BMul => amd64_build_byte_mul(writer, &code),
-            LtacType::BDiv | LtacType::BMod => amd64_build_byte_div(writer, &code),
+            LtacType::BMul | LtacType::U8Mul => amd64_build_byte_mul(writer, &code),
+            LtacType::BDiv | LtacType::BMod |
+            LtacType::U8Div | LtacType::U8Mod => amd64_build_byte_div(writer, &code),
             
             LtacType::I16Div | LtacType::I16Mod |
             LtacType::U16Div | LtacType::U16Mod => amd64_build_short_div(writer, &code),
             
-            LtacType::BAdd |
+            LtacType::BAdd | LtacType::U8Add |
             LtacType::I16Add | LtacType::U16Add |
             LtacType::I32Add => amd64_build_instr(writer, &code),
             
@@ -280,7 +281,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::MovF32 => line.push_str("  movss "),
         LtacType::MovF64 => line.push_str("  movsd "),
         
-        LtacType::BAdd |
+        LtacType::BAdd | LtacType::U8Add |
         LtacType::I16Add | LtacType::U16Add |
         LtacType::I32Add => line.push_str("  add "),
         
