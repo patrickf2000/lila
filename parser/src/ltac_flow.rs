@@ -65,6 +65,9 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
     let mut cmp = ltac::create_instr(LtacType::I32Cmp);
     
+    // Set to true if we have a signed byte, short, or int variable
+    let mut signed_variant = false;
+    
     // Although we assume its integer comparison by default, the first operand
     // determines the comparison type
     match &arg1.arg_type {
@@ -117,11 +120,23 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp = ltac::create_instr(LtacType::F64Cmp);
                         cmp.arg1_type = LtacArg::FltReg64(0);
                         
+                    // Byte comparisons
                     } else if v.data_type == DataType::Byte {
                         cmp.instr_type = LtacType::I8Cmp;
                         cmp.arg1_type = LtacArg::Reg8(0);
                         
                         mov = ltac::create_instr(LtacType::MovB);
+                        mov.arg1_type = LtacArg::Reg8(0);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
+                        signed_variant = true;
+                        
+                    // Unsigned byte comparisons
+                    } else if v.data_type == DataType::UByte {
+                        cmp.instr_type = LtacType::U8Cmp;
+                        cmp.arg1_type = LtacArg::Reg8(0);
+                        
+                        mov = ltac::create_instr(LtacType::MovUB);
                         mov.arg1_type = LtacArg::Reg8(0);
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
@@ -144,7 +159,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg2.arg_type {
         AstArgType::ByteL => {
-            cmp.arg2_type = LtacArg::Byte(arg2.u8_val as i8);
+            if signed_variant {
+                cmp.arg2_type = LtacArg::Byte(arg2.u8_val as i8);
+            } else {
+                cmp.arg2_type = LtacArg::UByte(arg2.u8_val);
+            }
         },
     
         AstArgType::IntL => {

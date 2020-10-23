@@ -96,6 +96,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // Comparison instructons
             LtacType::I8Cmp => {},
+            LtacType::U8Cmp => {},
             LtacType::I32Cmp => {},
             LtacType::F32Cmp => {},
             LtacType::F64Cmp => {},

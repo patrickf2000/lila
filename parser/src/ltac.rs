@@ -51,7 +51,9 @@ pub enum LtacType {
     Free,
     Exit,
     
+    // Comparison and flow instructions
     I8Cmp,
+    U8Cmp,
     I32Cmp,
     F32Cmp,
     F64Cmp,
