@@ -219,11 +219,16 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::F64Mul => {},
             LtacType::F64Div => {},
             
-            LtacType::BAnd | LtacType::I32And => aarch64_build_instr(writer, &code),
-            LtacType::BOr | LtacType::I32Or => aarch64_build_instr(writer, &code),
-            LtacType::BXor | LtacType::I32Xor => aarch64_build_instr(writer, &code),
-            LtacType::BLsh | LtacType::I32Lsh => aarch64_build_instr(writer, &code),
-            LtacType::BRsh | LtacType::I32Rsh => aarch64_build_instr(writer, &code),
+            LtacType::BAnd | LtacType::WAnd |
+            LtacType::I32And => aarch64_build_instr(writer, &code),
+            LtacType::BOr | LtacType::WOr |
+            LtacType::I32Or => aarch64_build_instr(writer, &code),
+            LtacType::BXor | LtacType::WXor |
+            LtacType::I32Xor => aarch64_build_instr(writer, &code),
+            LtacType::BLsh | LtacType::WLsh |
+            LtacType::I32Lsh => aarch64_build_instr(writer, &code),
+            LtacType::BRsh | LtacType::WRsh |
+            LtacType::I32Rsh => aarch64_build_instr(writer, &code),
             
             LtacType::I32VAdd => {},
         }

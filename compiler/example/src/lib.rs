@@ -140,12 +140,19 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U16Div => {},
             LtacType::U16Mod => {},
             
-            // Signed byte bitwise operations
+            // Byte bitwise operations
             LtacType::BAnd => {},
             LtacType::BOr => {},
             LtacType::BXor => {},
             LtacType::BLsh => {},
             LtacType::BRsh => {},
+            
+            // Word bitwise operations
+            LtacType::WAnd => {},
+            LtacType::WOr => {},
+            LtacType::WXor => {},
+            LtacType::WLsh => {},
+            LtacType::WRsh => {},
             
             // Signed 32-bit integer math opreations
             LtacType::I32Add => {},

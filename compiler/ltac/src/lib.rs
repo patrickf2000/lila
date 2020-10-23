@@ -124,6 +124,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::BLsh => ltac_build_instr(writer, code),
             LtacType::BRsh => ltac_build_instr(writer, code),
             
+            LtacType::WAnd => ltac_build_instr(writer, code),
+            LtacType::WOr => ltac_build_instr(writer, code),
+            LtacType::WXor => ltac_build_instr(writer, code),
+            LtacType::WLsh => ltac_build_instr(writer, code),
+            LtacType::WRsh => ltac_build_instr(writer, code),
+            
             LtacType::I16Add | LtacType::U16Add => ltac_build_instr(writer, code),
             LtacType::I16Sub => ltac_build_instr(writer, code),
             LtacType::I16Mul | LtacType::U16Mul => ltac_build_instr(writer, code),
@@ -265,17 +271,18 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::BDiv => line.push_str("  i8.div "),
         LtacType::BMod => line.push_str("  i8.mod "),
         
-        LtacType::BAnd => line.push_str("  i8.and "),
-        LtacType::BOr => line.push_str("  i8.or "),
-        LtacType::BXor => line.push_str("  i8.xor "),
-        LtacType::BLsh => line.push_str("  i8.lsh "),
-        LtacType::BRsh => line.push_str("  i8.rsh "),
-        
         // Unsigned byte (u8) operations
         LtacType::U8Add => line.push_str("  u8.add "),
         LtacType::U8Mul => line.push_str("  u8.mul "),
         LtacType::U8Div => line.push_str("  u8.div "),
         LtacType::U8Mod => line.push_str("  u8.mod "),
+        
+        // Byte bitwise operations
+        LtacType::BAnd => line.push_str("  b.and "),
+        LtacType::BOr => line.push_str("  b.or "),
+        LtacType::BXor => line.push_str("  b.xor "),
+        LtacType::BLsh => line.push_str("  b.lsh "),
+        LtacType::BRsh => line.push_str("  b.rsh "),
         
         // Signed short (i16) operations
         LtacType::I16Add => line.push_str("  i16.add "),
@@ -289,6 +296,13 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U16Mul => line.push_str("  u16.mul "),
         LtacType::U16Div => line.push_str("  u16.div "),
         LtacType::U16Mod => line.push_str("  u16.mod "),
+        
+        // Short bitwise operations
+        LtacType::WAnd => line.push_str("  w.and "),
+        LtacType::WOr => line.push_str("  w.or "),
+        LtacType::WXor => line.push_str("  w.xor "),
+        LtacType::WLsh => line.push_str("  w.lsh "),
+        LtacType::WRsh => line.push_str("  w.rsh "),
         
         // Integer (i32) operations
         LtacType::I32Add => line.push_str("  i32.add "),

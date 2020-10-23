@@ -69,6 +69,7 @@ pub enum LtacType {
     Bfg,        // Jump if float is greater
     Bfge,       // Jump if float is greater or equal
     
+    // Math operations
     BAdd,
     BSub,
     BMul,
@@ -107,18 +108,28 @@ pub enum LtacType {
     F64Mul,
     F64Div,
     
-    I32And,
-    I32Or,
-    I32Xor,
-    I32Lsh,
-    I32Rsh,
-    
+    // Bitwise instructions
+    // I don't think these need to be by signed/unsigned, but
+    // if I'm wrong we'll have to change this.
     BAnd,
     BOr,
     BXor,
     BLsh,
     BRsh,
     
+    WAnd,
+    WOr,
+    WXor,
+    WLsh,
+    WRsh,
+    
+    I32And,
+    I32Or,
+    I32Xor,
+    I32Lsh,
+    I32Rsh,
+    
+    // Vector instructions
     I32VAdd,
 }
 
