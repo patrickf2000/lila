@@ -367,6 +367,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             },
             
             LtacArg::Byte(val) => line.push_str(&val.to_string()),
+            LtacArg::UByte(val) => line.push_str(&val.to_string()),
             LtacArg::I16(val) => line.push_str(&val.to_string()),
             LtacArg::I32(val) => line.push_str(&val.to_string()),
             LtacArg::F32(ref val) => line.push_str(&val.to_string()),
@@ -442,6 +443,11 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             },
             
             LtacArg::Byte(val) => {
+                line.push_str(", ");
+                line.push_str(&val.to_string());
+            },
+            
+            LtacArg::UByte(val) => {
                 line.push_str(", ");
                 line.push_str(&val.to_string());
             },

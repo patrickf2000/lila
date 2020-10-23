@@ -27,6 +27,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     }
     
     match code.arg2_type {
+        LtacArg::Byte(_v) => line = "  movsx ".to_string(),
+        LtacArg::UByte(_v) => line = "  movzx ".to_string(),
         LtacArg::I16(_v) => line = "  movsx ".to_string(),
         
         LtacArg::FltReg(pos) => {
@@ -72,6 +74,16 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
                     line.push_str(", ");
                 },
                 
+                LtacArg::Byte(_v) => {
+                    line.push_str(&reg32);
+                    line.push_str(", BYTE PTR ");
+                },
+                
+                LtacArg::UByte(_v) => {
+                    line.push_str(&reg32);
+                    line.push_str(", BYTE PTR ");
+                },
+                
                 LtacArg::I16(_v) => {
                     line.push_str(&reg32);
                     line.push_str(", WORD PTR ");
@@ -88,12 +100,11 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str("]");
         },
         
-        // TODO: We need to revist this
-        LtacArg::Byte(val) => {
-            let v = *val as u8;
+        // Byte literals are always passed as unsigned
+        LtacArg::UByte(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
-            line.push_str(&v.to_string());
+            line.push_str(&val.to_string());
         },
         
         LtacArg::I16(val) => {
@@ -134,6 +145,8 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(", OFFSET FLAT:");
             line.push_str(&val);
         },
+        
+        _ => {},
     }
     
     line.push_str("\n");

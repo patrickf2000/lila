@@ -25,14 +25,14 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         match &arg.arg_type {
             AstArgType::ByteL => {
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::Byte(arg.u8_val as i8);
+                push.arg1_type = LtacArg::UByte(arg.u8_val);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 
                 arg_no += 1;
             },
             
-            // TODO: Come back to this
+            // TODO: Come back to this one
             AstArgType::ShortL => {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg1_type = LtacArg::I16(arg.u16_val as i16);
@@ -85,14 +85,10 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                     Some(v) => {
                         push.arg1_type = LtacArg::Mem(v.pos);
                         
-                        //TODO: Clean up the byte code so its like the short type
                         if v.data_type == DataType::Byte {
-                            push.arg1_type = LtacArg::Reg8(2);
-                            
-                            let mut instr = ltac::create_instr(LtacType::MovB);
-                            instr.arg1_type = LtacArg::Reg8(2);
-                            instr.arg2_type = LtacArg::Mem(v.pos);
-                            builder.file.code.push(instr);
+                            push.arg2_type = LtacArg::Byte(0);
+                        } else if v.data_type == DataType::UByte {
+                            push.arg2_type = LtacArg::UByte(0);
                         } else if v.data_type == DataType::Short {
                             push.arg2_type = LtacArg::I16(0);
                         } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {

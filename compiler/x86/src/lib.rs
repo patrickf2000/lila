@@ -333,6 +333,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Mem(pos) => {
             match &code.arg2_type {
                 LtacArg::Byte(_v) => line.push_str("BYTE PTR "),
+                LtacArg::UByte(_v) => line.push_str("BYTE PTR "),
                 LtacArg::I16(_v) => line.push_str("WORD PTR "),
                 LtacArg::I32(_v) => line.push_str("DWORD PTR "), 
                 LtacArg::F32(_v) => line.push_str("DWORD PTR "),
@@ -347,6 +348,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::Byte(_v) => {},
+        LtacArg::UByte(_v) => {},
         LtacArg::I16(_v) => {},
         LtacArg::I32(_v) => {},
         
@@ -394,9 +396,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("]");
         },
         
-        LtacArg::Byte(val) => {
-            line.push_str(&val.to_string());
-        },
+        LtacArg::Byte(val) => line.push_str(&val.to_string()),
+        LtacArg::UByte(val) => line.push_str(&val.to_string()),
         
         LtacArg::I16(val) => {
             line.push_str(&val.to_string());
@@ -575,6 +576,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::Byte(_v) => {},
+        LtacArg::UByte(_v) => {},
         LtacArg::I16(_v) => {},
         LtacArg::I32(_v) => {},
         LtacArg::F32(_v) => {},
@@ -621,6 +623,11 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::Byte(val) => {
+            line.push_str(" BYTE PTR ");
+            line.push_str(&val.to_string());
+        },
+        
+        LtacArg::UByte(val) => {
             line.push_str(" BYTE PTR ");
             line.push_str(&val.to_string());
         },

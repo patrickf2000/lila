@@ -125,6 +125,7 @@ pub enum LtacArg {
     Mem(i32),
     
     Byte(i8),
+    UByte(u8),
     I16(i16),
     I32(i32),
     F32(String),

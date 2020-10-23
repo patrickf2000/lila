@@ -176,14 +176,17 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     
     for arg in args.iter() {
         match &arg.arg_type {
-            AstArgType::ByteL if var.data_type == DataType::Byte || var.data_type == DataType::ByteDynArray => {
-                instr.arg2_type = LtacArg::Byte(arg.u8_val as i8);
-                builder.file.code.push(instr.clone());
-            },
-            
             AstArgType::ByteL => {
-                builder.syntax.ltac_error(&line, "Invalid use of byte literal.".to_string());
-                return false;
+                if var.data_type == DataType::Byte || var.data_type == DataType::ByteDynArray {
+                    instr.arg2_type = LtacArg::Byte(arg.u8_val as i8);
+                } else if var.data_type == DataType::UByte {
+                    instr.arg2_type = LtacArg::UByte(arg.u8_val);
+                } else {
+                    builder.syntax.ltac_error(&line, "Invalid use of byte literal.".to_string());
+                    return false;
+                }
+                
+                builder.file.code.push(instr.clone());
             },
             
             AstArgType::ShortL if var.data_type == DataType::Short => {
