@@ -576,7 +576,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Logical AND
             
-            AstArgType::OpAnd if var.data_type == DataType::Byte => {
+            AstArgType::OpAnd if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
                 instr = ltac::create_instr(LtacType::BAnd);
                 instr.arg1_type = LtacArg::Reg8(0);
             },
@@ -599,7 +599,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Logical OR
             
-            AstArgType::OpOr if var.data_type == DataType::Byte => {
+            AstArgType::OpOr if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
                 instr = ltac::create_instr(LtacType::BOr);
                 instr.arg1_type = LtacArg::Reg8(0);
             },
@@ -622,7 +622,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Logical XOR
             
-            AstArgType::OpXor if var.data_type == DataType::Byte => {
+            AstArgType::OpXor if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
                 instr = ltac::create_instr(LtacType::BXor);
                 instr.arg1_type = LtacArg::Reg8(0);
             },
@@ -645,7 +645,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Left shift
             
-            AstArgType::OpLeftShift if var.data_type == DataType::Byte => {
+            AstArgType::OpLeftShift if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
                 instr = ltac::create_instr(LtacType::BLsh);
                 instr.arg1_type = LtacArg::Reg8(0);
             },
@@ -668,7 +668,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Right shift
             
-            AstArgType::OpRightShift if var.data_type == DataType::Byte => {
+            AstArgType::OpRightShift if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
                 instr = ltac::create_instr(LtacType::BRsh);
                 instr.arg1_type = LtacArg::Reg8(0);
             },
