@@ -84,6 +84,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::Byte => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Byte),
         Token::UByte => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UByte),
         Token::Short => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Short),
+        Token::UShort => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UShort),
         Token::Int => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int),
         Token::Float => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Float),
         Token::Double => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Double),

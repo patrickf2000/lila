@@ -39,6 +39,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             data_type = DataType::Short;
             builder.stack_pos += 2;
         },
+        
+        AstModType::UShort => {
+            data_type = DataType::UShort;
+            builder.stack_pos += 2;
+        },
     
         AstModType::Int => {
             data_type = DataType::Int;
@@ -164,6 +169,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovW);
         instr.arg1_type = LtacArg::Reg16(0);
         
+    } else if var.data_type == DataType::UShort {
+        instr = ltac::create_instr(LtacType::MovUW);
+        instr.arg1_type = LtacArg::Reg16(0);
+        
     // The float types
     } else if var.data_type == DataType::Float {
         instr = ltac::create_instr(LtacType::MovF32);
@@ -189,14 +198,17 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 builder.file.code.push(instr.clone());
             },
             
-            AstArgType::ShortL if var.data_type == DataType::Short => {
-                instr.arg2_type = LtacArg::I16(arg.u16_val as i16);
-                builder.file.code.push(instr.clone());
-            },
-            
             AstArgType::ShortL => {
-                builder.syntax.ltac_error(&line, "Invalid use of short literal.".to_string());
-                return false;
+                if var.data_type == DataType::Short {
+                    instr.arg2_type = LtacArg::I16(arg.u16_val as i16);
+                } else if var.data_type == DataType::UShort {
+                    instr.arg2_type = LtacArg::U16(arg.u16_val);
+                } else {
+                    builder.syntax.ltac_error(&line, "Invalid use of short literal.".to_string());
+                    return false;
+                }
+                    
+                builder.file.code.push(instr.clone());
             },
         
             AstArgType::IntL if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray => {

@@ -30,6 +30,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::Byte(_v) => line = "  movsx ".to_string(),
         LtacArg::UByte(_v) => line = "  movzx ".to_string(),
         LtacArg::I16(_v) => line = "  movsx ".to_string(),
+        LtacArg::U16(_v) => line = "  movzx ".to_string(),
         
         LtacArg::FltReg(pos) => {
             line = "  movss ".to_string();
@@ -88,6 +89,11 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
                     line.push_str(&reg32);
                     line.push_str(", WORD PTR ");
                 },
+                
+                LtacArg::U16(_v) => {
+                    line.push_str(&reg32);
+                    line.push_str(", WORD PTR ");
+                },
             
                 _ => {
                     line.push_str(&reg32);
@@ -107,7 +113,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str(&val.to_string());
         },
         
-        LtacArg::I16(val) => {
+        LtacArg::U16(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
             line.push_str(&val.to_string());

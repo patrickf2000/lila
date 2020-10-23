@@ -19,6 +19,7 @@ pub enum LtacType {
     MovB,
     MovUB,
     MovW,
+    MovUW,
     MovF32,
     MovF64,
     MovOffImm,
@@ -126,10 +127,15 @@ pub enum LtacArg {
     
     Byte(i8),
     UByte(u8),
+    
     I16(i16),
+    U16(u16),
+    
     I32(i32),
+    
     F32(String),
     F64(String),
+    
     Ptr(i32),
     PtrLcl(String)
 }
