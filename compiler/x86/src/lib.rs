@@ -692,13 +692,13 @@ fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg8(pos) => {
             let reg = amd64_op_reg8(*pos);
             
-            line.push_str("  mul ");
+            line.push_str("  imul ");
             line.push_str(&reg);
             line.push_str("\n");
         },
         
         LtacArg::Mem(pos) => {
-            line.push_str("  mul [rbp-");
+            line.push_str("  imul [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
         },
@@ -750,13 +750,13 @@ fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg8(pos) => {
             let reg = amd64_op_reg8(*pos);
             
-            line.push_str("  div ");
+            line.push_str("  idiv ");
             line.push_str(&reg);
             line.push_str("\n");
         },
         
         LtacArg::Mem(pos) => {
-            line.push_str("  div BYTE PTR [rbp-");
+            line.push_str("  idiv BYTE PTR [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
         },
@@ -766,7 +766,7 @@ fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&val.to_string());
             line.push_str("\n");
             
-            line.push_str("  div r15b\n");
+            line.push_str("  idiv r15b\n");
         },
         
         _ => {},
