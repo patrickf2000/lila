@@ -190,15 +190,23 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => {},
             LtacType::Bfge => {},
             
-            LtacType::BAdd | LtacType::I16Add |
+            LtacType::BAdd | 
+            LtacType::I16Add | LtacType::U16Add |
             LtacType::I32Add => aarch64_build_instr(writer, &code),
+            
             LtacType::BSub | LtacType::I16Sub |
             LtacType::I32Sub => aarch64_build_instr(writer, &code),
-            LtacType::BMul | LtacType::I16Mul |
+            
+            LtacType::BMul |
+            LtacType::I16Mul | LtacType::U16Mul |
             LtacType::I32Mul => aarch64_build_instr(writer, &code),
-            LtacType::BDiv | LtacType::I16Div |
+            
+            LtacType::BDiv |
+            LtacType::I16Div | LtacType::U16Div |
             LtacType::I32Div => aarch64_build_instr(writer, &code),
-            LtacType::BMod | LtacType::I16Mod |
+            
+            LtacType::BMod |
+            LtacType::I16Mod | LtacType::U16Mod |
             LtacType::I32Mod => aarch64_build_instr(writer, &code),
             
             LtacType::F32Add => {},

@@ -128,6 +128,11 @@ pub fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
 pub fn amd64_build_short_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     let mut dest = String::new();
+    let mut instr = "  idiv ".to_string();
+    
+    if code.instr_type == LtacType::U16Div || code.instr_type == LtacType::U16Mod {
+        instr = "  div ".to_string();
+    }
     
     line.push_str("  xor eax, eax\n");
     line.push_str("  xor edx, edx\n");
@@ -148,13 +153,14 @@ pub fn amd64_build_short_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg16(pos) => {
             let reg = amd64_op_reg16(*pos);
             
-            line.push_str("  idiv ");
+            line.push_str(&instr);
             line.push_str(&reg);
             line.push_str("\n");
         },
         
         LtacArg::Mem(pos) => {
-            line.push_str("  idiv WORD PTR [rbp-");
+            line.push_str(&instr);
+            line.push_str("WORD PTR [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
         },
@@ -164,7 +170,17 @@ pub fn amd64_build_short_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&val.to_string());
             line.push_str("\n");
             
-            line.push_str("  idiv r15w\n");
+            line.push_str(&instr);
+            line.push_str("r15w\n");
+        },
+        
+        LtacArg::U16(val) => {
+            line.push_str("  mov r15w, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+            
+            line.push_str(&instr);
+            line.push_str("r15w\n");
         },
         
         _ => {},
@@ -175,7 +191,7 @@ pub fn amd64_build_short_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str(&dest);
     line.push_str(", ");
     
-    if code.instr_type == LtacType::I16Mod {
+    if code.instr_type == LtacType::I16Mod || code.instr_type == LtacType::U16Mod {
         line.push_str("dx\n");
     } else {
         line.push_str("ax\n");
