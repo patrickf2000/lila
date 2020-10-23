@@ -187,8 +187,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::BMul => amd64_build_byte_mul(writer, &code),
             LtacType::BDiv | LtacType::BMod => amd64_build_byte_div(writer, &code),
             
-            LtacType::I16Mul => {},
-            LtacType::I16Div | LtacType::I16Mod => {},
+            LtacType::I16Div | LtacType::I16Mod => amd64_build_short_div(writer, &code),
             
             LtacType::BAdd | LtacType::I16Add |
             LtacType::I32Add => amd64_build_instr(writer, &code),
@@ -196,7 +195,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::BSub | LtacType::I16Sub |
             LtacType::I32Sub => amd64_build_instr(writer, &code),
             
-            LtacType::I32Mul => amd64_build_instr(writer, &code),
+            LtacType::I16Mul | LtacType::I32Mul => amd64_build_instr(writer, &code),
             LtacType::I32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod => amd64_build_div(writer, &code),
             
@@ -281,7 +280,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::BSub | LtacType::I16Sub |
         LtacType::I32Sub => line.push_str("  sub "),
         
-        LtacType::I32Mul => line.push_str("  imul "),
+        LtacType::I16Mul | LtacType::I32Mul => line.push_str("  imul "),
         
         LtacType::F32Add => line.push_str("  addss "),
         LtacType::F32Sub => line.push_str("  subss "),
@@ -782,6 +781,68 @@ fn amd64_build_byte_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
         line.push_str("ah\n");
     } else {
         line.push_str("al\n");
+    }
+    
+    // Write
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_byte_div] Write failed.");
+}
+
+// Builds division for short values
+fn amd64_build_short_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    let mut dest = String::new();
+    
+    line.push_str("  xor eax, eax\n");
+    line.push_str("  xor edx, edx\n");
+    
+    match &code.arg1_type {
+        LtacArg::Reg16(pos) => {
+            dest = amd64_op_reg16(*pos);
+            
+            line.push_str("  mov ax, ");
+            line.push_str(&dest);
+            line.push_str("\n");
+        },
+        
+        _ => {},
+    }
+    
+    match &code.arg2_type {
+        LtacArg::Reg16(pos) => {
+            let reg = amd64_op_reg16(*pos);
+            
+            line.push_str("  idiv ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+        
+        LtacArg::Mem(pos) => {
+            line.push_str("  idiv WORD PTR [rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+        },
+        
+        LtacArg::I16(val) => {
+            line.push_str("  mov r15w, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+            
+            line.push_str("  idiv r15w\n");
+        },
+        
+        _ => {},
+    }
+    
+    // Move the result back to the proper register
+    line.push_str("  mov ");
+    line.push_str(&dest);
+    line.push_str(", ");
+    
+    if code.instr_type == LtacType::I16Mod {
+        line.push_str("dx\n");
+    } else {
+        line.push_str("ax\n");
     }
     
     // Write
