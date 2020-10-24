@@ -72,13 +72,21 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     // determines the comparison type
     match &arg1.arg_type {
         AstArgType::ByteL => {
-            cmp.arg1_type = LtacArg::Byte(arg1.u8_val as i8);
+            let mut mov = ltac::create_instr(LtacType::MovUB);
+            mov.arg1_type = LtacArg::Reg8(0);
+            mov.arg2_type = LtacArg::UByte(arg1.u8_val);
+            builder.file.code.push(mov);
+            
+            cmp = ltac::create_instr(LtacType::U8Cmp);
+            cmp.arg1_type = LtacArg::Reg8(0);
         },
-    
+        
+        // TODO: This should be in a move instruction, like for byte literals
         AstArgType::IntL => {
             cmp.arg1_type = LtacArg::I32(arg1.i32_val);
         },
         
+        // TODO: This should be moved, like for byte literals
         AstArgType::FloatL => {
             cmp = ltac::create_instr(LtacType::F32Cmp);
             
@@ -122,7 +130,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                     // Byte comparisons
                     } else if v.data_type == DataType::Byte {
-                        cmp.instr_type = LtacType::I8Cmp;
+                        cmp= ltac::create_instr(LtacType::I8Cmp);
                         cmp.arg1_type = LtacArg::Reg8(0);
                         
                         mov = ltac::create_instr(LtacType::MovB);
@@ -185,15 +193,16 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
             mov.arg1_type = LtacArg::Reg32(1);
-            //mov.arg2_type = LtacArg::Mem;
             
             match &builder.vars.get(&arg2.str_val) {
                 Some(v) => {
+                    // Strings
                     if v.data_type == DataType::Str {
                         mov = ltac::create_instr(LtacType::PushArg);
                         mov.arg1_type = LtacArg::Ptr(v.pos);
                         mov.arg2_val = 2;
                         
+                    // Single-precision floats
                     } else if v.data_type == DataType::Float {
                         mov = ltac::create_instr(LtacType::MovF32);
                         mov.arg1_type = LtacArg::FltReg(1);
@@ -201,6 +210,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                         cmp.arg2_type = LtacArg::FltReg(1);
                         
+                    // Double-precision floats
                     } else if v.data_type == DataType::Double {
                         mov = ltac::create_instr(LtacType::MovF64);
                         mov.arg1_type = LtacArg::FltReg64(1);
@@ -218,13 +228,40 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                         cmp.arg2_type = LtacArg::FltReg64(1);
                         
+                    // Bytes
+                    } else if v.data_type == DataType::Byte {
+                        if arg1.arg_type == AstArgType::ByteL {
+                            builder.file.code.pop();
+                            mov = ltac::create_instr(LtacType::MovB);
+                            mov.arg1_type = LtacArg::Reg8(0);
+                            mov.arg2_type = LtacArg::Byte(arg1.u8_val as i8);
+                        
+                            cmp = ltac::create_instr(LtacType::I8Cmp);
+                            cmp.arg1_type = LtacArg::Reg8(0);
+                        } else {
+                            mov.arg1_type = LtacArg::Empty;
+                        }
+                        
+                        cmp.arg2_type = LtacArg::Mem(v.pos);
+                    
+                    // Unsigned bytes
+                    } else if v.data_type == DataType::UByte {
+                        mov = ltac::create_instr(LtacType::MovUB);
+                        mov.arg1_type = LtacArg::Reg8(1);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
+                        cmp.arg2_type = LtacArg::Reg8(1);
+                        
+                    // Other things
                     } else {
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg1_type = LtacArg::Reg32(0);
                     }
                     
-                    builder.file.code.push(mov);
+                    if mov.arg1_type != LtacArg::Empty {
+                        builder.file.code.push(mov);
+                    }
                 },
                 
                 None => mov.arg2_val = 0,
@@ -234,6 +271,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         _ => {},
     }
     
+    // Add the instruction
     let cmp_type = cmp.instr_type.clone();
     builder.file.code.push(cmp);
     
