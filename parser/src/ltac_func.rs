@@ -161,6 +161,11 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 mov.arg1_type = LtacArg::RetRegI8;
             },
             
+            DataType::UByte => {
+                mov = ltac::create_instr(LtacType::MovUB);
+                mov.arg1_type = LtacArg::RetRegU8;
+            },
+            
             DataType::Float => {
                 mov = ltac::create_instr(LtacType::MovF32);
                 mov.arg1_type = LtacArg::RetRegF32;

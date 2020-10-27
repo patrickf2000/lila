@@ -343,7 +343,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::RetRegI8 => line.push_str("eax, "),
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("eax, "),
         LtacArg::RetRegI32 => line.push_str("eax, "),
         LtacArg::RetRegI64 => line.push_str("rax, "),
         
@@ -398,7 +398,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
         
-        LtacArg::RetRegI8 => line.push_str("al"),
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("al"),
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
         
@@ -442,6 +442,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Special cases
     if code.arg1_type == LtacArg::RetRegI8 {
         line.push_str("  movsx eax, al\n");
+    } else if code.arg1_type == LtacArg::RetRegU8 {
+        line.push_str("  movzx eax, al\n");
     }
     
     // Write to the file
@@ -621,7 +623,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::FltReg(_p) => {},
         LtacArg::FltReg64(_p) => {},
         
-        LtacArg::RetRegI8 => line.push_str("eax"),
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("eax"),
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
         

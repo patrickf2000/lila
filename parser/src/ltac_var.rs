@@ -364,6 +364,8 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                 
                                 if *t == DataType::Byte {
                                     instr.arg2_type = LtacArg::RetRegI8;
+                                } else if *t == DataType::UByte {
+                                    instr.arg2_type = LtacArg::RetRegU8;
                                 } else if *t == DataType::Int {
                                     instr.arg2_type = LtacArg::RetRegI32;
                                 } else if *t == DataType::Float {
