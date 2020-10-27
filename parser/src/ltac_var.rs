@@ -216,97 +216,98 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             // ===============================================================
             // Assign integer literals
             
-            // Integers
-            AstArgType::IntL if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray => {
-                instr.arg2_type = LtacArg::I32(arg.i32_val);
-                builder.file.code.push(instr.clone());
-            },
-            
-            // Bytes
-            AstArgType::IntL if var.data_type == DataType::Byte => {
-                let val = arg.i32_val;
-                
-                if mem::size_of::<u8>() > (val as usize) {
-                    builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
-                    return false;
-                }
-                
-                let parts = unsafe { mem::transmute::<i32, [i8; 4]>(val) };
-                let result = parts[0];
-                
-                instr.arg2_type = LtacArg::Byte(result);
-                builder.file.code.push(instr.clone());
-            },
-            
-            // UByte
-            AstArgType::IntL if var.data_type == DataType::UByte => {
-                let val = arg.i32_val as u32;
-                
-                if mem::size_of::<u8>() > (val as usize) {
-                    builder.syntax.ltac_error(&line, "Integer is too big to fit into ubyte.".to_string());
-                    return false;
-                }
-                
-                let parts = unsafe { mem::transmute::<u32, [u8; 4]>(val) };
-                let result = parts[0];
-                
-                instr.arg2_type = LtacArg::UByte(result);
-                builder.file.code.push(instr.clone());
-            },
-            
-            // Short
-            AstArgType::IntL if var.data_type == DataType::Short => {
-                let val = arg.i32_val;
-                
-                if mem::size_of::<u16>() > (val as usize) {
-                    builder.syntax.ltac_error(&line, "Integer is too big to fit into short.".to_string());
-                    return false;
-                }
-                
-                let parts = unsafe { mem::transmute::<i32, [i16; 2]>(val) };
-                let result = parts[0];
-                
-                instr.arg2_type = LtacArg::I16(result);
-                builder.file.code.push(instr.clone());
-            },
-            
-            // UShort
-            AstArgType::IntL if var.data_type == DataType::UShort => {
-                let val = arg.i32_val as u32;
-                
-                if mem::size_of::<u16>() > (val as usize) {
-                    builder.syntax.ltac_error(&line, "Integer is too big to fit into ushort.".to_string());
-                    return false;
-                }
-                
-                let parts = unsafe { mem::transmute::<u32, [u16; 2]>(val) };
-                let result = parts[0];
-                
-                instr.arg2_type = LtacArg::U16(result);
-                builder.file.code.push(instr.clone());
-            },
-            
-            // Invalid
             AstArgType::IntL => {
-                builder.syntax.ltac_error(&line, "Invalid use of integer.".to_string());
-                return false;
+                // Bytes
+                if var.data_type == DataType::Byte {
+                    let val = arg.i32_val;
+                    
+                    if mem::size_of::<u8>() > (val as usize) {
+                        builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
+                        return false;
+                    }
+                    
+                    let parts = unsafe { mem::transmute::<i32, [i8; 4]>(val) };
+                    let result = parts[0];
+                    
+                    instr.arg2_type = LtacArg::Byte(result);
+                    builder.file.code.push(instr.clone());
+                    
+                // UByte
+                } else if var.data_type == DataType::UByte {
+                    let val = arg.i32_val as u32;
+                    
+                    if mem::size_of::<u8>() > (val as usize) {
+                        builder.syntax.ltac_error(&line, "Integer is too big to fit into ubyte.".to_string());
+                        return false;
+                    }
+                    
+                    let parts = unsafe { mem::transmute::<u32, [u8; 4]>(val) };
+                    let result = parts[0];
+                    
+                    instr.arg2_type = LtacArg::UByte(result);
+                    builder.file.code.push(instr.clone());
+                    
+                // Short
+                } else if var.data_type == DataType::Short {
+                    let val = arg.i32_val;
+                    
+                    if mem::size_of::<u16>() > (val as usize) {
+                        builder.syntax.ltac_error(&line, "Integer is too big to fit into short.".to_string());
+                        return false;
+                    }
+                    
+                    let parts = unsafe { mem::transmute::<i32, [i16; 2]>(val) };
+                    let result = parts[0];
+                    
+                    instr.arg2_type = LtacArg::I16(result);
+                    builder.file.code.push(instr.clone());
+                    
+                // UShort
+                } else if var.data_type == DataType::UShort {
+                    let val = arg.i32_val as u32;
+                    
+                    if mem::size_of::<u16>() > (val as usize) {
+                        builder.syntax.ltac_error(&line, "Integer is too big to fit into ushort.".to_string());
+                        return false;
+                    }
+                    
+                    let parts = unsafe { mem::transmute::<u32, [u16; 2]>(val) };
+                    let result = parts[0];
+                    
+                    instr.arg2_type = LtacArg::U16(result);
+                    builder.file.code.push(instr.clone());
+                    
+                // Integers and integer arrays
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr.arg2_type = LtacArg::I32(arg.i32_val);
+                    builder.file.code.push(instr.clone());
+                    
+                // Invalid
+                } else {
+                    builder.syntax.ltac_error(&line, "Invalid use of integer.".to_string());
+                    return false;
+                }
             },
             
             // ===============================================================
             // Assign float literals
-            AstArgType::FloatL if var.data_type == DataType::Float => {
-                let name = builder.build_float(arg.f64_val, false);
-                instr.arg2_type = LtacArg::F32(name);
-                builder.file.code.push(instr.clone());
-            },
             
-            AstArgType::FloatL if var.data_type == DataType::Double => {
-                let name = builder.build_float(arg.f64_val, true);
-                instr.arg2_type = LtacArg::F64(name);
-                builder.file.code.push(instr.clone());
+            AstArgType::FloatL => {
+                if var.data_type == DataType::Float {
+                    let name = builder.build_float(arg.f64_val, false);
+                    instr.arg2_type = LtacArg::F32(name);
+                    builder.file.code.push(instr.clone());
+                
+                } else if var.data_type == DataType::Double {
+                    let name = builder.build_float(arg.f64_val, true);
+                    instr.arg2_type = LtacArg::F64(name);
+                    builder.file.code.push(instr.clone());
+                    
+                } else {
+                    builder.syntax.ltac_error(&line, "Invalid use of float literal.".to_string());
+                    return false;
+                }
             },
-            
-            AstArgType::FloatL => {},
             
             AstArgType::StringL => {},
             
@@ -381,312 +382,276 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Addition
             
-            AstArgType::OpAdd if var.data_type == DataType::Float => {
-                instr = ltac::create_instr(LtacType::F32Add);
-                instr.arg1_type = LtacArg::FltReg(0);
-            },
-            
-            AstArgType::OpAdd if var.data_type == DataType::Double => {
-                instr = ltac::create_instr(LtacType::F64Add);
-                instr.arg1_type = LtacArg::FltReg64(0);
-            },
-            
-            AstArgType::OpAdd if var.data_type == DataType::Byte => {
-                instr = ltac::create_instr(LtacType::BAdd);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpAdd if var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::U8Add);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpAdd if var.data_type == DataType::Short => {
-                instr = ltac::create_instr(LtacType::I16Add);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpAdd if var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::U16Add);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpAdd 
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Add);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpAdd => {
-                builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
-                return false;
+                if var.data_type == DataType::Byte {
+                    instr = ltac::create_instr(LtacType::BAdd);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::U8Add);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short {
+                    instr = ltac::create_instr(LtacType::I16Add);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::U16Add);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Add);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else if var.data_type == DataType::Float {
+                    instr = ltac::create_instr(LtacType::F32Add);
+                    instr.arg1_type = LtacArg::FltReg(0);
+                    
+                } else if var.data_type == DataType::Double {
+                    instr = ltac::create_instr(LtacType::F64Add);
+                    instr.arg1_type = LtacArg::FltReg64(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
+                    return false;
+                }
             },
             
             // Subtraction
             
-            AstArgType::OpSub if var.data_type == DataType::Float => {
-                instr = ltac::create_instr(LtacType::F32Sub);
-                instr.arg1_type = LtacArg::FltReg(0);
-            },
-            
-            AstArgType::OpSub if var.data_type == DataType::Double => {
-                instr = ltac::create_instr(LtacType::F64Sub);
-                instr.arg1_type = LtacArg::FltReg64(0);
-            },
-            
-            AstArgType::OpSub if var.data_type == DataType::Byte => {
-                instr = ltac::create_instr(LtacType::BSub);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpSub if var.data_type == DataType::Short => {
-                instr = ltac::create_instr(LtacType::I16Sub);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpSub
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Sub);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpSub => {
-                builder.syntax.ltac_error(line, "Invalid use of subtraction operator.".to_string());
-                return false;
+                if var.data_type == DataType::Byte {
+                    instr = ltac::create_instr(LtacType::BSub);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short {
+                    instr = ltac::create_instr(LtacType::I16Sub);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Sub);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else if var.data_type == DataType::Float {
+                    instr = ltac::create_instr(LtacType::F32Sub);
+                    instr.arg1_type = LtacArg::FltReg(0);
+                    
+                } else if var.data_type == DataType::Double {
+                    instr = ltac::create_instr(LtacType::F64Sub);
+                    instr.arg1_type = LtacArg::FltReg64(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of subtraction operator.".to_string());
+                    return false;
+                }
             },
             
             // Multiplication
             
-            AstArgType::OpMul if var.data_type == DataType::Float => {
-                instr = ltac::create_instr(LtacType::F32Mul);
-                instr.arg1_type = LtacArg::FltReg(0);
-            },
-            
-            AstArgType::OpMul if var.data_type == DataType::Double => {
-                instr = ltac::create_instr(LtacType::F64Mul);
-                instr.arg1_type = LtacArg::FltReg64(0);
-            },
-            
-            AstArgType::OpMul if var.data_type == DataType::Byte => {
-                instr = ltac::create_instr(LtacType::BMul);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpMul if var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::U8Mul);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpMul if var.data_type == DataType::Short => {
-                instr = ltac::create_instr(LtacType::I16Mul);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpMul if var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::U16Mul);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpMul
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Mul);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpMul => {
-                builder.syntax.ltac_error(line, "Invalid use of multiplication operator.".to_string());
-                return false;
+                if var.data_type == DataType::Byte {
+                    instr = ltac::create_instr(LtacType::BMul);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::U8Mul);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short {
+                    instr = ltac::create_instr(LtacType::I16Mul);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::U16Mul);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Mul);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else if var.data_type == DataType::Float {
+                    instr = ltac::create_instr(LtacType::F32Mul);
+                    instr.arg1_type = LtacArg::FltReg(0);
+                    
+                } else if var.data_type == DataType::Double {
+                    instr = ltac::create_instr(LtacType::F64Mul);
+                    instr.arg1_type = LtacArg::FltReg64(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of multiplication operator.".to_string());
+                    return false;
+                }
             },
             
             // Division
             
-            AstArgType::OpDiv if var.data_type == DataType::Float => {
-                instr = ltac::create_instr(LtacType::F32Div);
-                instr.arg1_type = LtacArg::FltReg(0);
-            },
-            
-            AstArgType::OpDiv if var.data_type == DataType::Double => {
-                instr = ltac::create_instr(LtacType::F64Div);
-                instr.arg1_type = LtacArg::FltReg64(0);
-            },
-            
-            AstArgType::OpDiv
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Div);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
-            AstArgType::OpDiv if var.data_type == DataType::Byte => {
-                instr = ltac::create_instr(LtacType::BDiv);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpDiv if var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::U8Div);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpDiv if var.data_type == DataType::Short => {
-                instr = ltac::create_instr(LtacType::I16Div);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpDiv if var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::U16Div);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
             AstArgType::OpDiv => {
-                builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
-                return false;
+                if var.data_type == DataType::Byte {
+                    instr = ltac::create_instr(LtacType::BDiv);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::U8Div);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short {
+                    instr = ltac::create_instr(LtacType::I16Div);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::U16Div);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Div);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else if var.data_type == DataType::Float {
+                    instr = ltac::create_instr(LtacType::F32Div);
+                    instr.arg1_type = LtacArg::FltReg(0);
+                    
+                } else if var.data_type == DataType::Double {
+                    instr = ltac::create_instr(LtacType::F64Div);
+                    instr.arg1_type = LtacArg::FltReg64(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
+                    return false;
+                }
             },
             
             // Modulo
             
-            AstArgType::OpMod if var.data_type == DataType::Byte => {
-                instr = ltac::create_instr(LtacType::BMod);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpMod if var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::U8Mod);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpMod if var.data_type == DataType::Short => {
-                instr = ltac::create_instr(LtacType::I16Mod);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpMod if var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::U16Mod);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpMod
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Mod);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpMod => {
-                builder.syntax.ltac_error(line, "Modulo is only valid with integer values.".to_string());
-                return false;
+                if var.data_type == DataType::Byte {
+                    instr = ltac::create_instr(LtacType::BMod);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::U8Mod);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short {
+                    instr = ltac::create_instr(LtacType::I16Mod);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::U16Mod);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Mod);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Modulo is only valid with integer values.".to_string());
+                    return false;
+                }
             },
             
             // Logical AND
             
-            AstArgType::OpAnd if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::BAnd);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpAnd if var.data_type == DataType::Short || var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::WAnd);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpAnd
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32And);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpAnd => {
-                builder.syntax.ltac_error(line, "Invalid use of logical and.".to_string());
-                return false;
+                if var.data_type == DataType::Byte || var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::BAnd);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short || var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::WAnd);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32And);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of logical and.".to_string());
+                    return false;
+                }
             },
             
             // Logical OR
             
-            AstArgType::OpOr if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::BOr);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpOr if var.data_type == DataType::Short || var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::WOr);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpOr
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Or);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpOr => {
-                builder.syntax.ltac_error(line, "Invalid use of logical or.".to_string());
-                return false;
+                if var.data_type == DataType::Byte || var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::BOr);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short || var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::WOr);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Or);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of logical or.".to_string());
+                    return false;
+                }
             },
             
             // Logical XOR
             
-            AstArgType::OpXor if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::BXor);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpXor if var.data_type == DataType::Short || var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::WXor);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpXor
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Xor);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpXor => {
-                builder.syntax.ltac_error(line, "Invalid use of logical xor.".to_string());
-                return false;
+                if var.data_type == DataType::Byte || var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::BXor);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short || var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::WXor);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Xor);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of logical xor.".to_string());
+                    return false;
+                }
             },
             
             // Left shift
             
-            AstArgType::OpLeftShift if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::BLsh);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpLeftShift if var.data_type == DataType::Short || var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::WLsh);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpLeftShift
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Lsh);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpLeftShift => {
-                builder.syntax.ltac_error(line, "Invalid use of left shift.".to_string());
-                return false;
+                if var.data_type == DataType::Byte || var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::BLsh);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short || var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::WLsh);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Lsh);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of left shift.".to_string());
+                    return false;
+                }
             },
             
             // Right shift
             
-            AstArgType::OpRightShift if var.data_type == DataType::Byte || var.data_type == DataType::UByte => {
-                instr = ltac::create_instr(LtacType::BRsh);
-                instr.arg1_type = LtacArg::Reg8(0);
-            },
-            
-            AstArgType::OpRightShift if var.data_type == DataType::Short || var.data_type == DataType::UShort => {
-                instr = ltac::create_instr(LtacType::WRsh);
-                instr.arg1_type = LtacArg::Reg16(0);
-            },
-            
-            AstArgType::OpRightShift
-            if (var.data_type == DataType::Int || var.data_type == DataType::IntDynArray) => {
-                instr = ltac::create_instr(LtacType::I32Rsh);
-                instr.arg1_type = LtacArg::Reg32(0);
-            },
-            
             AstArgType::OpRightShift => {
-                builder.syntax.ltac_error(line, "Invalid use of right shift.".to_string());
-                return false;
+                if var.data_type == DataType::Byte || var.data_type == DataType::UByte {
+                    instr = ltac::create_instr(LtacType::BRsh);
+                    instr.arg1_type = LtacArg::Reg8(0);
+                    
+                } else if var.data_type == DataType::Short || var.data_type == DataType::UShort {
+                    instr = ltac::create_instr(LtacType::WRsh);
+                    instr.arg1_type = LtacArg::Reg16(0);
+                    
+                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                    instr = ltac::create_instr(LtacType::I32Rsh);
+                    instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else {
+                    builder.syntax.ltac_error(line, "Invalid use of right shift.".to_string());
+                    return false;
+                }
             },
             
             _ => {},
