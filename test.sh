@@ -55,19 +55,20 @@ fi
 echo "Running all tests..."
 echo ""
 
-run_test 'test/math/*.ds' 'clib' $1
-run_test 'test/cond/*.ds' 'clib' $1
-run_test 'test/func/*.ds' 'clib' $1
+run_test 'test/int/*.ds' 'clib' $1
+run_test 'test/byte/*.ds' 'clib' $1
+run_test 'test/short/*.ds' 'clib' $1
+run_test 'test/float/*.ds' 'clib' $1
+
 run_test 'test/loop/*.ds' 'clib' $1
 run_test 'test/array/*.ds' 'clib' $1
-run_test 'test/byte/*.ds' 'clib' $1
+
 run_test 'test/string/*.ds' 'clib' $1
+
 run_test 'test/errors/*.ds' 'clib' $1 "error"
 run_test 'test/errors/ltac/*.ds' "clib" $1 "error"
 
 if [[ $1 == "x86-64" ]] ; then
-    run_test 'test/short/*.ds' 'clib' $1
-    run_test 'test/float/*.ds' 'clib' $1
     run_test 'test/vector/*.ds' 'clib' $1
     run_test 'test/syscall/x86-64/*.ds' 'sys' $1
 elif [[ $1 == "aarch64" ]] ; then
