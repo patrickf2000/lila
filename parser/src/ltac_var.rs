@@ -35,6 +35,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 1;
         },
         
+        AstModType::UByteDynArray => {
+            data_type = DataType::UByteDynArray;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Short => {
             data_type = DataType::Short;
             builder.stack_pos += 2;
@@ -140,7 +145,7 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     
     let code : bool;
     
-    if var.data_type == DataType::ByteDynArray ||
+    if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
        var.data_type == DataType::IntDynArray {
         code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
@@ -194,7 +199,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::ByteL => {
                 if var.data_type == DataType::Byte || var.data_type == DataType::ByteDynArray {
                     instr.arg2_type = LtacArg::Byte(arg.u8_val as i8);
-                } else if var.data_type == DataType::UByte {
+                } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
                     instr.arg2_type = LtacArg::UByte(arg.u8_val);
                 } else {
                     builder.syntax.ltac_error(&line, "Invalid use of byte literal.".to_string());
@@ -726,7 +731,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         let first_arg = line.sub_args.last().unwrap();
         let mut offset_size = 4;
         
-        if var.data_type == DataType::ByteDynArray {
+        if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray {
             offset_size = 1;
         }
         
