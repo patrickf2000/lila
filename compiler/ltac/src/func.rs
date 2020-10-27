@@ -44,6 +44,7 @@ pub fn ltac_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     match &code.instr_type {
         LtacType::LdArgI8 => line.push_str("i8.ldarg"),
+        LtacType::LdArgU8 => line.push_str("u8.ldarg"),
         LtacType::LdArgI32 => line.push_str("i32.ldarg"),
         LtacType::LdArgF32 => line.push_str("f32.ldarg"),
         LtacType::LdArgF64 => line.push_str("f64.ldarg"),

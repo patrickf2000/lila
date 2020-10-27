@@ -127,6 +127,11 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
                 arg.modifiers.push(val_type);
             },
             
+            Token::UByte => {
+                let val_type = AstMod { mod_type : AstModType::UByte, };
+                arg.modifiers.push(val_type);
+            },
+            
             Token::Int => {
                 let mut data_type = AstModType::Int;
                 

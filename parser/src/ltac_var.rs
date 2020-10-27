@@ -109,6 +109,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             ld.arg2_val = arg_no;
             arg_no += 1;
             
+        } else if ast_data_type.mod_type == AstModType::UByte {
+            ld = ltac::create_instr(LtacType::LdArgU8);
+            ld.arg2_val = arg_no;
+            arg_no += 1;
+            
         } else {
             ld.arg2_val = arg_no;
             arg_no += 1;

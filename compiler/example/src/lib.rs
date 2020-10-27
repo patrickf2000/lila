@@ -71,6 +71,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // Used to load function arguments
             LtacType::LdArgI8 => {},
+            LtacType::LdArgU8 => {},
             LtacType::LdArgI32 => {},
             LtacType::LdArgF32 => {},
             LtacType::LdArgF64 => {},
