@@ -86,12 +86,15 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             cmp.arg1_type = LtacArg::I32(arg1.i32_val);
         },
         
-        // TODO: This should be moved, like for byte literals
         AstArgType::FloatL => {
-            cmp = ltac::create_instr(LtacType::F32Cmp);
-            
             let name = builder.build_float(arg1.f64_val, false);
-            cmp.arg1_type = LtacArg::F32(name);
+            let mut mov = ltac::create_instr(LtacType::MovF32);
+            mov.arg1_type = LtacArg::FltReg(0);
+            mov.arg2_type = LtacArg::F32(name);
+            builder.file.code.push(mov);
+            
+            cmp = ltac::create_instr(LtacType::F32Cmp);
+            cmp.arg1_type = LtacArg::FltReg(0);
         },
         
         AstArgType::StringL => {},
@@ -217,10 +220,17 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         match cmp.arg1_type {
-                            LtacArg::F32(ref _v) => {
-                                cmp = ltac::create_instr(LtacType::F64Cmp);
+                            LtacArg::FltReg(pos) => {
+                                builder.file.code.pop();
+                                
                                 let name = builder.build_float(arg1.f64_val, true);
-                                cmp.arg1_type = LtacArg::F64(name);
+                                let mut mov = ltac::create_instr(LtacType::MovF64);
+                                mov.arg1_type = LtacArg::FltReg64(pos);
+                                mov.arg2_type = LtacArg::F64(name);
+                                builder.file.code.push(mov);
+                                
+                                cmp = ltac::create_instr(LtacType::F64Cmp);
+                                cmp.arg1_type = LtacArg::FltReg64(pos);
                             },
                             
                             _ => {},

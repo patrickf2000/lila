@@ -246,22 +246,6 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     
     // Specific for float literals
-    match code.arg1_type {
-        LtacArg::F32(ref val) => {
-            line.push_str("  movss xmm1, DWORD PTR ");
-            line.push_str(&val);
-            line.push_str("[rip]\n");
-        },
-        
-        LtacArg::F64(ref val) => {
-            line.push_str("  movsd xmm1, QWORD PTR ");
-            line.push_str(&val);
-            line.push_str("[rip]\n");
-        },
-        
-        _ => {},
-    }
-    
     match code.arg2_type {
         LtacArg::F32(ref val) => {
             line.push_str("  movss xmm0, DWORD PTR ");
@@ -327,7 +311,6 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // The arguments
     match &code.arg1_type {
-        LtacArg::Empty => {},
         
         LtacArg::Reg8(pos) => {
             let reg = amd64_op_reg8(*pos);
@@ -382,18 +365,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("], ");
         },
         
-        LtacArg::Byte(_v) => {},
-        LtacArg::UByte(_v) => {},
-        LtacArg::I16(_v) => {},
-        LtacArg::U16(_v) => {},
-        LtacArg::I32(_v) => {},
-        
-        LtacArg::F32(_v) | LtacArg::F64(_v) => {
-            line.push_str("xmm1, ");
-        },
-        
-        LtacArg::Ptr(_v) => {},
-        LtacArg::PtrLcl(_v) => {},
+        _ => {},
     }
     
     match &code.arg2_type {
