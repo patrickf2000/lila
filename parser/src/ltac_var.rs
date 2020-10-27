@@ -362,7 +362,9 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                 stmt.args = arg.sub_args.clone();
                                 build_func_call(builder, &stmt);
                                 
-                                if *t == DataType::Int {
+                                if *t == DataType::Byte {
+                                    instr.arg2_type = LtacArg::RetRegI8;
+                                } else if *t == DataType::Int {
                                     instr.arg2_type = LtacArg::RetRegI32;
                                 } else if *t == DataType::Float {
                                     instr.arg2_type = LtacArg::RetRegF32;

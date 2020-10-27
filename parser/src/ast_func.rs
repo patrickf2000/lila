@@ -11,6 +11,11 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
     let token = scanner.get_token();
         
     match token {
+        Token::Byte => {
+            let func_type = AstMod { mod_type : AstModType::Byte, };
+            func.modifiers.push(func_type);
+        },
+    
         Token::Int => {
             let func_type = AstMod { mod_type : AstModType::Int, };
             func.modifiers.push(func_type);

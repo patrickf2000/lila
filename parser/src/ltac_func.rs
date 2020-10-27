@@ -156,6 +156,11 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         let mut mov = ltac::create_instr(LtacType::Mov);
         
         match &builder.current_type {
+            DataType::Byte => {
+                mov = ltac::create_instr(LtacType::MovB);
+                mov.arg1_type = LtacArg::RetRegI8;
+            },
+            
             DataType::Float => {
                 mov = ltac::create_instr(LtacType::MovF32);
                 mov.arg1_type = LtacArg::RetRegF32;
@@ -170,6 +175,14 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         }
         
         match &arg1.arg_type {
+            AstArgType::ByteL => {
+                if builder.current_type == DataType::UByte {
+                    mov.arg2_type = LtacArg::UByte(arg1.u8_val);
+                } else {
+                    mov.arg2_type = LtacArg::Byte(arg1.u8_val as i8);
+                }
+            },
+        
             AstArgType::IntL => {
                 mov.arg2_type = LtacArg::I32(arg1.i32_val);
             },
