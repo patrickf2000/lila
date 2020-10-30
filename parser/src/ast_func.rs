@@ -142,6 +142,16 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
                 arg.modifiers.push(val_type);
             },
             
+            Token::Short => {
+                let val_type = AstMod { mod_type : AstModType::Short, };
+                arg.modifiers.push(val_type);
+            },
+            
+            Token::UShort => {
+                let val_type = AstMod { mod_type : AstModType::UShort, };
+                arg.modifiers.push(val_type);
+            },
+            
             Token::Int => {
                 let mut data_type = AstModType::Int;
                 

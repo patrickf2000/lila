@@ -75,6 +75,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Ret => ltac_build_ret(writer),
             
             LtacType::LdArgI8 | LtacType::LdArgU8 => ltac_build_ldarg(writer, code),
+            LtacType::LdArgI16 | LtacType::LdArgU16 => ltac_build_ldarg(writer, code),
             LtacType::LdArgI32 => ltac_build_ldarg(writer, code),
             LtacType::LdArgF32 => ltac_build_ldarg(writer, code),
             LtacType::LdArgF64 => ltac_build_ldarg(writer, code),

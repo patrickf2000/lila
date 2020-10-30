@@ -37,6 +37,7 @@ pub enum LtacType {
     StrPtr,
     
     LdArgI8,    LdArgU8,
+    LdArgI16,   LdArgU16,
     LdArgI32,
     LdArgF32,
     LdArgF64,
