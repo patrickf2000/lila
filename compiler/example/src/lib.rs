@@ -104,6 +104,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I16Cmp => {},
             LtacType::U16Cmp => {},
             LtacType::I32Cmp => {},
+            LtacType::U32Cmp => {},
             LtacType::F32Cmp => {},
             LtacType::F64Cmp => {},
             LtacType::StrCmp => {},

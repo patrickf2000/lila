@@ -63,7 +63,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     let arg1 = &line.args.iter().nth(0).unwrap();
     let arg2 = &line.args.iter().nth(2).unwrap();
     
-    let mut cmp = ltac::create_instr(LtacType::I32Cmp);
+    let mut cmp = ltac::create_instr(LtacType::U32Cmp);
     
     // Set to true if we have a signed byte, short, or int variable
     let mut signed_variant = false;
@@ -92,9 +92,9 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         },
         
         AstArgType::IntL => {
-            let mut mov = ltac::create_instr(LtacType::Mov);
+            let mut mov = ltac::create_instr(LtacType::MovU);
             mov.arg1_type = LtacArg::Reg32(0);
-            mov.arg2_type  = LtacArg::I32(arg1.u32_val as i32);
+            mov.arg2_type  = LtacArg::U32(arg1.u32_val);
             builder.file.code.push(mov);
             
             cmp.arg1_type = LtacArg::Reg32(0);
@@ -114,7 +114,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::StringL => {},
         
         AstArgType::Id => {
-            let mut mov = ltac::create_instr(LtacType::Mov);
+            let mut mov = ltac::create_instr(LtacType::MovU);
             mov.arg1_type = LtacArg::Reg32(0);
             
             match &builder.vars.get(&arg1.str_val) {
@@ -187,6 +187,12 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                     // Integer comparisons
                     } else {
+                        if v.data_type == DataType::Int {
+                            mov.instr_type = LtacType::Mov;
+                            cmp.instr_type = LtacType::I32Cmp;
+                            signed_variant = true;
+                        }
+                        
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg1_type = LtacArg::Reg32(0);
@@ -220,7 +226,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         },
     
         AstArgType::IntL => {
-            cmp.arg2_type = LtacArg::I32(arg2.u32_val as i32);
+            if signed_variant {
+                cmp.arg2_type = LtacArg::I32(arg2.u32_val as i32);
+            } else {
+                cmp.arg2_type = LtacArg::U32(arg2.u32_val);
+            }
         },
         
         AstArgType::FloatL => {
@@ -328,7 +338,22 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                         cmp.arg2_type = LtacArg::Reg16(1);
                         
-                    // Other things
+                    // Integers
+                    } else if v.data_type == DataType::Int {
+                        if arg1.arg_type == AstArgType::IntL {
+                            builder.file.code.pop();
+                            mov = ltac::create_instr(LtacType::Mov);
+                            mov.arg1_type = LtacArg::Reg32(0);
+                            mov.arg2_type = LtacArg::I32(arg1.u32_val as i32);
+                        
+                            cmp = ltac::create_instr(LtacType::I32Cmp);
+                            cmp.arg1_type = LtacArg::Reg32(0);
+                        } else {
+                            mov.arg1_type = LtacArg::Empty;
+                        }
+                        
+                        cmp.arg2_type = LtacArg::Mem(v.pos);
+                        
                     } else {
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         

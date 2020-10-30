@@ -53,7 +53,7 @@ pub enum LtacType {
     // Comparison and flow instructions
     I8Cmp,      U8Cmp,
     I16Cmp,     U16Cmp,
-    I32Cmp,
+    I32Cmp,     U32Cmp,
     F32Cmp,
     F64Cmp,
     StrCmp,

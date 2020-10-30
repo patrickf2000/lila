@@ -175,7 +175,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             LtacType::I8Cmp | LtacType::U8Cmp => {},
             LtacType::I16Cmp | LtacType::U16Cmp => {},
-            LtacType::I32Cmp => aarch64_build_instr(writer, &code),
+            LtacType::I32Cmp | LtacType::U32Cmp => aarch64_build_instr(writer, &code),
             LtacType::F32Cmp => {},
             LtacType::F64Cmp => {},
             LtacType::StrCmp => aarch64_build_strcmp(writer, &code),
