@@ -138,11 +138,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I16Div | LtacType::U16Div => ltac_build_instr(writer, code),
             LtacType::I16Mod | LtacType::U16Mod => ltac_build_instr(writer, code),
             
-            LtacType::I32Add => ltac_build_instr(writer, code),
+            LtacType::I32Add | LtacType::U32Add => ltac_build_instr(writer, code),
             LtacType::I32Sub => ltac_build_instr(writer, code),
-            LtacType::I32Mul => ltac_build_instr(writer, code),
-            LtacType::I32Div => ltac_build_instr(writer, code),
-            LtacType::I32Mod => ltac_build_instr(writer, code),
+            LtacType::I32Mul | LtacType::U32Mul => ltac_build_instr(writer, code),
+            LtacType::I32Div | LtacType::U32Div => ltac_build_instr(writer, code),
+            LtacType::I32Mod | LtacType::U32Mod => ltac_build_instr(writer, code),
             
             LtacType::I32And => ltac_build_instr(writer, code),
             LtacType::I32Or => ltac_build_instr(writer, code),
@@ -314,6 +314,13 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::I32Div => line.push_str("  i32.div "),
         LtacType::I32Mod => line.push_str("  i32.mod "),
         
+        // Unsigned integer (u32) operations
+        LtacType::U32Add => line.push_str("  u32.add "),
+        LtacType::U32Mul => line.push_str("  u32.mul "),
+        LtacType::U32Div => line.push_str("  u32.div "),
+        LtacType::U32Mod => line.push_str("  u32.mod "),
+        
+        // Integer bitwise operations
         LtacType::I32And => line.push_str("  i32.and "),
         LtacType::I32Or => line.push_str("  i32.or "),
         LtacType::I32Xor => line.push_str("  i32.xor "),

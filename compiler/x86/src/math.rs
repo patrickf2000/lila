@@ -233,6 +233,11 @@ pub fn amd64_build_short_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
 pub fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     let mut dest_line = String::new();
+    let mut instr = "  idiv ".to_string();
+    
+    if code.instr_type == LtacType::U32Div || code.instr_type == LtacType::U32Mod {
+        instr = "  div ".to_string();
+    }
     
     line.push_str("  xor edx, edx\n");
     
@@ -266,13 +271,14 @@ pub fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
             
-            line.push_str("  idiv ");
+            line.push_str(&instr);
             line.push_str(&reg);
             line.push_str("\n");
         },
         
         LtacArg::Mem(pos) => {
-            line.push_str("  idiv DWORD PTR [rbp-");
+            line.push_str(&instr);
+            line.push_str("DWORD PTR [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
         },
@@ -285,12 +291,20 @@ pub fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("  idiv r15d\n");
         },
         
+        LtacArg::U32(val) => {
+            line.push_str("  mov r15d, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+            
+            line.push_str("  div r15d\n");
+        },
+        
         _ => {},
     }
     
     line.push_str(&dest_line);
     
-    if code.instr_type == LtacType::I32Mod {
+    if code.instr_type == LtacType::I32Mod || code.instr_type == LtacType::U32Mod {
         line.push_str("edx\n");
     } else {
         line.push_str("eax\n");

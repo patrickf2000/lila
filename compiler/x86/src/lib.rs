@@ -198,16 +198,16 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             LtacType::BAdd | LtacType::U8Add |
             LtacType::I16Add | LtacType::U16Add |
-            LtacType::I32Add => amd64_build_instr(writer, &code),
+            LtacType::I32Add | LtacType::U32Add => amd64_build_instr(writer, &code),
             
             LtacType::BSub | LtacType::I16Sub |
             LtacType::I32Sub => amd64_build_instr(writer, &code),
             
             LtacType::I16Mul | LtacType::U16Mul |
-            LtacType::I32Mul => amd64_build_instr(writer, &code),
+            LtacType::I32Mul | LtacType::U32Mul => amd64_build_instr(writer, &code),
             
-            LtacType::I32Div => amd64_build_div(writer, &code),
-            LtacType::I32Mod => amd64_build_div(writer, &code),
+            LtacType::I32Div | LtacType::U32Div => amd64_build_div(writer, &code),
+            LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(writer, &code),
             
             LtacType::F32Add | LtacType::F64Add => amd64_build_instr(writer, &code),
             LtacType::F32Sub | LtacType::F64Sub => amd64_build_instr(writer, &code),
@@ -266,6 +266,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     }
     
     // The instruction
+    // TODO: The unsigned multiplication should use "mul". This may require a separate function
     match &code.instr_type {
         LtacType::Mov | LtacType::MovU |
         LtacType::MovB | LtacType::MovUB |
@@ -275,13 +276,13 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacType::BAdd | LtacType::U8Add |
         LtacType::I16Add | LtacType::U16Add |
-        LtacType::I32Add => line.push_str("  add "),
+        LtacType::I32Add | LtacType::U32Add => line.push_str("  add "),
         
         LtacType::BSub | LtacType::I16Sub |
         LtacType::I32Sub => line.push_str("  sub "),
         
-        LtacType::I16Mul | LtacType::U16Mul |
-        LtacType::I32Mul => line.push_str("  imul "),
+        LtacType::I16Mul | LtacType::I32Mul => line.push_str("  imul "),
+        LtacType::U16Mul | LtacType::U32Mul => line.push_str("  imul "),
         
         LtacType::F32Add => line.push_str("  addss "),
         LtacType::F32Sub => line.push_str("  subss "),
