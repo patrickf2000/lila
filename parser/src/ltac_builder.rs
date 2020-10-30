@@ -27,6 +27,7 @@ pub enum DataType {
     IntDynArray,
     Float,
     Double,
+    FloatDynArray,
     Str,
 }
 
@@ -128,6 +129,7 @@ impl LtacBuilder {
                     AstModType::IntDynArray => func_type = DataType::IntDynArray,
                     AstModType::Float => func_type = DataType::Float,
                     AstModType::Double => func_type = DataType::Double,
+                    AstModType::FloatDynArray => func_type = DataType::FloatDynArray,
                     AstModType::Str => func_type = DataType::Str,
                 }
             }

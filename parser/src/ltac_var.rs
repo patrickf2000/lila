@@ -80,6 +80,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 8;
         },
         
+        AstModType::FloatDynArray => {
+            data_type = DataType::FloatDynArray;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Str => {
             data_type = DataType::Str;
             builder.stack_pos += 8;
@@ -167,7 +172,8 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     
     if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
        var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
-       var.data_type == DataType::IntDynArray {
+       var.data_type == DataType::IntDynArray ||
+       var.data_type == DataType::FloatDynArray {
         code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
         code = build_str_assign(builder, &line, &var);
@@ -205,7 +211,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg1_type = LtacArg::Reg16(0);
         
     // The float types
-    } else if var.data_type == DataType::Float {
+    } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::FltReg(0);
         
@@ -324,7 +330,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             // Assign float literals
             
             AstArgType::FloatL => {
-                if var.data_type == DataType::Float {
+                if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
                     let name = builder.build_float(arg.f64_val, false);
                     instr.arg2_type = LtacArg::F32(name);
                     builder.file.code.push(instr.clone());
@@ -350,7 +356,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         let mut size = 1;
                         if v.data_type == DataType::ShortDynArray || v.data_type == DataType::UShortDynArray {
                             size = 2;
-                        } else if v.data_type == DataType::IntDynArray {
+                        } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::FloatDynArray {
                             size = 4;
                         }
                         
@@ -363,7 +369,6 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     instr.arg2_offset = first_arg.i32_val * size;
                                 } else if first_arg.arg_type == AstArgType::Id {
                                     let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
-                                    instr2.arg1_type = LtacArg::Reg32(0);
                                     
                                     instr2.arg2_type = LtacArg::Mem(v.pos);
                                     instr2.arg2_offset_size = size;
@@ -373,9 +378,16 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                         None => instr2.arg2_offset = 0,
                                     };
                                     
-                                    builder.file.code.push(instr2);
+                                    // Choose the proper registers
+                                    if v.data_type == DataType::IntDynArray {
+                                        instr2.arg1_type = LtacArg::Reg32(0);
+                                        instr.arg2_type = LtacArg::Reg32(0);
+                                    } else if v.data_type == DataType::FloatDynArray {
+                                        instr2.arg1_type = LtacArg::FltReg(0);
+                                        instr.arg2_type = LtacArg::FltReg(0);
+                                    }
                                     
-                                    instr.arg2_type = LtacArg::Reg32(0);
+                                    builder.file.code.push(instr2);
                                 }
                             }
                         }
@@ -510,7 +522,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Mul);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::Float {
+                } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
                     instr = ltac::create_instr(LtacType::F32Mul);
                     instr.arg1_type = LtacArg::FltReg(0);
                     
@@ -736,7 +748,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg2_type = LtacArg::Reg16(0);
         
     // Store back a float
-    } else if var.data_type == DataType::Float {
+    } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::FltReg(0);
