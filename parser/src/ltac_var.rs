@@ -336,6 +336,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 } else if var.data_type == DataType::UInt {
                     instr.arg2_type = LtacArg::U32(arg.u32_val);
+                    builder.file.code.push(instr.clone());
                     
                 // Invalid
                 } else {
@@ -769,6 +770,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovUW);
         instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::Reg16(0);
+        
+    // Store back an unsigned integer
+    } else if var.data_type == DataType::UInt {
+        instr = ltac::create_instr(LtacType::MovU);
+        instr.arg1_type = LtacArg::Mem(var.pos);
+        instr.arg2_type = LtacArg::Reg32(0);
         
     // Store back a float
     } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {

@@ -275,7 +275,9 @@ impl Lex {
             Some("0x") => {
                 let base = current.trim_start_matches("0x");
                 
-                if base.len() == 4 || base.len() == 3 {
+                if base.len() > 4 && base.len() <= 8 {
+                    return Token::IntL(u32::from_str_radix(base, 16).unwrap());
+                } else if base.len() == 4 || base.len() == 3 {
                     return Token::ShortL(u16::from_str_radix(base, 16).unwrap());
                 } else {
                     return Token::ByteL(u8::from_str_radix(base, 16).unwrap());
