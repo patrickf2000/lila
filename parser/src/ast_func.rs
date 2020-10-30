@@ -36,6 +36,11 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
             func.modifiers.push(func_type);
         },
         
+        Token::UInt => {
+            let func_type = AstMod { mod_type : AstModType::UInt, };
+            func.modifiers.push(func_type);
+        },
+        
         Token::Float => {
             let func_type = AstMod { mod_type : AstModType::Float, };
             func.modifiers.push(func_type);
@@ -178,6 +183,11 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
                 }
                 
                 let val_type = AstMod { mod_type : data_type, };
+                arg.modifiers.push(val_type);
+            },
+            
+            Token::UInt => {
+                let val_type = AstMod { mod_type : AstModType::UInt, };
                 arg.modifiers.push(val_type);
             },
             

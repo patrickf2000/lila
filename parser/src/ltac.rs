@@ -36,7 +36,7 @@ pub enum LtacType {
     
     LdArgI8,    LdArgU8,
     LdArgI16,   LdArgU16,
-    LdArgI32,
+    LdArgI32,   LdArgU32,
     LdArgF32,
     LdArgF64,
     LdArgPtr,
@@ -141,9 +141,14 @@ pub enum LtacArg {
     FltReg(i32),
     FltReg64(i32),
     
+    // 10/30/2020
+    // The reason for separate types is because on some architectures, you have to
+    // have a specific instruction, even if the registers are the same
+    //
+    // For a justifiable example, see the main build_instr function in the x86 layer
     RetRegI8,       RetRegU8,
     RetRegI16,      RetRegU16,
-    RetRegI32,
+    RetRegI32,      RetRegU32,
     RetRegI64,
     RetRegF32,
     RetRegF64,
