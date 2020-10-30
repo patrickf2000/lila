@@ -135,6 +135,9 @@ impl LtacBuilder {
                     AstModType::FloatDynArray => func_type = DataType::FloatDynArray,
                     AstModType::DoubleDynArray => func_type = DataType::DoubleDynArray,
                     AstModType::Str => func_type = DataType::Str,
+                    
+                    // Do we need an error here? Really, it should never get to this pointer
+                    AstModType::None => {},
                 }
             }
         

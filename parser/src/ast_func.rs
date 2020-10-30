@@ -6,57 +6,55 @@ use crate::syntax::ErrorManager;
 
 use crate::ast_utils::*;
 
+// A utility function for returning a type modifier from a token
+fn token_to_mod(token : &Token, is_array : bool) -> AstMod {
+    let mod_type : AstModType;
+    
+    match token {
+        Token::Byte if is_array => mod_type = AstModType::ByteDynArray,
+        Token::Byte => mod_type = AstModType::Byte,
+        
+        Token::UByte if is_array => mod_type = AstModType::UByteDynArray,
+        Token::UByte => mod_type = AstModType::UByte,
+        
+        Token::Short if is_array => mod_type = AstModType::ShortDynArray,
+        Token::Short => mod_type = AstModType::Short,
+        
+        Token::UShort if is_array => mod_type = AstModType::UShortDynArray,
+        Token::UShort => mod_type = AstModType::UShort,
+    
+        Token::Int if is_array => mod_type = AstModType::IntDynArray,
+        Token::Int => mod_type = AstModType::Int,
+        
+        Token::UInt => mod_type = AstModType::UInt,
+        //Token::Byte if is_array => mod_type = AstModType::ByteDynArray,
+        
+        Token::Float if is_array => mod_type = AstModType::FloatDynArray,
+        Token::Float => mod_type = AstModType::Float,
+        
+        Token::Double if is_array => mod_type = AstModType::DoubleDynArray,
+        Token::Double => mod_type = AstModType::Double,
+        
+        Token::TStr => mod_type = AstModType::Str,
+        
+        _ => mod_type = AstModType::None,
+    }
+
+    let func_type = AstMod { mod_type : mod_type, };
+    return func_type;
+}
+
 // A helper function for the function declaration builder
 fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> bool {
     let token = scanner.get_token();
-        
-    match token {
-        Token::Byte => {
-            let func_type = AstMod { mod_type : AstModType::Byte, };
-            func.modifiers.push(func_type);
-        },
-        
-        Token::UByte => {
-            let func_type = AstMod { mod_type : AstModType::UByte, };
-            func.modifiers.push(func_type);
-        },
-        
-        Token::Short => {
-            let func_type = AstMod { mod_type : AstModType::Short, };
-            func.modifiers.push(func_type);
-        },
-        
-        Token::UShort => {
-            let func_type = AstMod { mod_type : AstModType::UShort, };
-            func.modifiers.push(func_type);
-        },
+    let ret = token_to_mod(&token, false);
     
-        Token::Int => {
-            let func_type = AstMod { mod_type : AstModType::Int, };
-            func.modifiers.push(func_type);
-        },
-        
-        Token::UInt => {
-            let func_type = AstMod { mod_type : AstModType::UInt, };
-            func.modifiers.push(func_type);
-        },
-        
-        Token::Float => {
-            let func_type = AstMod { mod_type : AstModType::Float, };
-            func.modifiers.push(func_type);
-        },
-        
-        Token::Double => {
-            let func_type = AstMod { mod_type : AstModType::Double, };
-            func.modifiers.push(func_type);
-        },
-        
-        _ => {
-            syntax.syntax_error(scanner, "Invalid function return type.".to_string());
-            return false;
-        },
+    if ret.mod_type == AstModType::None {
+        syntax.syntax_error(scanner, "Invalid function return type.".to_string());
+        return false;
     }
     
+    func.modifiers.push(ret);
     true
 }
 
@@ -136,6 +134,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         
         let sym_token = scanner.get_token();
         let type_token = scanner.get_token();
+        let mut is_array = false;
         
         last_token = name_token.clone();
         
@@ -146,72 +145,26 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         
         token = scanner.get_token();
         
-        match type_token {
-            Token::Byte => {
-                let val_type = AstMod { mod_type : AstModType::Byte, };
-                arg.modifiers.push(val_type);
-            },
+        if token == Token::LBracket {
+            token = scanner.get_token();
+            is_array = true;
             
-            Token::UByte => {
-                let val_type = AstMod { mod_type : AstModType::UByte, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::Short => {
-                let val_type = AstMod { mod_type : AstModType::Short, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::UShort => {
-                let val_type = AstMod { mod_type : AstModType::UShort, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::Int => {
-                let mut data_type = AstModType::Int;
-                
-                if token == Token::LBracket {
-                    token = scanner.get_token();
-                    
-                    if token == Token::RBracket {
-                        data_type = AstModType::IntDynArray;
-                        token = scanner.get_token();
-                    } else {
-                        syntax.syntax_error(scanner, "Expected closing \']\'.".to_string());
-                        return false;
-                    }
-                }
-                
-                let val_type = AstMod { mod_type : data_type, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::UInt => {
-                let val_type = AstMod { mod_type : AstModType::UInt, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::Float => {
-                let val_type = AstMod { mod_type : AstModType::Float, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::Double => {
-                let val_type = AstMod { mod_type : AstModType::Double, };
-                arg.modifiers.push(val_type);
-            },
-            
-            Token::TStr => {
-                let val_type = AstMod { mod_type : AstModType::Str, };
-                arg.modifiers.push(val_type);
-            },
-            
-            _ => {
-                syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
+            if token != Token::RBracket {
+                syntax.syntax_error(scanner, "Expected closing \']\'.".to_string());
                 return false;
-            },
+            }
+            
+            token = scanner.get_token();
         }
         
+        let val = token_to_mod(&type_token, is_array);
+    
+        if val.mod_type == AstModType::None {
+            syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
+            return false;
+        }
+        
+        arg.modifiers.push(val);
         func.args.push(arg);
         
         if token != Token::Comma && token != Token::RParen {

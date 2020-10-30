@@ -99,6 +99,9 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             data_type = DataType::Str;
             builder.stack_pos += 8;
         },
+        
+        // Do we need an error here? Really, it should never get to this pointer
+        AstModType::None => return (false, arg_no, flt_arg_no),
     }
     
     let mut is_param = false;
@@ -431,22 +434,20 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                 stmt.args = arg.sub_args.clone();
                                 build_func_call(builder, &stmt);
                                 
-                                if *t == DataType::Byte {
-                                    instr.arg2_type = LtacArg::RetRegI8;
-                                } else if *t == DataType::UByte {
-                                    instr.arg2_type = LtacArg::RetRegU8;
-                                } else if *t == DataType::Short {
-                                    instr.arg2_type = LtacArg::RetRegI16;
-                                } else if *t == DataType::UShort {
-                                    instr.arg2_type = LtacArg::RetRegU16;
-                                } else if *t == DataType::Int {
-                                    instr.arg2_type = LtacArg::RetRegI32;
-                                } else if *t == DataType::UInt {
-                                    instr.arg2_type = LtacArg::RetRegU32;
-                                } else if *t == DataType::Float {
-                                    instr.arg2_type = LtacArg::RetRegF32;
-                                } else if *t == DataType::Double {
-                                    instr.arg2_type = LtacArg::RetRegF64;
+                                match *t {
+                                    DataType::Byte => instr.arg2_type = LtacArg::RetRegI8,
+                                    DataType::UByte => instr.arg2_type = LtacArg::RetRegU8,
+                                    DataType::Short => instr.arg2_type = LtacArg::RetRegI16,
+                                    DataType::UShort => instr.arg2_type = LtacArg::RetRegU16,
+                                    DataType::Int => instr.arg2_type = LtacArg::RetRegI32,
+                                    DataType::UInt => instr.arg2_type = LtacArg::RetRegU32,
+                                    DataType::Float => instr.arg2_type = LtacArg::RetRegF32,
+                                    DataType::Double => instr.arg2_type = LtacArg::RetRegF64,
+                                    
+                                    _ => {
+                                        builder.syntax.ltac_error(line, "Invalid return.".to_string());
+                                        return false;
+                                    },
                                 }
                             },
                             
