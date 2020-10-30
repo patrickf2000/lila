@@ -81,9 +81,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgF64 => ltac_build_ldarg(writer, code),
             LtacType::LdArgPtr => ltac_build_ldarg(writer, code),
             
-            LtacType::Mov => ltac_build_instr(writer, code),
             LtacType::MovB | LtacType::MovUB => ltac_build_instr(writer, code),
             LtacType::MovW | LtacType::MovUW => ltac_build_instr(writer, code),
+            LtacType::Mov | LtacType::MovU => ltac_build_instr(writer, code),
             LtacType::MovF32 => ltac_build_instr(writer, code),
             LtacType::MovF64 => ltac_build_instr(writer, code),
             LtacType::MovOffImm => ltac_build_instr(writer, code),
@@ -242,11 +242,12 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     match &code.instr_type {
         // Move instructions
-        LtacType::Mov => line.push_str("  mov "),
         LtacType::MovB => line.push_str("  mov.b "),
         LtacType::MovUB => line.push_str("  mov.ub "),
         LtacType::MovW => line.push_str("  mov.w "),
         LtacType::MovUW => line.push_str("  mov.uw "),
+        LtacType::Mov => line.push_str("  mov "),
+        LtacType::MovU => line.push_str("  mov.u "),
         LtacType::MovF32 => line.push_str("  mov.f32 "),
         LtacType::MovF64 => line.push_str("  mov.f64 "),
         LtacType::MovOffImm => line.push_str("  mov.imm "),
@@ -419,6 +420,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::I16(val) => line.push_str(&val.to_string()),
             LtacArg::U16(val) => line.push_str(&val.to_string()),
             LtacArg::I32(val) => line.push_str(&val.to_string()),
+            LtacArg::U32(val) => line.push_str(&val.to_string()),
             LtacArg::F32(ref val) => line.push_str(&val.to_string()),
             LtacArg::F64(ref val) => line.push_str(&val.to_string()),
             
@@ -516,6 +518,11 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             },
             
             LtacArg::I32(val) => {
+                line.push_str(", ");
+                line.push_str(&val.to_string());
+            },
+            
+            LtacArg::U32(val) => {
                 line.push_str(", ");
                 line.push_str(&val.to_string());
             },

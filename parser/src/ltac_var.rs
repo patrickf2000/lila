@@ -65,6 +65,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 4;
         },
         
+        AstModType::UInt => {
+            data_type = DataType::UInt;
+            builder.stack_pos += 4;
+        },
+        
         AstModType::IntDynArray => {
             data_type = DataType::IntDynArray;
             builder.stack_pos += 8
@@ -215,6 +220,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovUW);
         instr.arg1_type = LtacArg::Reg16(0);
         
+    // Unsigned integer
+    } else if var.data_type == DataType::UInt {
+        instr = ltac::create_instr(LtacType::MovU);
+        instr.arg1_type = LtacArg::Reg32(0);
+        
     // The float types
     } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
         instr = ltac::create_instr(LtacType::MovF32);
@@ -261,7 +271,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::IntL => {
                 // Bytes
                 if var.data_type == DataType::Byte {
-                    let val = arg.i32_val;
+                    let val = arg.u32_val as i32;
                     
                     if mem::size_of::<u8>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
@@ -276,7 +286,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // UByte
                 } else if var.data_type == DataType::UByte {
-                    let val = arg.i32_val as u32;
+                    let val = arg.u32_val;
                     
                     if mem::size_of::<u8>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into ubyte.".to_string());
@@ -291,7 +301,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // Short
                 } else if var.data_type == DataType::Short {
-                    let val = arg.i32_val;
+                    let val = arg.u32_val as i32;
                     
                     if mem::size_of::<u16>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into short.".to_string());
@@ -306,7 +316,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // UShort
                 } else if var.data_type == DataType::UShort {
-                    let val = arg.i32_val as u32;
+                    let val = arg.u32_val;
                     
                     if mem::size_of::<u16>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into ushort.".to_string());
@@ -321,8 +331,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // Integers and integer arrays
                 } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
-                    instr.arg2_type = LtacArg::I32(arg.i32_val);
+                    instr.arg2_type = LtacArg::I32(arg.u32_val as i32);
                     builder.file.code.push(instr.clone());
+                    
+                } else if var.data_type == DataType::UInt {
+                    instr.arg2_type = LtacArg::U32(arg.u32_val);
                     
                 // Invalid
                 } else {
@@ -373,7 +386,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                             if arg.sub_args.len() == 1 {
                                 if first_arg.arg_type == AstArgType::IntL {
                                     instr.instr_type = LtacType::MovOffImm;
-                                    instr.arg2_offset = first_arg.i32_val * size;
+                                    instr.arg2_offset = (first_arg.u32_val as i32) * size;
                                 } else if first_arg.arg_type == AstArgType::Id {
                                     let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
                                     
@@ -791,7 +804,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         if line.sub_args.len() == 1 {
             if first_arg.arg_type == AstArgType::IntL {
                 instr.instr_type = LtacType::MovOffImm;
-                instr.arg1_offset = first_arg.i32_val * offset_size;
+                instr.arg1_offset = (first_arg.u32_val as i32) * offset_size;
             } else if first_arg.arg_type == AstArgType::Id {
                 instr.instr_type = LtacType::MovOffMem;
                 instr.arg1_offset_size = offset_size;

@@ -60,6 +60,7 @@ pub enum AstModType {
     ShortDynArray,
     UShortDynArray,
     Int,
+    UInt,
     IntDynArray,
     Float,
     Double,
@@ -105,7 +106,7 @@ pub struct AstArg {
     pub str_val : String,
     pub u8_val : u8,
     pub u16_val : u16,
-    pub i32_val : i32,
+    pub u32_val : u32,
     pub f64_val : f64,
     
     pub sub_args : Vec<AstArg>,
@@ -211,7 +212,7 @@ impl AstArg {
         match &self.arg_type {
             AstArgType::ByteL => print!("{} ", self.u8_val),
             AstArgType::ShortL => print!("{} ", self.u16_val),
-            AstArgType::IntL => print!("{} ", self.i32_val),
+            AstArgType::IntL => print!("{} ", self.u32_val),
             AstArgType::FloatL => print!("{} ", self.f64_val),
             AstArgType::StringL => print!("\"{}\" ", self.str_val),
             AstArgType::Id => print!("{} ", self.str_val),
@@ -264,6 +265,7 @@ impl AstMod {
             AstModType::ShortDynArray => print!("ShortDynArr"),
             AstModType::UShortDynArray => print!("UShortDynArr"),
             AstModType::Int => print!("Int"),
+            AstModType::UInt => print!("UInt"),
             AstModType::IntDynArray => print!("IntDynArr"),
             AstModType::Float => print!("Float"),
             AstModType::Double => print!("Double"),
@@ -342,7 +344,7 @@ pub fn create_byte(val : u8) -> AstArg {
         str_val : String::new(),
         u8_val : val,
         u16_val : 0,
-        i32_val : 0,
+        u32_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
     }
@@ -354,19 +356,19 @@ pub fn create_short(val : u16) -> AstArg {
         str_val : String::new(),
         u8_val : 0,
         u16_val : val,
-        i32_val : 0,
+        u32_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
     }
 }
 
-pub fn create_int(val : i32) -> AstArg {
+pub fn create_int(val : u32) -> AstArg {
     AstArg {
         arg_type : AstArgType::IntL,
         str_val : String::new(),
         u8_val : 0,
         u16_val : 0,
-        i32_val : val,
+        u32_val : val,
         f64_val : 0.0,
         sub_args : Vec::new(),
     }
@@ -378,7 +380,7 @@ pub fn create_float(val : f64) -> AstArg {
         str_val : String::new(),
         u8_val : 0,
         u16_val : 0,
-        i32_val : 0,
+        u32_val : 0,
         f64_val : val,
         sub_args : Vec::new(),
     }
@@ -390,7 +392,7 @@ pub fn create_string(val : String) -> AstArg {
         str_val : val,
         u8_val : 0,
         u16_val : 0,
-        i32_val : 0,
+        u32_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
     }
@@ -402,7 +404,7 @@ pub fn create_arg(arg_type : AstArgType) -> AstArg {
         str_val : String::new(),
         u8_val : 0,
         u16_val : 0,
-        i32_val : 0,
+        u32_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
     }

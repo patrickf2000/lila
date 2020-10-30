@@ -106,7 +106,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
             line.push_str("]");
         },
         
-        // Byte literals are always passed as unsigned
+        // Literals are always passed as unsigned
         LtacArg::UByte(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
@@ -120,6 +120,12 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         },
         
         LtacArg::I32(val) => {
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&val.to_string());
+        },
+        
+        LtacArg::U32(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
             line.push_str(&val.to_string());

@@ -156,9 +156,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
             
-            LtacType::Mov => amd64_build_instr(writer, &code),
             LtacType::MovB | LtacType::MovUB => amd64_build_instr(writer, &code),
             LtacType::MovW | LtacType::MovUW => amd64_build_instr(writer, &code),
+            LtacType::Mov | LtacType::MovU => amd64_build_instr(writer, &code),
             LtacType::MovF32 => amd64_build_instr(writer, &code),
             LtacType::MovF64 => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
@@ -267,7 +267,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     // The instruction
     match &code.instr_type {
-        LtacType::Mov | 
+        LtacType::Mov | LtacType::MovU |
         LtacType::MovB | LtacType::MovUB |
         LtacType::MovW | LtacType::MovUW => line.push_str("  mov "),
         LtacType::MovF32 => line.push_str("  movss "),
@@ -429,6 +429,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::I32(val) => {
             line.push_str(&val.to_string());
         },
+        
+        LtacArg::U32(val) => line.push_str(&val.to_string()),
         
         LtacArg::F32(_v) | LtacArg::F64(_v) => {
             line.push_str("xmm0\n");
@@ -731,6 +733,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::I32(val) => {
             line.push_str(&val.to_string());
         },
+        
+        LtacArg::U32(val) => line.push_str(&val.to_string()),
         
         LtacArg::F32(_v) | LtacArg::F64(_v) => {
             line.push_str("xmm2");

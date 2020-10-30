@@ -22,6 +22,7 @@ pub enum Token {
     Short,
     UShort,
     Int,
+    UInt,
     Float,
     Double,
     TStr,
@@ -58,7 +59,7 @@ pub enum Token {
     Id(String),
     ByteL(u8),
     ShortL(u16),
-    IntL(i32),
+    IntL(u32),
     FloatL(f64),
     StringL(String),
 }
@@ -285,8 +286,8 @@ impl Lex {
         }
         
         // Check other literals
-        if current.parse::<i32>().is_ok() {
-            return Token::IntL(current.parse::<i32>().unwrap());
+        if current.parse::<u32>().is_ok() {
+            return Token::IntL(current.parse::<u32>().unwrap());
         } else if current.parse::<f64>().is_ok() {
             return Token::FloatL(current.parse::<f64>().unwrap());
         }
@@ -306,6 +307,7 @@ impl Lex {
             "short" => token = Token::Short,
             "ushort" => token = Token::UShort,
             "int" => token = Token::Int,
+            "uint" => token = Token::UInt,
             "float" => token = Token::Float,
             "double" => token = Token::Double,
             "str" => token = Token::TStr,

@@ -86,6 +86,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::Short => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Short),
         Token::UShort => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UShort),
         Token::Int => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int),
+        Token::UInt => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UInt),
         Token::Float => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Float),
         Token::Double => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Double),
         Token::TStr => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
@@ -179,6 +180,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
                 AstModType::Short => data_type.mod_type = AstModType::ShortDynArray,
                 AstModType::UShort => data_type.mod_type = AstModType::UShortDynArray,
                 AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
+                AstModType::UInt => data_type.mod_type = AstModType::UInt,
                 AstModType::Float => data_type.mod_type = AstModType::FloatDynArray,
                 AstModType::Double => data_type.mod_type = AstModType::DoubleDynArray,
                 
