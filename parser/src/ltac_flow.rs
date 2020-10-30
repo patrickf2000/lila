@@ -91,9 +91,13 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             cmp.arg1_type = LtacArg::Reg16(0);
         },
         
-        // TODO: This should be in a move instruction, like for byte literals
         AstArgType::IntL => {
-            cmp.arg1_type = LtacArg::I32(arg1.i32_val);
+            let mut mov = ltac::create_instr(LtacType::Mov);
+            mov.arg1_type = LtacArg::Reg32(0);
+            mov.arg2_type  = LtacArg::I32(arg1.i32_val);
+            builder.file.code.push(mov);
+            
+            cmp.arg1_type = LtacArg::Reg32(0);
         },
         
         AstArgType::FloatL => {
@@ -328,7 +332,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     } else {
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
-                        cmp.arg1_type = LtacArg::Reg32(0);
+                        cmp.arg2_type = LtacArg::Reg32(1);
                     }
                     
                     if mov.arg1_type != LtacArg::Empty {
