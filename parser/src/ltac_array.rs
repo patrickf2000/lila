@@ -25,7 +25,7 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
         if (var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
             var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
             var.data_type == DataType::IntDynArray ||
-            var.data_type == DataType::FloatDynArray)
+            var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray)
             && !var.is_param {
             
             let mut pusharg = ltac::create_instr(LtacType::PushArg);
@@ -53,6 +53,8 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
             size = 1;
         } else if var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray {
             size = 2;
+        } else if var.data_type == DataType::DoubleDynArray {
+            size = 8;
         }
         
         let mut pusharg = ltac::create_instr(LtacType::PushArg);

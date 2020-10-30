@@ -64,6 +64,7 @@ pub enum AstModType {
     Float,
     Double,
     FloatDynArray,
+    DoubleDynArray,
     Str,
 }
 
@@ -267,6 +268,7 @@ impl AstMod {
             AstModType::Float => print!("Float"),
             AstModType::Double => print!("Double"),
             AstModType::FloatDynArray => print!("FloatDynArray"),
+            AstModType::DoubleDynArray => print!("DoubleDynArray"),
             AstModType::Str => print!("Str"),
         }
         

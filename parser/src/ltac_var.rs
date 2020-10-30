@@ -85,6 +85,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 8;
         },
         
+        AstModType::DoubleDynArray => {
+            data_type = DataType::DoubleDynArray;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Str => {
             data_type = DataType::Str;
             builder.stack_pos += 8;
@@ -173,7 +178,7 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
        var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
        var.data_type == DataType::IntDynArray ||
-       var.data_type == DataType::FloatDynArray {
+       var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray {
         code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
         code = build_str_assign(builder, &line, &var);
@@ -215,7 +220,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovF32);
         instr.arg1_type = LtacArg::FltReg(0);
         
-    } else if var.data_type == DataType::Double {
+    } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
         instr = ltac::create_instr(LtacType::MovF64);
         instr.arg1_type = LtacArg::FltReg64(0);
     }
@@ -335,7 +340,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg2_type = LtacArg::F32(name);
                     builder.file.code.push(instr.clone());
                 
-                } else if var.data_type == DataType::Double {
+                } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
                     let name = builder.build_float(arg.f64_val, true);
                     instr.arg2_type = LtacArg::F64(name);
                     builder.file.code.push(instr.clone());
@@ -358,6 +363,8 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                             size = 2;
                         } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::FloatDynArray {
                             size = 4;
+                        } else if v.data_type == DataType::DoubleDynArray {
+                            size = 8;
                         }
                         
                         if arg.sub_args.len() > 0 {
@@ -385,6 +392,9 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     } else if v.data_type == DataType::FloatDynArray {
                                         instr2.arg1_type = LtacArg::FltReg(0);
                                         instr.arg2_type = LtacArg::FltReg(0);
+                                    } else if v.data_type == DataType::DoubleDynArray {
+                                        instr2.arg1_type = LtacArg::FltReg64(0);
+                                        instr.arg2_type = LtacArg::FltReg64(0);
                                     }
                                     
                                     builder.file.code.push(instr2);
@@ -460,7 +470,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::F32Add);
                     instr.arg1_type = LtacArg::FltReg(0);
                     
-                } else if var.data_type == DataType::Double {
+                } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
                     instr = ltac::create_instr(LtacType::F64Add);
                     instr.arg1_type = LtacArg::FltReg64(0);
                     
@@ -489,7 +499,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::F32Sub);
                     instr.arg1_type = LtacArg::FltReg(0);
                     
-                } else if var.data_type == DataType::Double {
+                } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
                     instr = ltac::create_instr(LtacType::F64Sub);
                     instr.arg1_type = LtacArg::FltReg64(0);
                     
@@ -526,7 +536,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::F32Mul);
                     instr.arg1_type = LtacArg::FltReg(0);
                     
-                } else if var.data_type == DataType::Double {
+                } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
                     instr = ltac::create_instr(LtacType::F64Mul);
                     instr.arg1_type = LtacArg::FltReg64(0);
                     
@@ -563,7 +573,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::F32Div);
                     instr.arg1_type = LtacArg::FltReg(0);
                     
-                } else if var.data_type == DataType::Double {
+                } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
                     instr = ltac::create_instr(LtacType::F64Div);
                     instr.arg1_type = LtacArg::FltReg64(0);
                     
@@ -754,7 +764,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg2_type = LtacArg::FltReg(0);
         
     // Store back a double
-    } else if var.data_type == DataType::Double {
+    } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
         instr = ltac::create_instr(LtacType::MovF64);
         instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::FltReg64(0);
@@ -774,6 +784,8 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             offset_size = 1;
         } else if var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray {
             offset_size = 2;
+        } else if var.data_type == DataType::DoubleDynArray {
+            offset_size = 8;
         }
         
         if line.sub_args.len() == 1 {
