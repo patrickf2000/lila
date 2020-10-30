@@ -477,6 +477,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 
                 match code.arg1_type {
                     LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15+"),
+                    LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15+"),
                     _ => line.push_str("  mov r15d, DWORD PTR [r15+"),
                 }
                 
@@ -530,7 +531,13 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
         
-        LtacArg::Reg16(_p) => {},
+        LtacArg::Reg16(pos) => {
+            let reg = amd64_op_reg16(*pos);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         LtacArg::Reg32(pos) => {
             let reg = amd64_op_reg32(*pos);
@@ -646,6 +653,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             if code.instr_type == LtacType::MovOffImm || code.instr_type == LtacType::MovOffMem {
                 match &code.arg1_type {
                     LtacArg::Reg8(_p) => line.push_str("r15b"),
+                    LtacArg::Reg16(_p) => line.push_str("r15w"),
                     _ => line.push_str("r15d"),
                 }
             } else {
@@ -665,8 +673,15 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&val.to_string());
         },
         
-        LtacArg::I16(_v) => {},
-        LtacArg::U16(_v) => {},
+        LtacArg::I16(val) => {
+            line.push_str(" WORD PTR ");
+            line.push_str(&val.to_string());
+        },
+        
+        LtacArg::U16(val) => {
+            line.push_str(" WORD PTR ");
+            line.push_str(&val.to_string());
+        },
         
         LtacArg::I32(val) => {
             line.push_str(&val.to_string());
