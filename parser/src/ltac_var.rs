@@ -45,14 +45,19 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 2;
         },
         
+        AstModType::UShort => {
+            data_type = DataType::UShort;
+            builder.stack_pos += 2;
+        },
+        
         AstModType::ShortDynArray => {
             data_type = DataType::ShortDynArray;
             builder.stack_pos += 8;
         },
         
-        AstModType::UShort => {
-            data_type = DataType::UShort;
-            builder.stack_pos += 2;
+        AstModType::UShortDynArray => {
+            data_type = DataType::UShortDynArray;
+            builder.stack_pos += 8;
         },
     
         AstModType::Int => {
@@ -161,7 +166,7 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     let code : bool;
     
     if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
-       var.data_type == DataType::ShortDynArray ||
+       var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
        var.data_type == DataType::IntDynArray {
         code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
@@ -229,7 +234,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::ShortL => {
                 if var.data_type == DataType::Short || var.data_type == DataType::ShortDynArray {
                     instr.arg2_type = LtacArg::I16(arg.u16_val as i16);
-                } else if var.data_type == DataType::UShort {
+                } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
                     instr.arg2_type = LtacArg::U16(arg.u16_val);
                 } else {
                     builder.syntax.ltac_error(&line, "Invalid use of short literal.".to_string());
@@ -343,7 +348,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         instr.arg2_type = LtacArg::Mem(v.pos);
                         
                         let mut size = 1;
-                        if v.data_type == DataType::ShortDynArray {
+                        if v.data_type == DataType::ShortDynArray || v.data_type == DataType::UShortDynArray {
                             size = 2;
                         } else if v.data_type == DataType::IntDynArray {
                             size = 4;
@@ -755,7 +760,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         
         if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray {
             offset_size = 1;
-        } else if var.data_type == DataType::ShortDynArray {
+        } else if var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray {
             offset_size = 2;
         }
         

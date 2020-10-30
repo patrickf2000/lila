@@ -177,6 +177,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
                 AstModType::Byte => data_type.mod_type = AstModType::ByteDynArray,
                 AstModType::UByte => data_type.mod_type = AstModType::UByteDynArray,
                 AstModType::Short => data_type.mod_type = AstModType::ShortDynArray,
+                AstModType::UShort => data_type.mod_type = AstModType::UShortDynArray,
                 AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
                 
                 _ => {},

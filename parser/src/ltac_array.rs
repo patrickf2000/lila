@@ -23,7 +23,7 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
 pub fn free_arrays(builder : &mut LtacBuilder) {
     for (_name, var) in &builder.vars {
         if (var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
-            var.data_type == DataType::ShortDynArray ||
+            var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
             var.data_type == DataType::IntDynArray)
             && !var.is_param {
             
@@ -50,7 +50,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         
         if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray {
             size = 1;
-        } else if var.data_type == DataType::ShortDynArray {
+        } else if var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray {
             size = 2;
         }
         
