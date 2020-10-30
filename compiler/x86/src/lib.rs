@@ -604,6 +604,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 match &code.arg2_type {
                     LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
                     LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
+                    LtacArg::FltReg(_v) => line.push_str("  movss "),
                     _ => line.push_str("  mov "),
                 };
                 line.push_str("[r15], ");
@@ -639,7 +640,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 line.push_str("[r15], ");
             } else {
                 match code.arg2_type {
-                    LtacArg::I32(_v) => line.push_str("DWORD PTR "),
+                    LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
                     _ => line.push_str("  mov "),
                 }
                 
