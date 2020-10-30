@@ -166,6 +166,16 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 mov.arg1_type = LtacArg::RetRegU8;
             },
             
+            DataType::Short => {
+                mov = ltac::create_instr(LtacType::MovW);
+                mov.arg1_type = LtacArg::RetRegI16;
+            },
+            
+            DataType::UShort => {
+                mov = ltac::create_instr(LtacType::MovUW);
+                mov.arg1_type = LtacArg::RetRegU16;
+            },
+            
             DataType::Float => {
                 mov = ltac::create_instr(LtacType::MovF32);
                 mov.arg1_type = LtacArg::RetRegF32;
@@ -185,6 +195,14 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                     mov.arg2_type = LtacArg::UByte(arg1.u8_val);
                 } else {
                     mov.arg2_type = LtacArg::Byte(arg1.u8_val as i8);
+                }
+            },
+            
+            AstArgType::ShortL => {
+                if builder.current_type == DataType::UShort {
+                    mov.arg2_type = LtacArg::U16(arg1.u16_val);
+                } else {
+                    mov.arg2_type = LtacArg::I16(arg1.u16_val as i16);
                 }
             },
         

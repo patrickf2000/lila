@@ -20,6 +20,16 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
             let func_type = AstMod { mod_type : AstModType::UByte, };
             func.modifiers.push(func_type);
         },
+        
+        Token::Short => {
+            let func_type = AstMod { mod_type : AstModType::Short, };
+            func.modifiers.push(func_type);
+        },
+        
+        Token::UShort => {
+            let func_type = AstMod { mod_type : AstModType::UShort, };
+            func.modifiers.push(func_type);
+        },
     
         Token::Int => {
             let func_type = AstMod { mod_type : AstModType::Int, };

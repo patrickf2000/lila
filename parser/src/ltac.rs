@@ -149,6 +149,7 @@ pub enum LtacArg {
     FltReg64(i32),
     
     RetRegI8,       RetRegU8,
+    RetRegI16,      RetRegU16,
     RetRegI32,
     RetRegI64,
     RetRegF32,

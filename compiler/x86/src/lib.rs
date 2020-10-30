@@ -345,6 +345,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("eax, "),
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 => line.push_str("eax, "),
         LtacArg::RetRegI32 => line.push_str("eax, "),
         LtacArg::RetRegI64 => line.push_str("rax, "),
         
@@ -400,6 +401,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
         
         LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("al"),
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 => line.push_str("ax"),
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
         
@@ -441,10 +443,17 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str("\n");
     
     // Special cases
+    // Bytes
     if code.arg1_type == LtacArg::RetRegI8 {
         line.push_str("  movsx eax, al\n");
     } else if code.arg1_type == LtacArg::RetRegU8 {
         line.push_str("  movzx eax, al\n");
+        
+    // Short
+    } else if code.arg1_type == LtacArg::RetRegI16 {
+        line.push_str("  movsx eax, ax\n");
+    } else if code.arg1_type == LtacArg::RetRegU16 {
+        line.push_str("  movzx eax, ax\n");
     }
     
     // Write to the file
@@ -625,6 +634,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::FltReg64(_p) => {},
         
         LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("eax"),
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 => line.push_str("eax"),
         LtacArg::RetRegI32 => line.push_str("eax"),
         LtacArg::RetRegI64 => line.push_str("rax"),
         
