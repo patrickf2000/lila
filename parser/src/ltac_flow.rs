@@ -81,6 +81,16 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             cmp.arg1_type = LtacArg::Reg8(0);
         },
         
+        AstArgType::ShortL => {
+            let mut mov = ltac::create_instr(LtacType::MovUW);
+            mov.arg1_type = LtacArg::Reg16(0);
+            mov.arg2_type = LtacArg::U16(arg1.u16_val);
+            builder.file.code.push(mov);
+            
+            cmp = ltac::create_instr(LtacType::U16Cmp);
+            cmp.arg1_type = LtacArg::Reg16(0);
+        },
+        
         // TODO: This should be in a move instruction, like for byte literals
         AstArgType::IntL => {
             cmp.arg1_type = LtacArg::I32(arg1.i32_val);
@@ -151,6 +161,26 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_type = LtacArg::Reg8(0);
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
+                    // Short comparisons
+                    } else if v.data_type == DataType::Short {
+                        cmp= ltac::create_instr(LtacType::I16Cmp);
+                        cmp.arg1_type = LtacArg::Reg16(0);
+                        
+                        mov = ltac::create_instr(LtacType::MovW);
+                        mov.arg1_type = LtacArg::Reg16(0);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
+                        signed_variant = true;
+                    
+                    // Unsigned short comparisons
+                    } else if v.data_type == DataType::UShort {
+                        cmp.instr_type = LtacType::U16Cmp;
+                        cmp.arg1_type = LtacArg::Reg16(0);
+                        
+                        mov = ltac::create_instr(LtacType::MovUW);
+                        mov.arg1_type = LtacArg::Reg16(0);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
                     // Integer comparisons
                     } else {
                         mov.arg2_type = LtacArg::Mem(v.pos);
@@ -174,6 +204,14 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                 cmp.arg2_type = LtacArg::Byte(arg2.u8_val as i8);
             } else {
                 cmp.arg2_type = LtacArg::UByte(arg2.u8_val);
+            }
+        },
+        
+        AstArgType::ShortL => {
+            if signed_variant {
+                cmp.arg2_type = LtacArg::I16(arg2.u16_val as i16);
+            } else {
+                cmp.arg2_type = LtacArg::U16(arg2.u16_val);
             }
         },
     
@@ -261,6 +299,30 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg2_type = LtacArg::Reg8(1);
+                        
+                    // Shorts
+                    } else if v.data_type == DataType::Short {
+                        if arg1.arg_type == AstArgType::ShortL {
+                            builder.file.code.pop();
+                            mov = ltac::create_instr(LtacType::MovW);
+                            mov.arg1_type = LtacArg::Reg16(0);
+                            mov.arg2_type = LtacArg::I16(arg1.u16_val as i16);
+                        
+                            cmp = ltac::create_instr(LtacType::I16Cmp);
+                            cmp.arg1_type = LtacArg::Reg16(0);
+                        } else {
+                            mov.arg1_type = LtacArg::Empty;
+                        }
+                        
+                        cmp.arg2_type = LtacArg::Mem(v.pos);
+                    
+                    // Unsigned short
+                    } else if v.data_type == DataType::UShort {
+                        mov = ltac::create_instr(LtacType::MovUW);
+                        mov.arg1_type = LtacArg::Reg16(1);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
+                        cmp.arg2_type = LtacArg::Reg16(1);
                         
                     // Other things
                     } else {

@@ -96,6 +96,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Syscall => ltac_build_cmd(writer, code),
             
             LtacType::I8Cmp | LtacType::U8Cmp => ltac_build_instr(writer, code),
+            LtacType::I16Cmp | LtacType::U16Cmp => ltac_build_instr(writer, code),
             LtacType::I32Cmp => ltac_build_instr(writer, code),
             LtacType::F32Cmp => ltac_build_instr(writer, code),
             LtacType::F64Cmp => ltac_build_instr(writer, code),
@@ -336,6 +337,8 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         // Comparisons
         LtacType::I8Cmp => line.push_str("  i8.cmp "),
         LtacType::U8Cmp => line.push_str("  u8.cmp "),
+        LtacType::I16Cmp => line.push_str("  i16.cmp "),
+        LtacType::U16Cmp => line.push_str("  u16.cmp "),
         LtacType::I32Cmp => line.push_str("  i32.cmp "),
         LtacType::F32Cmp => line.push_str("  f32.cmp "),
         LtacType::F64Cmp => line.push_str("  f64.cmp "),
