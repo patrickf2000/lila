@@ -87,6 +87,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovUW => {},
             LtacType::Mov => {},
             LtacType::MovU => {},
+            LtacType::MovQ => {},
             LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovOffImm => {},

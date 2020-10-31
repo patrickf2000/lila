@@ -56,6 +56,7 @@ echo "Running all tests..."
 echo ""
 
 run_test 'test/int/*.ds' 'clib' $1
+run_test 'test/int64/*.ds' 'clib' $1
 run_test 'test/byte/*.ds' 'clib' $1
 run_test 'test/short/*.ds' 'clib' $1
 run_test 'test/float/*.ds' 'clib' $1

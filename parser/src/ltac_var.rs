@@ -75,6 +75,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 8
         },
         
+        AstModType::Int64 => {
+            data_type = DataType::Int64;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Float => {
             data_type = DataType::Float;
             builder.stack_pos += 4;
@@ -233,6 +238,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovU);
         instr.arg1_type = LtacArg::Reg32(0);
         
+    // The int64 types
+    } else if var.data_type == DataType::Int64 {
+        instr = ltac::create_instr(LtacType::MovQ);
+        instr.arg1_type = LtacArg::Reg64(0);
+        
     // The float types
     } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
         instr = ltac::create_instr(LtacType::MovF32);
@@ -344,6 +354,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 } else if var.data_type == DataType::UInt {
                     instr.arg2_type = LtacArg::U32(arg.u64_val as u32);
+                    builder.file.code.push(instr.clone());
+                    
+                } else if var.data_type == DataType::Int64 {
+                    instr.arg2_type = LtacArg::I64(arg.u64_val as i64);
                     builder.file.code.push(instr.clone());
                     
                 // Invalid
@@ -805,6 +819,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr = ltac::create_instr(LtacType::MovU);
         instr.arg1_type = LtacArg::Mem(var.pos);
         instr.arg2_type = LtacArg::Reg32(0);
+        
+    // Store back a 64-bit integer
+    } else if var.data_type == DataType::Int64 {
+        instr = ltac::create_instr(LtacType::MovQ);
+        instr.arg1_type = LtacArg::Mem(var.pos);
+        instr.arg2_type = LtacArg::Reg64(0);
         
     // Store back a float
     } else if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {

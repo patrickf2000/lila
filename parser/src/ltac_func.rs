@@ -99,6 +99,9 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
                             push.arg1_type = LtacArg::Ptr(v.pos);
                             
+                        } else if v.data_type == DataType::Int64 {
+                            push.arg2_type = LtacArg::I64(0);
+                            
                         } else if v.data_type == DataType::Float {
                             push.arg2_type = LtacArg::FltReg(flt_arg_no);
                             
