@@ -43,7 +43,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::IntL => {
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::U32(arg.u32_val);
+                push.arg1_type = LtacArg::U32(arg.u64_val as u32);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 
@@ -212,7 +212,7 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             },
         
             AstArgType::IntL => {
-                mov.arg2_type = LtacArg::I32(arg1.u32_val as i32);
+                mov.arg2_type = LtacArg::I32(arg1.u64_val as i32);
             },
             
             AstArgType::FloatL => {

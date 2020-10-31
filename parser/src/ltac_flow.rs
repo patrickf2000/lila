@@ -94,7 +94,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::IntL => {
             let mut mov = ltac::create_instr(LtacType::MovU);
             mov.arg1_type = LtacArg::Reg32(0);
-            mov.arg2_type  = LtacArg::U32(arg1.u32_val);
+            mov.arg2_type  = LtacArg::U32(arg1.u64_val as u32);
             builder.file.code.push(mov);
             
             cmp.arg1_type = LtacArg::Reg32(0);
@@ -227,9 +227,9 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
         AstArgType::IntL => {
             if signed_variant {
-                cmp.arg2_type = LtacArg::I32(arg2.u32_val as i32);
+                cmp.arg2_type = LtacArg::I32(arg2.u64_val as i32);
             } else {
-                cmp.arg2_type = LtacArg::U32(arg2.u32_val);
+                cmp.arg2_type = LtacArg::U32(arg2.u64_val as u32);
             }
         },
         
@@ -344,7 +344,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                             builder.file.code.pop();
                             mov = ltac::create_instr(LtacType::Mov);
                             mov.arg1_type = LtacArg::Reg32(0);
-                            mov.arg2_type = LtacArg::I32(arg1.u32_val as i32);
+                            mov.arg2_type = LtacArg::I32(arg1.u64_val as i32);
                         
                             cmp = ltac::create_instr(LtacType::I32Cmp);
                             cmp.arg1_type = LtacArg::Reg32(0);
@@ -451,7 +451,7 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg1.arg_type {
         AstArgType::IntL => {
-            cmp.arg1_type = LtacArg::I32(arg1.u32_val as i32);
+            cmp.arg1_type = LtacArg::I32(arg1.u64_val as i32);
         },
         
         AstArgType::StringL => {},
@@ -475,7 +475,7 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg2.arg_type {
         AstArgType::IntL => {
-            cmp.arg2_type = LtacArg::I32(arg2.u32_val as i32);
+            cmp.arg2_type = LtacArg::I32(arg2.u64_val as i32);
         },
         
         AstArgType::StringL => {},

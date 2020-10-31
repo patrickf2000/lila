@@ -279,7 +279,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             AstArgType::IntL => {
                 // Bytes
                 if var.data_type == DataType::Byte {
-                    let val = arg.u32_val as i32;
+                    let val = arg.u64_val as i32;
                     
                     if mem::size_of::<u8>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
@@ -294,7 +294,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // UByte
                 } else if var.data_type == DataType::UByte {
-                    let val = arg.u32_val;
+                    let val = arg.u64_val as u32;
                     
                     if mem::size_of::<u8>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into ubyte.".to_string());
@@ -309,7 +309,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // Short
                 } else if var.data_type == DataType::Short {
-                    let val = arg.u32_val as i32;
+                    let val = arg.u64_val as i32;
                     
                     if mem::size_of::<u16>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into short.".to_string());
@@ -324,7 +324,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // UShort
                 } else if var.data_type == DataType::UShort {
-                    let val = arg.u32_val;
+                    let val = arg.u64_val as u32;
                     
                     if mem::size_of::<u16>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into ushort.".to_string());
@@ -339,11 +339,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // Integers and integer arrays
                 } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
-                    instr.arg2_type = LtacArg::I32(arg.u32_val as i32);
+                    instr.arg2_type = LtacArg::I32(arg.u64_val as i32);
                     builder.file.code.push(instr.clone());
                     
                 } else if var.data_type == DataType::UInt {
-                    instr.arg2_type = LtacArg::U32(arg.u32_val);
+                    instr.arg2_type = LtacArg::U32(arg.u64_val as u32);
                     builder.file.code.push(instr.clone());
                     
                 // Invalid
@@ -395,7 +395,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                             if arg.sub_args.len() == 1 {
                                 if first_arg.arg_type == AstArgType::IntL {
                                     instr.instr_type = LtacType::MovOffImm;
-                                    instr.arg2_offset = (first_arg.u32_val as i32) * size;
+                                    instr.arg2_offset = (first_arg.u64_val as i32) * size;
                                 } else if first_arg.arg_type == AstArgType::Id {
                                     let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
                                     
@@ -840,7 +840,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         if line.sub_args.len() == 1 {
             if first_arg.arg_type == AstArgType::IntL {
                 instr.instr_type = LtacType::MovOffImm;
-                instr.arg1_offset = (first_arg.u32_val as i32) * offset_size;
+                instr.arg1_offset = (first_arg.u64_val as i32) * offset_size;
             } else if first_arg.arg_type == AstArgType::Id {
                 instr.instr_type = LtacType::MovOffMem;
                 instr.arg1_offset_size = offset_size;

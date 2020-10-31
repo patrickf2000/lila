@@ -23,6 +23,7 @@ pub enum Token {
     UShort,
     Int,
     UInt,
+    Int64,
     Float,
     Double,
     TStr,
@@ -59,7 +60,7 @@ pub enum Token {
     Id(String),
     ByteL(u8),
     ShortL(u16),
-    IntL(u32),
+    IntL(u64),
     FloatL(f64),
     StringL(String),
 }
@@ -275,8 +276,8 @@ impl Lex {
             Some("0x") => {
                 let base = current.trim_start_matches("0x");
                 
-                if base.len() > 4 && base.len() <= 8 {
-                    return Token::IntL(u32::from_str_radix(base, 16).unwrap());
+                if base.len() > 4 && base.len() <= 16 {
+                    return Token::IntL(u64::from_str_radix(base, 16).unwrap());
                 } else if base.len() == 4 || base.len() == 3 {
                     return Token::ShortL(u16::from_str_radix(base, 16).unwrap());
                 } else {
@@ -288,8 +289,8 @@ impl Lex {
         }
         
         // Check other literals
-        if current.parse::<u32>().is_ok() {
-            return Token::IntL(current.parse::<u32>().unwrap());
+        if current.parse::<u64>().is_ok() {
+            return Token::IntL(current.parse::<u64>().unwrap());
         } else if current.parse::<f64>().is_ok() {
             return Token::FloatL(current.parse::<f64>().unwrap());
         }
@@ -310,6 +311,7 @@ impl Lex {
             "ushort" => token = Token::UShort,
             "int" => token = Token::Int,
             "uint" => token = Token::UInt,
+            "int64" => token = Token::Int64,
             "float" => token = Token::Float,
             "double" => token = Token::Double,
             "str" => token = Token::TStr,
