@@ -160,7 +160,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovUB => {},
             LtacType::MovW => {},
             LtacType::MovUW => {},
-            LtacType::MovQ => {},
+            LtacType::MovQ | LtacType::MovUQ => {},
             LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovOffImm => aarch64_build_mov_offset(writer, &code, stack_size),

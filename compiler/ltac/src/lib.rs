@@ -84,7 +84,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovB | LtacType::MovUB => ltac_build_instr(writer, code),
             LtacType::MovW | LtacType::MovUW => ltac_build_instr(writer, code),
             LtacType::Mov | LtacType::MovU => ltac_build_instr(writer, code),
-            LtacType::MovQ => ltac_build_instr(writer, code),
+            LtacType::MovQ | LtacType::MovUQ => ltac_build_instr(writer, code),
             LtacType::MovF32 => ltac_build_instr(writer, code),
             LtacType::MovF64 => ltac_build_instr(writer, code),
             LtacType::MovOffImm => ltac_build_instr(writer, code),
@@ -256,6 +256,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::Mov => line.push_str("  mov "),
         LtacType::MovU => line.push_str("  mov.u "),
         LtacType::MovQ => line.push_str("  mov.q "),
+        LtacType::MovUQ => line.push_str("  mov.uq "),
         LtacType::MovF32 => line.push_str("  mov.f32 "),
         LtacType::MovF64 => line.push_str("  mov.f64 "),
         LtacType::MovOffImm => line.push_str("  mov.imm "),
@@ -452,6 +453,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::I32(val) => line.push_str(&val.to_string()),
             LtacArg::U32(val) => line.push_str(&val.to_string()),
             LtacArg::I64(val) => line.push_str(&val.to_string()),
+            LtacArg::U64(val) => line.push_str(&val.to_string()),
             LtacArg::F32(ref val) => line.push_str(&val.to_string()),
             LtacArg::F64(ref val) => line.push_str(&val.to_string()),
             
@@ -560,6 +562,11 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             },
             
             LtacArg::I64(val) => {
+                line.push_str(", ");
+                line.push_str(&val.to_string());
+            },
+            
+            LtacArg::U64(val) => {
                 line.push_str(", ");
                 line.push_str(&val.to_string());
             },

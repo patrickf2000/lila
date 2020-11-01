@@ -18,7 +18,7 @@ pub enum LtacType {
     MovB,       MovUB,      // Move byte (byte)
     MovW,       MovUW,      // Move word (short)
     Mov,        MovU,       // Move double word (int)
-    MovQ,                   // Move qword (int64)
+    MovQ,       MovUQ,      // Move qword (int64)
     MovF32,
     MovF64,
     MovOffImm,
@@ -171,7 +171,7 @@ pub enum LtacArg {
     Byte(i8),       UByte(u8),
     I16(i16),       U16(u16),
     I32(i32),       U32(u32),
-    I64(i64),
+    I64(i64),       U64(u64),
     F32(String),
     F64(String),
     
