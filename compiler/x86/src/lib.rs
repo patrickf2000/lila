@@ -210,6 +210,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I32Div | LtacType::U32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(writer, &code),
             
+            LtacType::I64Add => amd64_build_instr(writer, &code),
+            LtacType::I64Sub => amd64_build_instr(writer, &code),
+            LtacType::I64Mul => amd64_build_instr(writer, &code),
+            LtacType::I64Div | LtacType::I64Mod => amd64_build_div(writer, &code),
+            
             LtacType::F32Add | LtacType::F64Add => amd64_build_instr(writer, &code),
             LtacType::F32Sub | LtacType::F64Sub => amd64_build_instr(writer, &code),
             LtacType::F32Mul | LtacType::F64Mul => amd64_build_instr(writer, &code),
@@ -278,12 +283,14 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacType::BAdd | LtacType::U8Add |
         LtacType::I16Add | LtacType::U16Add |
-        LtacType::I32Add | LtacType::U32Add => line.push_str("  add "),
+        LtacType::I32Add | LtacType::U32Add |
+        LtacType::I64Add => line.push_str("  add "),
         
         LtacType::BSub | LtacType::I16Sub |
-        LtacType::I32Sub => line.push_str("  sub "),
+        LtacType::I32Sub  | LtacType::I64Sub => line.push_str("  sub "),
         
-        LtacType::I16Mul | LtacType::I32Mul => line.push_str("  imul "),
+        LtacType::I16Mul | LtacType::I32Mul |
+        LtacType::I64Mul => line.push_str("  imul "),
         LtacType::U16Mul | LtacType::U32Mul => line.push_str("  imul "),
         
         LtacType::F32Add => line.push_str("  addss "),

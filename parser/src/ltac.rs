@@ -95,6 +95,12 @@ pub enum LtacType {
     I32Div,     U32Div,
     I32Mod,     U32Mod,
     
+    I64Add,
+    I64Sub,
+    I64Mul,
+    I64Div,
+    I64Mod,
+    
     F32Add,
     F32Sub,
     F32Mul,

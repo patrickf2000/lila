@@ -153,6 +153,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             LtacType::I32VAdd => ltac_build_instr(writer, code),
             
+            LtacType::I64Add => ltac_build_instr(writer, code),
+            LtacType::I64Sub => ltac_build_instr(writer, code),
+            LtacType::I64Mul => ltac_build_instr(writer, code),
+            LtacType::I64Div => ltac_build_instr(writer, code),
+            LtacType::I64Mod => ltac_build_instr(writer, code),
+            
             LtacType::F32Add => ltac_build_instr(writer, code),
             LtacType::F32Sub => ltac_build_instr(writer, code),
             LtacType::F32Mul => ltac_build_instr(writer, code),
@@ -331,6 +337,13 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         // Integer (i32) vector operations
         LtacType::I32VAdd => line.push_str("  i32.vadd "),
+        
+        // Signed 64-bit integer math operations
+        LtacType::I64Add => line.push_str("  i64.add "),
+        LtacType::I64Sub => line.push_str("  i64.sub "),
+        LtacType::I64Mul => line.push_str("  i64.mul "),
+        LtacType::I64Div => line.push_str("  i64.div "),
+        LtacType::I64Mod => line.push_str("  i64.mod "),
         
         // Single-precision float operations
         LtacType::F32Add => line.push_str("  f32.add "),

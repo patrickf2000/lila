@@ -187,6 +187,13 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // Signed 32-bit vector math operations
             LtacType::I32VAdd => {},
             
+            // Signed 64-bit integer math operations
+            LtacType::I64Add => {},
+            LtacType::I64Sub => {},
+            LtacType::I64Mul => {},
+            LtacType::I64Div => {},
+            LtacType::I64Mod => {},
+            
             // Single-precision float operations
             LtacType::F32Add => {},
             LtacType::F32Sub => {},
