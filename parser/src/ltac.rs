@@ -132,6 +132,12 @@ pub enum LtacType {
     I32Lsh,
     I32Rsh,
     
+    I64And,
+    I64Or,
+    I64Xor,
+    I64Lsh,
+    I64Rsh,
+    
     // Vector instructions
     I32VAdd,
 }

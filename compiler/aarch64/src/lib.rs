@@ -239,6 +239,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::BRsh | LtacType::WRsh |
             LtacType::I32Rsh => aarch64_build_instr(writer, &code),
             
+            LtacType::I64And => {},
+            LtacType::I64Or => {},
+            LtacType::I64Xor => {},
+            LtacType::I64Lsh => {},
+            LtacType::I64Rsh => {},
+            
             LtacType::I32VAdd => {},
         }
     }

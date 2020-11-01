@@ -221,15 +221,15 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::F32Div | LtacType::F64Div => amd64_build_instr(writer, &code),
             
             LtacType::BAnd | LtacType::WAnd |
-            LtacType::I32And => amd64_build_instr(writer, &code),
+            LtacType::I32And | LtacType::I64And => amd64_build_instr(writer, &code),
             LtacType::BOr | LtacType::WOr |
-            LtacType::I32Or => amd64_build_instr(writer, &code),
+            LtacType::I32Or | LtacType::I64Or => amd64_build_instr(writer, &code),
             LtacType::BXor | LtacType::WXor |
-            LtacType::I32Xor => amd64_build_instr(writer, &code),
+            LtacType::I32Xor | LtacType::I64Xor => amd64_build_instr(writer, &code),
             LtacType::BLsh | LtacType::WLsh |
-            LtacType::I32Lsh => amd64_build_instr(writer, &code),
+            LtacType::I32Lsh | LtacType::I64Lsh => amd64_build_instr(writer, &code),
             LtacType::BRsh | LtacType::WRsh |
-            LtacType::I32Rsh => amd64_build_instr(writer, &code),
+            LtacType::I32Rsh | LtacType::I64Rsh => amd64_build_instr(writer, &code),
             
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
             
@@ -304,15 +304,15 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::F64Div => line.push_str("  divsd "),
         
         LtacType::BAnd | LtacType::WAnd |
-        LtacType::I32And => line.push_str("  and "),
+        LtacType::I32And | LtacType::I64And => line.push_str("  and "),
         LtacType::BOr | LtacType::WOr |
-        LtacType::I32Or => line.push_str("  or "),
+        LtacType::I32Or | LtacType::I64Or => line.push_str("  or "),
         LtacType::BXor | LtacType::WXor |
-        LtacType::I32Xor => line.push_str("  xor "),
+        LtacType::I32Xor | LtacType::I64Xor => line.push_str("  xor "),
         LtacType::BLsh | LtacType::WLsh |
-        LtacType::I32Lsh => line.push_str("  shl "),
+        LtacType::I32Lsh | LtacType::I64Lsh => line.push_str("  shl "),
         LtacType::BRsh | LtacType::WRsh |
-        LtacType::I32Rsh => line.push_str("  shr "),
+        LtacType::I32Rsh | LtacType::I64Rsh => line.push_str("  shr "),
         
         LtacType::I8Cmp | LtacType::U8Cmp |
         LtacType::I16Cmp | LtacType::U16Cmp |

@@ -700,6 +700,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32And);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
+                } else if var.data_type == DataType::Int64 {
+                    instr = ltac::create_instr(LtacType::I64And);
+                    instr.arg1_type = LtacArg::Reg64(0);
+                    
                 } else {
                     builder.syntax.ltac_error(line, "Invalid use of logical and.".to_string());
                     return false;
@@ -721,6 +725,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         var.data_type == DataType::IntDynArray {
                     instr = ltac::create_instr(LtacType::I32Or);
                     instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else if var.data_type == DataType::Int64 {
+                    instr = ltac::create_instr(LtacType::I64Or);
+                    instr.arg1_type = LtacArg::Reg64(0);
                     
                 } else {
                     builder.syntax.ltac_error(line, "Invalid use of logical or.".to_string());
@@ -744,6 +752,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Xor);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
+                } else if var.data_type == DataType::Int64 {
+                    instr = ltac::create_instr(LtacType::I64Xor);
+                    instr.arg1_type = LtacArg::Reg64(0);
+                    
                 } else {
                     builder.syntax.ltac_error(line, "Invalid use of logical xor.".to_string());
                     return false;
@@ -766,6 +778,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Lsh);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
+                } else if var.data_type == DataType::Int64 {
+                    instr = ltac::create_instr(LtacType::I64Lsh);
+                    instr.arg1_type = LtacArg::Reg64(0);
+                    
                 } else {
                     builder.syntax.ltac_error(line, "Invalid use of left shift.".to_string());
                     return false;
@@ -787,6 +803,10 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         var.data_type == DataType::IntDynArray {
                     instr = ltac::create_instr(LtacType::I32Rsh);
                     instr.arg1_type = LtacArg::Reg32(0);
+                    
+                } else if var.data_type == DataType::Int64 {
+                    instr = ltac::create_instr(LtacType::I64Rsh);
+                    instr.arg1_type = LtacArg::Reg64(0);
                     
                 } else {
                     builder.syntax.ltac_error(line, "Invalid use of right shift.".to_string());

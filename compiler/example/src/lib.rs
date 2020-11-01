@@ -194,6 +194,13 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I64Div => {},
             LtacType::I64Mod => {},
             
+            // 64-bit integer bitwise operations
+            LtacType::I64And => {},
+            LtacType::I64Or => {},
+            LtacType::I64Xor => {},
+            LtacType::I64Lsh => {},
+            LtacType::I64Rsh => {},
+            
             // Single-precision float operations
             LtacType::F32Add => {},
             LtacType::F32Sub => {},
