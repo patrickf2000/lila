@@ -24,7 +24,7 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
     for (_name, var) in &builder.vars {
         if (var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
             var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
-            var.data_type == DataType::IntDynArray ||
+            var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray ||
             var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray)
             && !var.is_param {
             

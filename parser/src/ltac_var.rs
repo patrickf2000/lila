@@ -75,6 +75,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 8
         },
         
+        AstModType::UIntDynArray => {
+            data_type = DataType::UIntDynArray;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Int64 => {
             data_type = DataType::Int64;
             builder.stack_pos += 8;
@@ -210,7 +215,7 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     
     if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
        var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
-       var.data_type == DataType::IntDynArray ||
+       var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray ||
        var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray {
         code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
@@ -371,7 +376,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg2_type = LtacArg::I32(arg.u64_val as i32);
                     builder.file.code.push(instr.clone());
                     
-                } else if var.data_type == DataType::UInt {
+                } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
                     instr.arg2_type = LtacArg::U32(arg.u64_val as u32);
                     builder.file.code.push(instr.clone());
                     
@@ -420,7 +425,8 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         let mut size = 1;
                         if v.data_type == DataType::ShortDynArray || v.data_type == DataType::UShortDynArray {
                             size = 2;
-                        } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::FloatDynArray {
+                        } else if v.data_type == DataType::IntDynArray  || v.data_type == DataType::UIntDynArray
+                            || v.data_type == DataType::FloatDynArray {
                             size = 4;
                         } else if v.data_type == DataType::DoubleDynArray {
                             size = 8;
@@ -445,7 +451,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     };
                                     
                                     // Choose the proper registers
-                                    if v.data_type == DataType::IntDynArray {
+                                    if v.data_type == DataType::IntDynArray || v.data_type == DataType::UIntDynArray {
                                         instr2.arg1_type = LtacArg::Reg32(0);
                                         instr.arg2_type = LtacArg::Reg32(0);
                                     } else if v.data_type == DataType::FloatDynArray {
@@ -527,7 +533,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Add);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::UInt {
+                } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::U32Add);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -609,7 +615,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Mul);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::UInt {
+                } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::U32Mul);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -658,7 +664,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Div);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::UInt {
+                } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::U32Div);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -707,7 +713,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Mod);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::UInt {
+                } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::U32Mod);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -737,7 +743,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg1_type = LtacArg::Reg16(0);
                     
                 } else if var.data_type == DataType::Int || var.data_type == DataType::UInt ||
-                        var.data_type == DataType::IntDynArray {
+                        var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::I32And);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -763,7 +769,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg1_type = LtacArg::Reg16(0);
                     
                 } else if var.data_type == DataType::Int || var.data_type == DataType::UInt ||
-                        var.data_type == DataType::IntDynArray {
+                        var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::I32Or);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -789,7 +795,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg1_type = LtacArg::Reg16(0);
                     
                 } else if var.data_type == DataType::Int || var.data_type == DataType::UInt ||
-                        var.data_type == DataType::IntDynArray {
+                        var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::I32Xor);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -815,7 +821,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg1_type = LtacArg::Reg16(0);
                     
                 } else if var.data_type == DataType::Int || var.data_type == DataType::UInt ||
-                        var.data_type == DataType::IntDynArray {
+                        var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::I32Lsh);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
@@ -841,7 +847,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr.arg1_type = LtacArg::Reg16(0);
                     
                 } else if var.data_type == DataType::Int || var.data_type == DataType::UInt ||
-                        var.data_type == DataType::IntDynArray {
+                        var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray {
                     instr = ltac::create_instr(LtacType::I32Rsh);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
