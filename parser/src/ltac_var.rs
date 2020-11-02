@@ -729,7 +729,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32And);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::Int64 {
+                } else if var.data_type == DataType::Int64 || var.data_type == DataType::UInt64 {
                     instr = ltac::create_instr(LtacType::I64And);
                     instr.arg1_type = LtacArg::Reg64(0);
                     
@@ -755,7 +755,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Or);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::Int64 {
+                } else if var.data_type == DataType::Int64 || var.data_type == DataType::UInt64 {
                     instr = ltac::create_instr(LtacType::I64Or);
                     instr.arg1_type = LtacArg::Reg64(0);
                     
@@ -781,7 +781,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Xor);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::Int64 {
+                } else if var.data_type == DataType::Int64 || var.data_type == DataType::UInt64 {
                     instr = ltac::create_instr(LtacType::I64Xor);
                     instr.arg1_type = LtacArg::Reg64(0);
                     
@@ -807,7 +807,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Lsh);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::Int64 {
+                } else if var.data_type == DataType::Int64 || var.data_type == DataType::UInt64 {
                     instr = ltac::create_instr(LtacType::I64Lsh);
                     instr.arg1_type = LtacArg::Reg64(0);
                     
@@ -833,7 +833,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     instr = ltac::create_instr(LtacType::I32Rsh);
                     instr.arg1_type = LtacArg::Reg32(0);
                     
-                } else if var.data_type == DataType::Int64 {
+                } else if var.data_type == DataType::Int64 || var.data_type == DataType::UInt64 {
                     instr = ltac::create_instr(LtacType::I64Rsh);
                     instr.arg1_type = LtacArg::Reg64(0);
                     
