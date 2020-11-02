@@ -185,6 +185,24 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg1_type = LtacArg::Reg16(0);
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
+                    // Signed int64 comparisons
+                    } else if v.data_type == DataType::Int64 {
+                        cmp.instr_type = LtacType::I64Cmp;
+                        cmp.arg1_type = LtacArg::Reg64(0);
+                        
+                        mov = ltac::create_instr(LtacType::MovQ);
+                        mov.arg1_type = LtacArg::Reg64(0);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                    
+                    // Unsigned int64 comparisons
+                    } else if v.data_type == DataType::UInt64 {
+                        cmp.instr_type = LtacType::U64Cmp;
+                        cmp.arg1_type = LtacArg::Reg64(0);
+                        
+                        mov = ltac::create_instr(LtacType::MovUQ);
+                        mov.arg1_type = LtacArg::Reg64(0);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
                     // Integer comparisons
                     } else {
                         if v.data_type == DataType::Int {
@@ -227,9 +245,17 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
         AstArgType::IntL => {
             if signed_variant {
-                cmp.arg2_type = LtacArg::I32(arg2.u64_val as i32);
+                if cmp.instr_type == LtacType::I64Cmp {
+                    cmp.arg2_type = LtacArg::I64(arg2.u64_val as i64);
+                } else {
+                    cmp.arg2_type = LtacArg::I32(arg2.u64_val as i32);
+                }
             } else {
-                cmp.arg2_type = LtacArg::U32(arg2.u64_val as u32);
+                if cmp.instr_type == LtacType::U64Cmp {
+                    cmp.arg2_type = LtacArg::U64(arg2.u64_val);
+                } else {
+                    cmp.arg2_type = LtacArg::U32(arg2.u64_val as u32);
+                }
             }
         },
         
@@ -337,6 +363,44 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         mov.arg2_type = LtacArg::Mem(v.pos);
                         
                         cmp.arg2_type = LtacArg::Reg16(1);
+                        
+                    // Int-64
+                    } else if v.data_type == DataType::Int64 {
+                        if arg1.arg_type == AstArgType::IntL {
+                            builder.file.code.pop();
+                            let mut mov2 = ltac::create_instr(LtacType::MovQ);
+                            mov2.arg1_type = LtacArg::Reg64(0);
+                            mov2.arg2_type = LtacArg::I64(arg1.u64_val as i64);
+                            builder.file.code.push(mov2);
+                            
+                            cmp = ltac::create_instr(LtacType::I64Cmp);
+                            cmp.arg1_type = LtacArg::Reg64(0);
+                        }
+                        
+                        mov = ltac::create_instr(LtacType::MovQ);
+                        mov.arg1_type = LtacArg::Reg64(1);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
+                        cmp.arg2_type = LtacArg::Reg64(1);
+                    
+                    // Unsigned int-64
+                    } else if v.data_type == DataType::UInt64 {
+                        if arg1.arg_type == AstArgType::IntL {
+                            builder.file.code.pop();
+                            let mut mov2 = ltac::create_instr(LtacType::MovUQ);
+                            mov2.arg1_type = LtacArg::Reg64(0);
+                            mov2.arg2_type = LtacArg::U64(arg1.u64_val);
+                            builder.file.code.push(mov2);
+                            
+                            cmp = ltac::create_instr(LtacType::U64Cmp);
+                            cmp.arg1_type = LtacArg::Reg64(0);
+                        }
+                        
+                        mov = ltac::create_instr(LtacType::MovUQ);
+                        mov.arg1_type = LtacArg::Reg64(1);
+                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        
+                        cmp.arg2_type = LtacArg::Reg64(1);
                         
                     // Integers
                     } else if v.data_type == DataType::Int {

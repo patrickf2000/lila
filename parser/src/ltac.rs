@@ -56,6 +56,7 @@ pub enum LtacType {
     I8Cmp,      U8Cmp,
     I16Cmp,     U16Cmp,
     I32Cmp,     U32Cmp,
+    I64Cmp,     U64Cmp,
     F32Cmp,
     F64Cmp,
     StrCmp,

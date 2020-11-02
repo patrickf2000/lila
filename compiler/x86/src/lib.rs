@@ -175,6 +175,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I8Cmp | LtacType::U8Cmp => amd64_build_instr(writer, &code),
             LtacType::I16Cmp | LtacType::U16Cmp => amd64_build_instr(writer, &code),
             LtacType::I32Cmp | LtacType::U32Cmp => amd64_build_instr(writer, &code),
+            LtacType::I64Cmp | LtacType::U64Cmp => amd64_build_instr(writer, &code),
             LtacType::F32Cmp => amd64_build_instr(writer, &code),
             LtacType::F64Cmp => amd64_build_instr(writer, &code),
             LtacType::StrCmp => amd64_build_strcmp(writer, &code),
@@ -319,7 +320,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacType::I8Cmp | LtacType::U8Cmp |
         LtacType::I16Cmp | LtacType::U16Cmp |
-        LtacType::I32Cmp | LtacType::U32Cmp => line.push_str("  cmp "),
+        LtacType::I32Cmp | LtacType::U32Cmp |
+        LtacType::I64Cmp | LtacType::U64Cmp => line.push_str("  cmp "),
         LtacType::F32Cmp => line.push_str("  ucomiss "),
         LtacType::F64Cmp => line.push_str("  ucomisd "),
         
