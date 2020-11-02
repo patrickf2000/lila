@@ -66,7 +66,6 @@ run_test 'test/short/*.ds' 'clib' $1
 run_test 'test/float/*.ds' 'clib' $1
 
 run_test 'test/loop/*.ds' 'clib' $1
-run_test 'test/array/*.ds' 'clib' $1
 
 run_test 'test/string/*.ds' 'clib' $1
 
