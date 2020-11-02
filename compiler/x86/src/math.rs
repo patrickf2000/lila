@@ -235,7 +235,8 @@ pub fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut dest_line = String::new();
     let mut instr = "  idiv ".to_string();
     
-    if code.instr_type == LtacType::U32Div || code.instr_type == LtacType::U32Mod {
+    if code.instr_type == LtacType::U32Div || code.instr_type == LtacType::U32Mod
+        || code.instr_type == LtacType::U64Div || code.instr_type == LtacType::U64Mod {
         instr = "  div ".to_string();
     }
     
@@ -344,6 +345,14 @@ pub fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str("  idiv r15\n");
         },
         
+        LtacArg::U64(val) => {
+            line.push_str("  mov r15, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+            
+            line.push_str("  div r15\n");
+        },
+        
         _ => {},
     }
     
@@ -351,10 +360,10 @@ pub fn amd64_build_div(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     match &code.instr_type {
         LtacType::I32Div | LtacType::U32Div => line.push_str("eax\n"),
-        LtacType::I64Div => line.push_str("rax\n"),
+        LtacType::I64Div | LtacType::U64Div => line.push_str("rax\n"),
         
         LtacType::I32Mod | LtacType::U32Mod => line.push_str("edx\n"),
-        LtacType::I64Mod => line.push_str("rdx\n"),
+        LtacType::I64Mod | LtacType::U64Mod => line.push_str("rdx\n"),
         
         _ => {},
     }

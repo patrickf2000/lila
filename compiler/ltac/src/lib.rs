@@ -153,11 +153,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             LtacType::I32VAdd => ltac_build_instr(writer, code),
             
-            LtacType::I64Add => ltac_build_instr(writer, code),
+            LtacType::I64Add | LtacType::U64Add => ltac_build_instr(writer, code),
             LtacType::I64Sub => ltac_build_instr(writer, code),
-            LtacType::I64Mul => ltac_build_instr(writer, code),
-            LtacType::I64Div => ltac_build_instr(writer, code),
-            LtacType::I64Mod => ltac_build_instr(writer, code),
+            LtacType::I64Mul | LtacType::U64Mul => ltac_build_instr(writer, code),
+            LtacType::I64Div | LtacType::U64Div => ltac_build_instr(writer, code),
+            LtacType::I64Mod | LtacType::U64Mod => ltac_build_instr(writer, code),
             
             LtacType::F32Add => ltac_build_instr(writer, code),
             LtacType::F32Sub => ltac_build_instr(writer, code),
@@ -346,6 +346,13 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::I64Div => line.push_str("  i64.div "),
         LtacType::I64Mod => line.push_str("  i64.mod "),
         
+        // Signed 64-bit integer math operations
+        LtacType::U64Add => line.push_str("  u64.add "),
+        LtacType::U64Mul => line.push_str("  u64.mul "),
+        LtacType::U64Div => line.push_str("  u64.div "),
+        LtacType::U64Mod => line.push_str("  u64.mod "),
+        
+        // 64-bit integer bitwise operations
         LtacType::I64And => line.push_str("  i64.and "),
         LtacType::I64Or => line.push_str("  i64.or "),
         LtacType::I64Xor => line.push_str("  i64.xor "),
