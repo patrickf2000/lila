@@ -184,6 +184,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
                 AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
                 AstModType::UInt => data_type.mod_type = AstModType::UIntDynArray,
                 AstModType::Int64 => data_type.mod_type = AstModType::I64DynArray,
+                AstModType::UInt64 => data_type.mod_type = AstModType::U64DynArray,
                 AstModType::Float => data_type.mod_type = AstModType::FloatDynArray,
                 AstModType::Double => data_type.mod_type = AstModType::DoubleDynArray,
                 
