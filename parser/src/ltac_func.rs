@@ -184,6 +184,16 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 mov.arg1_type = LtacArg::RetRegU32;
             },
             
+            DataType::Int64 => {
+                mov = ltac::create_instr(LtacType::MovQ);
+                mov.arg1_type = LtacArg::RetRegI64;
+            },
+            
+            DataType::UInt64 => {
+                mov = ltac::create_instr(LtacType::MovUQ);
+                mov.arg1_type = LtacArg::RetRegU64;
+            },
+            
             DataType::Float => {
                 mov = ltac::create_instr(LtacType::MovF32);
                 mov.arg1_type = LtacArg::RetRegF32;
@@ -215,7 +225,14 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             },
         
             AstArgType::IntL => {
-                mov.arg2_type = LtacArg::I32(arg1.u64_val as i32);
+                match builder.current_type {
+                    DataType::Int => mov.arg2_type = LtacArg::I32(arg1.u64_val as i32),
+                    DataType::UInt => mov.arg2_type = LtacArg::U32(arg1.u64_val as u32),
+                    DataType::Int64 => mov.arg2_type = LtacArg::I64(arg1.u64_val as i64),
+                    DataType::UInt64 => mov.arg2_type = LtacArg::U64(arg1.u64_val),
+                    
+                    _ => {},
+                }
             },
             
             AstArgType::FloatL => {

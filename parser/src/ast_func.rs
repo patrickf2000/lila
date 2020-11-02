@@ -29,6 +29,9 @@ fn token_to_mod(token : &Token, is_array : bool) -> AstMod {
         Token::UInt => mod_type = AstModType::UInt,
         //Token::Byte if is_array => mod_type = AstModType::ByteDynArray,
         
+        Token::Int64 => mod_type = AstModType::Int64,
+        Token::UInt64 => mod_type = AstModType::UInt64,
+        
         Token::Float if is_array => mod_type = AstModType::FloatDynArray,
         Token::Float => mod_type = AstModType::Float,
         

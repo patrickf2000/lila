@@ -72,7 +72,8 @@ pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
     } else if code.instr_type == LtacType::LdArgI32 || code.instr_type == LtacType::LdArgU32 {
         let reg = amd64_arg_reg32(code.arg2_val);
         line.push_str(&reg);
-    } else if code.instr_type == LtacType::LdArgPtr {
+    } else if code.instr_type == LtacType::LdArgI64 || code.instr_type == LtacType::LdArgU64 ||
+            code.instr_type == LtacType::LdArgPtr {
         let reg = amd64_arg_reg64(code.arg2_val);
         line.push_str(&reg);
     }

@@ -172,6 +172,16 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             ld.arg2_val = arg_no;
             arg_no += 1;
             
+        } else if ast_data_type.mod_type == AstModType::Int64 {
+            ld = ltac::create_instr(LtacType::LdArgI64);
+            ld.arg2_val = arg_no;
+            arg_no += 1;
+        
+        } else if ast_data_type.mod_type == AstModType::UInt64 {
+            ld = ltac::create_instr(LtacType::LdArgU64);
+            ld.arg2_val = arg_no;
+            arg_no += 1;
+            
         } else {
             ld.arg2_val = arg_no;
             arg_no += 1;
@@ -468,6 +478,8 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     DataType::UShort => instr.arg2_type = LtacArg::RetRegU16,
                                     DataType::Int => instr.arg2_type = LtacArg::RetRegI32,
                                     DataType::UInt => instr.arg2_type = LtacArg::RetRegU32,
+                                    DataType::Int64 => instr.arg2_type = LtacArg::RetRegI64,
+                                    DataType::UInt64 => instr.arg2_type = LtacArg::RetRegU64,
                                     DataType::Float => instr.arg2_type = LtacArg::RetRegF32,
                                     DataType::Double => instr.arg2_type = LtacArg::RetRegF64,
                                     

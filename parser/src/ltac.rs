@@ -38,6 +38,7 @@ pub enum LtacType {
     LdArgI8,    LdArgU8,
     LdArgI16,   LdArgU16,
     LdArgI32,   LdArgU32,
+    LdArgI64,   LdArgU64,
     LdArgF32,
     LdArgF64,
     LdArgPtr,
@@ -162,7 +163,7 @@ pub enum LtacArg {
     RetRegI8,       RetRegU8,
     RetRegI16,      RetRegU16,
     RetRegI32,      RetRegU32,
-    RetRegI64,
+    RetRegI64,      RetRegU64,
     RetRegF32,
     RetRegF64,
     

@@ -77,6 +77,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgI8 | LtacType::LdArgU8 => ltac_build_ldarg(writer, code),
             LtacType::LdArgI16 | LtacType::LdArgU16 => ltac_build_ldarg(writer, code),
             LtacType::LdArgI32 | LtacType::LdArgU32 => ltac_build_ldarg(writer, code),
+            LtacType::LdArgI64 | LtacType::LdArgU64 => ltac_build_ldarg(writer, code),
             LtacType::LdArgF32 => ltac_build_ldarg(writer, code),
             LtacType::LdArgF64 => ltac_build_ldarg(writer, code),
             LtacType::LdArgPtr => ltac_build_ldarg(writer, code),
@@ -428,6 +429,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::RetRegI32 => line.push_str("i32.ret"),
             LtacArg::RetRegU32 => line.push_str("u32.ret"),
             LtacArg::RetRegI64 => line.push_str("i64.ret"),
+            LtacArg::RetRegU64 => line.push_str("u64.ret"),
             LtacArg::RetRegF32 => line.push_str("f32.ret"),
             LtacArg::RetRegF64 => line.push_str("f64.ret"),
             
@@ -513,6 +515,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::RetRegI32 => line.push_str(", i32.ret"),
             LtacArg::RetRegU32 => line.push_str(", u32.ret"),
             LtacArg::RetRegI64 => line.push_str(", i64.ret"),
+            LtacArg::RetRegU64 => line.push_str(", u64.ret"),
             LtacArg::RetRegF32 => line.push_str(", f32.ret"),
             LtacArg::RetRegF64 => line.push_str(", f64.ret"),
             
