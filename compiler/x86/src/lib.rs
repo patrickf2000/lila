@@ -634,6 +634,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 match &code.arg2_type {
                     LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
                     LtacArg::U32(_v) => line.push_str("  mov DWORD PTR "),
+                    LtacArg::I64(_v) => line.push_str("  mov QWORD PTR "),
+                    LtacArg::U64(_v) => line.push_str("  mov QWORD PTR "),
                     LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
                     LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
                     LtacArg::FltReg(_v) => line.push_str("  movss "),
@@ -667,6 +669,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 match &code.arg2_type {
                     LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
                     LtacArg::U32(_v) => line.push_str("  mov DWORD PTR "),
+                    LtacArg::I64(_v) => line.push_str("  mov QWORD PTR "),
+                    LtacArg::U64(_v) => line.push_str("  mov QWORD PTR "),
                     LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
                     LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
                     LtacArg::FltReg(_v) => line.push_str("  movss "),
@@ -678,6 +682,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 match code.arg2_type {
                     LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
                     LtacArg::U32(_v) => line.push_str("  mov DWORD PTR "),
+                    LtacArg::I64(_v) => line.push_str("  mov QWORD PTR "),
+                    LtacArg::U64(_v) => line.push_str("  mov QWORD PTR "),
                     _ => line.push_str("  mov "),
                 }
                 
@@ -723,6 +729,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 match &code.arg1_type {
                     LtacArg::Reg8(_p) => line.push_str("r15b"),
                     LtacArg::Reg16(_p) => line.push_str("r15w"),
+                    LtacArg::Reg64(_p) => line.push_str("r15"),
                     LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm1"),
                     _ => line.push_str("r15d"),
                 }
