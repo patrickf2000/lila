@@ -1,5 +1,7 @@
 #!/bin/bash
 
+test_count=0
+
 function run_test() {
     for entry in $1
     do
@@ -43,6 +45,8 @@ function run_test() {
         	rm /tmp/$name.o
         	rm /tmp/$name.asm
     	fi
+    	
+    	test_count=$((test_count+1))
     done
 }
 
@@ -76,5 +80,7 @@ elif [[ $1 == "aarch64" ]] ; then
     run_test 'test/syscall/aarch64/*.ds' 'sys' $1
 fi
 
+echo ""
+echo "$test_count tests passed successfully."
 echo "Done"
 
