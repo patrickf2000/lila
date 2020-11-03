@@ -14,7 +14,7 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         None => return false,
     }
     
-    let code = build_var_math(builder, &line, &var);
+    let code = build_var_math(builder, &line, &var, -1);
     
     code
 }

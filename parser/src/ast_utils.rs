@@ -230,3 +230,129 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
     true
 }
 
+// Checks the order of operations in an expression
+pub fn check_operations(original_args : &Vec<AstArg>) -> Vec<AstArg> {
+    if original_args.len() < 4 {
+        return original_args.to_vec();
+    }
+
+    let mut args : Vec<AstArg> = Vec::new();
+    let mut operations : Vec<AstArg> = Vec::new();
+    
+    for arg in original_args.iter() {
+        match arg.arg_type {
+            AstArgType::OpAdd |
+            AstArgType::OpSub |
+            AstArgType::OpMul |
+            AstArgType::OpDiv |
+            AstArgType::OpMod => {
+                loop {
+                    if operations.len() == 0 {
+                        break;
+                    }
+                    
+                    let top_type = &operations.last().unwrap().arg_type;
+                    
+                    if arg.arg_type == AstArgType::OpAdd || arg.arg_type == AstArgType::OpSub {
+                        let top = operations.pop().unwrap();
+                        args.push(top);
+                    } else {
+                        match top_type {
+                            AstArgType::OpAdd | AstArgType::OpSub => {
+                                break;
+                            },
+                            
+                            _ => {
+                                let top = operations.pop().unwrap();
+                                args.push(top);
+                            },
+                        }
+                    }
+                }
+                
+                operations.push(arg.clone());
+            },
+            
+            _ => args.push(arg.clone()),
+        }
+    }
+    
+    while operations.len() > 0 {
+        let op = operations.pop().unwrap();
+        args.push(op.clone());
+    }
+    
+    // Now, convert back to infix
+    let mut stack : Vec<Vec<AstArg>> = Vec::new();
+    let mut negate_next = false;
+    
+    for arg in args {
+        match arg.arg_type {
+            AstArgType::OpAdd |
+            AstArgType::OpSub |
+            AstArgType::OpMul |
+            AstArgType::OpDiv |
+            AstArgType::OpMod => {
+                let arg2 = stack.pop().unwrap();
+                let arg1 = stack.pop().unwrap();
+                let mut ln : Vec<AstArg> = Vec::new();
+                
+                let lparen = ast::create_arg(AstArgType::OpLParen);
+                let rparen = ast::create_arg(AstArgType::OpRParen);
+                
+                if arg1.len() > 2 {
+                    ln.push(lparen.clone());
+                    
+                    for a in arg1.iter() {
+                        ln.push(a.clone());
+                    }
+                    
+                    ln.push(rparen.clone());
+                } else {
+                    for a in arg1.iter() {
+                        ln.push(a.clone());
+                    }
+                }
+                
+                ln.push(arg.clone());
+                
+                if arg2.len() > 2 {
+                    ln.push(lparen);
+                    
+                    for a in arg2.iter() {
+                        ln.push(a.clone());
+                    }
+                    
+                    ln.push(rparen);
+                } else {
+                    for a in arg2.iter() {
+                        ln.push(a.clone());
+                    }
+                }
+                
+                stack.push(ln);
+            },
+            
+            AstArgType::OpNeg => negate_next = true,
+            
+            _ => {
+                let mut ln : Vec<AstArg> = Vec::new();
+                
+                if negate_next {
+                    let arg = ast::create_arg(AstArgType::OpNeg);
+                    ln.push(arg);
+                }
+                
+                ln.push(arg.clone());
+                stack.push(ln);
+                
+                negate_next = false;
+            },
+        }
+    }
+    
+    // TODO: This is dangerous
+    stack.pop().unwrap()
+}
+
+

@@ -22,6 +22,7 @@ pub enum AstStmtType {
 // Represents AST argument types
 #[derive(PartialEq, Clone)]
 pub enum AstArgType {
+    None,
     ByteL,
     ShortL,
     IntL,
@@ -29,6 +30,8 @@ pub enum AstArgType {
     StringL,
     Id,
     Array,
+    OpRParen,
+    OpLParen,
     OpNeg,
     OpAdd,
     OpSub,
@@ -217,6 +220,7 @@ impl AstStmt {
 impl AstArg {
     pub fn print(&self) {
         match &self.arg_type {
+            AstArgType::None => print!("?? "),
             AstArgType::ByteL => print!("{} ", self.u8_val),
             AstArgType::ShortL => print!("{} ", self.u16_val),
             AstArgType::IntL => print!("{} ", self.u64_val),
@@ -224,6 +228,8 @@ impl AstArg {
             AstArgType::StringL => print!("\"{}\" ", self.str_val),
             AstArgType::Id => print!("{} ", self.str_val),
             AstArgType::Array => print!("ARRAY "),
+            AstArgType::OpLParen => print!("("),
+            AstArgType::OpRParen => print!(")"),
             AstArgType::OpNeg => print!("-"),
             AstArgType::OpAdd => print!("+ "),
             AstArgType::OpSub => print!("- "),

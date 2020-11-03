@@ -10,6 +10,7 @@ use crate::utils::*;
 pub fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     let mut instr = "  imul ".to_string();
+    let mut dest_reg = 0;
     
     if code.instr_type == LtacType::U8Mul {
         instr = "  mul ".to_string();
@@ -20,6 +21,7 @@ pub fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg1 {
         LtacArg::Reg8(pos) => {
             let reg = amd64_op_reg8(*pos);
+            dest_reg = *pos;
             
             line.push_str("  mov al, ");
             line.push_str(&reg);
@@ -65,7 +67,7 @@ pub fn amd64_build_byte_mul(writer : &mut BufWriter<File>, code : &LtacInstr) {
     }
     
     // Move the result back to the proper register
-    let reg = amd64_op_reg16(code.arg1_val);
+    let reg = amd64_op_reg16(dest_reg);
     
     line.push_str("  mov ");
     line.push_str(&reg);

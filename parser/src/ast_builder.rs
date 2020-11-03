@@ -173,6 +173,8 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
         return false;
     }
     
+    var_dec.args = check_operations(&var_dec.args);
+    
     // If we have the array, check the array type
     if is_array {
         if var_dec.args.len() == 1 && var_dec.args.last().unwrap().arg_type == AstArgType::Array {
