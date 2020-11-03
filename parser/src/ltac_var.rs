@@ -335,7 +335,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     }
                     
                     let parts = unsafe { mem::transmute::<i32, [i8; 4]>(val) };
-                    let result = parts[0];
+                    let mut result = parts[0];
+                    
+                    if negate_next {
+                        result = -result;
+                        negate_next = false;
+                    }
                     
                     instr.arg2_type = LtacArg::Byte(result);
                     builder.file.code.push(instr.clone());
@@ -494,6 +499,20 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         
                         if negate_next {
                             match v.data_type {
+                                DataType::Byte => {
+                                    let mut instr2 = ltac::create_instr(LtacType::MovB);
+                                    instr2.arg1_type = LtacArg::Reg8(1);
+                                    instr2.arg2_type = LtacArg::Byte(0);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr2 = ltac::create_instr(LtacType::BSub);
+                                    instr2.arg1_type = LtacArg::Reg8(1);
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::Reg8(1);
+                                },
+                                
                                 DataType::Int => {
                                     let mut instr2 = ltac::create_instr(LtacType::Mov);
                                     instr2.arg1_type = LtacArg::Reg32(1);
