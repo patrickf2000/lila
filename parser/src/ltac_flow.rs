@@ -101,7 +101,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         },
         
         AstArgType::FloatL => {
-            let name = builder.build_float(arg1.f64_val, false);
+            let name = builder.build_float(arg1.f64_val, false, false);
             let mut mov = ltac::create_instr(LtacType::MovF32);
             mov.arg1_type = LtacArg::FltReg(0);
             mov.arg2_type = LtacArg::F32(name);
@@ -261,10 +261,10 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         
         AstArgType::FloatL => {
             if cmp.instr_type == LtacType::F64Cmp {
-                let name = builder.build_float(arg2.f64_val, true);
+                let name = builder.build_float(arg2.f64_val, true, false);
                 cmp.arg2_type = LtacArg::F64(name);
             } else {
-                let name = builder.build_float(arg2.f64_val, false);
+                let name = builder.build_float(arg2.f64_val, false, false);
                 cmp.arg2_type = LtacArg::F32(name);
             }
         },
@@ -301,7 +301,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                             LtacArg::FltReg(pos) => {
                                 builder.file.code.pop();
                                 
-                                let name = builder.build_float(arg1.f64_val, true);
+                                let name = builder.build_float(arg1.f64_val, true, false);
                                 let mut mov = ltac::create_instr(LtacType::MovF64);
                                 mov.arg1_type = LtacArg::FltReg64(pos);
                                 mov.arg2_type = LtacArg::F64(name);

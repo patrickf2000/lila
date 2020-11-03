@@ -438,12 +438,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             AstArgType::FloatL => {
                 if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
-                    let name = builder.build_float(arg.f64_val, false);
+                    let name = builder.build_float(arg.f64_val, false, negate_next);
                     instr.arg2_type = LtacArg::F32(name);
                     builder.file.code.push(instr.clone());
                 
                 } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
-                    let name = builder.build_float(arg.f64_val, true);
+                    let name = builder.build_float(arg.f64_val, true, negate_next);
                     instr.arg2_type = LtacArg::F64(name);
                     builder.file.code.push(instr.clone());
                     
@@ -451,11 +451,15 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     builder.syntax.ltac_error(&line, "Invalid use of float literal.".to_string());
                     return false;
                 }
+                
+                negate_next = false;
             },
             
             AstArgType::StringL => {},
             
             AstArgType::Id => {
+                let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
+                
                 match builder.vars.get(&arg.str_val) {
                     Some(v) => {
                         instr.arg2_type = LtacArg::Mem(v.pos);
@@ -570,6 +574,34 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     builder.file.code.push(instr2);
                                     
                                     instr.arg2_type = LtacArg::Reg64(1);
+                                },
+                                
+                                DataType::Float => {
+                                    let mut instr2 = ltac::create_instr(LtacType::MovF32);
+                                    instr2.arg1_type = LtacArg::FltReg(1);
+                                    instr2.arg2_type = LtacArg::F32(zero);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr2 = ltac::create_instr(LtacType::F32Sub);
+                                    instr2.arg1_type = LtacArg::FltReg(1);
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::FltReg(1);
+                                },
+                                
+                                DataType::Double => {
+                                    let mut instr2 = ltac::create_instr(LtacType::MovF64);
+                                    instr2.arg1_type = LtacArg::FltReg64(1);
+                                    instr2.arg2_type = LtacArg::F64(zero);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr2 = ltac::create_instr(LtacType::F64Sub);
+                                    instr2.arg1_type = LtacArg::FltReg64(1);
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::FltReg64(1);
                                 },
                                 
                                 _ => {

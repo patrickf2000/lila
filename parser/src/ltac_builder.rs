@@ -260,7 +260,7 @@ impl LtacBuilder {
     
     // Builds a float literal and adds it to the data section
     // https://stackoverflow.com/questions/40030551/how-to-decode-and-encode-a-float-in-rust
-    pub fn build_float(&mut self, val : f64, is_double : bool) -> String {
+    pub fn build_float(&mut self, v : f64, is_double : bool, negate_next : bool) -> String {
         // Create the float name
         let fpos = self.flt_pos.to_string();
         self.flt_pos = self.flt_pos + 1;
@@ -270,6 +270,11 @@ impl LtacBuilder {
         
         let value : String;
         let data_type : LtacDataType;
+        
+        let mut val = v;
+        if negate_next {
+            val = -v;
+        }
         
         if is_double {
             data_type = LtacDataType::DoubleL;
