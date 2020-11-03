@@ -295,6 +295,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         match &arg.arg_type {
             // Assign byte literals
             AstArgType::ByteL => {
+                if negate_next {
+                    builder.syntax.ltac_error(&line, "Negation invalid for this type.".to_string());
+                    return false;
+                }
+            
                 if var.data_type == DataType::Byte || var.data_type == DataType::ByteDynArray {
                     instr.arg2_type = LtacArg::Byte(arg.u8_val as i8);
                 } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
@@ -309,6 +314,11 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             
             // Assign short literals
             AstArgType::ShortL => {
+                if negate_next {
+                    builder.syntax.ltac_error(&line, "Negation invalid for this type.".to_string());
+                    return false;
+                }
+                
                 if var.data_type == DataType::Short || var.data_type == DataType::ShortDynArray {
                     instr.arg2_type = LtacArg::I16(arg.u16_val as i16);
                 } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
@@ -429,6 +439,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 // Invalid
                 } else {
                     builder.syntax.ltac_error(&line, "Invalid use of integer.".to_string());
+                    return false;
+                }
+                
+                // If the negate flag is still active at this point, we used it in the wrong place.
+                if negate_next {
+                    builder.syntax.ltac_error(&line, "Negation invalid for this type.".to_string());
                     return false;
                 }
             },
