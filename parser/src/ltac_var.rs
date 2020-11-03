@@ -370,7 +370,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     }
                     
                     let parts = unsafe { mem::transmute::<i32, [i16; 2]>(val) };
-                    let result = parts[0];
+                    let mut result = parts[0];
+                    
+                    if negate_next {
+                        result = -result;
+                        negate_next = false;
+                    }
                     
                     instr.arg2_type = LtacArg::I16(result);
                     builder.file.code.push(instr.clone());
@@ -497,6 +502,8 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                             }
                         }
                         
+                        // Negate variable if needed
+                        // Variable negation is simply the value subtracted from 0
                         if negate_next {
                             match v.data_type {
                                 DataType::Byte => {
@@ -511,6 +518,20 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     builder.file.code.push(instr2);
                                     
                                     instr.arg2_type = LtacArg::Reg8(1);
+                                },
+                                
+                                DataType::Short => {
+                                    let mut instr2 = ltac::create_instr(LtacType::MovW);
+                                    instr2.arg1_type = LtacArg::Reg16(1);
+                                    instr2.arg2_type = LtacArg::I16(0);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr2 = ltac::create_instr(LtacType::I16Sub);
+                                    instr2.arg1_type = LtacArg::Reg16(1);
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::Reg16(1);
                                 },
                                 
                                 DataType::Int => {
