@@ -44,7 +44,6 @@ pub enum Token {
     OpMul,
     OpDiv,
     OpMod,
-    OpExponent,
     OpEq,
     OpNeq,
     OpLt,

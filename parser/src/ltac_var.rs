@@ -246,6 +246,9 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     let mut instr = ltac::create_instr(LtacType::Mov);
     instr.arg1_type = LtacArg::Reg32(0);
     
+    // The control variable for negatives
+    let mut negate_next = false;
+    
     // The byte types
     if var.data_type == DataType::Byte {
         instr = ltac::create_instr(LtacType::MovB);
@@ -384,7 +387,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     
                 // Integers and integer arrays
                 } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
-                    instr.arg2_type = LtacArg::I32(arg.u64_val as i32);
+                    let mut val = arg.u64_val as i32;
+                    
+                    if negate_next {
+                        val = -val;
+                        negate_next = false;
+                    }
+                    
+                    instr.arg2_type = LtacArg::I32(val);
                     builder.file.code.push(instr.clone());
                     
                 } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
@@ -481,6 +491,31 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                 }
                             }
                         }
+                        
+                        if negate_next {
+                            match v.data_type {
+                                DataType::Int => {
+                                    let mut instr2 = ltac::create_instr(LtacType::Mov);
+                                    instr2.arg1_type = LtacArg::Reg32(1);
+                                    instr2.arg2_type = LtacArg::I32(0);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr2 = ltac::create_instr(LtacType::I32Sub);
+                                    instr2.arg1_type = LtacArg::Reg32(1);
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::Reg32(1);
+                                },
+                                
+                                _ => {
+                                    builder.syntax.ltac_error(line, "Invalid use of negation operator.".to_string());
+                                    return false;
+                                },
+                            }
+                            
+                            negate_next = false;
+                        }
                     },
                     
                     None => {
@@ -524,6 +559,12 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 
                 builder.file.code.push(instr.clone());
             },
+            
+            // Negate operator
+            // Basically, we set a control variable. That way, if the next AST node is a literal, we simply
+            // negate it here. If its a variable, we can create a subtraction operations
+            
+            AstArgType::OpNeg => negate_next = true,
             
             // Addition
             

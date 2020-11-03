@@ -4,11 +4,40 @@ use crate::ast::*;
 use crate::lex::{Token, Lex};
 use crate::syntax::*;
 
+// Checks to see if a given token is an operator
+fn is_operator(token : Token) -> bool {
+    match token {
+        Token::Assign |
+        Token::Comma |
+        Token::Any |
+        Token::OpAdd |
+        Token::OpSub |
+        Token::OpMul |
+        Token::OpDiv |
+        Token::OpMod |
+        Token::OpEq |
+        Token::OpNeq |
+        Token::OpLt |
+        Token::OpLte |
+        Token::OpGt |
+        Token::OpGte |
+        Token::OpNot |
+        Token::OpAnd |
+        Token::OpOr |
+        Token::OpXor |
+        Token::OpLeftShift |
+        Token::OpRightShift => return true,
+        
+        _ => return false,
+    }
+}
+
 // A common function for building statement arguments
 // TODO: If there's a way to not make parts of this so repetative, that would be great
 pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax : &mut ErrorManager) -> bool {
     let mut token = scanner.get_token();
     let mut args : Vec<AstArg> = Vec::new();
+    let mut last = Token::Unknown;
     
     let mut current_arg = ast::create_arg(AstArgType::Id);
     let mut in_array = false;
@@ -87,8 +116,13 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             },
             
             Token::OpSub => {
-                let arg = ast::create_arg(AstArgType::OpSub);
-                args.push(arg);
+                if last == Token::Unknown || is_operator(last) {
+                    let arg = ast::create_arg(AstArgType::OpNeg);
+                    args.push(arg);
+                } else {
+                    let arg = ast::create_arg(AstArgType::OpSub);
+                    args.push(arg);
+                }
             },
             
             Token::OpMul => {
@@ -181,6 +215,7 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             },
         }
     
+        last = token.clone();
         token = scanner.get_token();
     }
     
