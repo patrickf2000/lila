@@ -412,7 +412,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     builder.file.code.push(instr.clone());
                     
                 } else if var.data_type == DataType::Int64  || var.data_type == DataType::I64DynArray {
-                    instr.arg2_type = LtacArg::I64(arg.u64_val as i64);
+                    let mut val = arg.u64_val as i64;
+                    
+                    if negate_next {
+                        val = -val;
+                        negate_next = false;
+                    }
+                    
+                    instr.arg2_type = LtacArg::I64(val);
                     builder.file.code.push(instr.clone());
                     
                 } else if var.data_type == DataType::UInt64 || var.data_type == DataType::U64DynArray {
@@ -504,6 +511,9 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                         
                         // Negate variable if needed
                         // Variable negation is simply the value subtracted from 0
+                        //
+                        // instr: mov r1, 0
+                        //        sub r1, mem
                         if negate_next {
                             match v.data_type {
                                 DataType::Byte => {
@@ -546,6 +556,20 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                                     builder.file.code.push(instr2);
                                     
                                     instr.arg2_type = LtacArg::Reg32(1);
+                                },
+                                
+                                DataType::Int64 => {
+                                    let mut instr2 = ltac::create_instr(LtacType::MovQ);
+                                    instr2.arg1_type = LtacArg::Reg64(1);
+                                    instr2.arg2_type = LtacArg::I64(0);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr2 = ltac::create_instr(LtacType::I64Sub);
+                                    instr2.arg1_type = LtacArg::Reg64(1);
+                                    instr2.arg2_type = LtacArg::Mem(v.pos);
+                                    builder.file.code.push(instr2);
+                                    
+                                    instr.arg2_type = LtacArg::Reg64(1);
                                 },
                                 
                                 _ => {
