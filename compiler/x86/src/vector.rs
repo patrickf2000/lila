@@ -9,7 +9,7 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
     let mut line = String::new();
     let instr : String;
     
-    match code.arg2_type {
+    match code.arg2 {
         LtacArg::Mem(pos) => {
             line.push_str("  mov r15, QWORD PTR [rbp-");
             line.push_str(&pos.to_string());
@@ -25,7 +25,7 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
         _ => return,
     }
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Mem(pos) => {
             line.push_str("  mov r15, QWORD PTR [rbp-");
             line.push_str(&pos.to_string());
@@ -57,7 +57,7 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
         _ => {},
     }
     
-    match &code.arg2_type {
+    match &code.arg2 {
         LtacArg::Mem(_p) => {
             line.push_str("[r15+");
             line.push_str(&code.arg2_offset.to_string());

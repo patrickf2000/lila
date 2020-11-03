@@ -73,34 +73,34 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
         match &line.instr_type {
         
             // Store byte to variable
-            LtacType::MovB if is_mem(&line.arg1_type) => {
-                let pos = get_mem(&line.arg1_type);
+            LtacType::MovB if is_mem(&line.arg1) => {
+                let pos = get_mem(&line.arg1);
             
-                match &line.arg2_type {
+                match &line.arg2 {
                     LtacArg::Byte(val) => {
                         let mut instr = ltac::create_instr(LtacType::MovB);
-                        instr.arg1_type = LtacArg::Reg8(2);
-                        instr.arg2_type = LtacArg::Byte(*val);
+                        instr.arg1 = LtacArg::Reg8(2);
+                        instr.arg2 = LtacArg::Byte(*val);
                         
                         file.code.push(instr.clone());
                         
                         instr = ltac::create_instr(LtacType::StrB);
-                        instr.arg1_type = LtacArg::Mem(pos);
-                        instr.arg2_type = LtacArg::Reg8(2);
+                        instr.arg1 = LtacArg::Mem(pos);
+                        instr.arg2 = LtacArg::Reg8(2);
                         
                         file.code.push(instr.clone()); 
                     },
                     
                     LtacArg::I32(val) => {
                         let mut instr = ltac::create_instr(LtacType::Mov);
-                        instr.arg1_type = LtacArg::Reg32(2);
-                        instr.arg2_type = LtacArg::I32(*val);
+                        instr.arg1 = LtacArg::Reg32(2);
+                        instr.arg2 = LtacArg::I32(*val);
                         
                         file.code.push(instr.clone());
                         
                         instr = ltac::create_instr(LtacType::Str);
-                        instr.arg1_type = LtacArg::Mem(pos);
-                        instr.arg2_type = LtacArg::Reg32(2);
+                        instr.arg1 = LtacArg::Mem(pos);
+                        instr.arg2 = LtacArg::Reg32(2);
                         
                         file.code.push(instr.clone());
                     },
@@ -122,37 +122,37 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             },
             
             // Store memory to register
-            LtacType::Mov if is_mem(&line.arg2_type) => {
-                let pos = get_mem(&line.arg2_type);
+            LtacType::Mov if is_mem(&line.arg2) => {
+                let pos = get_mem(&line.arg2);
             
                 let mut instr = ltac::create_instr(LtacType::Ld);
-                instr.arg1_type = LtacArg::Mem(pos);
-                instr.arg2_type = line.arg1_type.clone();
+                instr.arg1 = LtacArg::Mem(pos);
+                instr.arg2 = line.arg1.clone();
                 instr.arg2_val = line.arg1_val;
                 
                 file.code.push(instr.clone());
             },
             
             // Store memory to byte register
-            LtacType::MovB if is_mem(&line.arg2_type) => {
-                let pos = get_mem(&line.arg2_type);
+            LtacType::MovB if is_mem(&line.arg2) => {
+                let pos = get_mem(&line.arg2);
                 
                 let mut instr = ltac::create_instr(LtacType::LdB);
-                instr.arg1_type = LtacArg::Mem(pos);
-                instr.arg2_type = line.arg1_type.clone();
+                instr.arg1 = LtacArg::Mem(pos);
+                instr.arg2 = line.arg1.clone();
                 instr.arg2_val = line.arg1_val;
                 
                 file.code.push(instr.clone());
             },
             
             // Store value to variable
-            LtacType::Mov if is_mem(&line.arg1_type) && !is_ptr_lcl(&line.arg2_type) => {
+            LtacType::Mov if is_mem(&line.arg1) && !is_ptr_lcl(&line.arg2) => {
                 let arg2_val : LtacArg;
             
-                match &line.arg2_type {
+                match &line.arg2 {
                     LtacArg::RetRegI64 => {
                         let mut instr = line.clone();
-                        instr.arg1_type = LtacArg::Reg64(2);
+                        instr.arg1 = LtacArg::Reg64(2);
                         file.code.push(instr.clone());
                         
                         arg2_val = LtacArg::Reg64(2);
@@ -160,7 +160,7 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                     
                     LtacArg::Reg64(_p) => {
                         let mut instr = line.clone();
-                        instr.arg1_type = LtacArg::Reg64(2);
+                        instr.arg1 = LtacArg::Reg64(2);
                         file.code.push(instr.clone());
                         
                         arg2_val = LtacArg::Reg64(2);
@@ -168,7 +168,7 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                     
                     _ => {
                         let mut instr = line.clone();
-                        instr.arg1_type = LtacArg::Reg32(2);
+                        instr.arg1 = LtacArg::Reg32(2);
                         file.code.push(instr.clone());
                         
                         arg2_val = LtacArg::Reg32(2);
@@ -176,16 +176,16 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
                 }
                 
                 let mut instr = ltac::create_instr(LtacType::Str);
-                instr.arg1_type = line.arg1_type.clone();
-                instr.arg2_type = arg2_val;
+                instr.arg1 = line.arg1.clone();
+                instr.arg2 = arg2_val;
                 file.code.push(instr.clone());
             },
             
             // Store string to variable
-            LtacType::Mov if is_mem(&line.arg1_type) && is_ptr_lcl(&line.arg2_type) => {
+            LtacType::Mov if is_mem(&line.arg1) && is_ptr_lcl(&line.arg2) => {
                 let mut instr = ltac::create_instr(LtacType::StrPtr);
-                instr.arg1_type = line.arg1_type.clone();
-                instr.arg2_type = line.arg2_type.clone();
+                instr.arg1 = line.arg1.clone();
+                instr.arg2 = line.arg2.clone();
                 file.code.push(instr.clone());
             },
             
@@ -194,44 +194,44 @@ fn risc_optimize(original : &LtacFile) -> Result<LtacFile, ()> {
             LtacType::I32Add | LtacType::I32Sub | LtacType::I32Mul | LtacType::I32Div | LtacType::I32Mod |
             LtacType::I32And | LtacType::I32Or | LtacType::I32Xor | LtacType::I32Lsh | LtacType::I32Rsh |
             LtacType::I32Cmp |
-            LtacType::BAdd | LtacType::BSub | LtacType::BMul | LtacType::BDiv | LtacType::BMod |
+            LtacType::I8Add | LtacType::I8Sub | LtacType::I8Mul | LtacType::I8Div | LtacType::I8Mod |
             LtacType::BAnd | LtacType::BOr | LtacType::BXor | LtacType::BLsh | LtacType::BRsh => {
-                match line.arg2_type {
+                match line.arg2 {
                     LtacArg::Byte(val) => {
                         let mut instr = ltac::create_instr(LtacType::MovB);
-                        instr.arg1_type = LtacArg::Reg8(1);
-                        instr.arg2_type = LtacArg::Byte(val);
+                        instr.arg1 = LtacArg::Reg8(1);
+                        instr.arg2 = LtacArg::Byte(val);
                         
                         file.code.push(instr);
                         
                         instr = line.clone();
-                        instr.arg2_type = LtacArg::Reg8(1);
+                        instr.arg2 = LtacArg::Reg8(1);
                         
                         file.code.push(instr);
                     },
                     
                     LtacArg::I32(val) => {
                         let mut instr = ltac::create_instr(LtacType::Mov);
-                        instr.arg1_type = LtacArg::Reg32(1);
-                        instr.arg2_type = LtacArg::I32(val);
+                        instr.arg1 = LtacArg::Reg32(1);
+                        instr.arg2 = LtacArg::I32(val);
                         
                         file.code.push(instr);
                 
                         instr = line.clone();
-                        instr.arg2_type = LtacArg::Reg32(1);
+                        instr.arg2 = LtacArg::Reg32(1);
                         
                         file.code.push(instr);
                     },
                     
                     LtacArg::Mem(pos) => {
                         let mut instr = ltac::create_instr(LtacType::Ld);
-                        instr.arg1_type = LtacArg::Mem(pos);
-                        instr.arg2_type = LtacArg::Reg32(1);
+                        instr.arg1 = LtacArg::Mem(pos);
+                        instr.arg2 = LtacArg::Reg32(1);
                         
                         file.code.push(instr);
                 
                         instr = line.clone();
-                        instr.arg2_type = LtacArg::Reg32(1);
+                        instr.arg2 = LtacArg::Reg32(1);
                         
                         file.code.push(instr);
                     },
@@ -267,7 +267,7 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
             LtacType::Exit => {
                 if use_c {
                     let mut instr = ltac::create_instr(LtacType::PushArg);
-                    instr.arg1_type = line.arg1_type.clone();
+                    instr.arg1 = line.arg1.clone();
                     instr.arg2_val = 1;
                     file2.code.push(instr);
                     
@@ -280,14 +280,14 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     instr.arg2_val = 1;
                     
                     match arch {
-                        Arch::X86_64 => instr.arg1_type = LtacArg::I32(60),       // Linux x86-64
-                        Arch::AArch64 => instr.arg1_type = LtacArg::I32(93),       // Linux AArch64
+                        Arch::X86_64 => instr.arg1 = LtacArg::I32(60),       // Linux x86-64
+                        Arch::AArch64 => instr.arg1 = LtacArg::I32(93),       // Linux AArch64
                     };
                     
                     file2.code.push(instr.clone());
                     
                     // Exit code
-                    instr.arg1_type = line.arg1_type.clone();
+                    instr.arg1 = line.arg1.clone();
                     instr.arg2_val = 2;
                     file2.code.push(instr.clone());
                     
@@ -315,36 +315,36 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     instr.arg2_val = 1;
                     
                     match arch {
-                        Arch::X86_64 => instr.arg1_type = LtacArg::I32(9),
-                        Arch::AArch64 => instr.arg1_type = LtacArg::I32(222),
+                        Arch::X86_64 => instr.arg1 = LtacArg::I32(9),
+                        Arch::AArch64 => instr.arg1 = LtacArg::I32(222),
                     };
                     
                     file2.code.push(instr.clone());
                     
                     // Address (0 by default)
-                    instr.arg1_type = LtacArg::I32(0);
+                    instr.arg1 = LtacArg::I32(0);
                     instr.arg2_val = 2;
                     file2.code.push(instr.clone());
                     
                     // Memory segment size
-                    instr.arg1_type = size_instr.arg1_type.clone();
+                    instr.arg1 = size_instr.arg1.clone();
                     instr.arg2_val = 3;
                     file2.code.push(instr.clone());
                     
                     // All other are various flags and stuff
-                    instr.arg1_type = LtacArg::I32(3);
+                    instr.arg1 = LtacArg::I32(3);
                     instr.arg2_val = 4;
                     file2.code.push(instr.clone());
                     
-                    instr.arg1_type = LtacArg::I32(34);
+                    instr.arg1 = LtacArg::I32(34);
                     instr.arg2_val = 5;
                     file2.code.push(instr.clone());
                     
-                    instr.arg1_type = LtacArg::I32(-1);
+                    instr.arg1 = LtacArg::I32(-1);
                     instr.arg2_val = 6;
                     file2.code.push(instr.clone());
                     
-                    instr.arg1_type = LtacArg::I32(0);
+                    instr.arg1 = LtacArg::I32(0);
                     instr.arg2_val = 7;
                     file2.code.push(instr.clone());
                     
@@ -368,14 +368,14 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     instr.arg2_val = 1;
                     
                     match arch {
-                        Arch::X86_64 => instr.arg1_type = LtacArg::I32(11),
-                        Arch::AArch64 => instr.arg1_type = LtacArg::I32(215),
+                        Arch::X86_64 => instr.arg1 = LtacArg::I32(11),
+                        Arch::AArch64 => instr.arg1 = LtacArg::I32(215),
                     };
                     
                     file2.code.push(instr.clone());
                     
                     // Address
-                    instr.arg1_type = addr_instr.arg1_type.clone();
+                    instr.arg1 = addr_instr.arg1.clone();
                     instr.arg2_val = 2;
                     file2.code.push(instr.clone());
                     

@@ -195,22 +195,22 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => {},
             LtacType::Bfge => {},
             
-            LtacType::BAdd | LtacType::U8Add |
+            LtacType::I8Add | LtacType::U8Add |
             LtacType::I16Add | LtacType::U16Add |
             LtacType::I32Add | LtacType::U32Add => aarch64_build_instr(writer, &code),
             
-            LtacType::BSub | LtacType::I16Sub |
+            LtacType::I8Sub | LtacType::I16Sub |
             LtacType::I32Sub => aarch64_build_instr(writer, &code),
             
-            LtacType::BMul | LtacType::U8Mul |
+            LtacType::I8Mul | LtacType::U8Mul |
             LtacType::I16Mul | LtacType::U16Mul |
             LtacType::I32Mul | LtacType::U32Mul => aarch64_build_instr(writer, &code),
             
-            LtacType::BDiv | LtacType::U8Div |
+            LtacType::I8Div | LtacType::U8Div |
             LtacType::I16Div | LtacType::U16Div |
             LtacType::I32Div | LtacType::U32Div => aarch64_build_instr(writer, &code),
             
-            LtacType::BMod | LtacType::U8Mod |
+            LtacType::I8Mod | LtacType::U8Mod |
             LtacType::I16Mod | LtacType::U16Mod |
             LtacType::I32Mod | LtacType::U32Mod => aarch64_build_instr(writer, &code),
             
@@ -261,11 +261,11 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut src = "w0".to_string();
     
     match &code.instr_type {
-        LtacType::BAdd | LtacType::I32Add => line.push_str("  add "),
-        LtacType::BSub | LtacType::I32Sub => line.push_str("  sub "),
-        LtacType::BMul | LtacType::I32Mul => line.push_str("  mul "),
-        LtacType::BDiv | LtacType::I32Div => line.push_str("  sdiv "),
-        LtacType::BMod | LtacType::I32Mod => line.push_str("  udiv "),
+        LtacType::I8Add | LtacType::I32Add => line.push_str("  add "),
+        LtacType::I8Sub | LtacType::I32Sub => line.push_str("  sub "),
+        LtacType::I8Mul | LtacType::I32Mul => line.push_str("  mul "),
+        LtacType::I8Div | LtacType::I32Div => line.push_str("  sdiv "),
+        LtacType::I8Mod | LtacType::I32Mod => line.push_str("  udiv "),
         
         LtacType::BAnd | LtacType::I32And => line.push_str("  and "),
         LtacType::BOr | LtacType::I32Or => line.push_str("  orr "),
@@ -278,7 +278,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         _ => {},
     }
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             dest = reg.clone();
@@ -293,7 +293,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         _ => {},
     }
     
-    if code.instr_type == LtacType::BMod || code.instr_type == LtacType::I32Mod {
+    if code.instr_type == LtacType::I8Mod || code.instr_type == LtacType::I32Mod {
         line.push_str("w4, ");
     } else if code.instr_type != LtacType::I32Cmp {
         line.push_str(&dest_line);
@@ -301,7 +301,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
     line.push_str(&dest_line);
     
-    match &code.arg2_type {
+    match &code.arg2 {
         LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             src = reg.clone();
@@ -318,7 +318,7 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str("\n");
     
     // For modulo
-    if code.instr_type == LtacType::BMod || code.instr_type == LtacType::I32Mod {
+    if code.instr_type == LtacType::I8Mod || code.instr_type == LtacType::I32Mod {
         line.push_str("  msub ");
         line.push_str(&dest);
         line.push_str(", w4, ");

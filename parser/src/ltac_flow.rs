@@ -73,49 +73,49 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     match &arg1.arg_type {
         AstArgType::ByteL => {
             let mut mov = ltac::create_instr(LtacType::MovUB);
-            mov.arg1_type = LtacArg::Reg8(0);
-            mov.arg2_type = LtacArg::UByte(arg1.u8_val);
+            mov.arg1 = LtacArg::Reg8(0);
+            mov.arg2 = LtacArg::UByte(arg1.u8_val);
             builder.file.code.push(mov);
             
             cmp = ltac::create_instr(LtacType::U8Cmp);
-            cmp.arg1_type = LtacArg::Reg8(0);
+            cmp.arg1 = LtacArg::Reg8(0);
         },
         
         AstArgType::ShortL => {
             let mut mov = ltac::create_instr(LtacType::MovUW);
-            mov.arg1_type = LtacArg::Reg16(0);
-            mov.arg2_type = LtacArg::U16(arg1.u16_val);
+            mov.arg1 = LtacArg::Reg16(0);
+            mov.arg2 = LtacArg::U16(arg1.u16_val);
             builder.file.code.push(mov);
             
             cmp = ltac::create_instr(LtacType::U16Cmp);
-            cmp.arg1_type = LtacArg::Reg16(0);
+            cmp.arg1 = LtacArg::Reg16(0);
         },
         
         AstArgType::IntL => {
             let mut mov = ltac::create_instr(LtacType::MovU);
-            mov.arg1_type = LtacArg::Reg32(0);
-            mov.arg2_type  = LtacArg::U32(arg1.u64_val as u32);
+            mov.arg1 = LtacArg::Reg32(0);
+            mov.arg2  = LtacArg::U32(arg1.u64_val as u32);
             builder.file.code.push(mov);
             
-            cmp.arg1_type = LtacArg::Reg32(0);
+            cmp.arg1 = LtacArg::Reg32(0);
         },
         
         AstArgType::FloatL => {
             let name = builder.build_float(arg1.f64_val, false, false);
             let mut mov = ltac::create_instr(LtacType::MovF32);
-            mov.arg1_type = LtacArg::FltReg(0);
-            mov.arg2_type = LtacArg::F32(name);
+            mov.arg1 = LtacArg::FltReg(0);
+            mov.arg2 = LtacArg::F32(name);
             builder.file.code.push(mov);
             
             cmp = ltac::create_instr(LtacType::F32Cmp);
-            cmp.arg1_type = LtacArg::FltReg(0);
+            cmp.arg1 = LtacArg::FltReg(0);
         },
         
         AstArgType::StringL => {},
         
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::MovU);
-            mov.arg1_type = LtacArg::Reg32(0);
+            mov.arg1 = LtacArg::Reg32(0);
             
             match &builder.vars.get(&arg1.str_val) {
                 Some(v) => {
@@ -124,84 +124,84 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp = ltac::create_instr(LtacType::StrCmp);
                         
                         mov = ltac::create_instr(LtacType::PushArg);
-                        mov.arg1_type = LtacArg::Ptr(v.pos);
+                        mov.arg1 = LtacArg::Ptr(v.pos);
                         mov.arg2_val = 1;
                         
                     // Float-32 comparisons
                     } else if v.data_type == DataType::Float {
                         mov = ltac::create_instr(LtacType::MovF32);
-                        mov.arg1_type = LtacArg::FltReg(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::FltReg(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                         cmp = ltac::create_instr(LtacType::F32Cmp);
-                        cmp.arg1_type = LtacArg::FltReg(0);
+                        cmp.arg1 = LtacArg::FltReg(0);
                         
                     // Float-64 comparisons
                     } else if v.data_type == DataType::Double {
                         mov = ltac::create_instr(LtacType::MovF64);
-                        mov.arg1_type = LtacArg::FltReg64(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::FltReg64(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                         cmp = ltac::create_instr(LtacType::F64Cmp);
-                        cmp.arg1_type = LtacArg::FltReg64(0);
+                        cmp.arg1 = LtacArg::FltReg64(0);
                         
                     // Byte comparisons
                     } else if v.data_type == DataType::Byte {
                         cmp= ltac::create_instr(LtacType::I8Cmp);
-                        cmp.arg1_type = LtacArg::Reg8(0);
+                        cmp.arg1 = LtacArg::Reg8(0);
                         
                         mov = ltac::create_instr(LtacType::MovB);
-                        mov.arg1_type = LtacArg::Reg8(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg8(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                         signed_variant = true;
                         
                     // Unsigned byte comparisons
                     } else if v.data_type == DataType::UByte {
                         cmp.instr_type = LtacType::U8Cmp;
-                        cmp.arg1_type = LtacArg::Reg8(0);
+                        cmp.arg1 = LtacArg::Reg8(0);
                         
                         mov = ltac::create_instr(LtacType::MovUB);
-                        mov.arg1_type = LtacArg::Reg8(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg8(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                     // Short comparisons
                     } else if v.data_type == DataType::Short {
                         cmp= ltac::create_instr(LtacType::I16Cmp);
-                        cmp.arg1_type = LtacArg::Reg16(0);
+                        cmp.arg1 = LtacArg::Reg16(0);
                         
                         mov = ltac::create_instr(LtacType::MovW);
-                        mov.arg1_type = LtacArg::Reg16(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg16(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                         signed_variant = true;
                     
                     // Unsigned short comparisons
                     } else if v.data_type == DataType::UShort {
                         cmp.instr_type = LtacType::U16Cmp;
-                        cmp.arg1_type = LtacArg::Reg16(0);
+                        cmp.arg1 = LtacArg::Reg16(0);
                         
                         mov = ltac::create_instr(LtacType::MovUW);
-                        mov.arg1_type = LtacArg::Reg16(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg16(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                     // Signed int64 comparisons
                     } else if v.data_type == DataType::Int64 {
                         cmp.instr_type = LtacType::I64Cmp;
-                        cmp.arg1_type = LtacArg::Reg64(0);
+                        cmp.arg1 = LtacArg::Reg64(0);
                         
                         mov = ltac::create_instr(LtacType::MovQ);
-                        mov.arg1_type = LtacArg::Reg64(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg64(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                     
                     // Unsigned int64 comparisons
                     } else if v.data_type == DataType::UInt64 {
                         cmp.instr_type = LtacType::U64Cmp;
-                        cmp.arg1_type = LtacArg::Reg64(0);
+                        cmp.arg1 = LtacArg::Reg64(0);
                         
                         mov = ltac::create_instr(LtacType::MovUQ);
-                        mov.arg1_type = LtacArg::Reg64(0);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg64(0);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
                     // Integer comparisons
                     } else {
@@ -211,9 +211,9 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                             signed_variant = true;
                         }
                         
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg1_type = LtacArg::Reg32(0);
+                        cmp.arg1 = LtacArg::Reg32(0);
                     }
                     
                     builder.file.code.push(mov);
@@ -229,32 +229,32 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     match &arg2.arg_type {
         AstArgType::ByteL => {
             if signed_variant {
-                cmp.arg2_type = LtacArg::Byte(arg2.u8_val as i8);
+                cmp.arg2 = LtacArg::Byte(arg2.u8_val as i8);
             } else {
-                cmp.arg2_type = LtacArg::UByte(arg2.u8_val);
+                cmp.arg2 = LtacArg::UByte(arg2.u8_val);
             }
         },
         
         AstArgType::ShortL => {
             if signed_variant {
-                cmp.arg2_type = LtacArg::I16(arg2.u16_val as i16);
+                cmp.arg2 = LtacArg::I16(arg2.u16_val as i16);
             } else {
-                cmp.arg2_type = LtacArg::U16(arg2.u16_val);
+                cmp.arg2 = LtacArg::U16(arg2.u16_val);
             }
         },
     
         AstArgType::IntL => {
             if signed_variant {
                 if cmp.instr_type == LtacType::I64Cmp {
-                    cmp.arg2_type = LtacArg::I64(arg2.u64_val as i64);
+                    cmp.arg2 = LtacArg::I64(arg2.u64_val as i64);
                 } else {
-                    cmp.arg2_type = LtacArg::I32(arg2.u64_val as i32);
+                    cmp.arg2 = LtacArg::I32(arg2.u64_val as i32);
                 }
             } else {
                 if cmp.instr_type == LtacType::U64Cmp {
-                    cmp.arg2_type = LtacArg::U64(arg2.u64_val);
+                    cmp.arg2 = LtacArg::U64(arg2.u64_val);
                 } else {
-                    cmp.arg2_type = LtacArg::U32(arg2.u64_val as u32);
+                    cmp.arg2 = LtacArg::U32(arg2.u64_val as u32);
                 }
             }
         },
@@ -262,10 +262,10 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         AstArgType::FloatL => {
             if cmp.instr_type == LtacType::F64Cmp {
                 let name = builder.build_float(arg2.f64_val, true, false);
-                cmp.arg2_type = LtacArg::F64(name);
+                cmp.arg2 = LtacArg::F64(name);
             } else {
                 let name = builder.build_float(arg2.f64_val, false, false);
-                cmp.arg2_type = LtacArg::F32(name);
+                cmp.arg2 = LtacArg::F32(name);
             }
         },
         
@@ -273,158 +273,158 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
-            mov.arg1_type = LtacArg::Reg32(1);
+            mov.arg1 = LtacArg::Reg32(1);
             
             match &builder.vars.get(&arg2.str_val) {
                 Some(v) => {
                     // Strings
                     if v.data_type == DataType::Str {
                         mov = ltac::create_instr(LtacType::PushArg);
-                        mov.arg1_type = LtacArg::Ptr(v.pos);
+                        mov.arg1 = LtacArg::Ptr(v.pos);
                         mov.arg2_val = 2;
                         
                     // Single-precision floats
                     } else if v.data_type == DataType::Float {
                         mov = ltac::create_instr(LtacType::MovF32);
-                        mov.arg1_type = LtacArg::FltReg(1);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::FltReg(1);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg2_type = LtacArg::FltReg(1);
+                        cmp.arg2 = LtacArg::FltReg(1);
                         
                     // Double-precision floats
                     } else if v.data_type == DataType::Double {
                         mov = ltac::create_instr(LtacType::MovF64);
-                        mov.arg1_type = LtacArg::FltReg64(1);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::FltReg64(1);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        match cmp.arg1_type {
+                        match cmp.arg1 {
                             LtacArg::FltReg(pos) => {
                                 builder.file.code.pop();
                                 
                                 let name = builder.build_float(arg1.f64_val, true, false);
                                 let mut mov = ltac::create_instr(LtacType::MovF64);
-                                mov.arg1_type = LtacArg::FltReg64(pos);
-                                mov.arg2_type = LtacArg::F64(name);
+                                mov.arg1 = LtacArg::FltReg64(pos);
+                                mov.arg2 = LtacArg::F64(name);
                                 builder.file.code.push(mov);
                                 
                                 cmp = ltac::create_instr(LtacType::F64Cmp);
-                                cmp.arg1_type = LtacArg::FltReg64(pos);
+                                cmp.arg1 = LtacArg::FltReg64(pos);
                             },
                             
                             _ => {},
                         }
                         
-                        cmp.arg2_type = LtacArg::FltReg64(1);
+                        cmp.arg2 = LtacArg::FltReg64(1);
                         
                     // Bytes
                     } else if v.data_type == DataType::Byte {
                         if arg1.arg_type == AstArgType::ByteL {
                             builder.file.code.pop();
                             mov = ltac::create_instr(LtacType::MovB);
-                            mov.arg1_type = LtacArg::Reg8(0);
-                            mov.arg2_type = LtacArg::Byte(arg1.u8_val as i8);
+                            mov.arg1 = LtacArg::Reg8(0);
+                            mov.arg2 = LtacArg::Byte(arg1.u8_val as i8);
                         
                             cmp = ltac::create_instr(LtacType::I8Cmp);
-                            cmp.arg1_type = LtacArg::Reg8(0);
+                            cmp.arg1 = LtacArg::Reg8(0);
                         } else {
-                            mov.arg1_type = LtacArg::Empty;
+                            mov.arg1 = LtacArg::Empty;
                         }
                         
-                        cmp.arg2_type = LtacArg::Mem(v.pos);
+                        cmp.arg2 = LtacArg::Mem(v.pos);
                     
                     // Unsigned bytes
                     } else if v.data_type == DataType::UByte {
                         mov = ltac::create_instr(LtacType::MovUB);
-                        mov.arg1_type = LtacArg::Reg8(1);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg8(1);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg2_type = LtacArg::Reg8(1);
+                        cmp.arg2 = LtacArg::Reg8(1);
                         
                     // Shorts
                     } else if v.data_type == DataType::Short {
                         if arg1.arg_type == AstArgType::ShortL {
                             builder.file.code.pop();
                             mov = ltac::create_instr(LtacType::MovW);
-                            mov.arg1_type = LtacArg::Reg16(0);
-                            mov.arg2_type = LtacArg::I16(arg1.u16_val as i16);
+                            mov.arg1 = LtacArg::Reg16(0);
+                            mov.arg2 = LtacArg::I16(arg1.u16_val as i16);
                         
                             cmp = ltac::create_instr(LtacType::I16Cmp);
-                            cmp.arg1_type = LtacArg::Reg16(0);
+                            cmp.arg1 = LtacArg::Reg16(0);
                         } else {
-                            mov.arg1_type = LtacArg::Empty;
+                            mov.arg1 = LtacArg::Empty;
                         }
                         
-                        cmp.arg2_type = LtacArg::Mem(v.pos);
+                        cmp.arg2 = LtacArg::Mem(v.pos);
                     
                     // Unsigned short
                     } else if v.data_type == DataType::UShort {
                         mov = ltac::create_instr(LtacType::MovUW);
-                        mov.arg1_type = LtacArg::Reg16(1);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg16(1);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg2_type = LtacArg::Reg16(1);
+                        cmp.arg2 = LtacArg::Reg16(1);
                         
                     // Int-64
                     } else if v.data_type == DataType::Int64 {
                         if arg1.arg_type == AstArgType::IntL {
                             builder.file.code.pop();
                             let mut mov2 = ltac::create_instr(LtacType::MovQ);
-                            mov2.arg1_type = LtacArg::Reg64(0);
-                            mov2.arg2_type = LtacArg::I64(arg1.u64_val as i64);
+                            mov2.arg1 = LtacArg::Reg64(0);
+                            mov2.arg2 = LtacArg::I64(arg1.u64_val as i64);
                             builder.file.code.push(mov2);
                             
                             cmp = ltac::create_instr(LtacType::I64Cmp);
-                            cmp.arg1_type = LtacArg::Reg64(0);
+                            cmp.arg1 = LtacArg::Reg64(0);
                         }
                         
                         mov = ltac::create_instr(LtacType::MovQ);
-                        mov.arg1_type = LtacArg::Reg64(1);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg64(1);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg2_type = LtacArg::Reg64(1);
+                        cmp.arg2 = LtacArg::Reg64(1);
                     
                     // Unsigned int-64
                     } else if v.data_type == DataType::UInt64 {
                         if arg1.arg_type == AstArgType::IntL {
                             builder.file.code.pop();
                             let mut mov2 = ltac::create_instr(LtacType::MovUQ);
-                            mov2.arg1_type = LtacArg::Reg64(0);
-                            mov2.arg2_type = LtacArg::U64(arg1.u64_val);
+                            mov2.arg1 = LtacArg::Reg64(0);
+                            mov2.arg2 = LtacArg::U64(arg1.u64_val);
                             builder.file.code.push(mov2);
                             
                             cmp = ltac::create_instr(LtacType::U64Cmp);
-                            cmp.arg1_type = LtacArg::Reg64(0);
+                            cmp.arg1 = LtacArg::Reg64(0);
                         }
                         
                         mov = ltac::create_instr(LtacType::MovUQ);
-                        mov.arg1_type = LtacArg::Reg64(1);
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg1 = LtacArg::Reg64(1);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg2_type = LtacArg::Reg64(1);
+                        cmp.arg2 = LtacArg::Reg64(1);
                         
                     // Integers
                     } else if v.data_type == DataType::Int {
                         if arg1.arg_type == AstArgType::IntL {
                             builder.file.code.pop();
                             mov = ltac::create_instr(LtacType::Mov);
-                            mov.arg1_type = LtacArg::Reg32(0);
-                            mov.arg2_type = LtacArg::I32(arg1.u64_val as i32);
+                            mov.arg1 = LtacArg::Reg32(0);
+                            mov.arg2 = LtacArg::I32(arg1.u64_val as i32);
                         
                             cmp = ltac::create_instr(LtacType::I32Cmp);
-                            cmp.arg1_type = LtacArg::Reg32(0);
+                            cmp.arg1 = LtacArg::Reg32(0);
                         } else {
-                            mov.arg1_type = LtacArg::Empty;
+                            mov.arg1 = LtacArg::Empty;
                         }
                         
-                        cmp.arg2_type = LtacArg::Mem(v.pos);
+                        cmp.arg2 = LtacArg::Mem(v.pos);
                         
                     } else {
-                        mov.arg2_type = LtacArg::Mem(v.pos);
+                        mov.arg2 = LtacArg::Mem(v.pos);
                         
-                        cmp.arg2_type = LtacArg::Reg32(1);
+                        cmp.arg2 = LtacArg::Reg32(1);
                     }
                     
-                    if mov.arg1_type != LtacArg::Empty {
+                    if mov.arg1 != LtacArg::Empty {
                         builder.file.code.push(mov);
                     }
                 },
@@ -515,23 +515,23 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg1.arg_type {
         AstArgType::IntL => {
-            cmp.arg1_type = LtacArg::I32(arg1.u64_val as i32);
+            cmp.arg1 = LtacArg::I32(arg1.u64_val as i32);
         },
         
         AstArgType::StringL => {},
         
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
-            mov.arg1_type = LtacArg::Reg32(0);
+            mov.arg1 = LtacArg::Reg32(0);
             
             match &builder.vars.get(&arg1.str_val) {
-                Some(v) => mov.arg2_type = LtacArg::Mem(v.pos),
+                Some(v) => mov.arg2 = LtacArg::Mem(v.pos),
                 None => {/* TODO: Syntax error */},
             }
             
             cmp_block.push(mov);
             
-            cmp.arg1_type = LtacArg::Reg32(0);
+            cmp.arg1 = LtacArg::Reg32(0);
         },
         
         _ => {},
@@ -539,23 +539,23 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     
     match &arg2.arg_type {
         AstArgType::IntL => {
-            cmp.arg2_type = LtacArg::I32(arg2.u64_val as i32);
+            cmp.arg2 = LtacArg::I32(arg2.u64_val as i32);
         },
         
         AstArgType::StringL => {},
         
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);
-            mov.arg1_type = LtacArg::Reg32(1);
+            mov.arg1 = LtacArg::Reg32(1);
             
             match &builder.vars.get(&arg2.str_val) {
-                Some(v) => mov.arg2_type = LtacArg::Mem(v.pos),
+                Some(v) => mov.arg2 = LtacArg::Mem(v.pos),
                 None => {/* TODO: Syntax error */},
             }
             
             cmp_block.push(mov);
             
-            cmp.arg2_type = LtacArg::Reg32(1);
+            cmp.arg2 = LtacArg::Reg32(1);
         },
         
         _ => {},

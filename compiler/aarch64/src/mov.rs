@@ -9,7 +9,7 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
     let mut line : String;
     let mut pos = 0;
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Mem(p) => pos = stack_size - p,
         _ => {},
     }
@@ -23,7 +23,7 @@ pub fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         _ => line = String::new(),
     }
     
-    match &code.arg2_type {
+    match &code.arg2 {
         LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             line.push_str(&reg);
@@ -54,12 +54,12 @@ pub fn aarch64_build_strptr(writer : &mut BufWriter<File>, code : &LtacInstr, st
     let mut pos = 0;
     let name : String;
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Mem(p) => pos = stack_size - p,
         _ => {},
     }
     
-    match &code.arg2_type {
+    match &code.arg2 {
         LtacArg::PtrLcl(ref val) => name = val.clone(),
         _ => name = String::new(),
     }
@@ -84,7 +84,7 @@ pub fn aarch64_build_strptr(writer : &mut BufWriter<File>, code : &LtacInstr, st
 pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "  mov ".to_string();
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
         
@@ -104,7 +104,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         _ => {},
     }
     
-    match &code.arg2_type {
+    match &code.arg2 {
         LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             line.push_str(&reg);
@@ -135,7 +135,7 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     let mut line = String::new();
     let mut dest_reg = "w5".to_string();
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Reg32(pos) => {
             dest_reg = aarch64_op_reg32(*pos);
         },
@@ -180,7 +180,7 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     }
     
     // Whatever happens here should go to x5
-    match &code.arg2_type {
+    match &code.arg2 {
         LtacArg::Reg32(pos) => {
             dest_reg = aarch64_op_reg32(*pos);
         },
@@ -239,7 +239,7 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     }
     
     // Store back
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Mem(_p) => {
             line.push_str("  str ");
             line.push_str(&dest_reg);

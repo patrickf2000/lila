@@ -117,11 +117,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => ltac_build_jump(writer, code),
             LtacType::Bfge => ltac_build_jump(writer, code),
             
-            LtacType::BAdd | LtacType::U8Add => ltac_build_instr(writer, code),
-            LtacType::BSub => ltac_build_instr(writer, code),
-            LtacType::BMul | LtacType::U8Mul => ltac_build_instr(writer, code),
-            LtacType::BDiv | LtacType::U8Div => ltac_build_instr(writer, code),
-            LtacType::BMod | LtacType::U8Mod => ltac_build_instr(writer, code),
+            LtacType::I8Add | LtacType::U8Add => ltac_build_instr(writer, code),
+            LtacType::I8Sub => ltac_build_instr(writer, code),
+            LtacType::I8Mul | LtacType::U8Mul => ltac_build_instr(writer, code),
+            LtacType::I8Div | LtacType::U8Div => ltac_build_instr(writer, code),
+            LtacType::I8Mod | LtacType::U8Mod => ltac_build_instr(writer, code),
             
             LtacType::BAnd => ltac_build_instr(writer, code),
             LtacType::BOr => ltac_build_instr(writer, code),
@@ -279,11 +279,11 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::StrPtr => line.push_str("  ptr.str "),
         
         // Byte (i8) operations
-        LtacType::BAdd => line.push_str("  i8.add "),
-        LtacType::BSub => line.push_str("  i8.sub "),
-        LtacType::BMul => line.push_str("  i8.mul "),
-        LtacType::BDiv => line.push_str("  i8.div "),
-        LtacType::BMod => line.push_str("  i8.mod "),
+        LtacType::I8Add => line.push_str("  i8.add "),
+        LtacType::I8Sub => line.push_str("  i8.sub "),
+        LtacType::I8Mul => line.push_str("  i8.mul "),
+        LtacType::I8Div => line.push_str("  i8.div "),
+        LtacType::I8Mod => line.push_str("  i8.mod "),
         
         // Unsigned byte (u8) operations
         LtacType::U8Add => line.push_str("  u8.add "),
@@ -392,7 +392,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         _ => {},
     }
     
-    match &code.arg1_type {
+    match &code.arg1 {
             LtacArg::Empty => line.push_str(" "),
             
             LtacArg::Reg8(val) => {
@@ -478,7 +478,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::PtrLcl(val) => line.push_str(&val.to_string()),
         }
         
-        match &code.arg2_type {
+        match &code.arg2 {
             LtacArg::Empty => line.push_str(""),
             
             LtacArg::Reg8(val) => {

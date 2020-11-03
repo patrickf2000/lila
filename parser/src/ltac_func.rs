@@ -25,7 +25,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         match &arg.arg_type {
             AstArgType::ByteL => {
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::UByte(arg.u8_val);
+                push.arg1 = LtacArg::UByte(arg.u8_val);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 
@@ -34,7 +34,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::ShortL => {
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::U16(arg.u16_val);
+                push.arg1 = LtacArg::U16(arg.u16_val);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 
@@ -43,7 +43,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::IntL => {
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::U32(arg.u64_val as u32);
+                push.arg1 = LtacArg::U32(arg.u64_val as u32);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 
@@ -58,7 +58,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             AstArgType::FloatL => {
                 let mut push = ltac::create_instr(LtacType::PushArg);
                 let name = builder.build_float(arg.f64_val, false, false);
-                push.arg1_type = LtacArg::F32(name);
+                push.arg1 = LtacArg::F32(name);
                 push.arg2_val = flt_arg_no;
                 builder.file.code.push(push);
                 
@@ -69,7 +69,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 let name = builder.build_string(arg.str_val.clone());
                 
                 let mut push = ltac::create_instr(arg_type.clone());
-                push.arg1_type = LtacArg::PtrLcl(name);
+                push.arg1 = LtacArg::PtrLcl(name);
                 push.arg2_val = arg_no;
                 builder.file.code.push(push);
                 
@@ -82,31 +82,31 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 
                 match &builder.vars.get(&arg.str_val) {
                     Some(v) => {
-                        push.arg1_type = LtacArg::Mem(v.pos);
+                        push.arg1 = LtacArg::Mem(v.pos);
                         
                         if v.data_type == DataType::Byte {
-                            push.arg2_type = LtacArg::Byte(0);
+                            push.arg2 = LtacArg::Byte(0);
                             
                         } else if v.data_type == DataType::UByte {
-                            push.arg2_type = LtacArg::UByte(0);
+                            push.arg2 = LtacArg::UByte(0);
                             
                         } else if v.data_type == DataType::Short {
-                            push.arg2_type = LtacArg::I16(0);
+                            push.arg2 = LtacArg::I16(0);
                             
                         } else if v.data_type == DataType::UShort {
-                            push.arg2_type = LtacArg::U16(0);
+                            push.arg2 = LtacArg::U16(0);
                             
                         } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
-                            push.arg1_type = LtacArg::Ptr(v.pos);
+                            push.arg1 = LtacArg::Ptr(v.pos);
                             
                         } else if v.data_type == DataType::Int64 {
-                            push.arg2_type = LtacArg::I64(0);
+                            push.arg2 = LtacArg::I64(0);
                             
                         } else if v.data_type == DataType::Float {
-                            push.arg2_type = LtacArg::FltReg(flt_arg_no);
+                            push.arg2 = LtacArg::FltReg(flt_arg_no);
                             
                         } else if v.data_type == DataType::Double {
-                            push.arg2_type = LtacArg::FltReg64(flt_arg_no);
+                            push.arg2 = LtacArg::FltReg64(flt_arg_no);
                         }
                         
                         // For the proper registers
@@ -161,75 +161,75 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         match &builder.current_type {
             DataType::Byte => {
                 mov = ltac::create_instr(LtacType::MovB);
-                mov.arg1_type = LtacArg::RetRegI8;
+                mov.arg1 = LtacArg::RetRegI8;
             },
             
             DataType::UByte => {
                 mov = ltac::create_instr(LtacType::MovUB);
-                mov.arg1_type = LtacArg::RetRegU8;
+                mov.arg1 = LtacArg::RetRegU8;
             },
             
             DataType::Short => {
                 mov = ltac::create_instr(LtacType::MovW);
-                mov.arg1_type = LtacArg::RetRegI16;
+                mov.arg1 = LtacArg::RetRegI16;
             },
             
             DataType::UShort => {
                 mov = ltac::create_instr(LtacType::MovUW);
-                mov.arg1_type = LtacArg::RetRegU16;
+                mov.arg1 = LtacArg::RetRegU16;
             },
             
             DataType::UInt => {
                 mov = ltac::create_instr(LtacType::MovU);
-                mov.arg1_type = LtacArg::RetRegU32;
+                mov.arg1 = LtacArg::RetRegU32;
             },
             
             DataType::Int64 => {
                 mov = ltac::create_instr(LtacType::MovQ);
-                mov.arg1_type = LtacArg::RetRegI64;
+                mov.arg1 = LtacArg::RetRegI64;
             },
             
             DataType::UInt64 => {
                 mov = ltac::create_instr(LtacType::MovUQ);
-                mov.arg1_type = LtacArg::RetRegU64;
+                mov.arg1 = LtacArg::RetRegU64;
             },
             
             DataType::Float => {
                 mov = ltac::create_instr(LtacType::MovF32);
-                mov.arg1_type = LtacArg::RetRegF32;
+                mov.arg1 = LtacArg::RetRegF32;
             },
             
             DataType::Double => {
                 mov = ltac::create_instr(LtacType::MovF64);
-                mov.arg1_type = LtacArg::RetRegF64;
+                mov.arg1 = LtacArg::RetRegF64;
             },
             
-            _ => mov.arg1_type = LtacArg::RetRegI32,
+            _ => mov.arg1 = LtacArg::RetRegI32,
         }
         
         match &arg1.arg_type {
             AstArgType::ByteL => {
                 if builder.current_type == DataType::UByte {
-                    mov.arg2_type = LtacArg::UByte(arg1.u8_val);
+                    mov.arg2 = LtacArg::UByte(arg1.u8_val);
                 } else {
-                    mov.arg2_type = LtacArg::Byte(arg1.u8_val as i8);
+                    mov.arg2 = LtacArg::Byte(arg1.u8_val as i8);
                 }
             },
             
             AstArgType::ShortL => {
                 if builder.current_type == DataType::UShort {
-                    mov.arg2_type = LtacArg::U16(arg1.u16_val);
+                    mov.arg2 = LtacArg::U16(arg1.u16_val);
                 } else {
-                    mov.arg2_type = LtacArg::I16(arg1.u16_val as i16);
+                    mov.arg2 = LtacArg::I16(arg1.u16_val as i16);
                 }
             },
         
             AstArgType::IntL => {
                 match builder.current_type {
-                    DataType::Int => mov.arg2_type = LtacArg::I32(arg1.u64_val as i32),
-                    DataType::UInt => mov.arg2_type = LtacArg::U32(arg1.u64_val as u32),
-                    DataType::Int64 => mov.arg2_type = LtacArg::I64(arg1.u64_val as i64),
-                    DataType::UInt64 => mov.arg2_type = LtacArg::U64(arg1.u64_val),
+                    DataType::Int => mov.arg2 = LtacArg::I32(arg1.u64_val as i32),
+                    DataType::UInt => mov.arg2 = LtacArg::U32(arg1.u64_val as u32),
+                    DataType::Int64 => mov.arg2 = LtacArg::I64(arg1.u64_val as i64),
+                    DataType::UInt64 => mov.arg2 = LtacArg::U64(arg1.u64_val),
                     
                     _ => {},
                 }
@@ -238,10 +238,10 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             AstArgType::FloatL => {
                 if builder.current_type == DataType::Float {
                     let name = builder.build_float(arg1.f64_val, false, false);
-                    mov.arg2_type = LtacArg::F32(name);
+                    mov.arg2 = LtacArg::F32(name);
                 } else {
                     let name = builder.build_float(arg1.f64_val, true, false);
-                    mov.arg2_type = LtacArg::F64(name);
+                    mov.arg2 = LtacArg::F64(name);
                 }
             }
             
@@ -249,7 +249,7 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::Id => {
                 match builder.vars.get(&arg1.str_val) {
-                    Some(v) => mov.arg2_type = LtacArg::Mem(v.pos),
+                    Some(v) => mov.arg2 = LtacArg::Mem(v.pos),
                     None => {/* TODO: Syntax error */},
                 }
             },
@@ -273,7 +273,7 @@ pub fn build_exit(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     free_arrays(builder);
     
     let mut instr = ltac::create_instr(LtacType::Exit);
-    instr.arg1_type = LtacArg::I32(0);
+    instr.arg1 = LtacArg::I32(0);
     
     if line.args.len() == 1 {
         //TODO

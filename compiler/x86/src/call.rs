@@ -19,14 +19,14 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     }
     
     // Determine move type
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Reg8(_p) => line = "  movzx ".to_string(),
         LtacArg::F32(_p) => line = "  movss ".to_string(),
         LtacArg::F64(_p) => line = "  movsd ".to_string(),
         _ => {},
     }
     
-    match code.arg2_type {
+    match code.arg2 {
         LtacArg::Byte(_v) => line = "  movsx ".to_string(),
         LtacArg::UByte(_v) => line = "  movzx ".to_string(),
         LtacArg::I16(_v) => line = "  movsx ".to_string(),
@@ -46,7 +46,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     }
     
     // Assemble
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Empty => {},
         
         LtacArg::Reg8(pos) => {
@@ -69,7 +69,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => {},
         
         LtacArg::Mem(pos) => {
-            match code.arg2_type {
+            match code.arg2 {
                 LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => {
                     line.push_str(&reg_flt);
                     line.push_str(", ");
@@ -170,7 +170,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
     
     // If we have a 32-bit float variable, we have to convert it to a double
     //TODO: combine
-    match code.arg2_type {
+    match code.arg2 {
         LtacArg::FltReg(_p) => {
             line.push_str("  cvtss2sd ");
             line.push_str(&reg_flt);
@@ -182,7 +182,7 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         _ => {},
     }
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::F32(_v) => {
             line.push_str("  cvtss2sd ");
             line.push_str(&reg_flt);

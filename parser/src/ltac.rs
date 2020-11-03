@@ -25,6 +25,7 @@ pub enum LtacType {
     MovOffMem,
     MovI32Vec,
     
+    // Load-store instructions- RISC specific
     Ld,
     LdB,
     LdUB,
@@ -35,6 +36,7 @@ pub enum LtacType {
     StrW,
     StrPtr,
     
+    // Argument load instructions
     LdArgI8,    LdArgU8,
     LdArgI16,   LdArgU16,
     LdArgI32,   LdArgU32,
@@ -74,16 +76,11 @@ pub enum LtacType {
     Bfge,       // Jump if float is greater or equal
     
     // Math operations
-    BAdd,
-    BSub,
-    BMul,
-    BDiv,
-    BMod,
-    
-    U8Add,
-    U8Mul,
-    U8Div,
-    U8Mod,
+    I8Add,      U8Add,
+    I8Sub,
+    I8Mul,      U8Mul,
+    I8Div,      U8Div,
+    I8Mod,      U8Mod,
     
     I16Add,     U16Add,
     I16Sub,
@@ -203,12 +200,12 @@ pub struct LtacInstr {
     pub instr_type : LtacType,
     pub name : String,
     
-    pub arg1_type : LtacArg,
+    pub arg1 : LtacArg,
     pub arg1_val : i32,
     pub arg1_offset : i32,
     pub arg1_offset_size : i32,
     
-    pub arg2_type : LtacArg,
+    pub arg2 : LtacArg,
     pub arg2_val : i32,
     pub arg2_offset : i32,
     pub arg2_offset_size : i32,
@@ -222,12 +219,12 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         instr_type : instr_type,
         name : String::new(),
         
-        arg1_type : LtacArg::Empty,
+        arg1 : LtacArg::Empty,
         arg1_val : 0,
         arg1_offset : 0,
         arg1_offset_size : 0,
         
-        arg2_type : LtacArg::Empty,
+        arg2 : LtacArg::Empty,
         arg2_val : 0,
         arg2_offset : 0,
         arg2_offset_size : 0,

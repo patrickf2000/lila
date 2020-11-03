@@ -30,7 +30,7 @@ pub fn free_arrays(builder : &mut LtacBuilder) {
             && !var.is_param {
             
             let mut pusharg = ltac::create_instr(LtacType::PushArg);
-            pusharg.arg1_type = LtacArg::Ptr(var.pos);
+            pusharg.arg1 = LtacArg::Ptr(var.pos);
             pusharg.arg2_val = 1;
             builder.file.code.push(pusharg);
             
@@ -60,7 +60,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         }
         
         let mut pusharg = ltac::create_instr(LtacType::PushArg);
-        pusharg.arg1_type = LtacArg::I32((arg.u64_val as i32) * size);
+        pusharg.arg1 = LtacArg::I32((arg.u64_val as i32) * size);
         pusharg.arg2_val = 1;
         
         builder.file.code.push(pusharg);
@@ -70,8 +70,8 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         
         // Move the return register back to the variable
         instr = ltac::create_instr(LtacType::Mov);
-        instr.arg1_type = LtacArg::Mem(var.pos);
-        instr.arg2_type = LtacArg::RetRegI64;
+        instr.arg1 = LtacArg::Mem(var.pos);
+        instr.arg2 = LtacArg::RetRegI64;
         builder.file.code.push(instr);
         
     // Vector math
@@ -87,13 +87,13 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
 // Builds integer vector math
 pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
     let mut instr = ltac::create_instr(LtacType::MovI32Vec);
-    instr.arg1_type = LtacArg::Reg32(0);
+    instr.arg1 = LtacArg::Reg32(0);
 
     for arg in line.args.iter() {
         match &arg.arg_type {
             AstArgType::Id => {
                 match &builder.vars.get(&arg.str_val) {
-                    Some(v) => instr.arg2_type = LtacArg::Mem(v.pos),
+                    Some(v) => instr.arg2 = LtacArg::Mem(v.pos),
                     None => {
                         builder.syntax.ltac_error(line, "Invalid variable.".to_string());
                         return false;
@@ -107,7 +107,7 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
             
             AstArgType::OpAdd => {
                 instr = ltac::create_instr(LtacType::I32VAdd);
-                instr.arg1_type = LtacArg::Reg32(0);
+                instr.arg1 = LtacArg::Reg32(0);
             },
             
             _ => {
@@ -119,8 +119,8 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
     
     // The final move instruction
     instr = ltac::create_instr(LtacType::MovI32Vec);
-    instr.arg1_type = LtacArg::Mem(var.pos);
-    instr.arg2_type = LtacArg::Reg32(0);
+    instr.arg1 = LtacArg::Mem(var.pos);
+    instr.arg2 = LtacArg::Reg32(0);
     instr.arg2_offset_size = 4;
     
     builder.file.code.push(instr.clone());

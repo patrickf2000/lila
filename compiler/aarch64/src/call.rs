@@ -16,7 +16,7 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, k
         reg64 = aarch64_karg_reg64(code.arg2_val);
     }
     
-    match &code.arg1_type {
+    match &code.arg1 {
         LtacArg::Reg8(pos) | LtacArg::Reg32(pos) => {
             let reg = aarch64_op_reg32(*pos);
             
