@@ -300,3 +300,55 @@ impl LtacBuilder {
 
 }
 
+// Returns a move statement for a given type
+pub fn mov_for_type(data_type :& DataType) -> LtacInstr {
+    let mut instr = ltac::create_instr(LtacType::Mov);
+    
+    match data_type {
+        DataType::Byte | DataType::ByteDynArray => instr = ltac::create_instr(LtacType::MovB),
+        DataType::UByte | DataType::UByteDynArray => instr = ltac::create_instr(LtacType::MovUB),
+        
+        DataType::Short | DataType::ShortDynArray => instr = ltac::create_instr(LtacType::MovW),
+        DataType::UShort | DataType::UShortDynArray => instr = ltac::create_instr(LtacType::MovUW),
+        
+        DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::Mov),
+        DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::MovU),
+        
+        DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::MovQ),
+        DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::MovUQ),
+        
+        DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::MovF32),
+        DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::MovF64),
+        
+        _ => {},
+    }
+    
+    instr
+}
+
+// Returns a register for a given type
+pub fn reg_for_type(data_type : &DataType, reg_no : i32) -> LtacArg {
+    let mut arg = LtacArg::Reg32(reg_no);
+    
+    match data_type {
+        DataType::Byte | DataType::ByteDynArray => arg = LtacArg::Reg8(reg_no),
+        DataType::UByte | DataType::UByteDynArray => arg = LtacArg::Reg8(reg_no),
+        
+        DataType::Short | DataType::ShortDynArray => arg = LtacArg::Reg16(reg_no),
+        DataType::UShort | DataType::UShortDynArray => arg = LtacArg::Reg16(reg_no),
+        
+        DataType::Int | DataType::IntDynArray => arg = LtacArg::Reg32(reg_no),
+        DataType::UInt | DataType::UIntDynArray => arg = LtacArg::Reg32(reg_no),
+        
+        DataType::Int64 | DataType::I64DynArray => arg = LtacArg::Reg64(reg_no),
+        DataType::UInt64 | DataType::U64DynArray => arg = LtacArg::Reg64(reg_no),
+        
+        DataType::Float | DataType::FloatDynArray => arg = LtacArg::FltReg(reg_no),
+        DataType::Double | DataType::DoubleDynArray => arg = LtacArg::FltReg64(reg_no),
+        
+        _ => {},
+    }
+    
+    arg
+}
+
