@@ -64,10 +64,10 @@ run_test 'test/int64/*.ds' 'clib' $1
 run_test 'test/byte/*.ds' 'clib' $1
 run_test 'test/short/*.ds' 'clib' $1
 run_test 'test/float/*.ds' 'clib' $1
-
-run_test 'test/loop/*.ds' 'clib' $1
-
 run_test 'test/string/*.ds' 'clib' $1
+
+run_test 'test/ooop/*.ds' 'clib' $1
+run_test 'test/loop/*.ds' 'clib' $1
 
 run_test 'test/errors/*.ds' 'clib' $1 "error"
 run_test 'test/errors/ltac/*.ds' "clib" $1 "error"
