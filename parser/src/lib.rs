@@ -7,6 +7,7 @@ mod ast_builder;
 mod ast_func;
 mod ast_utils;
 mod ltac_builder;
+mod ltac_expr;
 mod ltac_array;
 mod ltac_flow;
 mod ltac_func;

@@ -4,7 +4,7 @@ use crate::ltac;
 use crate::ltac::{LtacType, LtacArg};
 use crate::ast::{AstStmt, AstArgType};
 
-use crate::ltac_var::*;
+use crate::ltac_expr::*;
 
 // Assigns a value to an array
 pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
@@ -14,7 +14,7 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         None => return false,
     }
     
-    let code = build_var_math(builder, &line, &var, -1);
+    let code = build_var_math(builder, &line, &var);
     
     code
 }
