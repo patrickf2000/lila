@@ -24,6 +24,8 @@ fn run() -> i32 {
     let mut print_ast = false;
     let mut print_ltac = false;
     let mut use_c = false;
+    let mut link_lib = false;
+    let mut no_link = false;
     let mut arch = Arch::X86_64;
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
@@ -41,6 +43,8 @@ fn run() -> i32 {
             "--ast" => print_ast = true,
             "--ltac" => print_ltac = true,
             "--use-c" => use_c = true,
+            "--lib" => link_lib = true,
+            "--no-link" => no_link = true,
             "--amd64" => arch = Arch::X86_64,
             "--aarch64" => arch = Arch::AArch64,
             "-o" => next_output = true,
@@ -62,6 +66,11 @@ fn run() -> i32 {
     let mut all_names : Vec<String> = Vec::new();
     
     for input in inputs {
+        if input.starts_with("-l") || input.ends_with(".o") {
+            all_names.push(input);
+            continue;
+        }
+    
         // Build the LTAC portion
         let mut ltac = match parser::parse(input) {
             Ok(ltac) => ltac,
@@ -81,7 +90,7 @@ fn run() -> i32 {
             ltac_printer::compile(&ltac).expect("LTAC Codegen failed with unknown error."); 
         } else if arch == Arch::X86_64 {
             x86::compile(&ltac).expect("Codegen failed with unknown error.");
-            x86::build_asm(&ltac.name);
+            x86::build_asm(&ltac.name, no_link);
         } else if arch == Arch::AArch64 {
             aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
             aarch64::build_asm(&ltac.name, use_c);
@@ -89,8 +98,10 @@ fn run() -> i32 {
     }
     
     // Link
-    if arch == Arch::X86_64 {
-        x86::link(&all_names, &output, use_c);
+    if !no_link {
+        if arch == Arch::X86_64 {
+            x86::link(&all_names, &output, use_c, link_lib);
+        }
     }
     
     0

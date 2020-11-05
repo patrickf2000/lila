@@ -39,13 +39,17 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
 }
 
 // Assemble a file
-pub fn build_asm(name : &String) {
+pub fn build_asm(name : &String, no_link : bool) {
     // Create all the names
     let mut asm_name = "/tmp/".to_string();
     asm_name.push_str(name);
     asm_name.push_str(".asm");
     
     let mut obj_name = "/tmp/".to_string();
+    if no_link {
+        obj_name = "./".to_string();
+    }
+    
     obj_name.push_str(name);
     obj_name.push_str(".o");
 
@@ -62,12 +66,15 @@ pub fn build_asm(name : &String) {
 }
  
 // Link everything
-pub fn link(all_names : &Vec<String>, output : &String, use_c : bool) {
+pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : bool) {
     let mut names : Vec<String> = Vec::new();
+    let mut libs : Vec<String> = Vec::new();
     
     for name in all_names.iter() {
         if name.ends_with(".o") {
             names.push(name.clone());
+        } else if name.starts_with("-l") {
+            libs.push(name.clone());
         } else {
             let mut obj_name = "/tmp/".to_string();
             obj_name.push_str(&name);
@@ -89,9 +96,19 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool) {
             args.push(&name);
         }
         
-        args.push("-dynamic-linker");
-        args.push("/lib64/ld-linux-x86-64.so.2");
+        if is_lib {
+            args.push("-shared");
+        } else {
+            args.push("-dynamic-linker");
+            args.push("/lib64/ld-linux-x86-64.so.2");
+        }
+        
         args.push("-lc");
+        
+        for lib in libs.iter() {
+            args.push(lib);
+        }
+        
         args.push("-o");
         args.push(output);
         
@@ -104,6 +121,10 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool) {
         
         for name in names.iter() {
             args.push(&name);
+        }
+        
+        for lib in libs.iter() {
+            args.push(lib);
         }
         
         args.push("-o");
