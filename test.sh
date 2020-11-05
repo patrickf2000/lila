@@ -30,9 +30,9 @@ function run_test() {
             rm ERROR_TEST.sh
         else
             if [[ $2 == "sys" ]] ; then
-                cargo run $entry $arch
+                cargo run $entry $arch -o $name
             elif [[ $2 == "clib" ]] ; then
-                cargo run $entry --use-c $arch
+                cargo run $entry --use-c $arch -o $name
             fi
         
     	    ./test.py $entry ./$name ""

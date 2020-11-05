@@ -37,8 +37,9 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     
     Ok(())
 }
- 
-pub fn build_asm(name : &String, use_c : bool) {
+
+// Assemble a file
+pub fn build_asm(name : &String) {
     // Create all the names
     let mut asm_name = "/tmp/".to_string();
     asm_name.push_str(name);
@@ -47,8 +48,6 @@ pub fn build_asm(name : &String, use_c : bool) {
     let mut obj_name = "/tmp/".to_string();
     obj_name.push_str(name);
     obj_name.push_str(".o");
-    
-    let output = &mut name.clone();
 
     // Assemble
     let asm = Command::new("as")
@@ -60,36 +59,58 @@ pub fn build_asm(name : &String, use_c : bool) {
         io::stdout().write_all(&asm.stdout).unwrap();
         io::stderr().write_all(&asm.stderr).unwrap();
     }
+}
+ 
+// Link everything
+pub fn link(all_names : &Vec<String>, output : &String, use_c : bool) {
+    let mut names : Vec<String> = Vec::new();
+    
+    for name in all_names.iter() {
+        if name.ends_with(".o") {
+            names.push(name.clone());
+        } else {
+            let mut obj_name = "/tmp/".to_string();
+            obj_name.push_str(&name);
+            obj_name.push_str(".o");
+            names.push(obj_name);
+        }
+    }
     
     // Link
     let ld : Output;
     
     if use_c {
-        let args = [
-            "/usr/lib/x86_64-linux-gnu/crti.o",
-            "/usr/lib/x86_64-linux-gnu/crtn.o",
-            "/usr/lib/x86_64-linux-gnu/crt1.o",
-            &obj_name,
-            "-dynamic-linker",
-            "/lib64/ld-linux-x86-64.so.2",
-            "-lc",
-            "-o",
-            output
-        ];
+        let mut args : Vec<&str> = Vec::new();
+        args.push("/usr/lib/x86_64-linux-gnu/crti.o");
+        args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
+        args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
+        
+        for name in names.iter() {
+            args.push(&name);
+        }
+        
+        args.push("-dynamic-linker");
+        args.push("/lib64/ld-linux-x86-64.so.2");
+        args.push("-lc");
+        args.push("-o");
+        args.push(output);
         
         ld = Command::new("ld")
-            .args(&args)
+            .args(args.as_slice())
             .output()
             .expect("Fatal: Linking failed.");
     } else {
-        let args = [
-            &obj_name,
-            "-o",
-            output
-        ];
+        let mut args : Vec<&str> = Vec::new();
+        
+        for name in names.iter() {
+            args.push(&name);
+        }
+        
+        args.push("-o");
+        args.push(output);
         
         ld = Command::new("ld")
-            .args(&args)
+            .args(args.as_slice())
             .output()
             .expect("Fatal: Linking failed.");
     }
