@@ -19,7 +19,7 @@ use math::*;
 use utils::*;
 use vector::*;
 
-pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
+pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
     name.push_str(&ltac_file.name);
     name.push_str(".asm");
@@ -32,8 +32,8 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     writer.write(b".intel_syntax noprefix\n")
         .expect("[AMD64_setup] Write failed.");
     
-    write_data(&mut writer, &ltac_file.data);
-    write_code(&mut writer, &ltac_file.code);
+    write_data(&mut writer, &ltac_file.data, pic);
+    write_code(&mut writer, &ltac_file.code, pic);
     
     Ok(())
 }
@@ -86,14 +86,17 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
     // Link
     //let ld : Output;
     let mut args : Vec<&str> = Vec::new();
+    args.push("-L./");
     
     if use_c {
-        args.push("/usr/lib/x86_64-linux-gnu/crti.o");
-        args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
-        args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
-        
-        args.push("-dynamic-linker");
-        args.push("/lib64/ld-linux-x86-64.so.2");
+        if !is_lib {
+            args.push("/usr/lib/x86_64-linux-gnu/crti.o");
+            args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
+            args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
+            
+            args.push("-dynamic-linker");
+            args.push("/lib64/ld-linux-x86-64.so.2");
+        }
         
         args.push("-lc");
     }
@@ -125,9 +128,12 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
 }
 
 // Writes the .data section
-fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
+fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>, pic : bool) {
     let mut line = String::new();
-    line.push_str(".data\n");
+    
+    if !pic {
+        line.push_str(".data\n");
+    }
 
     for data in data.iter() {
         match &data.data_type {
@@ -161,7 +167,7 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
 }
 
 // Writes the .text section
-fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
+fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bool) {
     let line = ".text\n".to_string();
     writer.write(&line.into_bytes())
         .expect("[AMD64_code] Write failed");
@@ -170,23 +176,23 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
         match &code.instr_type {
             LtacType::Extern => amd64_build_extern(writer, &code),
             LtacType::Label => amd64_build_label(writer, &code),
-            LtacType::Func => amd64_build_func(writer, &code),
+            LtacType::Func => amd64_build_func(writer, &code, is_pic),
             LtacType::Ret => amd64_build_ret(writer),
             
-            LtacType::LdArgI8 | LtacType::LdArgU8 => amd64_build_ldarg(writer, &code),
-            LtacType::LdArgI16 | LtacType::LdArgU16 => amd64_build_ldarg(writer, &code),
-            LtacType::LdArgI32 | LtacType::LdArgU32 => amd64_build_ldarg(writer, &code),
-            LtacType::LdArgI64 | LtacType::LdArgU64 => amd64_build_ldarg(writer, &code),
+            LtacType::LdArgI8 | LtacType::LdArgU8 => amd64_build_ldarg(writer, &code, is_pic),
+            LtacType::LdArgI16 | LtacType::LdArgU16 => amd64_build_ldarg(writer, &code, is_pic),
+            LtacType::LdArgI32 | LtacType::LdArgU32 => amd64_build_ldarg(writer, &code, is_pic),
+            LtacType::LdArgI64 | LtacType::LdArgU64 => amd64_build_ldarg(writer, &code, is_pic),
             LtacType::LdArgF32 => amd64_build_ldarg_float(writer, &code),
             LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
-            LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
+            LtacType::LdArgPtr => amd64_build_ldarg(writer, &code, is_pic),
             
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             
-            LtacType::PushArg => amd64_build_pusharg(writer, &code, false),
-            LtacType::KPushArg => amd64_build_pusharg(writer, &code, true),
+            LtacType::PushArg => amd64_build_pusharg(writer, &code, false, is_pic),
+            LtacType::KPushArg => amd64_build_pusharg(writer, &code, true, is_pic),
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
             
@@ -234,13 +240,13 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrPtr => {},
             
             // Everything else uses the common build instruction function
-            _ => amd64_build_instr(writer, &code),
+            _ => amd64_build_instr(writer, &code, is_pic),
         }
     }
 }
 
 // Many instructions have common syntax
-fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
+fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : bool) {
     let mut line = String::new();
     
     // Specific for float literals
@@ -370,9 +376,15 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 _ => {},
             }
             
-            line.push_str("[rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("], ");
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp], ");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("], ");
+            }
         },
         
         _ => {},
@@ -414,9 +426,15 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0"),
         
         LtacArg::Mem(pos) => {
-            line.push_str("[rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]");
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]");
+            }
         },
         
         LtacArg::Byte(val) => line.push_str(&val.to_string()),

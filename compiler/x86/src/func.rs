@@ -28,12 +28,19 @@ pub fn amd64_build_label(writer : &mut BufWriter<File>, code : &LtacInstr) {
 // Builds a function
 // Params: name -> function name
 //         arg1_val -> stack size
-pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
+pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : bool) {
     let mut line = String::new();
 
     line.push_str("\n.global ");
     line.push_str(&code.name);
     line.push_str("\n");
+    
+    if is_pic {
+        line.push_str(".type ");
+        line.push_str(&code.name);
+        line.push_str(", @function\n");
+    }
+    
     line.push_str(&code.name);
     line.push_str(":\n");
     
@@ -56,12 +63,18 @@ pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
 // In the LtacInstr:
 //      -> arg1_val = memory location
 //      -> arg2_val = register position
-pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
+pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : bool) {
     let mut line = String::new();
     
-    line.push_str("  mov [rbp-");
-    line.push_str(&code.arg1_val.to_string());
-    line.push_str("], ");
+    if is_pic {
+        line.push_str("  mov -");
+        line.push_str(&code.arg1_val.to_string());
+        line.push_str("[rbp], ");
+    } else {
+        line.push_str("  mov [rbp-");
+        line.push_str(&code.arg1_val.to_string());
+        line.push_str("], ");
+    }
     
     if code.instr_type == LtacType::LdArgI8 || code.instr_type == LtacType::LdArgU8 {
         let reg = amd64_arg_reg8(code.arg2_val);

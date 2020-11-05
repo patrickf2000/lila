@@ -5,7 +5,7 @@ use parser::ltac::{LtacInstr, LtacArg};
 use crate::utils::*;
 
 // Builds a function argument
-pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool) {
+pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool, is_pic : bool) {
     let mut line = "  mov ".to_string();
     
     // Get the argument registers
@@ -158,9 +158,17 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         },
         
         LtacArg::PtrLcl(ref val) => {
-            line.push_str(&reg64);
-            line.push_str(", OFFSET FLAT:");
-            line.push_str(&val);
+            if is_pic {
+                line = "  lea ".to_string();
+                line.push_str(&reg64);
+                line.push_str(", ");
+                line.push_str(&val);
+                line.push_str("[rip]");
+            } else {
+                line.push_str(&reg64);
+                line.push_str(", OFFSET FLAT:");
+                line.push_str(&val);
+            }
         },
         
         _ => {},

@@ -89,7 +89,12 @@ fn run() -> i32 {
         if print_ltac {
             ltac_printer::compile(&ltac).expect("LTAC Codegen failed with unknown error."); 
         } else if arch == Arch::X86_64 {
-            x86::compile(&ltac).expect("Codegen failed with unknown error.");
+            let mut pic = false;
+            if link_lib {
+                pic = true;
+            }
+            
+            x86::compile(&ltac, pic).expect("Codegen failed with unknown error.");
             x86::build_asm(&ltac.name, no_link);
         } else if arch == Arch::AArch64 {
             aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
