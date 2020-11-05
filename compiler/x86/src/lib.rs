@@ -2,7 +2,7 @@ use std::io;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
-use std::process::{Command, Output};
+use std::process::Command;
 
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
@@ -84,57 +84,39 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
     }
     
     // Link
-    let ld : Output;
+    //let ld : Output;
+    let mut args : Vec<&str> = Vec::new();
     
     if use_c {
-        let mut args : Vec<&str> = Vec::new();
         args.push("/usr/lib/x86_64-linux-gnu/crti.o");
         args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
         args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
         
-        for name in names.iter() {
-            args.push(&name);
-        }
-        
-        if is_lib {
-            args.push("-shared");
-        } else {
-            args.push("-dynamic-linker");
-            args.push("/lib64/ld-linux-x86-64.so.2");
-        }
+        args.push("-dynamic-linker");
+        args.push("/lib64/ld-linux-x86-64.so.2");
         
         args.push("-lc");
-        
-        for lib in libs.iter() {
-            args.push(lib);
-        }
-        
-        args.push("-o");
-        args.push(output);
-        
-        ld = Command::new("ld")
-            .args(args.as_slice())
-            .output()
-            .expect("Fatal: Linking failed.");
-    } else {
-        let mut args : Vec<&str> = Vec::new();
-        
-        for name in names.iter() {
-            args.push(&name);
-        }
-        
-        for lib in libs.iter() {
-            args.push(lib);
-        }
-        
-        args.push("-o");
-        args.push(output);
-        
-        ld = Command::new("ld")
-            .args(args.as_slice())
-            .output()
-            .expect("Fatal: Linking failed.");
     }
+        
+    for name in names.iter() {
+        args.push(&name);
+    }
+        
+    if is_lib {
+        args.push("-shared");
+    }
+    
+    for lib in libs.iter() {
+        args.push(lib);
+    }
+        
+    args.push("-o");
+    args.push(output);
+    
+    let ld = Command::new("ld")
+        .args(args.as_slice())
+        .output()
+        .expect("Fatal: Linking failed.");
     
     if !ld.status.success() {
         io::stdout().write_all(&ld.stdout).unwrap();
@@ -199,12 +181,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code),
             
-            LtacType::MovB | LtacType::MovUB => amd64_build_instr(writer, &code),
-            LtacType::MovW | LtacType::MovUW => amd64_build_instr(writer, &code),
-            LtacType::Mov | LtacType::MovU => amd64_build_instr(writer, &code),
-            LtacType::MovQ | LtacType::MovUQ => amd64_build_instr(writer, &code),
-            LtacType::MovF32 => amd64_build_instr(writer, &code),
-            LtacType::MovF64 => amd64_build_instr(writer, &code),
             LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
@@ -214,12 +190,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
             
-            LtacType::I8Cmp | LtacType::U8Cmp => amd64_build_instr(writer, &code),
-            LtacType::I16Cmp | LtacType::U16Cmp => amd64_build_instr(writer, &code),
-            LtacType::I32Cmp | LtacType::U32Cmp => amd64_build_instr(writer, &code),
-            LtacType::I64Cmp | LtacType::U64Cmp => amd64_build_instr(writer, &code),
-            LtacType::F32Cmp => amd64_build_instr(writer, &code),
-            LtacType::F64Cmp => amd64_build_instr(writer, &code),
             LtacType::StrCmp => amd64_build_strcmp(writer, &code),
             
             LtacType::Br => amd64_build_jump(writer, &code),
@@ -241,40 +211,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I16Div | LtacType::I16Mod |
             LtacType::U16Div | LtacType::U16Mod => amd64_build_short_div(writer, &code),
             
-            LtacType::I8Add | LtacType::U8Add |
-            LtacType::I16Add | LtacType::U16Add |
-            LtacType::I32Add | LtacType::U32Add => amd64_build_instr(writer, &code),
-            
-            LtacType::I8Sub | LtacType::I16Sub |
-            LtacType::I32Sub => amd64_build_instr(writer, &code),
-            
-            LtacType::I16Mul | LtacType::U16Mul |
-            LtacType::I32Mul | LtacType::U32Mul => amd64_build_instr(writer, &code),
-            
             LtacType::I32Div | LtacType::U32Div => amd64_build_div(writer, &code),
             LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(writer, &code),
             
-            LtacType::I64Add | LtacType::U64Add => amd64_build_instr(writer, &code),
-            LtacType::I64Sub => amd64_build_instr(writer, &code),
-            LtacType::I64Mul | LtacType::U64Mul => amd64_build_instr(writer, &code),
             LtacType::I64Div | LtacType::U64Div => amd64_build_div(writer, &code),
             LtacType::I64Mod | LtacType::U64Mod => amd64_build_div(writer, &code),
-            
-            LtacType::F32Add | LtacType::F64Add => amd64_build_instr(writer, &code),
-            LtacType::F32Sub | LtacType::F64Sub => amd64_build_instr(writer, &code),
-            LtacType::F32Mul | LtacType::F64Mul => amd64_build_instr(writer, &code),
-            LtacType::F32Div | LtacType::F64Div => amd64_build_instr(writer, &code),
-            
-            LtacType::BAnd | LtacType::WAnd |
-            LtacType::I32And | LtacType::I64And => amd64_build_instr(writer, &code),
-            LtacType::BOr | LtacType::WOr |
-            LtacType::I32Or | LtacType::I64Or => amd64_build_instr(writer, &code),
-            LtacType::BXor | LtacType::WXor |
-            LtacType::I32Xor | LtacType::I64Xor => amd64_build_instr(writer, &code),
-            LtacType::BLsh | LtacType::WLsh |
-            LtacType::I32Lsh | LtacType::I64Lsh => amd64_build_instr(writer, &code),
-            LtacType::BRsh | LtacType::WRsh |
-            LtacType::I32Rsh | LtacType::I64Rsh => amd64_build_instr(writer, &code),
             
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
             
@@ -291,6 +232,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrB | LtacType::StrUB => {},
             LtacType::StrW => {},
             LtacType::StrPtr => {},
+            
+            // Everything else uses the common build instruction function
+            _ => amd64_build_instr(writer, &code),
         }
     }
 }
