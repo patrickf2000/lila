@@ -82,27 +82,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgF64 => ltac_build_ldarg(writer, code),
             LtacType::LdArgPtr => ltac_build_ldarg(writer, code),
             
-            LtacType::MovB | LtacType::MovUB => ltac_build_instr(writer, code),
-            LtacType::MovW | LtacType::MovUW => ltac_build_instr(writer, code),
-            LtacType::Mov | LtacType::MovU => ltac_build_instr(writer, code),
-            LtacType::MovQ | LtacType::MovUQ => ltac_build_instr(writer, code),
-            LtacType::MovF32 => ltac_build_instr(writer, code),
-            LtacType::MovF64 => ltac_build_instr(writer, code),
-            LtacType::MovOffImm => ltac_build_instr(writer, code),
-            LtacType::MovOffMem => ltac_build_instr(writer, code),
-            LtacType::MovI32Vec => ltac_build_instr(writer, code),
-            
-            LtacType::PushArg => ltac_build_instr(writer, code),
-            LtacType::KPushArg => ltac_build_instr(writer, code),
             LtacType::Call => ltac_build_call(writer, code),
             LtacType::Syscall => ltac_build_cmd(writer, code),
             
-            LtacType::I8Cmp | LtacType::U8Cmp => ltac_build_instr(writer, code),
-            LtacType::I16Cmp | LtacType::U16Cmp => ltac_build_instr(writer, code),
-            LtacType::I32Cmp | LtacType::U32Cmp => ltac_build_instr(writer, code),
-            LtacType::I64Cmp | LtacType::U64Cmp => ltac_build_instr(writer, code),
-            LtacType::F32Cmp => ltac_build_instr(writer, code),
-            LtacType::F64Cmp => ltac_build_instr(writer, code),
             LtacType::StrCmp => ltac_build_strcmp(writer),
             
             LtacType::Br => ltac_build_jump(writer, code),
@@ -117,78 +99,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Bfg => ltac_build_jump(writer, code),
             LtacType::Bfge => ltac_build_jump(writer, code),
             
-            LtacType::I8Add | LtacType::U8Add => ltac_build_instr(writer, code),
-            LtacType::I8Sub => ltac_build_instr(writer, code),
-            LtacType::I8Mul | LtacType::U8Mul => ltac_build_instr(writer, code),
-            LtacType::I8Div | LtacType::U8Div => ltac_build_instr(writer, code),
-            LtacType::I8Mod | LtacType::U8Mod => ltac_build_instr(writer, code),
-            
-            LtacType::BAnd => ltac_build_instr(writer, code),
-            LtacType::BOr => ltac_build_instr(writer, code),
-            LtacType::BXor => ltac_build_instr(writer, code),
-            LtacType::BLsh => ltac_build_instr(writer, code),
-            LtacType::BRsh => ltac_build_instr(writer, code),
-            
-            LtacType::WAnd => ltac_build_instr(writer, code),
-            LtacType::WOr => ltac_build_instr(writer, code),
-            LtacType::WXor => ltac_build_instr(writer, code),
-            LtacType::WLsh => ltac_build_instr(writer, code),
-            LtacType::WRsh => ltac_build_instr(writer, code),
-            
-            LtacType::I16Add | LtacType::U16Add => ltac_build_instr(writer, code),
-            LtacType::I16Sub => ltac_build_instr(writer, code),
-            LtacType::I16Mul | LtacType::U16Mul => ltac_build_instr(writer, code),
-            LtacType::I16Div | LtacType::U16Div => ltac_build_instr(writer, code),
-            LtacType::I16Mod | LtacType::U16Mod => ltac_build_instr(writer, code),
-            
-            LtacType::I32Add | LtacType::U32Add => ltac_build_instr(writer, code),
-            LtacType::I32Sub => ltac_build_instr(writer, code),
-            LtacType::I32Mul | LtacType::U32Mul => ltac_build_instr(writer, code),
-            LtacType::I32Div | LtacType::U32Div => ltac_build_instr(writer, code),
-            LtacType::I32Mod | LtacType::U32Mod => ltac_build_instr(writer, code),
-            
-            LtacType::I32And | LtacType::I64And => ltac_build_instr(writer, code),
-            LtacType::I32Or | LtacType::I64Or => ltac_build_instr(writer, code),
-            LtacType::I32Xor | LtacType::I64Xor => ltac_build_instr(writer, code),
-            LtacType::I32Lsh | LtacType::I64Lsh => ltac_build_instr(writer, code),
-            LtacType::I32Rsh | LtacType::I64Rsh => ltac_build_instr(writer, code),
-            
-            LtacType::I32VAdd => ltac_build_instr(writer, code),
-            
-            LtacType::I64Add | LtacType::U64Add => ltac_build_instr(writer, code),
-            LtacType::I64Sub => ltac_build_instr(writer, code),
-            LtacType::I64Mul | LtacType::U64Mul => ltac_build_instr(writer, code),
-            LtacType::I64Div | LtacType::U64Div => ltac_build_instr(writer, code),
-            LtacType::I64Mod | LtacType::U64Mod => ltac_build_instr(writer, code),
-            
-            LtacType::F32Add => ltac_build_instr(writer, code),
-            LtacType::F32Sub => ltac_build_instr(writer, code),
-            LtacType::F32Mul => ltac_build_instr(writer, code),
-            LtacType::F32Div => ltac_build_instr(writer, code),
-            
-            LtacType::F64Add => ltac_build_instr(writer, code),
-            LtacType::F64Sub => ltac_build_instr(writer, code),
-            LtacType::F64Mul => ltac_build_instr(writer, code),
-            LtacType::F64Div => ltac_build_instr(writer, code),
-            
             // These are intrinsics if you will; they should never get down to a code generation layer
             LtacType::Exit => ltac_build_cmd(writer, code),
             LtacType::Malloc => ltac_build_cmd(writer, code),
             LtacType::Free => ltac_build_cmd(writer, code),
             
-            // These are specific to RISC machines
-            // Load instructions
-            LtacType::Ld => ltac_build_instr(writer, code),
-            LtacType::LdB => ltac_build_instr(writer, code),
-            LtacType::LdUB => ltac_build_instr(writer, code),
-            LtacType::LdW => ltac_build_instr(writer, code),
-            
-            //Store instructions
-            LtacType::Str => ltac_build_instr(writer, code),
-            LtacType::StrB => ltac_build_instr(writer, code),
-            LtacType::StrUB => ltac_build_instr(writer, code),
-            LtacType::StrW => ltac_build_instr(writer, code),
-            LtacType::StrPtr => ltac_build_instr(writer, code),
+            _ => ltac_build_instr(writer, code),
         }
     }
 }

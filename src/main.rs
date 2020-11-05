@@ -98,7 +98,7 @@ fn run() -> i32 {
     }
     
     // Link
-    if !no_link {
+    if !no_link && !print_ltac {
         if arch == Arch::X86_64 {
             x86::link(&all_names, &output, use_c, link_lib);
         }
