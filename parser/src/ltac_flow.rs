@@ -214,6 +214,10 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
     }
     
     match &arg2.arg_type {
+        AstArgType::CharL => {
+            cmp.arg2 = LtacArg::Byte(arg2.char_val as i8);
+        },
+        
         AstArgType::ByteL => {
             if signed_variant {
                 cmp.arg2 = LtacArg::Byte(arg2.u8_val as i8);
