@@ -26,6 +26,7 @@ fn run() -> i32 {
     let mut use_c = false;
     let mut link_lib = false;
     let mut no_link = false;
+    let mut pic = false;
     let mut arch = Arch::X86_64;
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
@@ -43,7 +44,11 @@ fn run() -> i32 {
             "--ast" => print_ast = true,
             "--ltac" => print_ltac = true,
             "--use-c" => use_c = true,
-            "--lib" => link_lib = true,
+            "--lib" => {
+                link_lib = true;
+                pic = true;
+            },
+            "--pic" => pic = true,
             "--no-link" => no_link = true,
             "--amd64" => arch = Arch::X86_64,
             "--aarch64" => arch = Arch::AArch64,
@@ -89,11 +94,6 @@ fn run() -> i32 {
         if print_ltac {
             ltac_printer::compile(&ltac).expect("LTAC Codegen failed with unknown error."); 
         } else if arch == Arch::X86_64 {
-            let mut pic = false;
-            if link_lib {
-                pic = true;
-            }
-            
             x86::compile(&ltac, pic).expect("Codegen failed with unknown error.");
             x86::build_asm(&ltac.name, no_link);
         } else if arch == Arch::AArch64 {

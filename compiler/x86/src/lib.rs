@@ -93,13 +93,13 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
             args.push("/usr/lib/x86_64-linux-gnu/crti.o");
             args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
             args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
-            
-            args.push("-dynamic-linker");
-            args.push("/lib64/ld-linux-x86-64.so.2");
         }
         
         args.push("-lc");
     }
+    
+    args.push("-dynamic-linker");
+    args.push("/lib64/ld-linux-x86-64.so.2");
         
     for name in names.iter() {
         args.push(&name);

@@ -96,7 +96,8 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         } else if v.data_type == DataType::UShort {
                             push.arg2 = LtacArg::U16(0);
                             
-                        } else if v.data_type == DataType::IntDynArray || v.data_type == DataType::Str {
+                        } else if v.data_type == DataType::ByteDynArray || v.data_type == DataType::IntDynArray
+                                || v.data_type == DataType::Str {
                             push.arg1 = LtacArg::Ptr(v.pos);
                             
                         } else if v.data_type == DataType::Int64 {
