@@ -6,6 +6,7 @@ use std::io::{BufRead, BufReader};
 use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex, create_lex};
+use crate::module;
 use crate::syntax::ErrorManager;
 
 use crate::ast_func::*;
@@ -59,13 +60,17 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
 //      1) This should go into the module builder
 //      2) There should be something for the system-wide modules
 fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
-    let mut path = name.replace("default", "./");
-    path = path.replace(".", "/");
-    path.push_str(".di");
+    let path = module::get_module_path(&name);
     
     // Open the file
-    let file = File::open(&path)
-        .expect("Error: Invalid module.");
+    let file = match File::open(&path) {
+        Ok(f) => f,
+        Err(_e) => {
+            println!("Invalid module: {}", name);
+            return false;
+        },
+    };
+    
     let reader = BufReader::new(file);
     
     // Read the file line by line

@@ -4,8 +4,40 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs;
 use std::fs::File;
+use std::path::Path;
 
 use crate::ast::*;
+
+// Builds a module path and performs various checks
+pub fn get_module_path(name : &String) -> String {
+    let mut path = name.replace("default", "");
+    path = path.replace(".", "/");
+    path.push_str(".di");
+    
+    // The three paths to check, in order of importance
+    let mut path1 = "/usr/lib/dash/".to_string();
+    path1.push_str(&path);
+    
+    let mut path2 = "/usr/local/lib/dash/".to_string();
+    path2.push_str(&path);
+    
+    let mut path3 = "/opt/dash/".to_string();
+    path3.push_str(&path);
+    
+    if Path::new(&path1).exists() {
+        return path1;
+    }
+    
+    if Path::new(&path2).exists() {
+        return path2;
+    }
+    
+    if Path::new(&path3).exists() {
+        return path3;
+    }
+    
+    path
+}
 
 // Generates a header definition
 pub fn generate_module(tree : &AstTree) -> io::Result<()> {
