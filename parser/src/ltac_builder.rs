@@ -322,7 +322,7 @@ pub fn mov_for_type(data_type :& DataType) -> LtacInstr {
         DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::MovF32),
         DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::MovF64),
         
-        DataType::Char => instr = ltac::create_instr(LtacType::MovB),
+        DataType::Char | DataType::Str => instr = ltac::create_instr(LtacType::MovB),
         
         _ => {},
     }
@@ -350,7 +350,7 @@ pub fn reg_for_type(data_type : &DataType, reg_no : i32) -> LtacArg {
         DataType::Float | DataType::FloatDynArray => arg = LtacArg::FltReg(reg_no),
         DataType::Double | DataType::DoubleDynArray => arg = LtacArg::FltReg64(reg_no),
         
-        DataType::Char => arg = LtacArg::Reg8(reg_no),
+        DataType::Char | DataType::Str => arg = LtacArg::Reg8(reg_no),
         
         _ => {},
     }
