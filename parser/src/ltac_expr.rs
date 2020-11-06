@@ -322,6 +322,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             
             AstArgType::Id => {
                 let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
+                let mut pop_float = true;
                 
                 match builder.vars.get(&arg.str_val) {
                     Some(v) => {
@@ -411,6 +412,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     builder.file.code.push(instr2.clone());
                                     
                                     instr2.instr_type = LtacType::F32Sub;
+                                    pop_float = false;
                                 },
                                 
                                 DataType::Double => {
@@ -418,6 +420,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     builder.file.code.push(instr2.clone());
                                     
                                     instr2.instr_type = LtacType::F64Sub;
+                                    pop_float = false;
                                 },
                                 
                                 _ => {
@@ -431,6 +434,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                             builder.file.code.push(instr2);
                             
                             negate_next = false;
+                        }
+                        
+                        // Pop the extra float we created at the top if we don't need it
+                        if pop_float {
+                            builder.file.data.pop();
                         }
                     },
                     
