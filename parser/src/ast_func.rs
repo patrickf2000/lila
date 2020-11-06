@@ -78,9 +78,10 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
     let mut func : AstFunc;
     
     if is_extern {
-        func = ast::create_extern_func(name)
+        func = ast::create_extern_func(name);
     } else {
-        func = ast::create_func(name)
+        func = ast::create_func(name);
+        func.line = scanner.get_current_line();
     }
     
     // Check for arguments, and get them if so

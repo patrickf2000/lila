@@ -13,6 +13,7 @@ mod ltac_flow;
 mod ltac_func;
 mod ltac_var;
 mod lex;
+mod module;
 mod syntax;
 
 // Import what we need
@@ -40,6 +41,14 @@ pub fn parse(path : String) -> Result<LtacFile, ()> {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };
+    
+    match module::generate_module(&tree) {
+        Ok(()) => {},
+        Err(_e) => {
+            println!("Error generating module header");
+            return Err(());
+        },
+    }
     
     let mut syntax = syntax::create_error_manager();
     let name = get_name(&path);

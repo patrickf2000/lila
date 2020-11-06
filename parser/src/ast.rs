@@ -84,7 +84,7 @@ pub enum AstModType {
 // Represents the top of an AST tree
 pub struct AstTree {
     pub file_name : String,
-    pub module_name : String,
+    pub module : String,
     pub functions : Vec<AstFunc>,
 }
 
@@ -95,6 +95,7 @@ pub struct AstFunc {
     pub statements : Vec<AstStmt>,
     pub args : Vec<AstStmt>,
     pub modifiers : Vec<AstMod>,
+    pub line : String,
 }
 
 // Represents a statement
@@ -136,8 +137,8 @@ pub struct AstMod {
 impl AstTree {
     pub fn print(&self) {
         print!("Tree: ");
-        if self.module_name.len() > 0 {
-            print!("{}.", self.module_name);
+        if self.module.len() > 0 {
+            print!("{}.", self.module);
         }
         
         println!("{}", self.file_name);
@@ -321,6 +322,7 @@ pub fn create_extern_func(name : String) -> AstFunc {
         statements : Vec::new(),
         args : Vec::new(),
         modifiers : Vec::new(),
+        line : String::new(),
     }
 }
 
@@ -331,6 +333,7 @@ pub fn create_func(name : String) -> AstFunc {
         statements : Vec::new(),
         args : Vec::new(),
         modifiers : Vec::new(),
+        line : String::new(),
     }
 }
 
