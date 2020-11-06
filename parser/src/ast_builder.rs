@@ -22,6 +22,7 @@ use crate::ast_utils::*;
 pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
     let mut tree = AstTree {
         file_name : name,
+        module_name : String::new(),
         functions : Vec::new(),
     };
     
@@ -64,6 +65,23 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
     let mut token = scanner.get_token();
     
     match token {
+        Token::Module => {
+            if tree.module_name.len() > 0 {
+                syntax.syntax_error(&mut scanner, "Duplicate module declarations.".to_string());
+                return false;
+            }
+            
+            token = scanner.get_token();
+            
+            match token {
+                Token::Id(ref val) => tree.module_name = val.clone(),
+                _ => {
+                    syntax.syntax_error(&mut scanner, "Module names must be an identifier.".to_string());
+                    return false;
+                },
+            }
+        },
+    
         Token::Extern => {
             token = scanner.get_token();
             match token {

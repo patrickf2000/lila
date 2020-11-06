@@ -84,6 +84,7 @@ pub enum AstModType {
 // Represents the top of an AST tree
 pub struct AstTree {
     pub file_name : String,
+    pub module_name : String,
     pub functions : Vec<AstFunc>,
 }
 
@@ -134,7 +135,12 @@ pub struct AstMod {
 // Tree implementation
 impl AstTree {
     pub fn print(&self) {
-        println!("Tree: {}", self.file_name);
+        print!("Tree: ");
+        if self.module_name.len() > 0 {
+            print!("{}.", self.module_name);
+        }
+        
+        println!("{}", self.file_name);
     
         for func in self.functions.iter() {
             func.print();
