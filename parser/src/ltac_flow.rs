@@ -34,35 +34,13 @@ fn create_label(builder : &mut LtacBuilder, is_top : bool) {
     }
 }
 
-// Builds an LTAC conditional block
-pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
-    if line.stmt_type == AstStmtType::If {
-        builder.block_layer += 1;
-        create_label(builder, true);
-        
-        // A dummy placeholder
-        let code_block : Vec<LtacInstr> = Vec::new();
-        builder.code_stack.push(code_block);
-    } else {
-        let mut jmp = ltac::create_instr(LtacType::Br);
-        jmp.name = builder.top_label_stack.last().unwrap().to_string();
-        builder.file.code.push(jmp);
-    
-        let mut label = ltac::create_instr(LtacType::Label);
-        label.name = builder.label_stack.pop().unwrap();
-        builder.file.code.push(label);
-        
-        if line.stmt_type == AstStmtType::Else {
-            return;
-        }
-    }
-    
-    create_label(builder, false);
-    
+// Builds a conditional statement
+fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
     // Build the conditional statement
     let arg1 = &line.args.iter().nth(0).unwrap();
     let arg2 = &line.args.iter().nth(2).unwrap();
     
+    let mut block : Vec<LtacInstr> = Vec::new();
     let mut cmp = ltac::create_instr(LtacType::U32Cmp);
     
     // Set to true if we have a signed byte, short, or int variable
@@ -75,7 +53,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             let mut mov = ltac::create_instr(LtacType::MovUB);
             mov.arg1 = LtacArg::Reg8(0);
             mov.arg2 = LtacArg::UByte(arg1.u8_val);
-            builder.file.code.push(mov);
+            block.push(mov);
             
             cmp = ltac::create_instr(LtacType::U8Cmp);
             cmp.arg1 = LtacArg::Reg8(0);
@@ -85,7 +63,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             let mut mov = ltac::create_instr(LtacType::MovUW);
             mov.arg1 = LtacArg::Reg16(0);
             mov.arg2 = LtacArg::U16(arg1.u16_val);
-            builder.file.code.push(mov);
+            block.push(mov);
             
             cmp = ltac::create_instr(LtacType::U16Cmp);
             cmp.arg1 = LtacArg::Reg16(0);
@@ -95,7 +73,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             let mut mov = ltac::create_instr(LtacType::MovU);
             mov.arg1 = LtacArg::Reg32(0);
             mov.arg2  = LtacArg::U32(arg1.u64_val as u32);
-            builder.file.code.push(mov);
+            block.push(mov);
             
             cmp.arg1 = LtacArg::Reg32(0);
         },
@@ -105,7 +83,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             let mut mov = ltac::create_instr(LtacType::MovF32);
             mov.arg1 = LtacArg::FltReg(0);
             mov.arg2 = LtacArg::F32(name);
-            builder.file.code.push(mov);
+            block.push(mov);
             
             cmp = ltac::create_instr(LtacType::F32Cmp);
             cmp.arg1 = LtacArg::FltReg(0);
@@ -216,7 +194,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         cmp.arg1 = LtacArg::Reg32(0);
                     }
                     
-                    builder.file.code.push(mov);
+                    block.push(mov);
                 },
                 
                 None => mov.arg2_val = 0,
@@ -299,13 +277,13 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                         
                         match cmp.arg1 {
                             LtacArg::FltReg(pos) => {
-                                builder.file.code.pop();
+                                block.pop();
                                 
                                 let name = builder.build_float(arg1.f64_val, true, false);
                                 let mut mov = ltac::create_instr(LtacType::MovF64);
                                 mov.arg1 = LtacArg::FltReg64(pos);
                                 mov.arg2 = LtacArg::F64(name);
-                                builder.file.code.push(mov);
+                                block.push(mov);
                                 
                                 cmp = ltac::create_instr(LtacType::F64Cmp);
                                 cmp.arg1 = LtacArg::FltReg64(pos);
@@ -319,7 +297,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     // Bytes
                     } else if v.data_type == DataType::Byte {
                         if arg1.arg_type == AstArgType::ByteL {
-                            builder.file.code.pop();
+                            block.pop();
                             mov = ltac::create_instr(LtacType::MovB);
                             mov.arg1 = LtacArg::Reg8(0);
                             mov.arg2 = LtacArg::Byte(arg1.u8_val as i8);
@@ -343,7 +321,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     // Shorts
                     } else if v.data_type == DataType::Short {
                         if arg1.arg_type == AstArgType::ShortL {
-                            builder.file.code.pop();
+                            block.pop();
                             mov = ltac::create_instr(LtacType::MovW);
                             mov.arg1 = LtacArg::Reg16(0);
                             mov.arg2 = LtacArg::I16(arg1.u16_val as i16);
@@ -367,11 +345,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     // Int-64
                     } else if v.data_type == DataType::Int64 {
                         if arg1.arg_type == AstArgType::IntL {
-                            builder.file.code.pop();
+                            block.pop();
                             let mut mov2 = ltac::create_instr(LtacType::MovQ);
                             mov2.arg1 = LtacArg::Reg64(0);
                             mov2.arg2 = LtacArg::I64(arg1.u64_val as i64);
-                            builder.file.code.push(mov2);
+                            block.push(mov2);
                             
                             cmp = ltac::create_instr(LtacType::I64Cmp);
                             cmp.arg1 = LtacArg::Reg64(0);
@@ -386,11 +364,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     // Unsigned int-64
                     } else if v.data_type == DataType::UInt64 {
                         if arg1.arg_type == AstArgType::IntL {
-                            builder.file.code.pop();
+                            block.pop();
                             let mut mov2 = ltac::create_instr(LtacType::MovUQ);
                             mov2.arg1 = LtacArg::Reg64(0);
                             mov2.arg2 = LtacArg::U64(arg1.u64_val);
-                            builder.file.code.push(mov2);
+                            block.push(mov2);
                             
                             cmp = ltac::create_instr(LtacType::U64Cmp);
                             cmp.arg1 = LtacArg::Reg64(0);
@@ -405,7 +383,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     // Integers
                     } else if v.data_type == DataType::Int {
                         if arg1.arg_type == AstArgType::IntL {
-                            builder.file.code.pop();
+                            block.pop();
                             mov = ltac::create_instr(LtacType::Mov);
                             mov.arg1 = LtacArg::Reg32(0);
                             mov.arg2 = LtacArg::I32(arg1.u64_val as i32);
@@ -425,7 +403,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
                     }
                     
                     if mov.arg1 != LtacArg::Empty {
-                        builder.file.code.push(mov);
+                        block.push(mov);
                     }
                 },
                 
@@ -436,9 +414,43 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         _ => {},
     }
     
+    block.push(cmp);
+    block
+}
+
+// Builds an LTAC conditional block (specific for if-else)
+pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
+    if line.stmt_type == AstStmtType::If {
+        builder.block_layer += 1;
+        create_label(builder, true);
+        
+        // A dummy placeholder
+        let code_block : Vec<LtacInstr> = Vec::new();
+        builder.code_stack.push(code_block);
+    } else {
+        let mut jmp = ltac::create_instr(LtacType::Br);
+        jmp.name = builder.top_label_stack.last().unwrap().to_string();
+        builder.file.code.push(jmp);
+    
+        let mut label = ltac::create_instr(LtacType::Label);
+        label.name = builder.label_stack.pop().unwrap();
+        builder.file.code.push(label);
+        
+        if line.stmt_type == AstStmtType::Else {
+            return;
+        }
+    }
+    
+    create_label(builder, false);
+    
+    let cmp_block = build_cmp(builder, line);
+    for ln in cmp_block.iter() {
+        builder.file.code.push(ln.clone());
+    }
+    
     // Add the instruction
+    let cmp = cmp_block.last().unwrap();
     let cmp_type = cmp.instr_type.clone();
-    builder.file.code.push(cmp);
     
     // Now the operator
     let op = &line.args.iter().nth(1).unwrap();
@@ -507,61 +519,11 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     lbl2.name = cmp_label.clone();
     cmp_block.push(lbl2);
     
-    // Now for the arguments
-    let arg1 = &line.args.iter().nth(0).unwrap();
-    let arg2 = &line.args.iter().nth(2).unwrap();
-    
-    let mut cmp = ltac::create_instr(LtacType::I32Cmp);
-    
-    match &arg1.arg_type {
-        AstArgType::IntL => {
-            cmp.arg1 = LtacArg::I32(arg1.u64_val as i32);
-        },
-        
-        AstArgType::StringL => {},
-        
-        AstArgType::Id => {
-            let mut mov = ltac::create_instr(LtacType::Mov);
-            mov.arg1 = LtacArg::Reg32(0);
-            
-            match &builder.vars.get(&arg1.str_val) {
-                Some(v) => mov.arg2 = LtacArg::Mem(v.pos),
-                None => {/* TODO: Syntax error */},
-            }
-            
-            cmp_block.push(mov);
-            
-            cmp.arg1 = LtacArg::Reg32(0);
-        },
-        
-        _ => {},
+    // Build the conditional statement
+    let block = build_cmp(builder, line);
+    for ln in block.iter() {
+        cmp_block.push(ln.clone());
     }
-    
-    match &arg2.arg_type {
-        AstArgType::IntL => {
-            cmp.arg2 = LtacArg::I32(arg2.u64_val as i32);
-        },
-        
-        AstArgType::StringL => {},
-        
-        AstArgType::Id => {
-            let mut mov = ltac::create_instr(LtacType::Mov);
-            mov.arg1 = LtacArg::Reg32(1);
-            
-            match &builder.vars.get(&arg2.str_val) {
-                Some(v) => mov.arg2 = LtacArg::Mem(v.pos),
-                None => {/* TODO: Syntax error */},
-            }
-            
-            cmp_block.push(mov);
-            
-            cmp.arg2 = LtacArg::Reg32(1);
-        },
-        
-        _ => {},
-    }
-    
-    cmp_block.push(cmp);
     
     // Now the operator
     let op = &line.args.iter().nth(1).unwrap();

@@ -165,13 +165,15 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             
             AstArgType::IntL => {
                 // Bytes
-                if var.data_type == DataType::Byte {
+                if var.data_type == DataType::Byte || var.data_type == DataType::Char {
                     let val = arg.u64_val as i32;
                     
-                    if mem::size_of::<u8>() > (val as usize) {
+                    // TODO:
+                    // This was getting triggered for odd reasons
+                    /*if mem::size_of::<i8>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
                         return false;
-                    }
+                    }*/
                     
                     let parts = unsafe { mem::transmute::<i32, [i8; 4]>(val) };
                     let mut result = parts[0];
