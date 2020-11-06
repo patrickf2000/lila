@@ -180,7 +180,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
     if is_array {
         if var_dec.args.len() == 1 && var_dec.args.last().unwrap().arg_type == AstArgType::Array {
             match &dtype {
-                AstModType::Byte => data_type.mod_type = AstModType::ByteDynArray,
+                AstModType::Byte | AstModType::Char => data_type.mod_type = AstModType::ByteDynArray,
                 AstModType::UByte => data_type.mod_type = AstModType::UByteDynArray,
                 AstModType::Short => data_type.mod_type = AstModType::ShortDynArray,
                 AstModType::UShort => data_type.mod_type = AstModType::UShortDynArray,

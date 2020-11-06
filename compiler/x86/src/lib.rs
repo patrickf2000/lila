@@ -671,6 +671,7 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 
                 // Now set up for the final move
                 match &code.arg2 {
+                    LtacArg::Reg8(_v) => line.push_str("  mov BYTE PTR "),
                     LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
                     LtacArg::U32(_v) => line.push_str("  mov DWORD PTR "),
                     LtacArg::I64(_v) => line.push_str("  mov QWORD PTR "),
@@ -703,7 +704,11 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
     match &code.arg2 {
         LtacArg::Empty => {},
         
-        LtacArg::Reg8(_p) => {},
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
+            line.push_str(&reg);
+        },
+        
         LtacArg::Reg16(_p) => {},
         
         LtacArg::Reg32(pos) => {

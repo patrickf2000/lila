@@ -58,7 +58,15 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         },
         
         LtacArg::Reg16(_p) => {},
-        LtacArg::Reg32(_p) => {},
+        
+        LtacArg::Reg32(pos) => {
+            let reg = amd64_op_reg32(*pos);
+            
+            line.push_str(&reg32);
+            line.push_str(", ");
+            line.push_str(&reg);
+        },
+        
         LtacArg::Reg64(_p) => {},
         LtacArg::FltReg(_p) => {},
         LtacArg::FltReg64(_p) => {},

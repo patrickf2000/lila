@@ -1,7 +1,7 @@
 
 use crate::ltac_builder::*;
 use crate::ltac;
-use crate::ltac::{LtacType, LtacArg};
+use crate::ltac::{LtacType, LtacInstr, LtacArg};
 use crate::ast::{AstStmt, AstArgType};
 
 use crate::ltac_expr::*;
@@ -66,6 +66,70 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         builder.file.code.push(pusharg);
         
         let mut instr = ltac::create_instr(LtacType::Malloc);
+        builder.file.code.push(instr);
+        
+        // Move the return register back to the variable
+        instr = ltac::create_instr(LtacType::Mov);
+        instr.arg1 = LtacArg::Mem(var.pos);
+        instr.arg2 = LtacArg::RetRegI64;
+        builder.file.code.push(instr);
+        
+    // An array with a variable as the size
+    } else if sub_args.len() == 1 && sub_args.last().unwrap().arg_type == AstArgType::Id {
+        let arg = sub_args.last().unwrap();
+        let size = 1;
+        let data_type : DataType;
+        let pos : i32;
+        
+        match &builder.vars.get(&arg.str_val) {
+            Some(v) => {
+                data_type = v.data_type.clone();
+                pos = v.pos;
+            }
+            
+            None => {
+                builder.syntax.ltac_error(line, "Invalid identifier".to_string());
+                return false;
+            },
+        }
+        
+        if data_type != DataType::Int && data_type != DataType::UInt {
+            builder.syntax.ltac_error(line, "Array size can only be set with integer values or variables.".to_string());
+            return false;
+        }
+        
+        // Instruction syntax:
+        // mov u32.r0, [pos]
+        // imul u32.r0, size
+        // pusharg u32
+        // call malloc
+        
+        let mut instr : LtacInstr;
+        
+        if size > 1 {
+            instr = ltac::create_instr(LtacType::MovU);
+            instr.arg1 = LtacArg::Reg32(0);
+            instr.arg2 = LtacArg::Mem(pos);
+            builder.file.code.push(instr.clone());
+            
+            instr = ltac::create_instr(LtacType::U32Mul);
+            instr.arg1 = LtacArg::Reg32(0);
+            instr.arg2 = LtacArg::U32(size);
+            builder.file.code.push(instr.clone());
+            
+            instr = ltac::create_instr(LtacType::PushArg);
+            instr.arg1 = LtacArg::Reg32(0);
+            instr.arg2_val = 1;
+            builder.file.code.push(instr.clone());
+        } else {
+            instr = ltac::create_instr(LtacType::PushArg);
+            instr.arg1 = LtacArg::Mem(pos);
+            instr.arg2 = LtacArg::Reg32(0);
+            instr.arg2_val = 1;
+            builder.file.code.push(instr.clone());
+        }
+        
+        instr = ltac::create_instr(LtacType::Malloc);
         builder.file.code.push(instr);
         
         // Move the return register back to the variable

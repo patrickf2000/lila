@@ -306,7 +306,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             // Strings and characters
             
             AstArgType::CharL => {
-                if var.data_type == DataType::Char {
+                if var.data_type == DataType::Char || var.data_type == DataType::Byte {
                     instr.arg2 = LtacArg::Byte(arg.char_val as i8);
                     builder.file.code.push(instr.clone());
                     
