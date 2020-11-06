@@ -5,6 +5,7 @@ pub enum Token {
     Eof,
     
     Module,
+    Use,
     
     Extern,
     Func,
@@ -316,6 +317,7 @@ impl Lex {
         match current.as_ref() {
             "..." => token = Token::Any,
             "module" => token = Token::Module,
+            "use" => token = Token::Use,
             "extern" => token = Token::Extern,
             "func" => token = Token::Func,
             "return" => token = Token::Return,

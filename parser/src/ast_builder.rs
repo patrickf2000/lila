@@ -54,6 +54,42 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
     Ok(tree)
 }
 
+// Loads a module into the current tree
+// TODO:
+//      1) This should go into the module builder
+//      2) There should be something for the system-wide modules
+fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+    let mut path = name.replace("default", "./");
+    path = path.replace(".", "/");
+    path.push_str(".di");
+    
+    // Open the file
+    let file = File::open(&path)
+        .expect("Error: Invalid module.");
+    let reader = BufReader::new(file);
+    
+    // Read the file line by line
+    let mut line_no = 0;
+    
+    for line in reader.lines() {
+        let mut current = line.unwrap();
+        current = current.trim().to_string();
+        line_no += 1;
+        
+        if current.len() == 0 {
+            continue;
+        }
+        
+        let ret = build_line(current, line_no, tree, syntax);
+        
+        if !ret {
+            return false;
+        }
+    }
+    
+    true
+}
+
 // Converts a line to an AST node
 fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let mut scanner = create_lex(line);
@@ -80,6 +116,21 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
                     return false;
                 },
             }
+        },
+        
+        Token::Use => {
+            let module : String;
+            token = scanner.get_token();
+            
+            match token {
+                Token::Id(ref val) => module = val.clone(),
+                _ => {
+                    syntax.syntax_error(&mut scanner, "Module names must be an identifier.".to_string());
+                    return false;
+                },
+            }
+            
+            code = include_module(module, tree, syntax);
         },
     
         Token::Extern => {

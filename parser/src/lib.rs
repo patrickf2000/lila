@@ -42,12 +42,14 @@ pub fn parse(path : String) -> Result<LtacFile, ()> {
         Err(_e) => return Err(()),
     };
     
-    match module::generate_module(&tree) {
-        Ok(()) => {},
-        Err(_e) => {
-            println!("Error generating module header");
-            return Err(());
-        },
+    if tree.module.len() > 0 {
+        match module::generate_module(&tree) {
+            Ok(()) => {},
+            Err(_e) => {
+                println!("Error generating module header");
+                return Err(());
+            },
+        }
     }
     
     let mut syntax = syntax::create_error_manager();
