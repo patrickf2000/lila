@@ -91,6 +91,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::UInt64 => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UInt64),
         Token::Float => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Float),
         Token::Double => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Double),
+        Token::Char => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Char),
         Token::TStr => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
         Token::Id(ref val) => code = build_id(&mut scanner, tree, val.to_string(), syntax),
         Token::If => code = build_cond(&mut scanner, tree, Token::If, syntax),

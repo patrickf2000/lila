@@ -35,6 +35,7 @@ pub enum DataType {
     Double,
     FloatDynArray,
     DoubleDynArray,
+    Char,
     Str,
 }
 
@@ -144,6 +145,7 @@ impl LtacBuilder {
                     AstModType::Double => func_type = DataType::Double,
                     AstModType::FloatDynArray => func_type = DataType::FloatDynArray,
                     AstModType::DoubleDynArray => func_type = DataType::DoubleDynArray,
+                    AstModType::Char => func_type = DataType::Char,
                     AstModType::Str => func_type = DataType::Str,
                     
                     // Do we need an error here? Really, it should never get to this pointer
@@ -320,6 +322,8 @@ pub fn mov_for_type(data_type :& DataType) -> LtacInstr {
         DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::MovF32),
         DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::MovF64),
         
+        DataType::Char => instr = ltac::create_instr(LtacType::MovB),
+        
         _ => {},
     }
     
@@ -345,6 +349,8 @@ pub fn reg_for_type(data_type : &DataType, reg_no : i32) -> LtacArg {
         
         DataType::Float | DataType::FloatDynArray => arg = LtacArg::FltReg(reg_no),
         DataType::Double | DataType::DoubleDynArray => arg = LtacArg::FltReg64(reg_no),
+        
+        DataType::Char => arg = LtacArg::Reg8(reg_no),
         
         _ => {},
     }

@@ -84,7 +84,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                     Some(v) => {
                         push.arg1 = LtacArg::Mem(v.pos);
                         
-                        if v.data_type == DataType::Byte {
+                        if v.data_type == DataType::Byte || v.data_type == DataType::Char {
                             push.arg2 = LtacArg::Byte(0);
                             
                         } else if v.data_type == DataType::UByte {

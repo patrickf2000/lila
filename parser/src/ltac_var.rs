@@ -117,6 +117,11 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 8;
         },
         
+        AstModType::Char => {
+            data_type = DataType::Char;
+            builder.stack_pos += 8;
+        },
+        
         AstModType::Str => {
             data_type = DataType::Str;
             builder.stack_pos += 8;

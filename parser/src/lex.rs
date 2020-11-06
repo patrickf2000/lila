@@ -27,6 +27,7 @@ pub enum Token {
     UInt64,
     Float,
     Double,
+    Char,
     TStr,
     Array,
     
@@ -62,6 +63,7 @@ pub enum Token {
     ShortL(u16),
     IntL(u64),
     FloatL(f64),
+    CharL(char),
     StringL(String),
 }
 
@@ -103,6 +105,17 @@ impl Lex {
             // Return if we have a comment
             if c == '#' {
                 return;
+            }
+            
+            // Check to see if we have a char literal
+            if c == '\'' {
+                let c = self.input.chars().nth(self.index+1).unwrap();
+                
+                let token = Token::CharL(c);
+                self.all_tokens.push(token);
+                
+                self.index += 3;
+                continue;
             }
             
             // Check to see if we are in a quote (string literal)
@@ -315,6 +328,7 @@ impl Lex {
             "uint64" => token = Token::UInt64,
             "float" => token = Token::Float,
             "double" => token = Token::Double,
+            "char" => token = Token::Char,
             "str" => token = Token::TStr,
             "if" => token = Token::If,
             "elif" => token = Token::Elif,

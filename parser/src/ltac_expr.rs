@@ -300,7 +300,23 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 negate_next = false;
             },
             
+            // ===============================================================
+            // Strings and characters
+            
+            AstArgType::CharL => {
+                if var.data_type == DataType::Char {
+                    instr.arg2 = LtacArg::Byte(arg.char_val as i8);
+                    builder.file.code.push(instr.clone());
+                    
+                } else {
+                    builder.syntax.ltac_error(&line, "Invalid use of char literal.".to_string());
+                }
+            },
+            
             AstArgType::StringL => {},
+            
+            // ===============================================================
+            // Variables and functions
             
             AstArgType::Id => {
                 let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
