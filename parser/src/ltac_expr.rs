@@ -484,6 +484,22 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 builder.file.code.push(instr.clone());
             },
             
+            // Ldarg statement
+            // Format position (sub_arg[0]), data_type (sub_modifiers[0])
+            
+            AstArgType::LdArg => {
+                let position_arg = arg.sub_args.first().unwrap();
+                let position = position_arg.u64_val as i32;
+                
+                let mut ld_instr = ltac::create_instr(LtacType::LdArgI32);
+                ld_instr.arg1 = LtacArg::Reg32(reg_no+1);
+                ld_instr.arg2_val = position;
+                builder.file.code.push(ld_instr);
+                
+                instr.arg2 = LtacArg::Reg32(reg_no+1);
+                builder.file.code.push(instr.clone());
+            },
+            
             // Negate operator
             // Basically, we set a control variable. That way, if the next AST node is a literal, we simply
             // negate it here. If its a variable, we can create a subtraction operations

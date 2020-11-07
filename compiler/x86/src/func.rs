@@ -113,15 +113,17 @@ pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, is_pi
             if is_pic {
                 line.push_str("  mov -");
                 line.push_str(&pos.to_string());
-                line.push_str("[rbp], ");
+                line.push_str("[rbp]");
             } else {
                 line.push_str("  mov [rbp-");
                 line.push_str(&pos.to_string());
-                line.push_str("], ");
+                line.push_str("]");
             }
         },
         _ => {},
     }
+    
+    line.push_str(", ");
     
     if code.instr_type == LtacType::LdArgI8 || code.instr_type == LtacType::LdArgU8 {
         let reg = amd64_arg_reg8(code.arg2_val);
