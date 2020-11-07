@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language _name="Dash" version="1.0" _section="Sources" globs="*.ds;*.di" mimetypes="">
+	
+	<escape-char>\</escape-char>
+
+	<line-comment _name = "Line Comment" style= "Comment">
+		<start-regex>#</start-regex>
+	</line-comment>
+
+	<string _name = "String" style = "String" end-at-line-end = "TRUE">
+		<start-regex>&quot;</start-regex>
+		<end-regex>&quot;</end-regex>
+	</string>
+
+	<pattern-item _name = "Character Constant" style = "String">
+		<regex>&apos;([^\]|\\(.?))</regex>
+	</pattern-item>
+
+	<pattern-item _name = "Decimal" style = "Decimal">
+		<regex>\b([1-9][0-9]*|0)([Uu]([Ll]|LL|ll)?|([Ll]|LL|ll)[Uu]?)?\b</regex>
+	</pattern-item>
+
+	<pattern-item _name = "Floating Point Number" style = "Floating Point">
+		<regex>\b([0-9]+[Ee][-]?[0-9]+|([0-9]*\.[0-9]+|[0-9]+\.)([Ee][-]?[0-9]+)?)[fFlL]?</regex>
+	</pattern-item>
+
+	<pattern-item _name = "Hex Number" style = "Base-N Integer">
+		<regex>\b0[xX][0-9a-fA-F]+([Uu]([Ll]|LL|ll)?|([Ll]|LL|ll)[Uu]?)?\b</regex>
+	</pattern-item>
+	
+	<keyword-list _name = "DataTypes" style = "Data Type" case-sensitive="TRUE"
+		match-empty-string-at-beginning = "TRUE"
+		match-empty-string-at-end = "TRUE">
+
+		<keyword>byte</keyword>
+		<keyword>ubyte</keyword>
+		<keyword>short</keyword>
+		<keyword>ushort</keyword>
+		<keyword>int</keyword>
+		<keyword>uint</keyword>
+		<keyword>int64</keyword>
+		<keyword>uint64</keyword>
+		<keyword>float</keyword>
+		<keyword>double</keyword>
+		<keyword>char</keyword>
+		<keyword>str</keyword>
+
+	</keyword-list>
+	
+	<keyword-list _name = "Special_Keywords" style = "Preprocessor" case-sensitive="TRUE"
+		match-empty-string-at-beginning = "TRUE"
+		match-empty-string-at-end = "TRUE">
+
+		<keyword>syscall</keyword>
+		<keyword>array</keyword>
+		<keyword>exit</keyword>
+
+	</keyword-list>
+	
+	<keyword-list _name = "Keywords" style = "Keyword" case-sensitive="TRUE"
+		match-empty-string-at-beginning = "TRUE"
+		match-empty-string-at-end = "TRUE">
+
+        <keyword>module</keyword>
+        <keyword>use</keyword>
+		<keyword>func</keyword>
+		<keyword>extern</keyword>
+		<keyword>end</keyword>
+		<keyword>return</keyword>
+		<keyword>if</keyword>
+		<keyword>elif</keyword>
+		<keyword>else</keyword>
+		<keyword>while</keyword>
+		<keyword>break</keyword>
+		<keyword>continue</keyword>
+
+	</keyword-list>
+
+</language>
+
