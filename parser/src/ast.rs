@@ -30,6 +30,7 @@ pub enum AstArgType {
     CharL,
     StringL,
     Id,
+    LdArg,
     Array,
     OpRParen,
     OpLParen,
@@ -125,6 +126,7 @@ pub struct AstArg {
     pub f64_val : f64,
     
     pub sub_args : Vec<AstArg>,
+    pub sub_modifiers : Vec<AstMod>,
 }
 
 // Represents an statement modifier
@@ -238,6 +240,7 @@ impl AstArg {
             AstArgType::CharL => print!("\'{}\' ", self.char_val),
             AstArgType::StringL => print!("\"{}\" ", self.str_val),
             AstArgType::Id => print!("{} ", self.str_val),
+            AstArgType::LdArg => print!("LDARG "),
             AstArgType::Array => print!("ARRAY "),
             AstArgType::OpLParen => print!("("),
             AstArgType::OpRParen => print!(")"),
@@ -267,6 +270,14 @@ impl AstArg {
                 arg.print();
             }
             print!(") ");
+        }
+        
+        if self.sub_modifiers.len() > 0 {
+            print!("[MOD ");
+            for arg in self.sub_modifiers.iter() {
+                arg.print(true);
+            }
+            print!("] ");
         }
     }
 }
@@ -382,6 +393,7 @@ pub fn create_byte(val : u8) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 
@@ -395,6 +407,7 @@ pub fn create_short(val : u16) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 
@@ -408,6 +421,7 @@ pub fn create_int(val : u64) -> AstArg {
         u64_val : val,
         f64_val : 0.0,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 
@@ -421,6 +435,7 @@ pub fn create_float(val : f64) -> AstArg {
         u64_val : 0,
         f64_val : val,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 
@@ -434,6 +449,7 @@ pub fn create_char(val : char) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 
@@ -447,6 +463,7 @@ pub fn create_string(val : String) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 
@@ -460,6 +477,7 @@ pub fn create_arg(arg_type : AstArgType) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
+        sub_modifiers : Vec::new(),
     }
 }
 

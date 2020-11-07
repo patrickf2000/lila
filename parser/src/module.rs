@@ -68,6 +68,10 @@ pub fn generate_module(tree : &AstTree) -> io::Result<()> {
     
     // Now iterate through each function
     for func in tree.functions.iter() {
+        if func.line.len() == 0 {
+            continue;
+        }
+        
         line.push_str("extern ");
         line.push_str(&func.line);
         line.push_str("\n");
