@@ -1,7 +1,7 @@
 use std::io::{BufWriter, Write};
 use std::fs::File;
 
-use parser::ltac::{LtacInstr, LtacType};
+use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
 // Builds an extern declaration
@@ -66,14 +66,61 @@ pub fn amd64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic
 pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : bool) {
     let mut line = String::new();
     
-    if is_pic {
-        line.push_str("  mov -");
-        line.push_str(&code.arg1_val.to_string());
-        line.push_str("[rbp], ");
-    } else {
-        line.push_str("  mov [rbp-");
-        line.push_str(&code.arg1_val.to_string());
-        line.push_str("], ");
+    match &code.arg1 {
+        LtacArg::Reg8(pos) => {
+            let reg = amd64_op_reg8(*pos);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg16(pos) => {
+            let reg = amd64_op_reg16(*pos);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg32(pos) => {
+            let reg = amd64_op_reg32(*pos);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Reg64(pos) => {
+            let reg = amd64_op_reg64(*pos);
+            
+            line.push_str("  mov ");
+            line.push_str(&reg);
+        },
+        
+        LtacArg::FltReg(pos) => {
+            let reg = amd64_op_flt(*pos);
+            
+            line.push_str("  movss ");
+            line.push_str(&reg);
+        },
+        
+        LtacArg::FltReg64(pos) => {
+            let reg = amd64_op_flt(*pos);
+            
+            line.push_str("  movsd ");
+            line.push_str(&reg);
+        },
+        
+        LtacArg::Mem(pos) => {
+            if is_pic {
+                line.push_str("  mov -");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp], ");
+            } else {
+                line.push_str("  mov [rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("], ");
+            }
+        },
+        _ => {},
     }
     
     if code.instr_type == LtacType::LdArgI8 || code.instr_type == LtacType::LdArgU8 {
@@ -118,7 +165,15 @@ pub fn amd64_build_ldarg_float(writer : &mut BufWriter<File>, code : &LtacInstr)
     }
        
     line.push_str("[rbp-");
-    line.push_str(&code.arg1_val.to_string());
+    
+    match &code.arg1 {
+        LtacArg::Mem(pos) => {
+            line.push_str(&pos.to_string());
+        },
+        
+        _ => {},
+    }
+    
     line.push_str("], ");
     line.push_str(&reg);
     line.push_str("\n");

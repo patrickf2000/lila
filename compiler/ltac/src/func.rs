@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacType, LtacInstr};
+use parser::ltac::{LtacType, LtacInstr, LtacArg};
 
 pub fn ltac_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "extern ".to_string();
@@ -57,9 +57,46 @@ pub fn ltac_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr) {
         _ => {},
     }
     
-    line.push_str(" [bp-");
-    line.push_str(&code.arg1_val.to_string());
-    line.push_str("], r");
+    match &code.arg1 {
+        LtacArg::Reg8(pos) => {
+            line.push_str("i8.r");
+            line.push_str(&pos.to_string());
+        },
+        
+        LtacArg::Reg16(pos) => {
+            line.push_str("i16.r");
+            line.push_str(&pos.to_string());
+        },
+        
+        LtacArg::Reg32(pos) => {
+            line.push_str("i32.r");
+            line.push_str(&pos.to_string());
+        },
+        
+        LtacArg::Reg64(pos) => {
+            line.push_str("i64.r");
+            line.push_str(&pos.to_string());
+        },
+        
+        LtacArg::FltReg(pos) => {
+            line.push_str("f32.r");
+            line.push_str(&pos.to_string());
+        },
+        
+        LtacArg::FltReg64(pos) => {
+            line.push_str("f64.r");
+            line.push_str(&pos.to_string());
+        },
+        
+        LtacArg::Mem(pos) => {
+            line.push_str(" [bp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
+        _ => {},
+    }
+    
+    line.push_str(", r");
     line.push_str(&code.arg2_val.to_string());
     line.push_str("\n");
     

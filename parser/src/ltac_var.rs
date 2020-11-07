@@ -204,7 +204,7 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             arg_no += 1;
         }
         
-        ld.arg1_val = builder.stack_pos;
+        ld.arg1 = LtacArg::Mem(builder.stack_pos);
         builder.file.code.push(ld);
     } else {
         if !build_var_assign(builder, line) {
