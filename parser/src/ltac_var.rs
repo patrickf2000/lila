@@ -2,7 +2,7 @@
 use crate::ltac_builder::*;
 use crate::ast::{AstStmt, AstModType, AstArgType};
 use crate::ltac;
-use crate::ltac::{LtacType, LtacArg};
+use crate::ltac::{LtacInstr, LtacType, LtacArg};
 
 use crate::ltac_expr::*;
 use crate::ltac_array::*;
@@ -146,65 +146,18 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
     
     // If we have a function argument, add the load instruction
     if is_param {
-        let mut ld = ltac::create_instr(LtacType::LdArgI32);
+        let data_type = ast_to_datatype(ast_data_type);
+        let mem = LtacArg::Mem(builder.stack_pos);
+        let ld : LtacInstr;
         
-        if ast_data_type.mod_type == AstModType::Float {
-            ld = ltac::create_instr(LtacType::LdArgF32);
-            ld.arg2_val = flt_arg_no;
+        if data_type == DataType::Float || data_type == DataType::Double {
+            ld = ldarg_for_type(&data_type, mem, flt_arg_no);
             flt_arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::Double {
-            ld = ltac::create_instr(LtacType::LdArgF64);
-            ld.arg2_val = flt_arg_no;
-            flt_arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::IntDynArray
-            || ast_data_type.mod_type == AstModType::Str {
-            ld = ltac::create_instr(LtacType::LdArgPtr);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::Byte {
-            ld = ltac::create_instr(LtacType::LdArgI8);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::UByte {
-            ld = ltac::create_instr(LtacType::LdArgU8);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::Short {
-            ld = ltac::create_instr(LtacType::LdArgI16);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-        
-        } else if ast_data_type.mod_type == AstModType::UShort {
-            ld = ltac::create_instr(LtacType::LdArgU16);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::UInt {
-            ld = ltac::create_instr(LtacType::LdArgU32);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-            
-        } else if ast_data_type.mod_type == AstModType::Int64 {
-            ld = ltac::create_instr(LtacType::LdArgI64);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-        
-        } else if ast_data_type.mod_type == AstModType::UInt64 {
-            ld = ltac::create_instr(LtacType::LdArgU64);
-            ld.arg2_val = arg_no;
-            arg_no += 1;
-            
         } else {
-            ld.arg2_val = arg_no;
+            ld = ldarg_for_type(&data_type, mem, arg_no);
             arg_no += 1;
         }
         
-        ld.arg1 = LtacArg::Mem(builder.stack_pos);
         builder.file.code.push(ld);
     } else {
         if !build_var_assign(builder, line) {
