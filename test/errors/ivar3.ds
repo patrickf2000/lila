@@ -1,6 +1,6 @@
 
 #OUTPUT
-#Syntax Error: Invalid function or variable name: y
+#Syntax Error: Invalid function, constant, or variable name: y
 # -> [15] int answer = x * y
 #
 #END

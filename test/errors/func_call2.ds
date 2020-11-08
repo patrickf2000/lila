@@ -1,6 +1,6 @@
 
 #OUTPUT
-#Syntax Error: Invalid variable name: answerrr
+#Syntax Error: Invalid constant or variable name: answerrr
 # -> [17] printf("Answer: %d\n", answerrr)
 #
 #END
