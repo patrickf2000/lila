@@ -66,6 +66,16 @@ pub fn generate_module(tree : &AstTree) -> io::Result<()> {
     line.push_str("# DO NOT MODIFY. This will be rewritten each time you compile.");
     line.push_str("\n\n");
     
+    // Iterate through all the constants
+    for c in tree.constants.iter() {
+        if c.line.len() == 0 {
+            continue;
+        }
+        
+        line.push_str(&c.line);
+        line.push_str("\n");
+    }
+    
     // Now iterate through each function
     for func in tree.functions.iter() {
         if func.line.len() == 0 {
