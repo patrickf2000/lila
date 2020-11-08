@@ -377,7 +377,8 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
     if layer == 0 {
         tree.constants.push(constant);
     } else {
-        // TODO: Add to function
+        syntax.syntax_error(scanner, "Constants are not yet supported on the local level.".to_string());
+        return false;
     }
     
     true
