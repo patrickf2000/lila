@@ -318,12 +318,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             // ===============================================================
             // Variables and functions
             
-            // TODO: This is TERRIBLE. Please clean up
-            
             AstArgType::Id => {
                 let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
                 let mut pop_float = true;
                 
+                // Check variables
                 match builder.vars.get(&arg.str_val) {
                     Some(v) => {
                         instr.arg2 = LtacArg::Mem(v.pos);
@@ -442,53 +441,65 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                         }
                     },
                     
-                    None => {
-                        match builder.clone().functions.get(&arg.str_val) {
-                            Some(t) => {
-                                // Create a statement to build the rest of the function call
-                                let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
-                                stmt.name = arg.str_val.clone();
-                                stmt.args = arg.sub_args.clone();
-                                build_func_call(builder, &stmt);
-                                
-                                match *t {
-                                    DataType::Byte => instr.arg2 = LtacArg::RetRegI8,
-                                    DataType::UByte => instr.arg2 = LtacArg::RetRegU8,
-                                    DataType::Short => instr.arg2 = LtacArg::RetRegI16,
-                                    DataType::UShort => instr.arg2 = LtacArg::RetRegU16,
-                                    DataType::Int => instr.arg2 = LtacArg::RetRegI32,
-                                    DataType::UInt => instr.arg2 = LtacArg::RetRegU32,
-                                    DataType::Int64 => instr.arg2 = LtacArg::RetRegI64,
-                                    DataType::UInt64 => instr.arg2 = LtacArg::RetRegU64,
-                                    DataType::Float => instr.arg2 = LtacArg::RetRegF32,
-                                    DataType::Double => instr.arg2 = LtacArg::RetRegF64,
-                                    
-                                    _ => {
-                                        builder.syntax.ltac_error(line, "Invalid return.".to_string());
-                                        return false;
-                                    },
-                                }
-                            },
-                            
-                            None => {
-                                match builder.clone().global_consts.get(&arg.str_val) {
-                                    Some(c) => {
-                                        instr.arg2 = c.clone();
-                                    },
-                                    
-                                    None => {
-                                        let mut msg = "Invalid function, constant, or variable name: ".to_string();
-                                        msg.push_str(&arg.str_val);
-                                    
-                                        builder.syntax.ltac_error(line, msg);
-                                        return false;
-                                    },
-                                }
-                            },
-                        }
-                    }
+                    None => instr.arg2 = LtacArg::Empty,
                 }
                 
+                if instr.arg2 != LtacArg::Empty {
+                    builder.file.code.push(instr.clone());
+                    continue;
+                }
+                
+                // Check functions
+                match builder.clone().functions.get(&arg.str_val) {
+                    Some(t) => {
+                        // Create a statement to build the rest of the function call
+                        let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
+                        stmt.name = arg.str_val.clone();
+                        stmt.args = arg.sub_args.clone();
+                        build_func_call(builder, &stmt);
+                        
+                        match *t {
+                            DataType::Byte => instr.arg2 = LtacArg::RetRegI8,
+                            DataType::UByte => instr.arg2 = LtacArg::RetRegU8,
+                            DataType::Short => instr.arg2 = LtacArg::RetRegI16,
+                            DataType::UShort => instr.arg2 = LtacArg::RetRegU16,
+                            DataType::Int => instr.arg2 = LtacArg::RetRegI32,
+                            DataType::UInt => instr.arg2 = LtacArg::RetRegU32,
+                            DataType::Int64 => instr.arg2 = LtacArg::RetRegI64,
+                            DataType::UInt64 => instr.arg2 = LtacArg::RetRegU64,
+                            DataType::Float => instr.arg2 = LtacArg::RetRegF32,
+                            DataType::Double => instr.arg2 = LtacArg::RetRegF64,
+                            
+                            _ => {
+                                builder.syntax.ltac_error(line, "Invalid return.".to_string());
+                                return false;
+                            },
+                        }
+                    },
+                    
+                    None => instr.arg2 = LtacArg::Empty,
+                }
+                
+                if instr.arg2 != LtacArg::Empty {
+                    builder.file.code.push(instr.clone());
+                    continue;
+                }
+                
+                // Check constants
+                let const_arg = match builder.global_consts.get(&arg.str_val) {
+                    Some(c) => c.clone(),
+                    None => LtacArg::Empty,
+                };
+                
+                if const_arg == LtacArg::Empty {
+                    let mut msg = "Invalid function, constant, or variable name: ".to_string();
+                    msg.push_str(&arg.str_val);
+                
+                    builder.syntax.ltac_error(line, msg);
+                    return false;
+                }
+                
+                instr.arg2 = const_arg;
                 builder.file.code.push(instr.clone());
             },
             

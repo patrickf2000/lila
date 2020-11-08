@@ -80,7 +80,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg2_val = arg_no;
                 
-                // TODO: Clean this up
+                // Check variables
                 match &builder.vars.get(&arg.str_val) {
                     Some(v) => {
                         push.arg1 = LtacArg::Mem(v.pos);
@@ -123,24 +123,29 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         }
                     },
                     
-                    None => {
-                        match builder.clone().global_consts.get(&arg.str_val) {
-                            Some(c) => {
-                                push.arg1 = c.clone();
-                            },
-                            
-                            None => {
-                                let mut msg = "Invalid constant or variable name: ".to_string();
-                                msg.push_str(&arg.str_val);
-                                
-                                builder.syntax.ltac_error(line, msg);
-                                return false;
-                            },
-                        }
-                    },
+                    None => push.arg1 = LtacArg::Empty,
                 }
                 
-                builder.file.code.push(push);
+                if push.arg1 != LtacArg::Empty {
+                    builder.file.code.push(push);
+                    continue;
+                }
+                
+                // Check constants
+                match builder.clone().global_consts.get(&arg.str_val) {
+                    Some(c) => {
+                        push.arg1 = c.clone();
+                        builder.file.code.push(push);
+                    },
+                    
+                    None => {
+                        let mut msg = "Invalid constant or variable name: ".to_string();
+                        msg.push_str(&arg.str_val);
+                        
+                        builder.syntax.ltac_error(line, msg);
+                        return false;
+                    },
+                }
             },
             
             _ => {},
