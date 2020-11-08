@@ -495,10 +495,10 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 let data_type = ast_to_datatype(&ast_data_type);
                 let reg = reg_for_type(&data_type, reg_no+1);
                 
-                let ld_instr = ldarg_for_type(&data_type, reg, position);
+                let ld_instr = ldarg_for_type(&data_type, reg.clone(), position);
                 builder.file.code.push(ld_instr);
                 
-                instr.arg2 = LtacArg::Reg32(reg_no+1);
+                instr.arg2 = reg;
                 builder.file.code.push(instr.clone());
             },
             

@@ -95,20 +95,6 @@ pub fn amd64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, is_pi
             line.push_str(&reg);
         },
         
-        LtacArg::FltReg(pos) => {
-            let reg = amd64_op_flt(*pos);
-            
-            line.push_str("  movss ");
-            line.push_str(&reg);
-        },
-        
-        LtacArg::FltReg64(pos) => {
-            let reg = amd64_op_flt(*pos);
-            
-            line.push_str("  movsd ");
-            line.push_str(&reg);
-        },
-        
         LtacArg::Mem(pos) => {
             if is_pic {
                 line.push_str("  mov -");
@@ -165,18 +151,28 @@ pub fn amd64_build_ldarg_float(writer : &mut BufWriter<File>, code : &LtacInstr)
     } else {
         line.push_str("  movsd ");
     }
-       
-    line.push_str("[rbp-");
     
     match &code.arg1 {
         LtacArg::Mem(pos) => {
+            line.push_str("[rbp-");
             line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
+        
+        LtacArg::FltReg(pos) => {
+            let reg = amd64_op_flt(*pos);
+            line.push_str(&reg);
+        },
+        
+        LtacArg::FltReg64(pos) => {
+            let reg = amd64_op_flt(*pos);
+            line.push_str(&reg);
         },
         
         _ => {},
     }
     
-    line.push_str("], ");
+    line.push_str(", ");
     line.push_str(&reg);
     line.push_str("\n");
     

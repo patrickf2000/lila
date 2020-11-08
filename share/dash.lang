@@ -55,6 +55,7 @@
 		<keyword>syscall</keyword>
 		<keyword>array</keyword>
 		<keyword>exit</keyword>
+		<keyword>ldarg</keyword>
 
 	</keyword-list>
 	

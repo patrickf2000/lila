@@ -107,6 +107,11 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
                     line.push_str(&reg64);
                     line.push_str(", QWORD PTR ");
                 },
+                
+                LtacArg::U64(_v) => {
+                    line.push_str(&reg64);
+                    line.push_str(", QWORD PTR ");
+                },
             
                 _ => {
                     line.push_str(&reg32);

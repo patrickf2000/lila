@@ -103,6 +103,9 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         } else if v.data_type == DataType::Int64 {
                             push.arg2 = LtacArg::I64(0);
                             
+                        } else if v.data_type == DataType::UInt64 {
+                            push.arg2 = LtacArg::U64(0);
+                            
                         } else if v.data_type == DataType::Float {
                             push.arg2 = LtacArg::FltReg(flt_arg_no);
                             
