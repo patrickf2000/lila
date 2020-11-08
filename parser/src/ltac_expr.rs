@@ -318,6 +318,8 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             // ===============================================================
             // Variables and functions
             
+            // TODO: This is TERRIBLE. Please clean up
+            
             AstArgType::Id => {
                 let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
                 let mut pop_float = true;
@@ -469,11 +471,19 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                             },
                             
                             None => {
-                                let mut msg = "Invalid function or variable name: ".to_string();
-                                msg.push_str(&arg.str_val);
-                            
-                                builder.syntax.ltac_error(line, msg);
-                                return false;
+                                match builder.clone().global_consts.get(&arg.str_val) {
+                                    Some(c) => {
+                                        instr.arg2 = c.clone();
+                                    },
+                                    
+                                    None => {
+                                        let mut msg = "Invalid function, constant, or variable name: ".to_string();
+                                        msg.push_str(&arg.str_val);
+                                    
+                                        builder.syntax.ltac_error(line, msg);
+                                        return false;
+                                    },
+                                }
                             },
                         }
                     }

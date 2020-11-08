@@ -59,6 +59,9 @@ pub struct LtacBuilder {
     pub current_func : String,
     pub current_type : DataType,
     
+    // Constants
+    pub global_consts : HashMap<String, LtacArg>,
+    
     // Variable-related values
     pub vars : HashMap<String, Var>,
     pub stack_pos : i32,
@@ -88,6 +91,7 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         functions : HashMap::new(),
         current_func : String::new(),
         current_type : DataType::Void,
+        global_consts : HashMap::new(),
         vars : HashMap::new(),
         stack_pos : 0,
         block_layer : 0,
@@ -105,6 +109,12 @@ impl LtacBuilder {
 
     // Builds the main LTAC file
     pub fn build_ltac(&mut self, tree : &AstTree) -> Result<LtacFile, ()> {
+        // Cache the constants
+        if !self.build_global_constants(tree) {
+            self.syntax.print_errors();
+            return Err(());
+        }
+        
         // Build functions
         if !self.build_functions(tree) {
             self.syntax.print_errors();
@@ -112,6 +122,100 @@ impl LtacBuilder {
         }
         
         Ok(self.file.clone())
+    }
+    
+    // Builds the constant table
+    fn build_global_constants(&mut self, tree : &AstTree) -> bool {
+        for c in tree.constants.iter() {
+            let data_type = ast_to_datatype(&c.data_type);
+            let val = &c.value;
+            let arg : LtacArg;
+            
+            match data_type {
+                DataType::Byte => {
+                    match &val.arg_type {
+                        AstArgType::ByteL => arg = LtacArg::Byte(val.u8_val as i8),
+                        AstArgType::IntL => arg = LtacArg::Byte(val.u64_val as i8),
+                        
+                        _ => return false,
+                    }
+                },
+                
+                DataType::UByte => {
+                    match &val.arg_type {
+                        AstArgType::ByteL => arg = LtacArg::UByte(val.u8_val),
+                        AstArgType::IntL => arg = LtacArg::UByte(val.u64_val as u8),
+                        
+                        _ => return false,
+                    }
+                },
+                
+                DataType::Short => {
+                    match &val.arg_type {
+                        AstArgType::ShortL => arg = LtacArg::I16(val.u16_val as i16),
+                        AstArgType::IntL => arg = LtacArg::I16(val.u64_val as i16),
+                        
+                        _ => return false,
+                    }
+                },
+                
+                DataType::UShort => {
+                    match &val.arg_type {
+                        AstArgType::ShortL => arg = LtacArg::U16(val.u16_val as u16),
+                        AstArgType::IntL => arg = LtacArg::U16(val.u64_val as u16),
+                        
+                        _ => return false,
+                    }
+                },
+                
+                DataType::Int => {
+                    if val.arg_type == AstArgType::IntL {
+                        arg = LtacArg::I32(val.u64_val as i32);
+                    } else {
+                        return false;
+                    }
+                },
+                
+                DataType::UInt => {
+                    if val.arg_type == AstArgType::IntL {
+                        arg = LtacArg::U32(val.u64_val as u32);
+                    } else {
+                        return false;
+                    }
+                },
+                
+                DataType::Int64 => {
+                    if val.arg_type == AstArgType::IntL {
+                        arg = LtacArg::I64(val.u64_val as i64);
+                    } else {
+                        return false;
+                    }
+                },
+                
+                DataType::UInt64 => {
+                    if val.arg_type == AstArgType::IntL {
+                        arg = LtacArg::U64(val.u64_val);
+                    } else {
+                        return false;
+                    }
+                },
+                
+                /*DataType::Float => {},
+                
+                DataType::Double => {},
+                
+                DataType::Char => {},
+                DataType::Str => {},*/
+                
+                _ => {
+                    return false;
+                },
+            }
+            
+            self.global_consts.insert(c.name.clone(), arg);
+        }
+        
+        true
     }
 
     // Converts AST functions to LTAC functions
