@@ -491,9 +491,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 let position_arg = arg.sub_args.first().unwrap();
                 let position = position_arg.u64_val as i32;
                 
-                let mut ld_instr = ltac::create_instr(LtacType::LdArgI32);
-                ld_instr.arg1 = LtacArg::Reg32(reg_no+1);
-                ld_instr.arg2_val = position;
+                let ast_data_type = arg.sub_modifiers.first().unwrap();
+                let data_type = ast_to_datatype(&ast_data_type);
+                let reg = reg_for_type(&data_type, reg_no+1);
+                
+                let ld_instr = ldarg_for_type(&data_type, reg, position);
                 builder.file.code.push(ld_instr);
                 
                 instr.arg2 = LtacArg::Reg32(reg_no+1);

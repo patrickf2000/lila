@@ -131,6 +131,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     // TODO: Store function stack size around here, then pass to return
     for code in code.iter() {
         match &code.instr_type {
+            LtacType::None => {},
+            
             LtacType::Extern => aarch64_build_extern(writer, &code),
             LtacType::Label => aarch64_build_label(writer, &code),
             LtacType::Func => {

@@ -124,33 +124,7 @@ impl LtacBuilder {
             
             if func.modifiers.len() > 0 {
                 let func_mod = func.modifiers.first().unwrap();
-                match &func_mod.mod_type {
-                    AstModType::Byte => func_type = DataType::Byte,
-                    AstModType::ByteDynArray => func_type = DataType::ByteDynArray,
-                    AstModType::UByte => func_type = DataType::UByte,
-                    AstModType::UByteDynArray => func_type = DataType::UByteDynArray,
-                    AstModType::Short => func_type = DataType::Short,
-                    AstModType::UShort => func_type = DataType::UShort,
-                    AstModType::ShortDynArray => func_type = DataType::ShortDynArray,
-                    AstModType::UShortDynArray => func_type = DataType::UShortDynArray,
-                    AstModType::Int => func_type = DataType::Int,
-                    AstModType::UInt => func_type = DataType::UInt,
-                    AstModType::IntDynArray => func_type = DataType::IntDynArray,
-                    AstModType::UIntDynArray => func_type = DataType::UIntDynArray,
-                    AstModType::Int64 => func_type = DataType::Int64,
-                    AstModType::UInt64 => func_type = DataType::UInt64,
-                    AstModType::I64DynArray => func_type = DataType::I64DynArray,
-                    AstModType::U64DynArray => func_type = DataType::U64DynArray,
-                    AstModType::Float => func_type = DataType::Float,
-                    AstModType::Double => func_type = DataType::Double,
-                    AstModType::FloatDynArray => func_type = DataType::FloatDynArray,
-                    AstModType::DoubleDynArray => func_type = DataType::DoubleDynArray,
-                    AstModType::Char => func_type = DataType::Char,
-                    AstModType::Str => func_type = DataType::Str,
-                    
-                    // Do we need an error here? Really, it should never get to this pointer
-                    AstModType::None => {},
-                }
+                func_type = ast_to_datatype(&func_mod);
             }
         
             self.functions.insert(name, func_type);
@@ -302,6 +276,36 @@ impl LtacBuilder {
 
 }
 
+pub fn ast_to_datatype(ast_mod : &AstMod) -> DataType {
+    match &ast_mod.mod_type {
+        AstModType::Byte => return DataType::Byte,
+        AstModType::ByteDynArray => return DataType::ByteDynArray,
+        AstModType::UByte => return DataType::UByte,
+        AstModType::UByteDynArray => return DataType::UByteDynArray,
+        AstModType::Short => return DataType::Short,
+        AstModType::UShort => return DataType::UShort,
+        AstModType::ShortDynArray => return DataType::ShortDynArray,
+        AstModType::UShortDynArray => return DataType::UShortDynArray,
+        AstModType::Int => return DataType::Int,
+        AstModType::UInt => return DataType::UInt,
+        AstModType::IntDynArray => return DataType::IntDynArray,
+        AstModType::UIntDynArray => return DataType::UIntDynArray,
+        AstModType::Int64 => return DataType::Int64,
+        AstModType::UInt64 => return DataType::UInt64,
+        AstModType::I64DynArray => return DataType::I64DynArray,
+        AstModType::U64DynArray => return DataType::U64DynArray,
+        AstModType::Float => return DataType::Float,
+        AstModType::Double => return DataType::Double,
+        AstModType::FloatDynArray => return DataType::FloatDynArray,
+        AstModType::DoubleDynArray => return DataType::DoubleDynArray,
+        AstModType::Char => return DataType::Char,
+        AstModType::Str => return DataType::Str,
+        
+        // Do we need an error here? Really, it should never get to this pointer
+        AstModType::None => return DataType::Void,
+    }
+}
+
 // Returns a move statement for a given type
 pub fn mov_for_type(data_type :& DataType) -> LtacInstr {
     let mut instr = ltac::create_instr(LtacType::Mov);
@@ -354,6 +358,37 @@ pub fn reg_for_type(data_type : &DataType, reg_no : i32) -> LtacArg {
         
         _ => {},
     }
+    
+    arg
+}
+
+// Returns a ldarg statement for a given type
+pub fn ldarg_for_type(data_type : &DataType, dest : LtacArg, pos : i32) -> LtacInstr {
+    let mut arg = ltac::create_instr(LtacType::None);
+    
+    match data_type {
+        DataType::Byte => arg = ltac::create_instr(LtacType::LdArgI8),
+        DataType::UByte => arg = ltac::create_instr(LtacType::LdArgU8),
+        
+        DataType::Short => arg = ltac::create_instr(LtacType::LdArgI16),
+        DataType::UShort => arg = ltac::create_instr(LtacType::LdArgU16),
+        
+        DataType::Int => arg = ltac::create_instr(LtacType::LdArgI32),
+        DataType::UInt => arg = ltac::create_instr(LtacType::LdArgU32),
+        
+        DataType::Int64 => arg = ltac::create_instr(LtacType::LdArgI64),
+        DataType::UInt64 => arg = ltac::create_instr(LtacType::LdArgU64),
+        
+        DataType::Float => arg = ltac::create_instr(LtacType::LdArgF32),
+        DataType::Double => arg = ltac::create_instr(LtacType::LdArgF64),
+        
+        DataType::Str | DataType::IntDynArray => arg = ltac::create_instr(LtacType::LdArgPtr),
+        
+        _ => return arg,
+    }
+    
+    arg.arg1 = dest;
+    arg.arg2_val = pos;
     
     arg
 }

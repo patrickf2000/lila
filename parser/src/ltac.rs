@@ -10,6 +10,8 @@ pub enum LtacDataType {
 // Represents an instruction type
 #[derive(Clone, PartialEq)]
 pub enum LtacType {
+    None,
+    
     Extern,
     Label,
     Func,
