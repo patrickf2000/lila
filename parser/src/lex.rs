@@ -21,6 +21,7 @@ pub enum Token {
     Break,
     Continue,
     
+    Const,
     Byte,
     UByte,
     Short,
@@ -325,6 +326,7 @@ impl Lex {
             "return" => token = Token::Return,
             "exit" => token = Token::Exit,
             "end" => token = Token::End,
+            "const" => token = Token::Const,
             "byte" => token = Token::Byte,
             "ubyte" => token = Token::UByte,
             "short" => token = Token::Short,

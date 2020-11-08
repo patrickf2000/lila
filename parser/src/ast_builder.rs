@@ -25,6 +25,7 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
         file_name : name,
         module : String::new(),
         functions : Vec::new(),
+        constants : Vec::new(),
     };
     
     // Open the file
@@ -34,6 +35,7 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
     
     // Read the thing line by line
     let mut line_no = 0;
+    let mut layer = 0;
     
     for line in reader.lines() {
         let mut current = line.unwrap();
@@ -44,7 +46,8 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
             continue;
         }
         
-        let ret = build_line(current, line_no, &mut tree, syntax);
+        let (ret, new_layer) = build_line(current, line_no, layer, &mut tree, syntax);
+        layer = new_layer;
         
         if !ret {
             syntax.print_errors();
@@ -75,6 +78,7 @@ fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager
     
     // Read the file line by line
     let mut line_no = 0;
+    let mut layer = 0;
     
     for line in reader.lines() {
         let mut current = line.unwrap();
@@ -85,7 +89,8 @@ fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager
             continue;
         }
         
-        let ret = build_line(current, line_no, tree, syntax);
+        let (ret, new_layer) = build_line(current, line_no, layer, tree, syntax);
+        layer = new_layer;
         
         if !ret {
             return false;
@@ -96,11 +101,12 @@ fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager
 }
 
 // Converts a line to an AST node
-fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+fn build_line(line : String, line_no : i32, layer : i32, tree : &mut AstTree, syntax : &mut ErrorManager) -> (bool, i32) {
     let mut scanner = create_lex(line);
     scanner.tokenize(line_no);
     
     let mut code = true;
+    let mut new_layer = layer;
     
     // Get the first token
     let mut token = scanner.get_token();
@@ -109,7 +115,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::Module => {
             if tree.module.len() > 0 {
                 syntax.syntax_error(&mut scanner, "Duplicate module declarations.".to_string());
-                return false;
+                return (false, 0);
             }
             
             token = scanner.get_token();
@@ -118,7 +124,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
                 Token::Id(ref val) => tree.module = val.clone(),
                 _ => {
                     syntax.syntax_error(&mut scanner, "Module names must be an identifier.".to_string());
-                    return false;
+                    return (false, 0);
                 },
             }
         },
@@ -131,7 +137,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
                 Token::Id(ref val) => module = val.clone(),
                 _ => {
                     syntax.syntax_error(&mut scanner, "Module names must be an identifier.".to_string());
-                    return false;
+                    return (false, 0);
                 },
             }
             
@@ -144,17 +150,26 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
                 Token::Func => {},
                 _ => {
                     syntax.syntax_error(&mut scanner, "Expected \"func\" keyword.".to_string());
-                    return false;
+                    return (false, 0);
                 }
             }
                 
             code = build_func(&mut scanner, tree, syntax, true)
         },
         
-        Token::Func => code = build_func(&mut scanner, tree, syntax, false),
+        Token::Func => {
+            code = build_func(&mut scanner, tree, syntax, false);
+            new_layer += 1;
+        },
+        
         Token::Return => code = build_return(&mut scanner, tree, syntax),
         Token::Exit => code = build_exit(&mut scanner, tree, syntax),
-        Token::End => build_end(&mut scanner, tree),
+        
+        Token::End => {
+            build_end(&mut scanner, tree);
+            new_layer -= 1;
+        },
+        
         Token::Byte => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Byte),
         Token::UByte => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UByte),
         Token::Short => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Short),
@@ -167,11 +182,21 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         Token::Double => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Double),
         Token::Char => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Char),
         Token::TStr => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
+        Token::Const => code = build_const(&mut scanner, tree, syntax, layer),
         Token::Id(ref val) => code = build_id(&mut scanner, tree, val.to_string(), syntax),
-        Token::If => code = build_cond(&mut scanner, tree, Token::If, syntax),
+        
+        Token::If => {
+            code = build_cond(&mut scanner, tree, Token::If, syntax);
+            new_layer += 1;
+        },
+        
         Token::Elif => code = build_cond(&mut scanner, tree, Token::Elif, syntax),
         Token::Else => code = build_cond(&mut scanner, tree, Token::Else, syntax),
-        Token::While => code = build_cond(&mut scanner, tree, Token::While, syntax),
+        
+        Token::While => {
+            code = build_cond(&mut scanner, tree, Token::While, syntax);
+            new_layer += 1;
+        },
         
         Token::Break => {
             let br = ast::create_stmt(AstStmtType::Break, &mut scanner);
@@ -191,7 +216,7 @@ fn build_line(line : String, line_no : i32, tree : &mut AstTree, syntax : &mut E
         }
     }
     
-    code
+    (code, new_layer)
 }
 
 // Builds an integer variable declaration
@@ -274,6 +299,86 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
     
     var_dec.modifiers.push(data_type);
     ast::add_stmt(tree, var_dec);
+    
+    true
+}
+
+// Builds a constant
+fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, layer : i32) -> bool {
+    let mut token = scanner.get_token();
+    let data_type : AstModType;
+    let arg : AstArg;
+    let name : String;
+    
+    match &token {
+        Token::Byte => data_type = AstModType::Byte,
+        Token::UByte => data_type = AstModType::UByte,
+        Token::Short => data_type = AstModType::Short,
+        Token::UShort => data_type = AstModType::UShort,
+        Token::Int => data_type = AstModType::Int,
+        Token::UInt => data_type = AstModType::UInt,
+        Token::Int64 => data_type = AstModType::Int64,
+        Token::UInt64 => data_type = AstModType::UInt64,
+        Token::Float => data_type = AstModType::Float,
+        Token::Double => data_type = AstModType::Double,
+        Token::Char => data_type = AstModType::Char,
+        Token::TStr => data_type = AstModType::Str,
+        
+        _ => {
+            syntax.syntax_error(scanner, "Expected data type.".to_string());
+            return false;
+        },
+    }
+    
+    token = scanner.get_token();
+    
+    match &token {
+        Token::Id(ref val) => name = val.to_string(),
+        
+        _ => {
+            syntax.syntax_error(scanner, "Missing constant name.".to_string());
+            return false;
+        },
+    }
+    
+    token = scanner.get_token();
+    
+    if token != Token::Assign {
+        syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
+        return false;
+    }
+    
+    token = scanner.get_token();
+    
+    match &token {
+        Token::ByteL(val) => arg = ast::create_byte(*val),
+        Token::ShortL(val) => arg = ast::create_short(*val),
+        Token::IntL(val) => arg = ast::create_int(*val),
+        Token::FloatL(val) => arg = ast::create_float(*val),
+        Token::CharL(val) => arg = ast::create_char(*val),
+        Token::StringL(ref val) => arg = ast::create_string(val.to_string()),
+        
+        _ => {
+            syntax.syntax_error(scanner, "Constants can only be literal values.".to_string());
+            return false;
+        },
+    }
+    
+    let modifier = AstMod { mod_type : data_type, };
+    let constant = AstConst {
+        name : name,
+        data_type : modifier,
+        value : arg,
+        
+        line_no : scanner.get_line_no(),
+        line : scanner.get_current_line(),
+    };
+    
+    if layer == 0 {
+        tree.constants.push(constant);
+    } else {
+        // TODO: Add to function
+    }
     
     true
 }

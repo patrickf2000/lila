@@ -87,6 +87,7 @@ pub struct AstTree {
     pub file_name : String,
     pub module : String,
     pub functions : Vec<AstFunc>,
+    pub constants : Vec<AstConst>,
 }
 
 // Represents a function in a tree
@@ -97,6 +98,16 @@ pub struct AstFunc {
     pub args : Vec<AstStmt>,
     pub modifiers : Vec<AstMod>,
     pub line : String,
+}
+
+// Represents a constant
+pub struct AstConst {
+    pub name : String,
+    pub data_type : AstMod,
+    pub value : AstArg,
+    
+    pub line : String,
+    pub line_no : i32,
 }
 
 // Represents a statement
@@ -144,10 +155,48 @@ impl AstTree {
         }
         
         println!("{}", self.file_name);
+        
+        for constant in self.constants.iter() {
+            constant.print(false);
+        }
     
         for func in self.functions.iter() {
             func.print();
         }
+    }
+}
+
+// Constant implementation
+impl AstConst {
+    pub fn print(&self, is_global : bool) {
+        if is_global {
+            print!("CONST ");
+        } else {
+            print!("  CONST ");
+        }
+        
+        print!("{} ", self.name);
+        
+        match &self.data_type.mod_type {
+            AstModType::Byte => print!("Byte "),
+            AstModType::UByte => print!("UByte "),
+            AstModType::Short => print!("Short "),
+            AstModType::UShort => print!("UShort "),
+            AstModType::Int => print!("Int "),
+            AstModType::UInt => print!("UInt "),
+            AstModType::Int64 => print!("Int64 "),
+            AstModType::UInt64 => print!("UInt64 "),
+            AstModType::Float => print!("Float "),
+            AstModType::Double => print!("Double "),
+            AstModType::Char => print!("Char "),
+            AstModType::Str => print!("Str "),
+            
+            _ => print!("NONE"),
+        }
+        
+        self.value.print();
+        
+        println!("");
     }
 }
 
@@ -176,6 +225,7 @@ impl AstFunc {
         }
     }
 }
+
 
 // Statement implementation
 impl AstStmt {

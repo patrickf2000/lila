@@ -45,6 +45,8 @@
 		<keyword>double</keyword>
 		<keyword>char</keyword>
 		<keyword>str</keyword>
+		
+		<keyword>const</keyword>
 
 	</keyword-list>
 	
