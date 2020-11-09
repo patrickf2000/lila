@@ -116,6 +116,7 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         
                         // For the proper registers
                         if v.data_type == DataType::Float || v.data_type == DataType::Double {
+                            push.arg2_val = flt_arg_no;
                             flt_arg_no += 1;
                         } else {
                             push.arg2_val = arg_no;
@@ -134,6 +135,18 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 // Check constants
                 match builder.clone().global_consts.get(&arg.str_val) {
                     Some(c) => {
+                        match c {
+                            LtacArg::F32(_p) | LtacArg::F64(_p) => {
+                                push.arg2_val = flt_arg_no;
+                                flt_arg_no += 1;
+                            },
+                            
+                            _ => {
+                                push.arg2_val = arg_no;
+                                arg_no += 1;
+                            },
+                        }
+                        
                         push.arg1 = c.clone();
                         builder.file.code.push(push);
                     },
