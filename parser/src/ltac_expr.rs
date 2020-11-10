@@ -435,14 +435,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                             
                             negate_next = false;
                         }
-                        
-                        // Pop the extra float we created at the top if we don't need it
-                        if pop_float {
-                            builder.file.data.pop();
-                        }
                     },
                     
                     None => instr.arg2 = LtacArg::Empty,
+                }
+                
+                // Pop the extra float we created at the top if we don't need it
+                if pop_float {
+                    builder.file.data.pop();
                 }
                 
                 if instr.arg2 != LtacArg::Empty {
@@ -454,9 +454,10 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 match builder.clone().functions.get(&arg.str_val) {
                     Some(t) => {
                         // First, push the current register
-                        let mut store = ltac::create_instr(LtacType::Push);
-                        store.arg1 = reg_for_type(&*t, reg_no);
-                        builder.file.code.push(store);
+                        let mut store = mov_for_type(&*t);
+                        store.arg1 = LtacArg::Mem(var.pos);
+                        store.arg2 = reg_for_type(&*t, reg_no);
+                        builder.file.code.push(store.clone());
                         
                         // Create a statement to build the rest of the function call
                         let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
@@ -465,9 +466,9 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                         build_func_call(builder, &stmt);
                         
                         //Restore the current register
-                        let mut pop = ltac::create_instr(LtacType::Pop);
-                        pop.arg1 = reg_for_type(&*t, reg_no);
-                        builder.file.code.push(pop);
+                        store.arg1 = reg_for_type(&*t, reg_no);
+                        store.arg2 = LtacArg::Mem(var.pos);
+                        builder.file.code.push(store);
                         
                         match *t {
                             DataType::Byte => instr.arg2 = LtacArg::RetRegI8,

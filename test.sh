@@ -71,6 +71,7 @@ run_test 'test/ooop/*.ds' 'clib' $1
 run_test 'test/loop/*.ds' 'clib' $1
 run_test 'test/ldarg/*.ds' 'clib' $1
 run_test 'test/const/*.ds' 'clib' $1
+run_test 'test/func/*.ds' 'clib' $1
 
 run_test 'test/errors/*.ds' 'clib' $1 "error"
 run_test 'test/errors/ltac/*.ds' "clib" $1 "error"
