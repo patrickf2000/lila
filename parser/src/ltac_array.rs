@@ -170,7 +170,13 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
                                 if first_arg.arg_type == AstArgType::IntL {
                                     instr.arg2_offset = first_arg.u64_val as i32;
                                 } else if first_arg.arg_type == AstArgType::Id {
-                                    //TODO:
+                                    match &builder.vars.get(&first_arg.str_val) {
+                                        Some(v2) => instr.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos),
+                                        None => {
+                                            builder.syntax.ltac_error(line, "Invalid offset variable.".to_string());
+                                            return false;
+                                        },
+                                    }
                                 }
                             } else {
                                 //TODO

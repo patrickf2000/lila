@@ -466,6 +466,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             line.push_str("OFFSET FLAT:");
             line.push_str(&val);
         },
+        
+        _ => {},
     }
     
     line.push_str("\n");
@@ -783,6 +785,8 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         LtacArg::Ptr(_v) => {},
         LtacArg::PtrLcl(_v) => {},
+        
+        _ => {},
     }
     
     line.push_str("\n");

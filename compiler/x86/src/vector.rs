@@ -16,6 +16,18 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
             line.push_str("]\n");
         },
         
+        LtacArg::MemOffsetMem(pos, offset_pos) => {
+            if code.arg2_val != -1 {
+                line.push_str("  mov r15, QWORD PTR [rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            }
+            
+            line.push_str("  mov r14d, DWORD PTR [rbp-");
+            line.push_str(&offset_pos.to_string());
+            line.push_str("]\n");
+        },
+        
         _ => {},
     }
     
@@ -62,6 +74,12 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
             line.push_str("[r15+");
             line.push_str(&code.arg2_offset.to_string());
             line.push_str("*");
+            line.push_str(&code.arg2_offset_size.to_string());
+            line.push_str("]\n");
+        },
+        
+        LtacArg::MemOffsetMem(_p, _op) => {
+            line.push_str("[r15+r14*");
             line.push_str(&code.arg2_offset_size.to_string());
             line.push_str("]\n");
         },

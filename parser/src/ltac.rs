@@ -173,6 +173,7 @@ pub enum LtacArg {
     RetRegF64,
     
     Mem(i32),
+    MemOffsetMem(i32, i32),
     
     Byte(i8),       UByte(u8),
     I16(i16),       U16(u16),
