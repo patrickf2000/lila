@@ -56,15 +56,21 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         
         if line.sub_args.len() == 1 {
             if first_arg.arg_type == AstArgType::IntL {
-                instr.instr_type = LtacType::MovOffImm;
-                instr.arg1_offset = (first_arg.u64_val as i32) * offset_size;
+                //instr.instr_type = LtacType::MovOffImm;
+                //instr.arg1_offset = (first_arg.u64_val as i32) * offset_size;
+                
+                let offset = (first_arg.u64_val as i32) * offset_size;
+                instr.arg1 = LtacArg::MemOffsetImm(var.pos, offset);
             } else if first_arg.arg_type == AstArgType::Id {
-                instr.instr_type = LtacType::MovOffMem;
-                instr.arg1_offset_size = offset_size;
+                //instr.instr_type = LtacType::MovOffMem;
+                //instr.arg1_offset_size = offset_size;
                 
                 match builder.vars.get(&first_arg.str_val) {
-                    Some(v) => instr.arg1_offset = v.pos,
-                    None => instr.arg1_offset = 0,
+                    Some(v) => instr.arg1 = LtacArg::MemOffsetMem(var.pos, v.pos, offset_size),
+                    None => {
+                        // TODO: Error here
+                        return false;
+                    },
                 }
             }
         }
@@ -350,14 +356,17 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     let offset = (first_arg.u64_val as i32) * size;
                                     instr.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
                                 } else if first_arg.arg_type == AstArgType::Id {
-                                    let mut instr2 = ltac::create_instr(LtacType::MovOffMem);
+                                    let mut instr2 = mov_for_type(&v.data_type);
                                     
-                                    instr2.arg2 = LtacArg::Mem(v.pos);
-                                    instr2.arg2_offset_size = size;
+                                    //instr2.arg2 = LtacArg::Mem(v.pos);
+                                    //instr2.arg2_offset_size = size;
                                     
                                     match builder.vars.get(&first_arg.str_val) {
-                                        Some(v) => instr2.arg2_offset = v.pos,
-                                        None => instr2.arg2_offset = 0,
+                                        Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
+                                        None => {
+                                            // TODO: Error
+                                            return false;
+                                        },
                                     };
                                     
                                     // Choose the proper registers
