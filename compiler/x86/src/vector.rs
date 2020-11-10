@@ -10,7 +10,7 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
     let instr : String;
     
     match code.arg2 {
-        LtacArg::Mem(pos) => {
+        LtacArg::Mem(pos) if code.arg2_val != -1 => {
             line.push_str("  mov r15, QWORD PTR [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");

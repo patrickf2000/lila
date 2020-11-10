@@ -152,19 +152,46 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
 pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
     let mut instr = ltac::create_instr(LtacType::MovI32Vec);
     instr.arg1 = LtacArg::Reg32(0);
+    
+    // The last loaded memory position
+    let mut last_pos = 0;
 
     for arg in line.args.iter() {
         match &arg.arg_type {
             AstArgType::Id => {
                 match &builder.vars.get(&arg.str_val) {
-                    Some(v) => instr.arg2 = LtacArg::Mem(v.pos),
+                    Some(v) => {
+                        instr.arg2 = LtacArg::Mem(v.pos);
+                        
+                        if arg.sub_args.len() > 0 {
+                            let first_arg = arg.sub_args.last().unwrap();
+                            
+                            if arg.sub_args.len() == 1 {
+                                if first_arg.arg_type == AstArgType::IntL {
+                                    instr.arg2_offset = first_arg.u64_val as i32;
+                                } else if first_arg.arg_type == AstArgType::Id {
+                                    //TODO:
+                                }
+                            } else {
+                                //TODO
+                            }
+                        }
+                        
+                        // This is a flag, sort of; if we set it, we do not want to reload
+                        // the memory location
+                        if v.pos == last_pos {
+                            instr.arg2_val = -1;
+                        }
+                        
+                        last_pos = v.pos;
+                    },
+                    
                     None => {
                         builder.syntax.ltac_error(line, "Invalid variable.".to_string());
                         return false;
                     },
                 }
                 
-                instr.arg2_offset = 0;
                 instr.arg2_offset_size = 4;
                 builder.file.code.push(instr.clone());
             },
