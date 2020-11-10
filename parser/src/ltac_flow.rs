@@ -457,6 +457,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     if line.stmt_type == AstStmtType::If {
         builder.block_layer += 1;
         create_label(builder, true);
+        //create_label(builder, false);
         
         // A dummy placeholder
         let code_block : Vec<LtacInstr> = Vec::new();
@@ -467,8 +468,14 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         builder.file.code.push(jmp);
     
         let mut label = ltac::create_instr(LtacType::Label);
-        label.name = builder.label_stack.pop().unwrap();
-        builder.file.code.push(label);
+        match builder.label_stack.pop() {
+            Some(name) => {
+                label.name = name;
+                builder.file.code.push(label);
+            },
+            
+            None => {},
+        }
         
         if line.stmt_type == AstStmtType::Else {
             return;

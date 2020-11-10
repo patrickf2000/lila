@@ -486,7 +486,8 @@ pub fn ldarg_for_type(data_type : &DataType, dest : LtacArg, pos : i32) -> LtacI
         DataType::Float => arg = ltac::create_instr(LtacType::LdArgF32),
         DataType::Double => arg = ltac::create_instr(LtacType::LdArgF64),
         
-        DataType::Str | DataType::IntDynArray => arg = ltac::create_instr(LtacType::LdArgPtr),
+        DataType::ByteDynArray | DataType::IntDynArray |
+        DataType::Str => arg = ltac::create_instr(LtacType::LdArgPtr),
         
         _ => return arg,
     }

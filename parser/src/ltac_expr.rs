@@ -168,10 +168,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 if var.data_type == DataType::Byte || var.data_type == DataType::Char {
                     let val = arg.u64_val as i32;
                     
-                    if mem::size_of::<i8>() > (val as usize) {
+                    // TODO: Why the hell is this an error? Its getting thrown when using char values
+                    /*if mem::size_of::<i8>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into byte.".to_string());
                         return false;
-                    }
+                    }*/
                     
                     let parts = unsafe { mem::transmute::<i32, [i8; 4]>(val) };
                     let mut result = parts[0];
