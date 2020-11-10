@@ -358,7 +358,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             
             LtacArg::Mem(val) => {
                 if code.arg1_offset > 0 && code.arg1_offset_size > 0 {
-                    line.push_str("[bp-");
+                    line.push_str("![bp-");
                     line.push_str(&val.to_string());
                     line.push_str("+(");
                     line.push_str(&code.arg1_offset.to_string());
@@ -366,7 +366,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                     line.push_str(&code.arg1_offset_size.to_string());
                     line.push_str(")]");
                 } else if code.arg1_offset > 0 {
-                    line.push_str("[bp-");
+                    line.push_str("![bp-");
                     line.push_str(&val.to_string());
                     line.push_str("+");
                     line.push_str(&code.arg1_offset.to_string());
@@ -378,11 +378,21 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 }
             },
             
-            LtacArg::MemOffsetMem(pos, offset_pos) => {
+            LtacArg::MemOffsetImm(pos, offset_pos) => {
+                line.push_str("[bp-");
+                line.push_str(&pos.to_string());
+                line.push_str("+");
+                line.push_str(&offset_pos.to_string());
+                line.push_str("]");
+            },
+            
+            LtacArg::MemOffsetMem(pos, offset_pos, offset_size) => {
                 line.push_str("[bp-");
                 line.push_str(&pos.to_string());
                 line.push_str("+(");
                 line.push_str(&offset_pos.to_string());
+                line.push_str("*");
+                line.push_str(&offset_size.to_string());
                 line.push_str(")]");
             },
             
@@ -452,7 +462,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             
             LtacArg::Mem(val) => {
                 if code.arg2_offset > 0 && code.arg2_offset_size > 0 {
-                    line.push_str(", [bp-");
+                    line.push_str(", ![bp-");
                     line.push_str(&val.to_string());
                     line.push_str("+(");
                     line.push_str(&code.arg2_offset.to_string());
@@ -460,7 +470,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                     line.push_str(&code.arg2_offset_size.to_string());
                     line.push_str(")]");
                 } else if code.arg2_offset > 0 {
-                    line.push_str(", [bp-");
+                    line.push_str(", ![bp-");
                     line.push_str(&val.to_string());
                     line.push_str("+");
                     line.push_str(&code.arg2_offset.to_string());
@@ -472,11 +482,21 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 }
             },
             
-            LtacArg::MemOffsetMem(pos, offset_pos) => {
+            LtacArg::MemOffsetImm(pos, offset_pos) => {
+                line.push_str(", [bp-");
+                line.push_str(&pos.to_string());
+                line.push_str("+");
+                line.push_str(&offset_pos.to_string());
+                line.push_str("]");
+            },
+            
+            LtacArg::MemOffsetMem(pos, offset_pos, offset_size) => {
                 line.push_str(", [bp-");
                 line.push_str(&pos.to_string());
                 line.push_str("+(");
                 line.push_str(&offset_pos.to_string());
+                line.push_str("*");
+                line.push_str(&offset_size.to_string());
                 line.push_str(")]");
             },
             
