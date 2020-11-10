@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=./
+cwd=`pwd`
+export PATH="$cwd/target/release/dashc:$PATH"
+export LD_LIBRARY_PATH="$cwd/target:$LD_LIBRARY_PATH"
 
 test_count=0
 
@@ -16,7 +18,7 @@ function run_test() {
         
         dashc $entry -o $name -ldash
     
-	    ./test.py $entry ./$name ""
+	    ../test.py $entry ./$name ""
 	    
 	    if [[ $? != 0 ]] ; then
     		exit 1
@@ -36,10 +38,14 @@ if [[ $1 != "x86-64" && $1 != "aarch64" ]] ; then
     exit 1
 fi
 
-echo "Running all tests..."
+echo "Running all standard library tests..."
 echo ""
 
-run_test 'test/io/*.ds' $1
+cd target
+
+run_test '../test/stdlib/io/*.ds' $1
+
+cd ..
 
 echo ""
 echo "$test_count tests passed successfully."
