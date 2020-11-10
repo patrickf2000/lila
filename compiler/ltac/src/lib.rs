@@ -177,8 +177,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::MovUQ => line.push_str("  mov.uq "),
         LtacType::MovF32 => line.push_str("  mov.f32 "),
         LtacType::MovF64 => line.push_str("  mov.f64 "),
-        LtacType::MovOffImm => line.push_str("  mov.imm "),
-        LtacType::MovOffMem => line.push_str("  mov.mem "),
         LtacType::MovI32Vec => line.push_str("  mov.i32.vec "),
         
         // Push and pop
@@ -357,25 +355,9 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::RetRegF64 => line.push_str("f64.ret"),
             
             LtacArg::Mem(val) => {
-                if code.arg1_offset > 0 && code.arg1_offset_size > 0 {
-                    line.push_str("![bp-");
-                    line.push_str(&val.to_string());
-                    line.push_str("+(");
-                    line.push_str(&code.arg1_offset.to_string());
-                    line.push_str("*");
-                    line.push_str(&code.arg1_offset_size.to_string());
-                    line.push_str(")]");
-                } else if code.arg1_offset > 0 {
-                    line.push_str("![bp-");
-                    line.push_str(&val.to_string());
-                    line.push_str("+");
-                    line.push_str(&code.arg1_offset.to_string());
-                    line.push_str("]");
-                } else {
-                    line.push_str("[bp-");
-                    line.push_str(&val.to_string());
-                    line.push_str("]");
-                }
+                line.push_str("[bp-");
+                line.push_str(&val.to_string());
+                line.push_str("]");
             },
             
             LtacArg::MemOffsetImm(pos, offset_pos) => {
@@ -461,25 +443,9 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             LtacArg::RetRegF64 => line.push_str(", f64.ret"),
             
             LtacArg::Mem(val) => {
-                if code.arg2_offset > 0 && code.arg2_offset_size > 0 {
-                    line.push_str(", ![bp-");
-                    line.push_str(&val.to_string());
-                    line.push_str("+(");
-                    line.push_str(&code.arg2_offset.to_string());
-                    line.push_str("*");
-                    line.push_str(&code.arg2_offset_size.to_string());
-                    line.push_str(")]");
-                } else if code.arg2_offset > 0 {
-                    line.push_str(", ![bp-");
-                    line.push_str(&val.to_string());
-                    line.push_str("+");
-                    line.push_str(&code.arg2_offset.to_string());
-                    line.push_str("]");
-                } else {
-                    line.push_str(", [bp-");
-                    line.push_str(&val.to_string());
-                    line.push_str("]");
-                }
+                line.push_str(", [bp-");
+                line.push_str(&val.to_string());
+                line.push_str("]");
             },
             
             LtacArg::MemOffsetImm(pos, offset_pos) => {

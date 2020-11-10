@@ -131,7 +131,7 @@ pub fn aarch64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 }
 
 // A move with offset instruction
-pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+/*pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
     let mut line = String::new();
     let mut dest_reg = "w5".to_string();
     
@@ -252,4 +252,4 @@ pub fn aarch64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr
     writer.write(&line.into_bytes())
         .expect("[AARCH64_build_mov_offset] Write failed.");
 }
-
+*/

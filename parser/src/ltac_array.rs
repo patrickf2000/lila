@@ -168,7 +168,8 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
                             
                             if arg.sub_args.len() == 1 {
                                 if first_arg.arg_type == AstArgType::IntL {
-                                    instr.arg2_offset = first_arg.u64_val as i32;
+                                    let offset = (first_arg.u64_val as i32) * 4;
+                                    instr.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
                                 } else if first_arg.arg_type == AstArgType::Id {
                                     match &builder.vars.get(&first_arg.str_val) {
                                         Some(v2) => instr.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, 4),
@@ -198,7 +199,6 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
                     },
                 }
                 
-                instr.arg2_offset_size = 4;
                 builder.file.code.push(instr.clone());
             },
             
@@ -218,7 +218,6 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
     instr = ltac::create_instr(LtacType::MovI32Vec);
     instr.arg1 = LtacArg::Mem(var.pos);
     instr.arg2 = LtacArg::Reg32(0);
-    instr.arg2_offset_size = 4;
     
     builder.file.code.push(instr.clone());
     

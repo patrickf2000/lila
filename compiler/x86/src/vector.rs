@@ -44,11 +44,7 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
             line.push_str("]\n");
             
             line.push_str(&instr);
-            line.push_str("[r15+");
-            line.push_str(&code.arg1_offset.to_string());
-            line.push_str("*");
-            line.push_str(&code.arg2_offset_size.to_string());
-            line.push_str("], ");
+            line.push_str("[r15], ");
         },
         
         LtacArg::Reg32(pos) => {
@@ -71,16 +67,18 @@ pub fn amd64_build_vector_instr(writer : &mut BufWriter<File>, code : &LtacInstr
     
     match &code.arg2 {
         LtacArg::Mem(_p) => {
+            line.push_str("[r15]\n");
+        },
+        
+        LtacArg::MemOffsetImm(_p, offset) => {
             line.push_str("[r15+");
-            line.push_str(&code.arg2_offset.to_string());
-            line.push_str("*");
-            line.push_str(&code.arg2_offset_size.to_string());
+            line.push_str(&offset.to_string());
             line.push_str("]\n");
         },
         
-        LtacArg::MemOffsetMem(_p, _op, _s) => {
+        LtacArg::MemOffsetMem(_p, _op, size) => {
             line.push_str("[r15+r14*");
-            line.push_str(&code.arg2_offset_size.to_string());
+            line.push_str(&size.to_string());
             line.push_str("]\n");
         },
         

@@ -12,14 +12,12 @@ mod func;
 mod math;
 mod utils;
 mod vector;
-mod offset;     // TODO: Go away
 
 use call::*;
 use func::*;
 use math::*;
 use utils::*;
 use vector::*;
-use offset::*;
 
 pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -189,8 +187,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(writer, &code, is_pic),
             
-            LtacType::MovOffImm => amd64_build_mov_offset(writer, &code),
-            LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             
             LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),

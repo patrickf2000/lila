@@ -23,8 +23,6 @@ pub enum LtacType {
     MovQ,       MovUQ,      // Move qword (int64)
     MovF32,
     MovF64,
-    MovOffImm,
-    MovOffMem,
     MovI32Vec,
     
     // Push/pop
@@ -211,13 +209,9 @@ pub struct LtacInstr {
     
     pub arg1 : LtacArg,
     pub arg1_val : i32,
-    pub arg1_offset : i32,
-    pub arg1_offset_size : i32,
     
     pub arg2 : LtacArg,
     pub arg2_val : i32,
-    pub arg2_offset : i32,
-    pub arg2_offset_size : i32,
 }
 
 //=====================================
@@ -230,13 +224,9 @@ pub fn create_instr(instr_type : LtacType) -> LtacInstr {
         
         arg1 : LtacArg::Empty,
         arg1_val : 0,
-        arg1_offset : 0,
-        arg1_offset_size : 0,
         
         arg2 : LtacArg::Empty,
         arg2_val : 0,
-        arg2_offset : 0,
-        arg2_offset_size : 0,
     }
 }
 
