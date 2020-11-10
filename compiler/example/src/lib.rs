@@ -97,6 +97,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovOffMem => {},
             LtacType::MovI32Vec => {},
             
+            // Push/pop
+            LtacType::Push => {},
+            LtacType::Pop => {},
+            
             // Argument and function call instructions
             LtacType::PushArg => {},
             LtacType::KPushArg => {},

@@ -181,6 +181,10 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::MovOffMem => line.push_str("  mov.mem "),
         LtacType::MovI32Vec => line.push_str("  mov.i32.vec "),
         
+        // Push and pop
+        LtacType::Push => line.push_str("  push "),
+        LtacType::Pop => line.push_str("  pop "),
+        
         // Load instructions
         LtacType::Ld => line.push_str("  i32.ld "),
         LtacType::LdB => line.push_str("  i8.ld "),

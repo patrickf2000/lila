@@ -191,6 +191,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             LtacType::MovOffMem => amd64_build_mov_offset(writer, &code),
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             
+            LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),
+            
             LtacType::PushArg => amd64_build_pusharg(writer, &code, false, is_pic),
             LtacType::KPushArg => amd64_build_pusharg(writer, &code, true, is_pic),
             LtacType::Call => amd64_build_call(writer, &code),
@@ -787,6 +789,32 @@ fn amd64_build_mov_offset(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     writer.write(&line.into_bytes())
         .expect("[AMD64_writer_instr] Write failed.");
+}
+
+// x86-64 has the handy push/pop instructions
+fn amd64_build_stackop(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = "  ".to_string();
+    
+    match &code.instr_type {
+        LtacType::Push => line.push_str("push "),
+        LtacType::Pop => line.push_str("pop "),
+        _ => {},
+    }
+    
+    match &code.arg1 {
+        LtacArg::Reg8(pos) | LtacArg::Reg16(pos) |
+        LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
+            let reg = amd64_op_reg64(*pos);
+            line.push_str(&reg);
+        },
+        
+        _ => {},
+    }
+    
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_stackop] Write failed.");
 }
 
 // Builds a branch (actually kinda called "jumps" in x86...)

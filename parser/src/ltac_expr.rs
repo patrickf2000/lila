@@ -453,11 +453,21 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 // Check functions
                 match builder.clone().functions.get(&arg.str_val) {
                     Some(t) => {
+                        // First, push the current register
+                        let mut store = ltac::create_instr(LtacType::Push);
+                        store.arg1 = reg_for_type(&*t, reg_no);
+                        builder.file.code.push(store);
+                        
                         // Create a statement to build the rest of the function call
                         let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
                         stmt.name = arg.str_val.clone();
                         stmt.args = arg.sub_args.clone();
                         build_func_call(builder, &stmt);
+                        
+                        //Restore the current register
+                        let mut pop = ltac::create_instr(LtacType::Pop);
+                        pop.arg1 = reg_for_type(&*t, reg_no);
+                        builder.file.code.push(pop);
                         
                         match *t {
                             DataType::Byte => instr.arg2 = LtacArg::RetRegI8,

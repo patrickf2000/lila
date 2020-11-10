@@ -27,6 +27,11 @@ pub enum LtacType {
     MovOffMem,
     MovI32Vec,
     
+    // Push/pop
+    // These are mainly used on stack machines, but x86 has these instructions
+    Push,
+    Pop,
+    
     // Load-store instructions- RISC specific
     Ld,
     LdB,
