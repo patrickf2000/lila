@@ -10,11 +10,6 @@ function run_test() {
     for entry in $1
     do
     	name=`basename $entry .ds`
-    	arch="--amd64"
-    	
-    	if [[ $2 == "aarch64" ]] ; then
-    	    arch="--aarch64"
-    	fi
         
         dashc $entry -o $name -ldash
     
@@ -32,18 +27,12 @@ function run_test() {
     done
 }
 
-if [[ $1 != "x86-64" && $1 != "aarch64" ]] ; then
-    echo "Invalid architecture: $1"
-    echo "Please choose either \"x86-64\" or \"aarch64\""
-    exit 1
-fi
-
 echo "Running all standard library tests..."
 echo ""
 
 cd target
 
-run_test '../test/stdlib/io/*.ds' $1
+run_test '../test/stdlib/io/*.ds'
 
 cd ..
 

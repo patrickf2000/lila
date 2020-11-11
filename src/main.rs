@@ -27,7 +27,7 @@ fn run() -> i32 {
     let mut link_lib = false;
     let mut no_link = false;
     let mut pic = false;
-    let mut arch = Arch::X86_64;
+    let arch = Arch::X86_64;
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
     
@@ -50,8 +50,6 @@ fn run() -> i32 {
             },
             "--pic" => pic = true,
             "--no-link" => no_link = true,
-            "--amd64" => arch = Arch::X86_64,
-            "--aarch64" => arch = Arch::AArch64,
             "-o" => next_output = true,
             _ => inputs.push(arg.clone()),
         }
@@ -96,9 +94,8 @@ fn run() -> i32 {
         } else if arch == Arch::X86_64 {
             x86::compile(&ltac, pic).expect("Codegen failed with unknown error.");
             x86::build_asm(&ltac.name, no_link);
-        } else if arch == Arch::AArch64 {
-            aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
-            aarch64::build_asm(&ltac.name, use_c);
+        } else {
+            // TODO
         }
     }
     
@@ -111,3 +108,4 @@ fn run() -> i32 {
     
     0
 }
+

@@ -18,7 +18,7 @@ All the stuff here is either completely implemented or in-process.
 * Super simple to parse and understand
 * No ambiguous grammar
 * Easy to translate to underlying architectures
-* Default x86-64 and AArch64 support
+* Default x86-64 (others planned)
 * Support for all numerical types
 * Automated test system
 * Syntax checking and reporting
