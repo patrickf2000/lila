@@ -20,14 +20,14 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
 }
 
 // An internal function to free any dynamic arrays in the current context
-pub fn free_arrays(builder : &mut LtacBuilder) {
-    for (_name, var) in &builder.vars {
+pub fn free_arrays(builder : &mut LtacBuilder, ignore : String) {
+    for (name, var) in &builder.vars {
         if (var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
             var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
             var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray ||
             var.data_type == DataType::I64DynArray || var.data_type == DataType::U64DynArray ||
             var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray)
-            && !var.is_param {
+            && !var.is_param && *name != ignore {
             
             let mut pusharg = ltac::create_instr(LtacType::PushArg);
             pusharg.arg1 = LtacArg::Ptr(var.pos);

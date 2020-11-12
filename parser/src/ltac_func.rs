@@ -182,8 +182,16 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         builder.syntax.ltac_error(line, msg);
         return false;
     }
+    
+    let mut to_ignore = String::new();
+    if line.args.len() == 1 {
+        let arg1 = line.args.first().unwrap();
+        if arg1.arg_type == AstArgType::Id {
+            to_ignore = arg1.str_val.clone();
+        }
+    }
 
-    free_arrays(builder);
+    free_arrays(builder, to_ignore);
 
     if line.args.len() == 1 {
         let arg1 = line.args.first().unwrap();
@@ -233,6 +241,12 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             DataType::Double => {
                 mov = ltac::create_instr(LtacType::MovF64);
                 mov.arg1 = LtacArg::RetRegF64;
+            },
+            
+            // TODO: We may want a different move for this
+            DataType::Str => {
+                mov = ltac::create_instr(LtacType::Mov);
+                mov.arg1 = LtacArg::RetRegI64;
             },
             
             _ => mov.arg1 = LtacArg::RetRegI32,
@@ -301,7 +315,7 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
 
 // Builds the exit keyword
 pub fn build_exit(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
-    free_arrays(builder);
+    free_arrays(builder, String::new());
     
     let mut instr = ltac::create_instr(LtacType::Exit);
     instr.arg1 = LtacArg::I32(0);
@@ -324,7 +338,7 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         let last = builder.file.code.last().unwrap();
         
         if last.instr_type != LtacType::Ret && last.instr_type != LtacType::Exit {
-            free_arrays(builder);
+            free_arrays(builder, String::new());
             
             // See if there was supposed to be a return instruction
             if builder.current_type != DataType::Void {

@@ -1,11 +1,13 @@
 
 use crate::ltac_builder::*;
-use crate::ast::{AstStmt, AstModType, AstArgType};
+use crate::ast;
+use crate::ast::{AstStmt, AstStmtType, AstModType, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacInstr, LtacType, LtacArg};
 
 use crate::ltac_expr::*;
 use crate::ltac_array::*;
+use crate::ltac_func::*;
 
 // Builds an LTAC variable declaration
 pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32, flt_arg_no_o : i32) -> (bool, i32, i32) {
@@ -211,7 +213,7 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
             AstArgType::Id => {
                 match &builder.vars.get(&arg.str_val) {
                     Some(v) => {
-                        if v.data_type != DataType::Str {
+                        if v.data_type != DataType::Str && v.data_type != DataType::ByteDynArray && v.data_type != DataType::UByteDynArray {
                             builder.syntax.ltac_error(line, "You can only assign a string to a string.".to_string());
                             return false;
                         }
@@ -224,10 +226,31 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                         builder.file.code.push(instr2);
                     },
                     
-                    None => {
-                        builder.syntax.ltac_error(line, "Invalid string variable.".to_string());
-                        return false;
-                    },
+                    None => instr.arg2 = LtacArg::Empty,
+                }
+                
+                if instr.arg2 == LtacArg::Empty {
+                    match &builder.clone().functions.get(&arg.str_val) {
+                        Some(t) => {
+                            if **t != DataType::Str && **t != DataType::ByteDynArray && **t != DataType::UByteDynArray {
+                                builder.syntax.ltac_error(line, "You can only assign string or byte arrays to string variables.".to_string());
+                                return false;
+                            }
+                            
+                            instr.arg2 = LtacArg::RetRegI64;
+                            
+                            // Create a statement to build the rest of the function call
+                            let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
+                            stmt.name = arg.str_val.clone();
+                            stmt.args = arg.sub_args.clone();
+                            build_func_call(builder, &stmt);
+                        },
+                        
+                        None => {
+                            builder.syntax.ltac_error(line, "Invalid string variable.".to_string());
+                            return false;
+                        },
+                    }
                 }
             },
             
