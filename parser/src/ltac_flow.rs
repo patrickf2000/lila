@@ -36,15 +36,31 @@ fn create_label(builder : &mut LtacBuilder, is_top : bool) {
 
 // Builds a conditional statement
 fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
-    // Build the conditional statement
-    let arg1 = &line.args.iter().nth(0).unwrap();
-    let arg2 = &line.args.iter().nth(2).unwrap();
-    
     let mut block : Vec<LtacInstr> = Vec::new();
     let mut cmp = ltac::create_instr(LtacType::U32Cmp);
     
+    // Build the conditional statement
+    let arg1 = match line.args.iter().nth(0) {
+        Some(a) => a,
+        None => return block,
+    };
+    
+    let mut arg2 = match line.args.iter().nth(2) {
+        Some(a) => a,
+        None => return block,
+    };
+    
     // Set to true if we have a signed byte, short, or int variable
     let mut signed_variant = false;
+    let mut negate = false;
+    
+    if arg2.arg_type == AstArgType::OpNeg {
+        negate = true;
+        arg2 = match line.args.iter().nth(3) {
+            Some(a) => a,
+            None => return block,
+        };
+    }
     
     // Although we assume its integer comparison by default, the first operand
     // determines the comparison type
@@ -70,10 +86,22 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
         },
         
         AstArgType::IntL => {
-            let mut mov = ltac::create_instr(LtacType::MovU);
-            mov.arg1 = LtacArg::Reg32(0);
-            mov.arg2  = LtacArg::U32(arg1.u64_val as u32);
-            block.push(mov);
+            if negate {
+                let val : i32 = 0 - (arg1.u64_val as i32);
+                
+                let mut mov = ltac::create_instr(LtacType::Mov);
+                mov.arg1 = LtacArg::Reg32(0);
+                mov.arg2  = LtacArg::I32(val);
+                block.push(mov);
+                
+                cmp = ltac::create_instr(LtacType::I32Cmp);
+                signed_variant = true;
+            } else {
+                let mut mov = ltac::create_instr(LtacType::MovU);
+                mov.arg1 = LtacArg::Reg32(0);
+                mov.arg2  = LtacArg::U32(arg1.u64_val as u32);
+                block.push(mov);
+            }
             
             cmp.arg1 = LtacArg::Reg32(0);
         },
@@ -236,10 +264,15 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
     
         AstArgType::IntL => {
             if signed_variant {
+                let mut val = arg2.u64_val as i64;
+                if negate {
+                    val = 0 - val;
+                }
+                
                 if cmp.instr_type == LtacType::I64Cmp {
-                    cmp.arg2 = LtacArg::I64(arg2.u64_val as i64);
+                    cmp.arg2 = LtacArg::I64(val);
                 } else {
-                    cmp.arg2 = LtacArg::I32(arg2.u64_val as i32);
+                    cmp.arg2 = LtacArg::I32(val as i32);
                 }
             } else {
                 if cmp.instr_type == LtacType::I8Cmp {
