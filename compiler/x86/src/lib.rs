@@ -288,22 +288,44 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         
         LtacArg::MemOffsetMem(pos, offset, size) => {
             // Load the variable
-            line.push_str("  mov r15d, DWORD PTR [rbp-");
-            line.push_str(&offset.to_string());
-            line.push_str("]\n");
+            line.push_str("  mov r15d, DWORD PTR ");
+            
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&offset.to_string());
+                line.push_str("[rbp]\n");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&offset.to_string());
+                line.push_str("]\n");
+            }
             
             // Clear flags
             line.push_str("  cdqe\n");
             
             // Load the effective address
-            line.push_str("  lea r14, [0+r15*");
+            line.push_str("  lea r14, ");
+            
+            if is_pic {
+                line.push_str("0");
+            }
+            
+            line.push_str("[0+r15*");
             line.push_str(&size.to_string());
             line.push_str("]\n");
             
             // Load the array
-            line.push_str("  mov r15, QWORD PTR [rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]\n");
+            line.push_str("  mov r15, QWORD PTR ");
+            
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]\n");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            }
             
             // Add to get the proper offset
             line.push_str("  add r15, r14\n");
@@ -456,9 +478,17 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         },
         
         LtacArg::MemOffsetImm(pos, offset) => {
-            line.push_str("r15, QWORD PTR [rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]\n");
+            line.push_str("r15, QWORD PTR ");
+            
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]\n");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            }
             
             line.push_str("  add r15, ");
             line.push_str(&offset.to_string());
@@ -484,22 +514,44 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         
         LtacArg::MemOffsetMem(pos, offset, size) => {
             // Load the variable
-            line.push_str("r15d, DWORD PTR [rbp-");
-            line.push_str(&offset.to_string());
-            line.push_str("]\n");
+            line.push_str("r15d, DWORD PTR ");
+            
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&offset.to_string());
+                line.push_str("[rbp]\n");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&offset.to_string());
+                line.push_str("]\n");
+            }
             
             // Clear flags
             line.push_str("  cdqe\n");
             
             // Load the effective address
-            line.push_str("  lea r14, [0+r15*");
+            line.push_str("  lea r14, ");
+            
+            if is_pic {
+                line.push_str("0");
+            }
+            
+            line.push_str("[0+r15*");
             line.push_str(&size.to_string());
             line.push_str("]\n");
             
             // Load the array
-            line.push_str("  mov r15, QWORD PTR [rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]\n");
+            line.push_str("  mov r15, QWORD PTR "); 
+            
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]\n");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]\n");
+            }
             
             // Add to get the proper offset
             line.push_str("  add r15, r14\n");

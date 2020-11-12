@@ -119,9 +119,15 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
                 },
             }
             
-            line.push_str("[rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]");
+            if is_pic {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]");
+            } else {
+                line.push_str("[rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]");
+            }
         },
         
         // Literals are always passed as unsigned
@@ -165,9 +171,15 @@ pub fn amd64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_
         
         LtacArg::Ptr(pos) => {
             line.push_str(&reg64);
-            line.push_str(", [rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]");
+            if is_pic {
+                line.push_str(", -");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]");
+            } else {
+                line.push_str(", [rbp-");
+                line.push_str(&pos.to_string());
+                line.push_str("]");
+            }
         },
         
         LtacArg::PtrLcl(ref val) => {
