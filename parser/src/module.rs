@@ -14,6 +14,10 @@ pub fn get_module_path(name : &String) -> String {
     path = path.replace(".", "/");
     path.push_str(".di");
     
+    if Path::new(&path).exists() {
+        return path;
+    }
+    
     // The three paths to check, in order of importance
     let mut path1 = "/usr/lib/dash/".to_string();
     path1.push_str(&path);
