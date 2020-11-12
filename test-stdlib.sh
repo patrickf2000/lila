@@ -34,6 +34,17 @@ cd target
 
 run_test '../test/stdlib/io/*.ds'
 
+# Generate test file
+if [[ -f ./file.txt ]] ; then
+    rm file.txt
+fi
+echo "Hello, how are you?" >> file.txt
+echo "I am good." >> file.txt
+echo "Excellent." >> file.txt
+echo "" >> file.txt
+
+run_test '../test/stdlib/fs/*.ds'
+
 cd ..
 
 echo ""

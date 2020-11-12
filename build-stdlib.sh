@@ -24,13 +24,15 @@ $dashc ../stdlib/math.ds -o math.o --no-link --pic
 $dashc ../stdlib/string.ds -o string.o --no-link --pic
 $dashc ../stdlib/io.ds -o io.o --no-link --pic
 $dashc ../stdlib/unix.ds -o unix.o --no-link --pic
+$dashc ../stdlib/fs.ds -o fs.o --no-link --pic
 
 $dashc -o libdash.so --lib \
     x86_64.o \
     io.o \
     math.o \
     string.o \
-    unix.o
+    unix.o \
+    fs.o
     
 rm *.o
 
