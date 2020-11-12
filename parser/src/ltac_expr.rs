@@ -448,6 +448,25 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     continue;
                 }
                 
+                // Check system call
+                if arg.str_val == "syscall" {
+                    if var.data_type != DataType::Int && var.data_type != DataType::UInt {
+                        builder.syntax.ltac_error(line, "You can only assign system call returns to integers.".to_string());
+                        return false;
+                    }
+                    
+                    // Build the call
+                    let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
+                    stmt.name = arg.str_val.clone();
+                    stmt.args = arg.sub_args.clone();
+                    build_func_call(builder, &stmt);
+                        
+                    instr.arg2 = LtacArg::RetRegI32;
+                    
+                    builder.file.code.push(instr.clone());
+                    continue;
+                }
+                
                 // Check functions
                 match builder.clone().functions.get(&arg.str_val) {
                     Some(t) => {
