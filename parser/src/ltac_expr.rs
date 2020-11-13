@@ -173,7 +173,8 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             
             AstArgType::IntL => {
                 // Bytes
-                if var.data_type == DataType::Byte || var.data_type == DataType::Char {
+                if var.data_type == DataType::Byte || var.data_type == DataType::Char
+                    || var.data_type == DataType::ByteDynArray {
                     let val = arg.u64_val as i32;
                     
                     // TODO: Why the hell is this an error? Its getting thrown when using char values
@@ -194,7 +195,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     builder.file.code.push(instr.clone());
                     
                 // UByte
-                } else if var.data_type == DataType::UByte {
+                } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
                     let val = arg.u64_val as u32;
                     
                     if mem::size_of::<u8>() > (val as usize) {
@@ -209,7 +210,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     builder.file.code.push(instr.clone());
                     
                 // Short
-                } else if var.data_type == DataType::Short {
+                } else if var.data_type == DataType::Short || var.data_type == DataType::ShortDynArray {
                     let val = arg.u64_val as i32;
                     
                     if mem::size_of::<u16>() > (val as usize) {
@@ -229,7 +230,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     builder.file.code.push(instr.clone());
                     
                 // UShort
-                } else if var.data_type == DataType::UShort {
+                } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
                     let val = arg.u64_val as u32;
                     
                     if mem::size_of::<u16>() > (val as usize) {
