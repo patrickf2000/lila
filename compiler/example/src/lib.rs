@@ -243,6 +243,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrB => {},
             LtacType::StrUB => {},
             LtacType::StrW => {},
+            LtacType::StrQ => {},
             LtacType::StrPtr => {},
             
             // Unknown

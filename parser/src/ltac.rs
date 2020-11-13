@@ -36,9 +36,9 @@ pub enum LtacType {
     LdUB,
     LdW,
     Str,
-    StrB,
-    StrUB,
+    StrB,       StrUB,
     StrW,
+    StrQ,
     StrPtr,
     
     // Argument load instructions

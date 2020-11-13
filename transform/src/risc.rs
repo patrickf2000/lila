@@ -2,6 +2,16 @@
 use parser::ltac;
 use parser::ltac::{LtacFile, LtacType, LtacArg};
 
+fn is_move(instr : &LtacType) -> bool {
+    match instr {
+        LtacType::Mov |
+        LtacType::MovQ | LtacType::MovUQ
+            => return true,
+            
+        _ => return false,
+    }
+}
+
 fn has_mem(arg : &LtacArg) -> bool {
     match arg {
         LtacArg::Mem(_n) => return true,
@@ -21,15 +31,17 @@ fn load_for_mov(arg : &LtacArg) -> LtacType {
 }
 
 // Returns the proper store instruction for a given move
-fn store_for_mov(arg : &LtacArg) -> LtacType {
-    match arg {
+fn store_for_mov(instr : &LtacType) -> LtacType {
+    match instr {
+        LtacType::MovQ => return LtacType::StrQ,
         _ => return LtacType::Str,
     }
 }
 
 // Returns a register for a given move statement
-fn reg_for_mov(arg : &LtacArg, pos : i32) -> LtacArg {
-    match arg {
+fn reg_for_mov(instr : &LtacType, pos : i32) -> LtacArg {
+    match instr {
+        LtacType::MovQ => return LtacArg::Reg64(pos),
         _ => return LtacArg::Reg32(pos),
     }
 }
@@ -47,14 +59,14 @@ pub fn risc_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
     for line in code.iter() {
         let mut instr2 = line.clone();
         
-        if line.instr_type == LtacType::Mov {
+        if is_move(&line.instr_type) {
             if has_mem(&line.arg1) {
-                let instr_type = store_for_mov(&line.arg2);
+                let instr_type = store_for_mov(&line.instr_type);
                 let mut store = ltac::create_instr(instr_type);
                 store.arg1 = instr2.arg1.clone();
-                store.arg2 = reg_for_mov(&line.arg2, 0);
+                store.arg2 = reg_for_mov(&line.instr_type, 2);
                 
-                instr2.arg1 = reg_for_mov(&line.arg2, 0);
+                instr2.arg1 = reg_for_mov(&line.instr_type, 2);
                 
                 file2.code.push(instr2);
                 file2.code.push(store);
@@ -62,9 +74,9 @@ pub fn risc_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
                 let instr_type = load_for_mov(&line.arg2);
                 let mut load = ltac::create_instr(instr_type);
                 load.arg1 = instr2.arg2.clone();
-                load.arg2 = reg_for_mov(&line.arg2, 0);
+                load.arg2 = reg_for_mov(&line.instr_type, 2);
                 
-                instr2.arg2 = reg_for_mov(&line.arg1, 0);
+                instr2.arg2 = reg_for_mov(&line.instr_type, 2);
                 
                 file2.code.push(load);
                 file2.code.push(instr2);
@@ -72,13 +84,13 @@ pub fn risc_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
                 file2.code.push(instr2);
             }
         } else {
-            if has_mem(&line.arg2) {
+            if has_mem(&line.arg2) && line.instr_type != LtacType::PushArg {
                 let instr_type = load_for_mov(&line.arg2);
                 let mut load = ltac::create_instr(instr_type);
                 load.arg1 = instr2.arg2.clone();
-                load.arg2 = reg_for_mov(&line.arg2, 0);
+                load.arg2 = reg_for_mov(&line.instr_type, 2);
                 
-                instr2.arg2 = reg_for_mov(&line.arg1, 0);
+                instr2.arg2 = reg_for_mov(&line.instr_type, 2);
                 
                 file2.code.push(load);
             }

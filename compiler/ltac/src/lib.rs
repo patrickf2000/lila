@@ -194,6 +194,7 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::StrB => line.push_str("  i8.str "),
         LtacType::StrUB => line.push_str("  u8.str "),
         LtacType::StrW => line.push_str("  i16.str "),
+        LtacType::StrQ => line.push_str("  i64.str "),
         LtacType::StrPtr => line.push_str("  ptr.str "),
         
         // Byte (i8) operations

@@ -239,6 +239,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             
             LtacType::StrB | LtacType::StrUB |
             LtacType::StrW |
+            LtacType::StrQ |
             LtacType::Str => amd64_build_load_store(writer, &code, false),
             LtacType::StrPtr => {},
             

@@ -69,7 +69,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         builder.file.code.push(instr);
         
         // Move the return register back to the variable
-        instr = ltac::create_instr(LtacType::Mov);
+        instr = ltac::create_instr(LtacType::MovQ);
         instr.arg1 = LtacArg::Mem(var.pos);
         instr.arg2 = LtacArg::RetRegI64;
         builder.file.code.push(instr);
@@ -133,7 +133,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         builder.file.code.push(instr);
         
         // Move the return register back to the variable
-        instr = ltac::create_instr(LtacType::Mov);
+        instr = ltac::create_instr(LtacType::MovQ);
         instr.arg1 = LtacArg::Mem(var.pos);
         instr.arg2 = LtacArg::RetRegI64;
         builder.file.code.push(instr);

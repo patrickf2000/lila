@@ -17,31 +17,238 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
     let mut line = String::new();
     
     match code.instr_type {
-        LtacType::Ld | LtacType::Str => line = "  mov ".to_string(),
+        LtacType::Ld |
+        LtacType::Str | LtacType::StrQ => line = "  mov ".to_string(),
         
         _ => {},
     }
     
     let pos = match &code.arg1 {
         LtacArg::Mem(pos) => *pos,
+        
+        LtacArg::MemOffsetImm(pos, offset) if !is_load => {
+            line.push_str("r15, QWORD PTR ");
+            
+            line.push_str("[rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+            
+            line.push_str("  add r15, ");
+            line.push_str(&offset.to_string());
+            line.push_str("\n");
+            
+            match &code.arg2 {
+                LtacArg::Reg8(_v) => line.push_str("  mov BYTE PTR "),
+                LtacArg::Reg16(_v) => line.push_str("  mov WORD PTR "),
+                LtacArg::Reg32(_v) => line.push_str("  mov DWORD PTR "),
+                LtacArg::Reg64(_v) => line.push_str("  mov QWORD PTR "),
+                LtacArg::FltReg(_v) => line.push_str("  movss "),
+                LtacArg::FltReg64(_v) => line.push_str("  movsd "),
+                _ => line.push_str("  mov "),
+            };
+            line.push_str("[r15], ");
+            
+            0
+        },
+        
+        LtacArg::MemOffsetMem(pos, offset, size) if !is_load => {
+            // Load the variable
+            line.push_str("r15d, DWORD PTR ");
+            
+            line.push_str("[rbp-");
+            line.push_str(&offset.to_string());
+            line.push_str("]\n");
+            
+            // Load the effective address
+            line.push_str("  lea r14, ");
+            line.push_str("[0+r15*");
+            line.push_str(&size.to_string());
+            line.push_str("]\n");
+            
+            // Load the array
+            line.push_str("  mov r15, QWORD PTR [rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+            
+            // Add to get the proper offset
+            line.push_str("  add r15, r14\n");
+            
+            // Now set up for the final move
+            match &code.arg2 {
+                LtacArg::Reg8(_v) => line.push_str("  mov BYTE PTR "),
+                LtacArg::Reg16(_v) => line.push_str("  mov WORD PTR "),
+                LtacArg::Reg64(_v) => line.push_str("  mov QWORD PTR "),
+                LtacArg::FltReg(_v) => line.push_str("  movss "),
+                LtacArg::FltReg64(_v) => line.push_str("  movsd "),
+                _ => line.push_str("  mov "),
+            }
+            line.push_str("[r15], ");
+            
+            0
+        },
+        
+        LtacArg::MemOffsetReg(pos, reg, size) if !is_load => {
+            // Determine the right register
+            let src_reg = amd64_op_reg32(*reg);
+            let size_mod : String;
+            let mov_instr : String;
+            
+            match &code.arg2 {
+                LtacArg::Reg8(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Reg16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Reg64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::FltReg(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
+                LtacArg::FltReg64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
+                _ => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+            }
+        
+            // Load the array
+            line.push_str("r15, QWORD PTR ");
+            line.push_str("[rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+            
+            // Load the effective address
+            line.push_str("  lea r14, ");
+            
+            line.push_str("[0+");
+            line.push_str(&src_reg);
+            line.push_str("*");
+            line.push_str(&size.to_string());
+            line.push_str("]\n");
+            
+            // Add to get the proper offset
+            line.push_str("  add r15, r14\n");
+            
+            // Now set up for the final move
+            line.push_str(&mov_instr);
+            line.push_str(&size_mod);
+            line.push_str("[r15], ");
+            
+            0
+        },
+        
+        // ========================================================================================
+        // Load
+        LtacArg::MemOffsetImm(pos, offset) if is_load => {
+            line.push_str("r15, QWORD PTR [rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+            
+            match &code.arg2 {
+                LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15+"),
+                LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15+"),
+                LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15+"),
+                LtacArg::FltReg(_p) => line.push_str("  movss xmm1, DWORD PTR [r15+"),
+                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm1, QWORD PTR [r15+"),
+                _ => line.push_str("  mov r15d, DWORD PTR [r15+"),
+            }
+            
+            line.push_str(&offset.to_string());
+            line.push_str("]\n");
+            
+            0
+        },
+        
+        LtacArg::MemOffsetMem(pos, offset, size) if is_load => {
+            // Load the variable
+            line.push_str("r15d, DWORD PTR ");
+            
+            line.push_str("[rbp-");
+            line.push_str(&offset.to_string());
+            line.push_str("]\n");
+            
+            // Load the effective address
+            line.push_str("  lea r14, ");
+            line.push_str("[0+r15*");
+            line.push_str(&size.to_string());
+            line.push_str("]\n");
+            
+            // Load the array
+            line.push_str("  mov r15, QWORD PTR ");
+            
+            line.push_str("[rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+            
+            // Add to get the proper offset
+            line.push_str("  add r15, r14\n");
+            
+            // Store
+            match &code.arg1 {
+                LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
+                LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
+                LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15]\n"),
+                LtacArg::FltReg(_p) => line.push_str("  movss xmm1, DWORD PTR [r15]\n"),
+                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm1, QWORD PTR [r15]\n"),
+                _ => line.push_str("  mov r15d, DWORD PTR [r15]\n"),
+            }
+            
+            0
+        },
+        
+        LtacArg::MemOffsetReg(pos, reg, size) if is_load => {
+            // Determine the right register
+            let src_reg = amd64_op_reg32(*reg);
+            
+            // Load the array
+            line.push_str("r15, QWORD PTR ");
+            line.push_str("[rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+            
+            // Load the effective address
+            line.push_str("  lea r14, ");
+            line.push_str("[0+");
+            line.push_str(&src_reg);
+            line.push_str("*");
+            line.push_str(&size.to_string());
+            line.push_str("]\n");
+            
+            // Add to get the proper offset
+            line.push_str("  add r15, r14\n");
+            
+            // Store
+            match &code.arg1 {
+                LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
+                LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
+                LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15]\n"),
+                LtacArg::FltReg(_p) => line.push_str("  movss xmm1, DWORD PTR [r15]\n"),
+                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm1, QWORD PTR [r15]\n"),
+                _ => line.push_str("  mov r15d, DWORD PTR [r15]\n"),
+            }
+            
+            0
+        },
+        
         _ => 0,
     };
     
     let reg : String = match &code.arg2 {
         LtacArg::Reg32(pos) => amd64_op_reg32(*pos),
+        LtacArg::Reg64(pos) => amd64_op_reg64(*pos),
         
         _ => String::new(),
     };
     
     if is_load {
-        line.push_str(&reg);
-        line.push_str(", [rbp-");
-        line.push_str(&pos.to_string());
-        line.push_str("]\n");
+        if pos == 0 {
+            line.push_str("  mov ");
+            line.push_str(&reg);
+            line.push_str(", r15d\n");
+        } else {
+            line.push_str(&reg);
+            line.push_str(", [rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+        }
     } else {
-        line.push_str("[rbp-");
-        line.push_str(&pos.to_string());
-        line.push_str("], ");
+        if pos != 0 {
+            line.push_str("[rbp-");
+            line.push_str(&pos.to_string());
+            line.push_str("], ");
+        }
+        
         line.push_str(&reg);
         line.push_str("\n");
     }
