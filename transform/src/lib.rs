@@ -4,6 +4,11 @@ use std::collections::HashMap;
 use parser::ltac;
 use parser::ltac::{LtacFile, LtacType, LtacArg};
 
+// Import any local modules
+mod risc;
+
+use risc::*;
+
 #[derive(PartialEq, Clone, Copy)]
 pub enum Arch {
     X86_64,
@@ -15,11 +20,18 @@ pub enum Arch {
 // 2-> AArch64
 
 // The main transformation function
-pub fn run(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> {
-    let file2 = match check_builtins(file, arch, use_c) {
+pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Result<LtacFile, ()> {
+    let mut file2 = match check_builtins(file, arch, use_c) {
         Ok(ltac) => ltac,
         Err(_e) => return Err(()),
     };
+    
+    if risc_mode {
+        file2 = match risc_optimize(&file2) {
+            Ok(ltac) => ltac,
+            Err(_e) => return Err(()),
+        }
+    }
     
     Ok(file2)
 }

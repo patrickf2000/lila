@@ -27,6 +27,7 @@ fn run() -> i32 {
     let mut link_lib = false;
     let mut no_link = false;
     let mut pic = false;
+    let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
     let arch = Arch::X86_64;
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
@@ -49,6 +50,7 @@ fn run() -> i32 {
                 pic = true;
             },
             "--pic" => pic = true,
+            "--risc" => risc_mode = true,
             "--no-link" => no_link = true,
             "-o" => next_output = true,
             _ => inputs.push(arg.clone()),
@@ -81,7 +83,7 @@ fn run() -> i32 {
         };
         
         // Do any needed transformations or optimizations
-        ltac = match transform::run(&ltac, arch, use_c) {
+        ltac = match transform::run(&ltac, arch, use_c, risc_mode) {
             Ok(ltac) => ltac,
             Err(_e) => return 1,
         };
@@ -92,7 +94,7 @@ fn run() -> i32 {
         if print_ltac {
             ltac_printer::compile(&ltac).expect("LTAC Codegen failed with unknown error."); 
         } else if arch == Arch::X86_64 {
-            x86::compile(&ltac, pic).expect("Codegen failed with unknown error.");
+            x86::compile(&ltac, pic, risc_mode).expect("Codegen failed with unknown error.");
             x86::build_asm(&ltac.name, no_link);
         } else {
             // TODO

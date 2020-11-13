@@ -19,7 +19,7 @@ use math::*;
 use utils::*;
 use vector::*;
 
-pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
+pub fn compile(ltac_file : &LtacFile, pic : bool, is_risc : bool) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
     name.push_str(&ltac_file.name);
     name.push_str(".asm");
@@ -33,7 +33,7 @@ pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
         .expect("[AMD64_setup] Write failed.");
     
     write_data(&mut writer, &ltac_file.data, pic);
-    write_code(&mut writer, &ltac_file.code, pic);
+    write_code(&mut writer, &ltac_file.code, pic, is_risc);
     
     Ok(())
 }
@@ -167,7 +167,7 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>, pic : bool) 
 }
 
 // Writes the .text section
-fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bool) {
+fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bool, is_risc : bool) {
     let line = ".text\n".to_string();
     writer.write(&line.into_bytes())
         .expect("[AMD64_code] Write failed");
@@ -240,13 +240,13 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             LtacType::StrPtr => {},
             
             // Everything else uses the common build instruction function
-            _ => amd64_build_instr(writer, &code, is_pic),
+            _ => amd64_build_instr(writer, &code, is_pic, is_risc),
         }
     }
 }
 
 // Many instructions have common syntax
-fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : bool) {
+fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : bool, is_risc : bool) {
     let mut line = String::new();
     
     // Specific for float literals
@@ -268,7 +268,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
     
     // Need if any parts represent a memory offset (ie, array access)
     match code.arg2 {
-        LtacArg::MemOffsetImm(pos, offset) => {
+        LtacArg::MemOffsetImm(pos, offset) if !is_risc => {
             line.push_str("  mov r15, QWORD PTR [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
@@ -286,7 +286,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             line.push_str("]\n");
         },
         
-        LtacArg::MemOffsetMem(pos, offset, size) => {
+        LtacArg::MemOffsetMem(pos, offset, size) if !is_risc => {
             // Load the variable
             line.push_str("  mov r15d, DWORD PTR ");
             
@@ -341,7 +341,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             }
         },
         
-        LtacArg::MemOffsetReg(pos, reg, size) => {
+        LtacArg::MemOffsetReg(pos, reg, size) if !is_risc => {
             // Determine the right register
             /*let src_reg : String;
             
@@ -506,7 +506,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0, "),
         
-        LtacArg::Mem(pos) => {
+        LtacArg::Mem(pos) if !is_risc => {
             match &code.arg2 {
                 LtacArg::Byte(_v) => line.push_str("BYTE PTR "),
                 LtacArg::UByte(_v) => line.push_str("BYTE PTR "),
@@ -533,7 +533,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             }
         },
         
-        LtacArg::MemOffsetImm(pos, offset) => {
+        LtacArg::MemOffsetImm(pos, offset) if !is_risc => {
             line.push_str("r15, QWORD PTR ");
             
             if is_pic {
@@ -568,7 +568,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             line.push_str("[r15], ");
         },
         
-        LtacArg::MemOffsetMem(pos, offset, size) => {
+        LtacArg::MemOffsetMem(pos, offset, size) if !is_risc => {
             // Load the variable
             line.push_str("r15d, DWORD PTR ");
             
@@ -634,7 +634,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         },
         
         // If we can clean this up, especially the first match, that would be nice
-        LtacArg::MemOffsetReg(pos, reg, size) => {
+        LtacArg::MemOffsetReg(pos, reg, size) if !is_risc => {
             // Determine the right register
             let src_reg = amd64_op_reg32(*reg);
             let size_mod : String;
@@ -730,7 +730,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0"),
         
-        LtacArg::Mem(pos) => {
+        LtacArg::Mem(pos) if !is_risc => {
             if is_pic {
                 line.push_str("-");
                 line.push_str(&pos.to_string());
@@ -742,7 +742,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             }
         },
         
-        LtacArg::MemOffsetImm(_p, _o) => {
+        LtacArg::MemOffsetImm(_p, _o) if !is_risc => {
             match &code.arg1 {
                 LtacArg::Reg8(_p) => line.push_str("r15b"),
                 LtacArg::Reg16(_p) => line.push_str("r15w"),
@@ -752,7 +752,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             }
         },
         
-        LtacArg::MemOffsetMem(_p, _o, _s) | LtacArg::MemOffsetReg(_p, _o, _s) => {
+        LtacArg::MemOffsetMem(_p, _o, _s) | LtacArg::MemOffsetReg(_p, _o, _s) if !is_risc => {
             match &code.arg1 {
                 LtacArg::Reg8(_p) => line.push_str("r15b"),
                 LtacArg::Reg16(_p) => line.push_str("r15w"),
