@@ -343,7 +343,7 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         
         LtacArg::MemOffsetReg(pos, reg, size) => {
             // Determine the right register
-            let src_reg : String;
+            /*let src_reg : String;
             
             match &code.arg1 {
                 LtacArg::Reg8(_v) => src_reg = amd64_op_reg8(reg),
@@ -352,7 +352,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
                 LtacArg::FltReg(_v) => src_reg = amd64_op_flt(reg),
                 LtacArg::FltReg64(_v) => src_reg = amd64_op_flt(reg),
                 _ => src_reg = amd64_op_reg32(reg),
-            }
+            }*/
+            let src_reg = amd64_op_reg32(reg);
             
             // Load the array
             line.push_str("  mov r15, QWORD PTR ");
@@ -407,14 +408,16 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         LtacType::MovF32 => {
             match &code.arg1 {
                 LtacArg::MemOffsetImm(_p, _o) => line.push_str("  mov "),
-                LtacArg::MemOffsetMem(_p, _o, _s) => line.push_str("  mov "),
+                LtacArg::MemOffsetMem(_p, _o, _s) |
+                LtacArg::MemOffsetReg(_p, _o, _s) => line.push_str("  mov "),
                 _ => line.push_str("  movss "),
             }
         },
         LtacType::MovF64 => {
             match &code.arg1 {
                 LtacArg::MemOffsetImm(_p, _o) => line.push_str("  mov "),
-                LtacArg::MemOffsetMem(_p, _o, _s) => line.push_str("  mov "),
+                LtacArg::MemOffsetMem(_p, _o, _s) |
+                LtacArg::MemOffsetReg(_p, _o, _s) => line.push_str("  mov "),
                 _ => line.push_str("  movsd "),
             }
         },
@@ -633,26 +636,26 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         // If we can clean this up, especially the first match, that would be nice
         LtacArg::MemOffsetReg(pos, reg, size) => {
             // Determine the right register
-            let src_reg : String;
+            let src_reg = amd64_op_reg32(*reg);
             let size_mod : String;
             let mov_instr : String;
             
             match &code.arg2 {
-                LtacArg::Reg8(_v) => { src_reg = amd64_op_reg8(*reg); size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::Reg16(_v) => { src_reg = amd64_op_reg16(*reg); size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::Byte(_v) => { src_reg = amd64_op_reg8(*reg); size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::UByte(_v) => { src_reg = amd64_op_reg8(*reg); size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I16(_v) => { src_reg = amd64_op_reg16(*reg); size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U16(_v) => { src_reg = amd64_op_reg16(*reg); size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I32(_v) => { src_reg = amd64_op_reg32(*reg); size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U32(_v) => { src_reg = amd64_op_reg32(*reg); size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I64(_v) => { src_reg = amd64_op_reg64(*reg); size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U64(_v) => { src_reg = amd64_op_reg64(*reg); size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::F32(_v) => { src_reg = amd64_op_flt(*reg); size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
-                LtacArg::F64(_v) => { src_reg = amd64_op_flt(*reg); size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
-                LtacArg::FltReg(_v) => { src_reg = amd64_op_flt(*reg); size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
-                LtacArg::FltReg64(_v) => { src_reg = amd64_op_flt(*reg); size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
-                _ => { src_reg = amd64_op_reg32(*reg); size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Reg8(_v) => { /*src_reg = amd64_op_reg8(*reg);*/ size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Reg16(_v) => { /*src_reg = amd64_op_reg16(*reg);*/ size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Byte(_v) => { /*src_reg = amd64_op_reg8(*reg);*/ size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::UByte(_v) => { /*src_reg = amd64_op_reg8(*reg);*/ size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::I16(_v) => { /*src_reg = amd64_op_reg16(*reg);*/ size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::U16(_v) => { /*src_reg = amd64_op_reg16(*reg)*/ size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::I32(_v) => { /*src_reg = amd64_op_reg32(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::U32(_v) => { /*src_reg = amd64_op_reg32(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::I64(_v) => { /*src_reg = amd64_op_reg64(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::U64(_v) => { /*src_reg = amd64_op_reg64(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::F32(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
+                LtacArg::F64(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
+                LtacArg::FltReg(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
+                LtacArg::FltReg64(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
+                _ => { /*src_reg = amd64_op_reg32(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
             }
         
             // Load the array

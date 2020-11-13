@@ -66,7 +66,14 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 }
             }
         } else {
-            build_var_expr(builder, &line.sub_args, &line, var, 0);
+            // We create a dummy variable so the positional math is done as integers
+            let var2 = Var {
+                pos : 0,
+                data_type : DataType::Int,
+                is_param : false,
+            };
+            
+            build_var_expr(builder, &line.sub_args, &line, &var2, 0);
             instr.arg1 = LtacArg::MemOffsetReg(var.pos, 0, offset_size);
         }
     }
@@ -365,7 +372,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     builder.file.code.push(instr2);
                                 }
                             } else {
-                                build_var_expr(builder, &arg.sub_args, &line, var, 0);
+                                // Create a dummy variable so the types stay correct
+                                let var2 = Var {
+                                    pos : 0,
+                                    data_type : DataType::Int,
+                                    is_param : false,
+                                };
+                                
+                                build_var_expr(builder, &arg.sub_args, &line, &var2, 0);
                                 
                                 let mut instr2 = mov_for_type(&v.data_type);
                                 instr2.arg1 = reg_for_type(&v.data_type, 0);
