@@ -1,14 +1,91 @@
 
-use parser::ltac::{LtacFile/*, LtacType, LtacArg*/};
+use parser::ltac;
+use parser::ltac::{LtacFile, LtacType, LtacArg};
 
+fn has_mem(arg : &LtacArg) -> bool {
+    match arg {
+        LtacArg::Mem(_n) => return true,
+        LtacArg::MemOffsetImm(_n1, _n2) => return true,
+        LtacArg::MemOffsetMem(_n1, _n2, _n3) |
+        LtacArg::MemOffsetReg(_n1, _n2, _n3) => return true,
+        
+        _ => return false,
+    }
+}
+
+// Returns the proper load instruction for a given move
+fn load_for_mov(arg : &LtacArg) -> LtacType {
+    match arg {
+        _ => return LtacType::Ld,
+    }
+}
+
+// Returns the proper store instruction for a given move
+fn store_for_mov(arg : &LtacArg) -> LtacType {
+    match arg {
+        _ => return LtacType::Str,
+    }
+}
+
+// Returns a register for a given move statement
+fn reg_for_mov(arg : &LtacArg, pos : i32) -> LtacArg {
+    match arg {
+        _ => return LtacArg::Reg32(pos),
+    }
+}
+
+// The main RISC optimizer loop
 pub fn risc_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
-    let file2 = LtacFile {
+    let mut file2 = LtacFile {
         name : file.name.clone(),
         data : file.data.clone(),
         code : Vec::new(),
     };
     
-    //let code = file.code.clone();
+    let code = file.code.clone();
+    
+    for line in code.iter() {
+        let mut instr2 = line.clone();
+        
+        if line.instr_type == LtacType::Mov {
+            if has_mem(&line.arg1) {
+                let instr_type = store_for_mov(&line.arg2);
+                let mut store = ltac::create_instr(instr_type);
+                store.arg1 = instr2.arg1.clone();
+                store.arg2 = reg_for_mov(&line.arg2, 0);
+                
+                instr2.arg1 = reg_for_mov(&line.arg2, 0);
+                
+                file2.code.push(instr2);
+                file2.code.push(store);
+            } else if has_mem(&line.arg2) {
+                let instr_type = load_for_mov(&line.arg2);
+                let mut load = ltac::create_instr(instr_type);
+                load.arg1 = instr2.arg2.clone();
+                load.arg2 = reg_for_mov(&line.arg2, 0);
+                
+                instr2.arg2 = reg_for_mov(&line.arg1, 0);
+                
+                file2.code.push(load);
+                file2.code.push(instr2);
+            } else {
+                file2.code.push(instr2);
+            }
+        } else {
+            if has_mem(&line.arg2) {
+                let instr_type = load_for_mov(&line.arg2);
+                let mut load = ltac::create_instr(instr_type);
+                load.arg1 = instr2.arg2.clone();
+                load.arg2 = reg_for_mov(&line.arg2, 0);
+                
+                instr2.arg2 = reg_for_mov(&line.arg1, 0);
+                
+                file2.code.push(load);
+            }
+            
+            file2.code.push(instr2);
+        }
+    }
     
     Ok(file2)
 }

@@ -12,12 +12,14 @@ mod func;
 mod math;
 mod utils;
 mod vector;
+mod risc;
 
 use call::*;
 use func::*;
 use math::*;
 use utils::*;
 use vector::*;
+use risc::*;
 
 pub fn compile(ltac_file : &LtacFile, pic : bool, is_risc : bool) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -231,12 +233,13 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             LtacType::Free => {},
             
             // These are RISC-specific. At some point, we should generate instructions for them
-            LtacType::Ld => {},
-            LtacType::LdB | LtacType::LdUB => {},
-            LtacType::LdW => {},
-            LtacType::Str => {},
-            LtacType::StrB | LtacType::StrUB => {},
-            LtacType::StrW => {},
+            LtacType::LdB | LtacType::LdUB |
+            LtacType::LdW |
+            LtacType::Ld => amd64_build_load_store(writer, &code, true),
+            
+            LtacType::StrB | LtacType::StrUB |
+            LtacType::StrW |
+            LtacType::Str => amd64_build_load_store(writer, &code, false),
             LtacType::StrPtr => {},
             
             // Everything else uses the common build instruction function

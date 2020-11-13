@@ -1,6 +1,11 @@
 #!/bin/bash
 
 test_count=0
+flags=""
+
+if [[ $1 == "--risc" ]] ; then
+    flags=" --risc "
+fi
 
 function run_test() {
     for entry in $1
@@ -25,9 +30,9 @@ function run_test() {
             rm ERROR_TEST.sh
         else
             if [[ $2 == "sys" ]] ; then
-                cargo run $entry -o $name
+                cargo run $entry $flags -o $name
             elif [[ $2 == "clib" ]] ; then
-                cargo run $entry --use-c -o $name
+                cargo run $entry --use-c $flags -o $name
             fi
         
     	    ./test.py $entry ./$name ""
