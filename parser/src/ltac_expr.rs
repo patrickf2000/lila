@@ -65,6 +65,9 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                     },
                 }
             }
+        } else {
+            build_var_expr(builder, &line.sub_args, &line, var, 0);
+            instr.arg1 = LtacArg::MemOffsetReg(var.pos, 0, offset_size);
         }
     }
     
@@ -322,7 +325,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 let mut pop_float = true;
                 
                 // Check variables
-                match builder.vars.get(&arg.str_val) {
+                match builder.clone().vars.get(&arg.str_val) {
                     Some(v) => {
                         instr.arg2 = LtacArg::Mem(v.pos);
                         
@@ -361,6 +364,15 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     
                                     builder.file.code.push(instr2);
                                 }
+                            } else {
+                                build_var_expr(builder, &arg.sub_args, &line, var, 0);
+                                
+                                let mut instr2 = mov_for_type(&v.data_type);
+                                instr2.arg1 = reg_for_type(&v.data_type, 0);
+                                instr2.arg2 = LtacArg::MemOffsetReg(v.pos, 0, size);
+                                builder.file.code.push(instr2);
+                                
+                                instr.arg2 = reg_for_type(&v.data_type, 0);
                             }
                         }
                         

@@ -172,7 +172,8 @@ pub enum LtacArg {
     
     Mem(i32),
     MemOffsetImm(i32, i32),
-    MemOffsetMem(i32, i32, i32),
+    MemOffsetMem(i32, i32, i32),    // Dest, var, size
+    MemOffsetReg(i32, i32, i32),    // Dest, reg _no, size
     
     Byte(i8),       UByte(u8),
     I16(i16),       U16(u16),

@@ -137,32 +137,57 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             
             Token::OpAdd => {
                 let arg = ast::create_arg(AstArgType::OpAdd);
-                args.push(arg);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
             },
             
             Token::OpSub => {
+                let arg : AstArg;
                 if last == Token::Unknown || is_operator(last) {
-                    let arg = ast::create_arg(AstArgType::OpNeg);
-                    args.push(arg);
+                    arg = ast::create_arg(AstArgType::OpNeg);
                 } else {
-                    let arg = ast::create_arg(AstArgType::OpSub);
+                    arg = ast::create_arg(AstArgType::OpSub);
+                }
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
                     args.push(arg);
                 }
             },
             
             Token::OpMul => {
                 let arg = ast::create_arg(AstArgType::OpMul);
-                args.push(arg);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
             },
             
             Token::OpDiv => {
                 let arg = ast::create_arg(AstArgType::OpDiv);
-                args.push(arg);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
             },
             
             Token::OpMod => {
                 let arg = ast::create_arg(AstArgType::OpMod);
-                args.push(arg);
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
             },
             
             Token::OpEq => {
