@@ -32,12 +32,12 @@ pub enum LtacType {
     
     // Load-store instructions- RISC specific
     LdB,        LdUB,
-    LdW,
+    LdW,        LdUW,
     Ld,         LdU,
     LdQ,        LdUQ,
     
     StrB,       StrUB,
-    StrW,
+    StrW,       StrUW,
     Str,        StrU,
     StrQ,       StrUQ,
     StrPtr,

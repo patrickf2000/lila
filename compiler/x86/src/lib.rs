@@ -234,12 +234,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             
             // These are RISC-specific. At some point, we should generate instructions for them
             LtacType::LdB | LtacType::LdUB |
-            LtacType::LdW |
+            LtacType::LdW | LtacType::LdUW |
             LtacType::Ld | LtacType::LdU |
             LtacType::LdQ | LtacType::LdUQ => amd64_build_load_store(writer, &code, true),
             
             LtacType::StrB | LtacType::StrUB |
-            LtacType::StrW |
+            LtacType::StrW | LtacType::StrUW |
             LtacType::Str | LtacType::StrU |
             LtacType::StrQ | LtacType::StrUQ => amd64_build_load_store(writer, &code, false),
             LtacType::StrPtr => {},
@@ -504,8 +504,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             line.push_str(", ");
         },
         
-        LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("eax, "),
-        LtacArg::RetRegI16 | LtacArg::RetRegU16 => line.push_str("eax, "),
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("al, "),
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 => line.push_str("ax, "),
         LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("eax, "),
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("rax, "),
         

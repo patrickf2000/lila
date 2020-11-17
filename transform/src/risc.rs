@@ -4,7 +4,8 @@ use parser::ltac::{LtacFile, LtacType, LtacArg};
 
 fn is_move(instr : &LtacType) -> bool {
     match instr {
-        LtacType::MovUW |
+        LtacType::MovB | LtacType::MovUB |
+        LtacType::MovW | LtacType::MovUW |
         LtacType::Mov | LtacType::MovU |
         LtacType::MovQ | LtacType::MovUQ
             => return true,
@@ -27,13 +28,28 @@ fn has_mem(arg : &LtacArg) -> bool {
 // Returns the proper load instruction for a given move
 fn load_for_mov(instr : &LtacType) -> LtacType {
     match instr {
+        LtacType::I8Add | LtacType::I8Sub | LtacType::I8Mul |
+        LtacType::I8Div | LtacType::I8Mod |
+        LtacType::I8Cmp => return LtacType::LdB,
+        
+        LtacType::I16Add | LtacType::I16Sub | LtacType::I16Mul |
+        LtacType::I16Div | LtacType::I16Mod |
+        LtacType::I16Cmp => return LtacType::LdW,
+        
         LtacType::I64Add | LtacType::I64Sub | LtacType::I64Mul |
         LtacType::I64Div | LtacType::I64Mod => return LtacType::LdQ,
+        
         LtacType::U64Add | LtacType::U64Mul |
         LtacType::U64Div | LtacType::U64Mod => return LtacType::LdUQ,
+        
+        LtacType::MovB => return LtacType::LdB,
+        LtacType::MovUB => return LtacType::LdUB,
+        LtacType::MovW => return LtacType::LdW,
+        LtacType::MovUW => return LtacType::LdUW,
         LtacType::MovU => return LtacType::LdU,
         LtacType::MovQ => return LtacType::LdQ,
         LtacType::MovUQ => return LtacType::LdUQ,
+        
         _ => return LtacType::Ld,
     }
 }
@@ -41,6 +57,10 @@ fn load_for_mov(instr : &LtacType) -> LtacType {
 // Returns the proper store instruction for a given move
 fn store_for_mov(instr : &LtacType) -> LtacType {
     match instr {
+        LtacType::MovB => return LtacType::StrB,
+        LtacType::MovUB => return LtacType::StrUB,
+        LtacType::MovW => return LtacType::StrW,
+        LtacType::MovUW => return LtacType::StrUW,
         LtacType::MovU => return LtacType::StrU,
         LtacType::MovQ => return LtacType::StrQ,
         LtacType::MovUQ => return LtacType::StrUQ,
@@ -51,6 +71,10 @@ fn store_for_mov(instr : &LtacType) -> LtacType {
 // Returns a register for a given move statement
 fn reg_for_mov(instr : &LtacType, pos : i32) -> LtacArg {
     match instr {
+        LtacType::LdB | LtacType::LdUB |
+        LtacType::MovB | LtacType::MovUB => return LtacArg::Reg8(pos),
+        LtacType::LdW | LtacType::LdUW |
+        LtacType::MovW | LtacType::MovUW => return LtacArg::Reg16(pos),
         LtacType::LdQ | LtacType::LdUQ |
         LtacType::MovQ | LtacType::MovUQ => return LtacArg::Reg64(pos),
         _ => return LtacArg::Reg32(pos),
