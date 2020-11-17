@@ -197,7 +197,7 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
 
 // Builds a string variable assignment
 pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
-    let mut instr = ltac::create_instr(LtacType::Mov);
+    let mut instr = ltac::create_instr(LtacType::MovQ);
     
     if line.args.len() == 1 {
         let arg = line.args.first().unwrap();
@@ -220,7 +220,7 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                         
                         instr.arg2 = LtacArg::Reg64(0);
                         
-                        let mut instr2 = ltac::create_instr(LtacType::Mov);
+                        let mut instr2 = ltac::create_instr(LtacType::MovQ);
                         instr2.arg1 = LtacArg::Reg64(0);
                         instr2.arg2 = LtacArg::Mem(v.pos);
                         builder.file.code.push(instr2);

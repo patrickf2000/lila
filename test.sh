@@ -1,11 +1,6 @@
 #!/bin/bash
 
 test_count=0
-flags=""
-
-if [[ $1 == "--risc" ]] ; then
-    flags=" --risc "
-fi
 
 function run_test() {
     for entry in $1
@@ -30,9 +25,9 @@ function run_test() {
             rm ERROR_TEST.sh
         else
             if [[ $2 == "sys" ]] ; then
-                cargo run $entry $flags -o $name
+                cargo run $entry $3 -o $name
             elif [[ $2 == "clib" ]] ; then
-                cargo run $entry --use-c $flags -o $name
+                cargo run $entry --use-c $3 -o $name
             fi
         
     	    ./test.py $entry ./$name ""
@@ -50,22 +45,28 @@ function run_test() {
     done
 }
 
+flags=""
+
+if [[ $1 == "--risc" ]] ; then
+    flags=" --risc "
+fi
+
 echo "Running all tests..."
 echo ""
 
-run_test 'test/int/*.ds' 'clib'
-run_test 'test/int64/*.ds' 'clib'
-run_test 'test/byte/*.ds' 'clib'
-run_test 'test/short/*.ds' 'clib'
-run_test 'test/float/*.ds' 'clib'
-run_test 'test/char/*.ds' 'clib'
-run_test 'test/string/*.ds' 'clib'
+run_test 'test/int/*.ds' 'clib' $flags
+run_test 'test/int64/*.ds' 'clib' $flags
+run_test 'test/byte/*.ds' 'clib' $flags
+run_test 'test/short/*.ds' 'clib' $flags
+run_test 'test/float/*.ds' 'clib' $flags
+run_test 'test/char/*.ds' 'clib' $flags
+run_test 'test/string/*.ds' 'clib' $flags
 
-run_test 'test/ooop/*.ds' 'clib'
-run_test 'test/loop/*.ds' 'clib'
-run_test 'test/ldarg/*.ds' 'clib'
-run_test 'test/const/*.ds' 'clib'
-run_test 'test/func/*.ds' 'clib'
+run_test 'test/ooop/*.ds' 'clib' $flags
+run_test 'test/loop/*.ds' 'clib' $flags
+run_test 'test/ldarg/*.ds' 'clib' $flags
+run_test 'test/const/*.ds' 'clib' $flags
+run_test 'test/func/*.ds' 'clib' $flags
 
 run_test 'test/errors/*.ds' 'clib' "error"
 run_test 'test/errors/ltac/*.ds' "clib" "error"
