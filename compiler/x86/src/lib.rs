@@ -236,12 +236,14 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             LtacType::LdB | LtacType::LdUB |
             LtacType::LdW | LtacType::LdUW |
             LtacType::Ld | LtacType::LdU |
-            LtacType::LdQ | LtacType::LdUQ => amd64_build_load_store(writer, &code, true),
+            LtacType::LdQ | LtacType::LdUQ |
+            LtacType::LdF32 | LtacType::LdF64 => amd64_build_load_store(writer, &code, true),
             
             LtacType::StrB | LtacType::StrUB |
             LtacType::StrW | LtacType::StrUW |
             LtacType::Str | LtacType::StrU |
-            LtacType::StrQ | LtacType::StrUQ => amd64_build_load_store(writer, &code, false),
+            LtacType::StrQ | LtacType::StrUQ |
+            LtacType::StrF32 | LtacType::StrF64 => amd64_build_load_store(writer, &code, false),
             LtacType::StrPtr => {},
             
             // Everything else uses the common build instruction function

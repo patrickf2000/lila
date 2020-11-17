@@ -241,6 +241,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdU => {},
             LtacType::LdQ => {},
             LtacType::LdUQ => {},
+            LtacType::LdF32 => {},
+            LtacType::LdF64 => {},
             
             // RISC store instructions
             LtacType::StrB => {},
@@ -251,6 +253,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrU => {},
             LtacType::StrQ => {},
             LtacType::StrUQ => {},
+            LtacType::StrF32 => {},
+            LtacType::StrF64 => {},
             LtacType::StrPtr => {},
             
             // Unknown

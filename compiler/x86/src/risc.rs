@@ -27,6 +27,9 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         LtacType::Str | LtacType::StrU |
         LtacType::StrQ | LtacType::StrUQ => line = "  mov ".to_string(),
         
+        LtacType::LdF32 | LtacType::StrF32 => line = "  movss ".to_string(),
+        LtacType::LdF64 | LtacType::StrF64 => line = "  movsd ".to_string(),
+        
         _ => {},
     }
     
@@ -34,6 +37,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         LtacArg::Mem(pos) => *pos,
         
         LtacArg::MemOffsetImm(pos, offset) if !is_load => {
+            if code.instr_type == LtacType::StrF32 || code.instr_type == LtacType::StrF64 {
+                line = "  mov ".to_string();
+            }
+            
             line.push_str("r15, QWORD PTR ");
             
             line.push_str("[rbp-");
@@ -59,6 +66,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         },
         
         LtacArg::MemOffsetMem(pos, offset, size) if !is_load => {
+            if code.instr_type == LtacType::StrF32 || code.instr_type == LtacType::StrF64 {
+                line = "  mov ".to_string();
+            }
+            
             // Load the variable
             line.push_str("r15d, DWORD PTR ");
             
@@ -95,6 +106,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         },
         
         LtacArg::MemOffsetReg(pos, reg, size) if !is_load => {
+            if code.instr_type == LtacType::StrF32 || code.instr_type == LtacType::StrF64 {
+                line = "  mov ".to_string();
+            }
+            
             // Determine the right register
             let src_reg = amd64_op_reg32(*reg);
             let size_mod : String;
@@ -138,6 +153,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         // ========================================================================================
         // Load
         LtacArg::MemOffsetImm(pos, offset) if is_load => {
+            if code.instr_type == LtacType::LdF32 || code.instr_type == LtacType::LdF64 {
+                line = "  mov ".to_string();
+            }
+            
             line.push_str("r15, QWORD PTR [rbp-");
             line.push_str(&pos.to_string());
             line.push_str("]\n");
@@ -158,6 +177,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         },
         
         LtacArg::MemOffsetMem(pos, offset, size) if is_load => {
+            if code.instr_type == LtacType::LdF32 || code.instr_type == LtacType::LdF64 {
+                line = "  mov ".to_string();
+            }
+            
             // Load the variable
             line.push_str("r15d, DWORD PTR ");
             
@@ -182,7 +205,7 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
             line.push_str("  add r15, r14\n");
             
             // Store
-            match &code.arg1 {
+            match &code.arg2 {
                 LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
                 LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
                 LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15]\n"),
@@ -195,6 +218,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         },
         
         LtacArg::MemOffsetReg(pos, reg, size) if is_load => {
+            if code.instr_type == LtacType::LdF32 || code.instr_type == LtacType::LdF64 {
+                line = "  mov ".to_string();
+            }
+            
             // Determine the right register
             let src_reg = amd64_op_reg32(*reg);
             
@@ -216,7 +243,7 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
             line.push_str("  add r15, r14\n");
             
             // Store
-            match &code.arg1 {
+            match &code.arg2 {
                 LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
                 LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
                 LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15]\n"),
@@ -236,13 +263,22 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         LtacArg::Reg16(pos) => (amd64_op_reg16(*pos), "r15w".to_string()),
         LtacArg::Reg32(pos) => (amd64_op_reg32(*pos), "r15d".to_string()),
         LtacArg::Reg64(pos) => (amd64_op_reg64(*pos), "r15".to_string()),
+        LtacArg::FltReg(pos) => (amd64_op_flt(*pos), "xmm1".to_string()),
+        LtacArg::FltReg64(pos) => (amd64_op_flt(*pos), "xmm1".to_string()),
         
         _ => (String::new(), "r15d".to_string()),
     };
     
+    let mov : String = match &code.arg2 {
+        LtacArg::FltReg(_p) => "  movss ".to_string(),
+        LtacArg::FltReg64(_p) => "  movsd ".to_string(),
+        
+        _ => "  mov ".to_string(),
+    };
+    
     if is_load {
         if pos == 0 {
-            line.push_str("  mov ");
+            line.push_str(&mov);
             line.push_str(&reg);
             line.push_str(", ");
             line.push_str(&src_reg);

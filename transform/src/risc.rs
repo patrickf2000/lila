@@ -7,7 +7,8 @@ fn is_move(instr : &LtacType) -> bool {
         LtacType::MovB | LtacType::MovUB |
         LtacType::MovW | LtacType::MovUW |
         LtacType::Mov | LtacType::MovU |
-        LtacType::MovQ | LtacType::MovUQ
+        LtacType::MovQ | LtacType::MovUQ |
+        LtacType::MovF32 | LtacType::MovF64
             => return true,
             
         _ => return false,
@@ -50,6 +51,15 @@ fn load_for_mov(instr : &LtacType) -> LtacType {
         LtacType::MovQ => return LtacType::LdQ,
         LtacType::MovUQ => return LtacType::LdUQ,
         
+        LtacType::F32Add | LtacType::F32Sub |
+        LtacType::F32Mul | LtacType::F32Div => return LtacType::LdF32,
+        
+        LtacType::F64Add | LtacType::F64Sub |
+        LtacType::F64Mul | LtacType::F64Div => return LtacType::LdF64,
+        
+        LtacType::MovF32 => return LtacType::LdF32,
+        LtacType::MovF64 => return LtacType::LdF64,
+        
         _ => return LtacType::Ld,
     }
 }
@@ -64,6 +74,8 @@ fn store_for_mov(instr : &LtacType) -> LtacType {
         LtacType::MovU => return LtacType::StrU,
         LtacType::MovQ => return LtacType::StrQ,
         LtacType::MovUQ => return LtacType::StrUQ,
+        LtacType::MovF32 => return LtacType::StrF32,
+        LtacType::MovF64 => return LtacType::StrF64,
         _ => return LtacType::Str,
     }
 }
@@ -77,6 +89,8 @@ fn reg_for_mov(instr : &LtacType, pos : i32) -> LtacArg {
         LtacType::MovW | LtacType::MovUW => return LtacArg::Reg16(pos),
         LtacType::LdQ | LtacType::LdUQ |
         LtacType::MovQ | LtacType::MovUQ => return LtacArg::Reg64(pos),
+        LtacType::LdF32 | LtacType::MovF32 => return LtacArg::FltReg(pos),
+        LtacType::LdF64 | LtacType::MovF64 => return LtacArg::FltReg64(pos),
         _ => return LtacArg::Reg32(pos),
     }
 }

@@ -35,11 +35,15 @@ pub enum LtacType {
     LdW,        LdUW,
     Ld,         LdU,
     LdQ,        LdUQ,
+    LdF32,
+    LdF64,
     
     StrB,       StrUB,
     StrW,       StrUW,
     Str,        StrU,
     StrQ,       StrUQ,
+    StrF32,
+    StrF64,
     StrPtr,
     
     // Argument load instructions

@@ -192,6 +192,8 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::LdUW => line.push_str("  u16.ld "),
         LtacType::LdQ => line.push_str("  i64.ld "),
         LtacType::LdUQ => line.push_str("  u64.ld "),
+        LtacType::LdF32 => line.push_str("  f32.ld "),
+        LtacType::LdF64 => line.push_str("  f64.ld "),
         
         //Store instructions
         LtacType::Str => line.push_str("  i32.str "),
@@ -202,6 +204,8 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::StrUW => line.push_str("  u16.str "),
         LtacType::StrQ => line.push_str("  i64.str "),
         LtacType::StrUQ => line.push_str("  u64.str "),
+        LtacType::StrF32 => line.push_str("  f32.str "),
+        LtacType::StrF64 => line.push_str("  f64.str "),
         LtacType::StrPtr => line.push_str("  ptr.str "),
         
         // Byte (i8) operations
