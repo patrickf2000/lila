@@ -4,7 +4,8 @@ use parser::ltac::{LtacFile, LtacType, LtacArg};
 
 fn is_move(instr : &LtacType) -> bool {
     match instr {
-        LtacType::Mov |
+        LtacType::MovUW |
+        LtacType::Mov | LtacType::MovU |
         LtacType::MovQ | LtacType::MovUQ
             => return true,
             
@@ -24,8 +25,15 @@ fn has_mem(arg : &LtacArg) -> bool {
 }
 
 // Returns the proper load instruction for a given move
-fn load_for_mov(arg : &LtacArg) -> LtacType {
-    match arg {
+fn load_for_mov(instr : &LtacType) -> LtacType {
+    match instr {
+        LtacType::I64Add | LtacType::I64Sub | LtacType::I64Mul |
+        LtacType::I64Div | LtacType::I64Mod => return LtacType::LdQ,
+        LtacType::U64Add | LtacType::U64Mul |
+        LtacType::U64Div | LtacType::U64Mod => return LtacType::LdUQ,
+        LtacType::MovU => return LtacType::LdU,
+        LtacType::MovQ => return LtacType::LdQ,
+        LtacType::MovUQ => return LtacType::LdUQ,
         _ => return LtacType::Ld,
     }
 }
@@ -33,7 +41,9 @@ fn load_for_mov(arg : &LtacArg) -> LtacType {
 // Returns the proper store instruction for a given move
 fn store_for_mov(instr : &LtacType) -> LtacType {
     match instr {
+        LtacType::MovU => return LtacType::StrU,
         LtacType::MovQ => return LtacType::StrQ,
+        LtacType::MovUQ => return LtacType::StrUQ,
         _ => return LtacType::Str,
     }
 }
@@ -41,7 +51,8 @@ fn store_for_mov(instr : &LtacType) -> LtacType {
 // Returns a register for a given move statement
 fn reg_for_mov(instr : &LtacType, pos : i32) -> LtacArg {
     match instr {
-        LtacType::MovQ => return LtacArg::Reg64(pos),
+        LtacType::LdQ | LtacType::LdUQ |
+        LtacType::MovQ | LtacType::MovUQ => return LtacArg::Reg64(pos),
         _ => return LtacArg::Reg32(pos),
     }
 }
@@ -64,19 +75,19 @@ pub fn risc_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
                 let instr_type = store_for_mov(&line.instr_type);
                 let mut store = ltac::create_instr(instr_type);
                 store.arg1 = instr2.arg1.clone();
-                store.arg2 = reg_for_mov(&line.instr_type, 2);
+                store.arg2 = reg_for_mov(&line.instr_type, 3);
                 
-                instr2.arg1 = reg_for_mov(&line.instr_type, 2);
+                instr2.arg1 = reg_for_mov(&line.instr_type, 3);
                 
                 file2.code.push(instr2);
                 file2.code.push(store);
             } else if has_mem(&line.arg2) {
-                let instr_type = load_for_mov(&line.arg2);
+                let instr_type = load_for_mov(&line.instr_type);
                 let mut load = ltac::create_instr(instr_type);
                 load.arg1 = instr2.arg2.clone();
-                load.arg2 = reg_for_mov(&line.instr_type, 2);
+                load.arg2 = reg_for_mov(&line.instr_type, 3);
                 
-                instr2.arg2 = reg_for_mov(&line.instr_type, 2);
+                instr2.arg2 = reg_for_mov(&line.instr_type, 3);
                 
                 file2.code.push(load);
                 file2.code.push(instr2);
@@ -85,12 +96,12 @@ pub fn risc_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             }
         } else {
             if has_mem(&line.arg2) && line.instr_type != LtacType::PushArg {
-                let instr_type = load_for_mov(&line.arg2);
-                let mut load = ltac::create_instr(instr_type);
+                let instr_type = load_for_mov(&line.instr_type);
+                let mut load = ltac::create_instr(instr_type.clone());
                 load.arg1 = instr2.arg2.clone();
-                load.arg2 = reg_for_mov(&line.instr_type, 2);
+                load.arg2 = reg_for_mov(&instr_type, 3);
                 
-                instr2.arg2 = reg_for_mov(&line.instr_type, 2);
+                instr2.arg2 = reg_for_mov(&instr_type, 3);
                 
                 file2.code.push(load);
             }

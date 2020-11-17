@@ -8,7 +8,7 @@ pub enum LtacDataType {
 }
 
 // Represents an instruction type
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LtacType {
     None,
     
@@ -31,14 +31,15 @@ pub enum LtacType {
     Pop,
     
     // Load-store instructions- RISC specific
-    Ld,
-    LdB,
-    LdUB,
+    LdB,        LdUB,
     LdW,
-    Str,
+    Ld,         LdU,
+    LdQ,        LdUQ,
+    
     StrB,       StrUB,
     StrW,
-    StrQ,
+    Str,        StrU,
+    StrQ,       StrUQ,
     StrPtr,
     
     // Argument load instructions

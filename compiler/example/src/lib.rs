@@ -233,17 +233,22 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // These are specific to RISC machines
             // RISC Load instructions
-            LtacType::Ld => {},
             LtacType::LdB => {},
             LtacType::LdUB => {},
             LtacType::LdW => {},
+            LtacType::Ld => {},
+            LtacType::LdU => {},
+            LtacType::LdQ => {},
+            LtacType::LdUQ => {},
             
             // RISC store instructions
-            LtacType::Str => {},
             LtacType::StrB => {},
             LtacType::StrUB => {},
             LtacType::StrW => {},
+            LtacType::Str => {},
+            LtacType::StrU => {},
             LtacType::StrQ => {},
+            LtacType::StrUQ => {},
             LtacType::StrPtr => {},
             
             // Unknown

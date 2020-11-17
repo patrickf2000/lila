@@ -17,8 +17,10 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
     let mut line = String::new();
     
     match code.instr_type {
-        LtacType::Ld |
-        LtacType::Str | LtacType::StrQ => line = "  mov ".to_string(),
+        LtacType::Ld | LtacType::LdU |
+        LtacType::LdQ | LtacType::LdUQ |
+        LtacType::Str | LtacType::StrU |
+        LtacType::StrQ | LtacType::StrUQ => line = "  mov ".to_string(),
         
         _ => {},
     }
@@ -224,18 +226,20 @@ pub fn amd64_build_load_store(writer : &mut BufWriter<File>, code : &LtacInstr, 
         _ => 0,
     };
     
-    let reg : String = match &code.arg2 {
-        LtacArg::Reg32(pos) => amd64_op_reg32(*pos),
-        LtacArg::Reg64(pos) => amd64_op_reg64(*pos),
+    let (reg, src_reg) : (String, String) = match &code.arg2 {
+        LtacArg::Reg32(pos) => (amd64_op_reg32(*pos), "r15d".to_string()),
+        LtacArg::Reg64(pos) => (amd64_op_reg64(*pos), "r15".to_string()),
         
-        _ => String::new(),
+        _ => (String::new(), "r15d".to_string()),
     };
     
     if is_load {
         if pos == 0 {
             line.push_str("  mov ");
             line.push_str(&reg);
-            line.push_str(", r15d\n");
+            line.push_str(", ");
+            line.push_str(&src_reg);
+            line.push_str("\n");
         } else {
             line.push_str(&reg);
             line.push_str(", [rbp-");

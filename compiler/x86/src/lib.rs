@@ -235,12 +235,13 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             // These are RISC-specific. At some point, we should generate instructions for them
             LtacType::LdB | LtacType::LdUB |
             LtacType::LdW |
-            LtacType::Ld => amd64_build_load_store(writer, &code, true),
+            LtacType::Ld | LtacType::LdU |
+            LtacType::LdQ | LtacType::LdUQ => amd64_build_load_store(writer, &code, true),
             
             LtacType::StrB | LtacType::StrUB |
             LtacType::StrW |
-            LtacType::StrQ |
-            LtacType::Str => amd64_build_load_store(writer, &code, false),
+            LtacType::Str | LtacType::StrU |
+            LtacType::StrQ | LtacType::StrUQ => amd64_build_load_store(writer, &code, false),
             LtacType::StrPtr => {},
             
             // Everything else uses the common build instruction function
