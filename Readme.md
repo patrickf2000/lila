@@ -78,4 +78,8 @@ There are a lot of tests (at the time of writing, I think over 180). In order to
 
 All tests use the C library for things like output. NEVER use the standard library for testing; there's a separate script to test that. The point of the unit tests is to test only one thing, and to eliminate the potential surface area of other bugs.
 
+### Licensing
+
+Dash is licensed under the GPL v2 license (version 2, not 3. Only version 2). I feel that the GPL license best captures my goals for this project.
+
 
