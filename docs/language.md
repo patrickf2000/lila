@@ -6,25 +6,24 @@ This is a very high-level overview of the Dash language. For more practical exam
 
 Dash has the following types:
 
-* byte
-* short
-* int
+* byte/ubyte
+* short/ushort
+* int/uint
+* int64/uint64
 * float
 * double
+* char (equivalent to byte)
 * string (str in the code)
 
-We still need these types:
-
-* char
-* bool
-* ubyte
-* ushort
-* uint
-* uint64/int64
+I still need to add "bool". 
 
 Byte/ubyte are 8-bit (1 byte) types. Short/ushort are 16-bit (2 byte) types. Char will only be for characters, but they will have the same size as byte/ubyte. A bool will represent either true/false (1/0), but will be represented internally as integers.
 
 Note that variables must have an initial value when you create them.
+
+### Constants
+
+Constants currently only work on the global scope. You can declare them like this: "const int myint = 100".
 
 ### Arrays
 
@@ -34,7 +33,7 @@ In this example, we create an integer array of 10 elements. The array means it i
 
 Note that Dash will automatically insert free statements for each array created.
 
-Currently only byte/int arrays are created.
+All types are supported.
 
 ### Operators
 
