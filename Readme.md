@@ -1,6 +1,6 @@
 ## Dash
 
-Welcome to Dash! Dash is a high-level imperative systems programming language inspired in design and purpose by C and syntactically by BASIC (and a few other languages). This repository contains the compiler for Dash, the standard library, the test system, and a few examples.
+Welcome to Dash! Dash is a high-level imperative systems programming language inspired in design and purpose by C and syntactically by Pascal (and a few other languages). This repository contains the compiler for Dash, the standard library, the test system, and a few examples.
 
 ### Why Dash?
 
