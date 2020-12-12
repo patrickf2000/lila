@@ -1,7 +1,7 @@
 [package]
 name = "example"
 version = "0.0.2"
-authors = ["Patrick Flynn <patrickf4664@protonmail.com>"]
+authors = ["Patrick Flynn <pflynn4664@pm.me>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
