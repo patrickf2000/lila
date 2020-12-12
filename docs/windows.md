@@ -1,4 +1,4 @@
-### Dash on Windows
+### Lila on Windows
 
 I would not be opposed to getting it to work on Windows, but Windows is architecturally completely different from Linx/MacOS/FreeBSD/etc, so I think this would require a little more work. If you use the Mingw64 toolchain, the work may be a lot less.
 

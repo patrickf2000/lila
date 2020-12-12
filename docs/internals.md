@@ -1,6 +1,6 @@
-## Dash Internals
+## Lila Internals
 
-This is meant to give a quick overview of how Dash works internally. Part of the purpose of this project is to have a simple compiler and make it easy to port and hack on. Even if you have a minimal compiler background, it should be easy to understand.
+This is meant to give a quick overview of how Lila works internally. Part of the purpose of this project is to have a simple compiler and make it easy to port and hack on. Even if you have a minimal compiler background, it should be easy to understand.
 
 ### The Parser
 
@@ -20,5 +20,10 @@ The second transform is the RISC optimizer. This transforms the LTAC code into R
 
 ### The Compiler
 
-The compiler layer translates LTAC into assembly. Currently, I have complete support for x86-64 and almost complete support for AArch64 (Arm 64-bit).
+The compiler layer translates LTAC into assembly. Currently, I have complete support for x86-64.
+
+### In Action...
+
+To understand how sources are represented during compilation, you can use the "--ast" and "--ltac" compiler flags. The "--ast" flag will load the source into an AST and print it to the console. The "--ltac" flag will output the LTAC code to a file named after your source. The transform layer is still run when you use the "--ltac" flag. If you wish to see the equivalent RISC code regardless of your platform, use the "--risc" flag.
+
 

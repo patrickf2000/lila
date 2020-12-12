@@ -1,6 +1,10 @@
-## Dash Language
+## Lila Language
 
-This is a very high-level overview of the Dash language. For more practical examples, see the "examples" and "test" directory. Unless otherwise noted, everything here is implemented.
+This is a very high-level overview of the Lila language. For more practical examples, see the "examples" and "test" directory. Unless otherwise noted, everything here is implemented.
+
+### File Types
+
+`.ls` denotes a Lila source; `.lh` denotes Lila header.
 
 ### Types
 
@@ -31,7 +35,7 @@ Arrays have this syntax: ```int[10] numbers = array```
 
 In this example, we create an integer array of 10 elements. The array means it is dynamically created in the heap.
 
-Note that Dash will automatically insert free statements for each array created.
+Note that Lila will automatically insert free statements for each array created.
 
 All types are supported.
 

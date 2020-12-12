@@ -1,16 +1,16 @@
-## Dash
+## Lila
 
-Welcome to Dash! Dash is a high-level imperative systems programming language inspired in design and purpose by C and syntactically by Pascal (and a few other languages). This repository contains the compiler for Dash, the standard library, the test system, and a few examples.
+Welcome to Lila! Lila is a high-level imperative systems programming language inspired in design and purpose by C and syntactically by Pascal (and a few other languages). This repository contains the compiler for Lila, the standard library, the test system, and a few examples.
 
-### Why Dash?
+See the docs folder for more information about the language, the modules, the internals, and why I chose Rust.
 
-I started Dash as a descendant to my Quik compilers. The original Quik was when I was learning compiler development, so they weren't designed with any big purpose. I started Dash because I liked the Quik language I came up with, and because I needed a simple compiler so I could experiment with different architectures, learn a little more about compiler transformations, and so forth. I also started the project in hopes I can use this for some benchmarking work I do in one of my jobs.
+### Why Lila?
 
-However, Dash is not solely a personal thing. The first goal with Dash is simplicity- in the language itself and in the implementation. Dash is meant to be like C in that its basically portable assembly. The language should be super easy to port to any platform, whether a CPU or VM architecture (source interpretation should be easy as well). However, I do not wish to re-invent the wheel, so part of Dash is full interpolation with C and the system libraries.
+I started Lila as a descendant to my Quik compilers. The original Quik was when I was learning compiler development, so they weren't designed with any big purpose. I started Lila because I liked the Quik language I came up with, and because I needed a simple compiler so I could experiment with different architectures, learn a little more about compiler transformations, and so forth. I also started the project in hopes I can use this for some benchmarking work I do in one of my jobs.
 
-They key difference of Dash from C is the language design and the abstracting of certain concepts. For example, safety is a big goal. There are no pointers and references in C. Any programming construct requiring pointers and references is abstracted away. Dash also aims to provide better support for things like strings and data structures, two things which I think are very lacking in C. On the hardware level, I also have a goal of providing constructs to make newer hardware features easier to use, including threading and SIMD. And finally, since I like living close the hardware and the operating system, I have constructs to make it easy to interface with the underlying OS.
+However, Lila is not solely a personal thing. The first goal with Lila is simplicity- in the language itself and in the implementation. Lila is meant to be like C in that its basically portable assembly. The language should be super easy to port to any platform, whether a CPU or VM architecture (source interpretation should be easy as well). However, I do not wish to re-invent the wheel, so part of Lila is full interpolation with C and the system libraries.
 
-See the "docs" folder for why I chose Rust.
+They key difference of Lila from C is the language design and the abstracting of certain concepts. For example, safety is a big goal. There are no pointers and references in C. Any programming construct requiring pointers and references is abstracted away. Lila also aims to provide better support for things like strings and data structures, two things which I think are very lacking in C. On the hardware level, I also have a goal of providing constructs to make newer hardware features easier to use, including threading and SIMD. And finally, since I like living close the hardware and the operating system, I have constructs to make it easy to interface with the underlying OS.
 
 ### Features
 
@@ -33,21 +33,11 @@ All the stuff here is either completely implemented
 
 Currently, I only support x86-64. The internal representations generate an CISC-like assembly, which lends itself well to x86. I just finished an optimization layer that converts the IR to a RISC-like assembly, which will allow for very easy porting to architectures such as Arm, MIPS, and PowerPC. See the "docs" folder for creating a new backend.
 
-For x86, I currently use the GNU Assembler; however, I plan to drop that and use my own "as" assembler project in the very near future for final assembly (that will probably be my next step).
-
 ### System Requirements
 
-All development was done on Linux Mint. Any version of Linux with a fairly recent version of Rust will work. Linux Mint/Ubuntu/Debian/other derivatives should work right out of the box. For other Linux distributions, you may need to adjust the paths for the linking step, which are location in "compiler/x86/src/lib.rs", under the "link" function. I will eventually address this shortcoming.
+All development is currently done on Linux Mint. Any version of Linux with a fairly recent version of Rust will work. Linux Mint/Ubuntu/Debian/other derivatives should work right out of the box. For other Linux distributions, you may need to adjust the paths for the linking step, which are location in "compiler/x86/src/lib.rs", under the "link" function. I will eventually address this shortcoming.
 
-If you use only the C library, Dash may work on other Unix-like platforms. However, the standard library and non-C versions use Linux system calls for x86-64. Eventually, this will be expanded as I move to other platforms, but for the present, be warned. Windows is not supported at all.
-
-### Compiler Internals
-
-The of the goals of this project is for the compiler to be easy to understand and hack on. All the parsing code is located under "parser"; the transform code, which optimizes for RISC if needed and converts pseudo-instructions such as malloc and free are located under "transform". The code generators are located under "compiler".
-
-The compiler uses two intermediate representations (IR): the abstract syntax tree (AST) and the the pseudo-assembly layer (LTAC). The AST is created from the source file; you can see what the IR looks like from the "parser/src/ast.rs" file. The LTAC IR is where most of the work happens. LTAC is very strongly typed, so there are a lot of instructions. This is also partly because we need to be able to easily port it to different architectures. You can understand the IR by looking at the "parser/src/ltac.rs" file.
-
-To understand how sources are represented during compilation, you can use the "--ast" and "--ltac" compiler flags. The "--ast" flag will load the source into an AST and print it to the console. The "--ltac" flag will output the LTAC code to a file named after your source. The transform layer is still run when you use the "--ltac" flag. If you wish to see the equivalent RISC code regardless of your platform, use the "--risc" flag.
+If you use only the C library, Lila may work on other Unix-like platforms. However, the standard library and non-C versions use Linux system calls for x86-64. Eventually, this will be expanded as I move to other platforms, but for the present, be warned. Windows is not supported at all.
 
 ### The Standard Library
 
@@ -66,12 +56,6 @@ Unfortunately, I don't have a "--help" yet... I'm sorry... However, it works sim
 * -o <name>: Specify the output name
 * --risc: Run the RISC optimizer regardless of platform (the x86 code generator can convert RISC instructions)
 
-### Modules
-
-Rather than headers, Dash uses a simple module system. To get an understanding of how it works, take a look at the stdlib folder for how the modules are generated, and the "test/stdlib" folder for how to use them.
-
-I'll provide more documentation later as it gets more solidified.
-
 ### Testing
 
 There are a lot of tests (at the time of writing, I think over 180). In order to make sure I don't break things, I use a unit-test approach, which basically is a bunch of very small programs that test a certain construct. The tests are divided among the different data types and features. To run, simply run the "./test.sh" script. If you need to test the RISC layer, run it as "./test.sh --risc".
@@ -80,6 +64,6 @@ All tests use the C library for things like output. NEVER use the standard libra
 
 ### Licensing
 
-Dash is licensed under the GPL v2 license (version 2, not 3. Only version 2). I feel that the GPL license best captures my goals for this project.
+Lila is licensed under the GPL v2 license (version 2, not 3. Only version 2). I feel that the GPL license best captures my goals for this project.
 
 
