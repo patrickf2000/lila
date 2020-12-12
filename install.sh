@@ -10,7 +10,7 @@ sudo cp share/lila.lang /usr/share/gtksourceview-2.0/language-specs/
 sudo cp share/lila.lang /usr/share/gtksourceview-3.0/language-specs/
 
 if [[ -f target/liblila.so ]] ; then
-    sudo cp target/libdash.so /usr/local/lib
+    sudo cp target/liblila.so /usr/local/lib
     sudo ldconfig
 fi
 
