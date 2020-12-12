@@ -70,6 +70,12 @@ fn run() -> i32 {
             "--risc" => risc_mode = true,
             "--no-link" => no_link = true,
             "-o" => next_output = true,
+            
+            "-h" | "--help" => {
+                help();
+                return 0;
+            },
+            
             _ => inputs.push(arg.clone()),
         }
     }
@@ -128,3 +134,19 @@ fn run() -> i32 {
     0
 }
 
+// Displays compiler help
+fn help() {
+    println!("lilac version 0.1");
+    println!("");
+    println!("--ast \t\t Print a textual representation of the AST");
+    println!("--ltac \t\t Save the LTAC IR to a file.");
+    println!("--use-c \t Link to C start-up files and the C standard library.");
+    println!("--lib \t\t Generate a dynamic library.");
+    println!("--pic \t\t Generate position independent code (x86 only- you need this if you are building a library)");
+    println!("--no-link \t Only generate an object file.");
+    println!("-l<lib> \t Link to a certain library.");
+    println!("-o <name> \t Specify the output name.");
+    println!("--risc \t\t Run the RISC optimizer regardless of platform (the x86 code generator can convert RISC instructions).");
+    println!("-h, --help \t Display this message and exit.");
+    println!("");
+}

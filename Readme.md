@@ -45,7 +45,7 @@ There's currently a small standard library with a few commonly used procedures a
 
 ### Invoking the Compiler
 
-Unfortunately, I don't have a "--help" yet... I'm sorry... However, it works similar to most other compilers. You can pass multiple inputs, which can be a ".ds" source file or an object file. Here are all the current compiler options:
+The compiler has multiple options to help you build the type of binary you need. You can pass multiple inputs, which can be a ".ls" source file or an object file. Here are all the current compiler options:
 
 * --ast/--ltac: See above
 * --use-c: Link to C start-up files and the C standard library.
