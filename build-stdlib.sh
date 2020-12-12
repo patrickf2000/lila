@@ -6,7 +6,7 @@ echo ""
 cargo build --release
 
 cwd=`pwd`
-export dashc="$cwd/target/release/dashc"
+export lilac="$cwd/target/release/lilac"
 
 cd target
 
@@ -14,19 +14,19 @@ if [[ -d ./std ]] ; then
     rm -r ./std
 fi
 
-if [[ -f libdash.so ]] ; then
-    rm libdash.so
+if [[ -f liblila.so ]] ; then
+    rm liblila.so
 fi
 
 # Order matters
-$dashc ../stdlib/x86_64.ds -o x86_64.o --no-link --pic
-$dashc ../stdlib/math.ds -o math.o --no-link --pic
-$dashc ../stdlib/string.ds -o string.o --no-link --pic
-$dashc ../stdlib/io.ds -o io.o --no-link --pic
-$dashc ../stdlib/unix.ds -o unix.o --no-link --pic
-$dashc ../stdlib/fs.ds -o fs.o --no-link --pic
+$lilac ../stdlib/x86_64.ls -o x86_64.o --no-link --pic
+$lilac ../stdlib/math.ls -o math.o --no-link --pic
+$lilac ../stdlib/string.ls -o string.o --no-link --pic
+$lilac ../stdlib/io.ls -o io.o --no-link --pic
+$lilac ../stdlib/unix.ls -o unix.o --no-link --pic
+$lilac ../stdlib/fs.ls -o fs.o --no-link --pic
 
-$dashc -o libdash.so --lib \
+$lilac -o liblila.so --lib \
     x86_64.o \
     io.o \
     math.o \

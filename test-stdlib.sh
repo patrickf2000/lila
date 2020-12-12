@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cwd=`pwd`
-export PATH="$cwd/target/release/dashc:$PATH"
+export PATH="$cwd/target/release/lilac:$PATH"
 export LD_LIBRARY_PATH="$cwd/target:$LD_LIBRARY_PATH"
 
 test_count=0
@@ -9,9 +9,9 @@ test_count=0
 function run_test() {
     for entry in $1
     do
-    	name=`basename $entry .ds`
+    	name=`basename $entry .ls`
         
-        dashc $entry -o $name -ldash
+        dashc $entry -o $name -llila
     
 	    ../test.py $entry ./$name ""
 	    
@@ -32,7 +32,7 @@ echo ""
 
 cd target
 
-run_test '../test/stdlib/io/*.ds'
+run_test '../test/stdlib/io/*.ls'
 
 # Generate test file
 if [[ -f ./file.txt ]] ; then
@@ -43,7 +43,7 @@ echo "I am good." >> file.txt
 echo "Excellent." >> file.txt
 echo "" >> file.txt
 
-run_test '../test/stdlib/fs/*.ds'
+run_test '../test/stdlib/fs/*.ls'
 
 cd ..
 
