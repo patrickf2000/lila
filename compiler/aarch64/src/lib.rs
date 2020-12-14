@@ -157,14 +157,20 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
     writer.write(&line.into_bytes())
         .expect("[_code] Write failed");
 
+    let mut stack_size = 0;
+
     for code in code.iter() {
         match &code.instr_type {
         
             // Basic function instructions
             LtacType::Extern => aarch64_build_extern(writer, &code),
             LtacType::Label => aarch64_build_label(writer, &code),
-            LtacType::Func => {},
-            LtacType::Ret => {},
+            LtacType::Ret => aarch64_build_ret(writer, stack_size),
+            
+            LtacType::Func => {
+                stack_size = code.arg1_val;
+                aarch64_build_func(writer, &code);
+            },
             
             // Used to load function arguments
             LtacType::LdArgI8 => {},
