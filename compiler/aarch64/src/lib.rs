@@ -7,8 +7,11 @@ use std::process::Command;
 
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
+mod call;
 mod func;
+mod utils;
 
+use call::*;
 use func::*;
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
@@ -87,7 +90,7 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
     }
     
     args.push("-dynamic-linker");
-    args.push("/lib64/ld-aarch64.so.2");
+    args.push("/lib/ld-linux-aarch64.so.1");
         
     for name in names.iter() {
         args.push(&name);
@@ -203,9 +206,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Pop => {},
             
             // Argument and function call instructions
-            LtacType::PushArg => {},
-            LtacType::KPushArg => {},
-            LtacType::Call => {},
+            LtacType::PushArg => aarch64_build_pusharg(writer, &code, false),
+            LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true),
+            LtacType::Call => aarch64_build_call(writer, &code),
             LtacType::Syscall => {},
             
             // Comparison instructons

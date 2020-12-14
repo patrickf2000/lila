@@ -51,6 +51,8 @@ pub fn aarch64_build_ret(writer : &mut BufWriter<File>, stack_size : i32) {
     line.push_str(&stack_size.to_string());
     line.push_str("\n");
 
+    line.push_str("  ret\n");
+
     writer.write(&line.into_bytes())
         .expect("[AArch64_build_ret] Write failed.");
 }
