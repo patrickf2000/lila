@@ -1,0 +1,11 @@
+[package]
+name = "aarch64"
+version = "0.0.2"
+authors = ["Patrick Flynn <pflynn4664@pm.me>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+parser = { path = "../../parser" }
+
