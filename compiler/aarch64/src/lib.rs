@@ -5,7 +5,7 @@ use std::io::BufWriter;
 use std::fs::File;
 use std::process::Command;
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 mod call;
 mod func;
@@ -193,7 +193,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovUB => {},
             LtacType::MovW => {},
             LtacType::MovUW => {},
-            LtacType::Mov => {},
             LtacType::MovU => {},
             LtacType::MovQ => {},
             LtacType::MovUQ => {},
@@ -365,7 +364,38 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // Unknown
             // You should never see this
-            LtacType::None => {},
+            _ => aarch64_build_instr(writer, &code),
         }
     }
+}
+
+// For AArch64 instructions that have a common syntax
+fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+
+    // Write the instruction type
+    match &code.instr_type {
+        LtacType::Mov => line.push_str("  mov "),
+        _ => {},
+    }
+
+    // Write the first operand
+    match &code.arg1 {
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("w0, "),
+        
+        _ => {},
+    }
+
+    // Write the second operand
+    match &code.arg2 {
+        LtacArg::I32(val) => line.push_str(&val.to_string()),
+
+        _ => {},
+    }
+
+    // Finish writing
+    line.push_str("\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[AArch64_write_instr] Write failed.");
 }
