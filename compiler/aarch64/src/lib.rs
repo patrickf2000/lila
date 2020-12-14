@@ -13,6 +13,7 @@ mod utils;
 
 use call::*;
 use func::*;
+use utils::*;
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -168,12 +169,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // Basic function instructions
             LtacType::Extern => aarch64_build_extern(writer, &code),
             LtacType::Label => aarch64_build_label(writer, &code),
+            LtacType::Func => stack_size = aarch64_build_func(writer, &code),
             LtacType::Ret => aarch64_build_ret(writer, stack_size),
-            
-            LtacType::Func => {
-                stack_size = code.arg1_val;
-                aarch64_build_func(writer, &code);
-            },
             
             // Used to load function arguments
             LtacType::LdArgI8 => {},
@@ -205,8 +202,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Pop => {},
             
             // Argument and function call instructions
-            LtacType::PushArg => aarch64_build_pusharg(writer, &code, false),
-            LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true),
+            LtacType::PushArg => aarch64_build_pusharg(writer, &code, false, stack_size),
+            LtacType::KPushArg => aarch64_build_pusharg(writer, &code, true, stack_size),
             LtacType::Call => aarch64_build_call(writer, &code),
             LtacType::Syscall => {},
             
@@ -342,7 +339,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdUB => {},
             LtacType::LdW => {},
             LtacType::LdUW => {},
-            LtacType::Ld => {},
+            LtacType::Ld => aarch64_build_ld_str(writer, &code, stack_size),
             LtacType::LdU => {},
             LtacType::LdQ => {},
             LtacType::LdUQ => {},
@@ -354,7 +351,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrUB => {},
             LtacType::StrW => {},
             LtacType::StrUW => {},
-            LtacType::Str => {},
+            LtacType::Str => aarch64_build_ld_str(writer, &code, stack_size),
             LtacType::StrU => {},
             LtacType::StrQ => {},
             LtacType::StrUQ => {},
@@ -367,6 +364,48 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             _ => aarch64_build_instr(writer, &code),
         }
     }
+}
+
+// Builds the load-store instructions
+fn aarch64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_size : i32) {
+    let mut line = String::new();
+
+    match &code.instr_type {
+        LtacType::Ld => line.push_str("  ldr "),
+        LtacType::Str => line.push_str("  str "),
+
+        _ => {},
+    }
+
+    // Write the registers
+    match &code.arg2 {
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
+            line.push_str(&reg);
+        },
+
+        _ => {},
+    }
+
+    line.push_str(", ");
+
+    // Write out the memory
+    match &code.arg1 {
+        LtacArg::Mem(val) => {
+            let pos = stack_size - (*val);
+            line.push_str("[sp, ");
+            line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
+
+        _ => {},
+    }
+
+    // Write the rest out
+    line.push_str("\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[AArch64_build_ld_str] Write failed.");
 }
 
 // For AArch64 instructions that have a common syntax
@@ -382,6 +421,12 @@ fn aarch64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Write the first operand
     match &code.arg1 {
         LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("w0, "),
+
+        LtacArg::Reg32(pos) => {
+            let reg = aarch64_op_reg32(*pos);
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         _ => {},
     }

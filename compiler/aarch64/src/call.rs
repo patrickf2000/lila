@@ -5,7 +5,7 @@ use parser::ltac::{LtacInstr, LtacArg};
 use crate::utils::*;
 
 // Builds function/sytem call arguments
-pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool) {
+pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool, stack_size : i32) {
     let mut reg32 = aarch64_arg_reg32(code.arg2_val);
     let mut reg64 = aarch64_arg_reg64(code.arg2_val);
 
@@ -17,6 +17,16 @@ pub fn aarch64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
     let mut line = String::new();
 
     match &code.arg1 {
+
+        LtacArg::Mem(val) => {
+            let pos = stack_size - (*val);
+        
+            line.push_str("  ldr ");
+            line.push_str(&reg32);
+            line.push_str(", [sp, ");
+            line.push_str(&pos.to_string());
+            line.push_str("]\n");
+        },
         
         LtacArg::I32(val) => {
             line.push_str("  mov ");

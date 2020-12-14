@@ -25,7 +25,12 @@ pub fn aarch64_build_label(writer : &mut BufWriter<File>, code : &LtacInstr) {
 }
 
 // Builds a function
-pub fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
+pub fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) -> i32 {
+    let mut stack_size = code.arg1_val;
+    if stack_size > 0 && stack_size < 32 {
+        stack_size = 32;
+    }
+
     let mut line = String::new();
     line.push_str(".global ");
     line.push_str(&code.name);
@@ -35,13 +40,15 @@ pub fn aarch64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str(":\n");
     
     line.push_str("  stp x29, x30, [sp, -");
-    line.push_str(&code.arg1_val.to_string());
+    line.push_str(&stack_size.to_string());
     line.push_str("]!\n");
 
     line.push_str("  mov x29, sp\n\n");
 
     writer.write(&line.into_bytes())
         .expect("[AArch64_build_func] Write failed.");
+
+    stack_size
 }
 
 // Builds a return statement

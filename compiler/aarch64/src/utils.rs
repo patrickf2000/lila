@@ -53,7 +53,7 @@ pub fn aarch64_arg_reg64(pos : i32) -> String {
 }
 
 // Operation registers
-/*pub fn aarch64_op_reg32(pos : i32) -> String {
+pub fn aarch64_op_reg32(pos : i32) -> String {
     match pos {
         0 => return "w9".to_string(),
         1 => return "w10".to_string(),
@@ -64,7 +64,7 @@ pub fn aarch64_arg_reg64(pos : i32) -> String {
     };
 }
 
-pub fn aarch64_op_reg64(pos : i32) -> String {
+/*pub fn aarch64_op_reg64(pos : i32) -> String {
     match pos {
         0 => return "x9".to_string(),
         1 => return "x10".to_string(),
@@ -73,5 +73,4 @@ pub fn aarch64_op_reg64(pos : i32) -> String {
         4 => return "x13".to_string(),
         _ => return String::new(),
     };
-}
-*/
+}*/
