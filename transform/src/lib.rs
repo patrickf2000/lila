@@ -43,7 +43,7 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Res
         Err(_e) => return Err(()),
     };
     
-    if risc_mode {
+    if risc_mode || arch == Arch::AArch64 {
         file2 = match risc_optimize(&file2) {
             Ok(ltac) => ltac,
             Err(_e) => return Err(()),

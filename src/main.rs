@@ -23,6 +23,16 @@ use parser;
 use transform;
 use transform::Arch;
 
+#[cfg(target_arch = "x86_64")]
+fn get_arch() -> Arch {
+    Arch::X86_64
+}
+
+#[cfg(target_arch = "aarch64")]
+fn get_arch() -> Arch {
+    Arch::AArch64
+}
+
 // TODO: Is there a better way to do this?
 fn main() {
     let code = run();
@@ -45,7 +55,7 @@ fn run() -> i32 {
     let mut no_link = false;
     let mut pic = false;
     let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
-    let arch = Arch::X86_64;
+    let arch = get_arch();
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
     
@@ -119,6 +129,9 @@ fn run() -> i32 {
         } else if arch == Arch::X86_64 {
             x86::compile(&ltac, pic, risc_mode).expect("Codegen failed with unknown error.");
             x86::build_asm(&ltac.name, no_link);
+        } else if arch == Arch::AArch64 {
+            aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
+            aarch64::build_asm(&ltac.name, no_link);
         } else {
             // TODO
         }
@@ -128,6 +141,8 @@ fn run() -> i32 {
     if !no_link && !print_ltac {
         if arch == Arch::X86_64 {
             x86::link(&all_names, &output, use_c, link_lib);
+        } else if arch == Arch::AArch64 {
+            aarch64::link(&all_names, &output, use_c, link_lib);
         }
     }
     

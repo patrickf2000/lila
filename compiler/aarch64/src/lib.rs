@@ -17,11 +17,12 @@ use std::io;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
+use std::process::Command;
 
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
-    let mut name = "./".to_string();
+    let mut name = "/tmp/".to_string();
     name.push_str(&ltac_file.name);
     name.push_str(".asm");
     
@@ -35,6 +36,95 @@ pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     Ok(())
 }
 
+// Assemble a file
+pub fn build_asm(name : &String, no_link : bool) {
+    // Create all the names
+    let mut asm_name = "/tmp/".to_string();
+    asm_name.push_str(name);
+    asm_name.push_str(".asm");
+    
+    let mut obj_name = "/tmp/".to_string();
+    if no_link {
+        obj_name = "./".to_string();
+    }
+    
+    obj_name.push_str(name);
+    obj_name.push_str(".o");
+
+    // Assemble
+    let asm = Command::new("as")
+        .args(&[&asm_name, "-o", &obj_name])
+        .output()
+        .expect("Fatal: Assembly failed.");
+        
+    if !asm.status.success() {
+        io::stdout().write_all(&asm.stdout).unwrap();
+        io::stderr().write_all(&asm.stderr).unwrap();
+    }
+}
+ 
+// Link everything
+pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : bool) {
+    let mut names : Vec<String> = Vec::new();
+    let mut libs : Vec<String> = Vec::new();
+    
+    for name in all_names.iter() {
+        if name.ends_with(".o") {
+            names.push(name.clone());
+        } else if name.starts_with("-l") {
+            libs.push(name.clone());
+        } else {
+            let mut obj_name = "/tmp/".to_string();
+            obj_name.push_str(&name);
+            obj_name.push_str(".o");
+            names.push(obj_name);
+        }
+    }
+    
+    // Link
+    //let ld : Output;
+    let mut args : Vec<&str> = Vec::new();
+    args.push("-L./");
+    
+    if use_c {
+        if !is_lib {
+            args.push("/usr/lib/aarch64-linux-gnu/crti.o");
+            args.push("/usr/lib/aarch64-linux-gnu/crtn.o");
+            args.push("/usr/lib/aarch64-linux-gnu/crt1.o");
+        }
+        
+        args.push("-lc");
+    }
+    
+    args.push("-dynamic-linker");
+    args.push("/lib64/ld-aarch64.so.2");
+        
+    for name in names.iter() {
+        args.push(&name);
+    }
+        
+    if is_lib {
+        args.push("-shared");
+    }
+    
+    for lib in libs.iter() {
+        args.push(lib);
+    }
+        
+    args.push("-o");
+    args.push(output);
+    
+    let ld = Command::new("ld")
+        .args(args.as_slice())
+        .output()
+        .expect("Fatal: Linking failed.");
+    
+    if !ld.status.success() {
+        io::stdout().write_all(&ld.stdout).unwrap();
+        io::stderr().write_all(&ld.stderr).unwrap();
+    }
+}
+
 // Write the data section
 fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
     let mut line = String::new();
@@ -42,16 +132,33 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
 
     for data in data.iter() {
         match &data.data_type {
-            LtacDataType::StringL => {},
-            LtacDataType::FloatL => {},
-            LtacDataType::DoubleL => {},
+            LtacDataType::StringL => {
+                line.push_str(&data.name);
+                line.push_str(": .string \"");
+                line.push_str(&data.val);
+                line.push_str("\"\n");
+            },
+            
+            LtacDataType::FloatL => {
+                line.push_str(&data.name);
+                line.push_str(": .long ");
+                line.push_str(&data.val);
+                line.push_str("\n");
+            },
+            
+            LtacDataType::DoubleL => {
+                line.push_str(&data.name);
+                line.push_str(": .quad ");
+                line.push_str(&data.val);
+                line.push_str("\n");
+            },
         }
     }
     
     line.push_str("\n");
     
     writer.write(&line.into_bytes())
-        .expect("[_data] Write failed in .data");
+        .expect("[AARCH64_data] Write failed in .data");
 }
 
 // Write the code section
