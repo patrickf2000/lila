@@ -1,18 +1,4 @@
 
-/* Backend Example
-
-This is an example fo what a Dash backend could look like. For consistency, I would like all backends to
-have as similar a structure to this as possible.
-
-By default, this is built with the rest of the program. The reason is so I'm sure it will always be up to
-date (at the time of writing, the language itself is still being developed, so its quite possible we will
-be adding new LTAC instructions).
-
-*/
-
-// TODO: ALWAYS remove this in production code.
-#![allow(dead_code)]
-
 use std::io;
 use std::io::prelude::*;
 use std::io::BufWriter;
@@ -20,6 +6,10 @@ use std::fs::File;
 use std::process::Command;
 
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
+
+mod func;
+
+use func::*;
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
@@ -171,8 +161,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
         match &code.instr_type {
         
             // Basic function instructions
-            LtacType::Extern => {},
-            LtacType::Label => {},
+            LtacType::Extern => aarch64_build_extern(writer, &code),
+            LtacType::Label => aarch64_build_label(writer, &code),
             LtacType::Func => {},
             LtacType::Ret => {},
             
@@ -370,14 +360,3 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
         }
     }
 }
-
-// This is an example of what a code generation function could look like
-fn example_build_label(writer : &mut BufWriter<File>, code : &LtacInstr) {
-    let mut line = String::new();
-    line.push_str(&code.name);
-    line.push_str(":\n");
-    
-    writer.write(&line.into_bytes())
-        .expect("[_build_label] Write failed.");
-}
-
