@@ -324,9 +324,6 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
                 line.push_str("]\n");
             }
             
-            // Clear flags
-            line.push_str("  cdqe\n");
-            
             // Load the effective address
             line.push_str("  lea r14, ");
             
@@ -367,16 +364,6 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         
         LtacArg::MemOffsetReg(pos, reg, size) if !is_risc => {
             // Determine the right register
-            /*let src_reg : String;
-            
-            match &code.arg1 {
-                LtacArg::Reg8(_v) => src_reg = amd64_op_reg8(reg),
-                LtacArg::Reg16(_v) => src_reg = amd64_op_reg16(reg),
-                LtacArg::Reg64(_v) => src_reg = amd64_op_reg64(reg),
-                LtacArg::FltReg(_v) => src_reg = amd64_op_flt(reg),
-                LtacArg::FltReg64(_v) => src_reg = amd64_op_flt(reg),
-                _ => src_reg = amd64_op_reg32(reg),
-            }*/
             let src_reg = amd64_op_reg32(reg);
             
             // Load the array
@@ -606,9 +593,6 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
                 line.push_str("]\n");
             }
             
-            // Clear flags
-            line.push_str("  cdqe\n");
-            
             // Load the effective address
             line.push_str("  lea r14, ");
             
@@ -665,21 +649,21 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             let mov_instr : String;
             
             match &code.arg2 {
-                LtacArg::Reg8(_v) => { /*src_reg = amd64_op_reg8(*reg);*/ size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::Reg16(_v) => { /*src_reg = amd64_op_reg16(*reg);*/ size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::Byte(_v) => { /*src_reg = amd64_op_reg8(*reg);*/ size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::UByte(_v) => { /*src_reg = amd64_op_reg8(*reg);*/ size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I16(_v) => { /*src_reg = amd64_op_reg16(*reg);*/ size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U16(_v) => { /*src_reg = amd64_op_reg16(*reg)*/ size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I32(_v) => { /*src_reg = amd64_op_reg32(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U32(_v) => { /*src_reg = amd64_op_reg32(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I64(_v) => { /*src_reg = amd64_op_reg64(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U64(_v) => { /*src_reg = amd64_op_reg64(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::F32(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
-                LtacArg::F64(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
-                LtacArg::FltReg(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
-                LtacArg::FltReg64(_v) => { /*src_reg = amd64_op_flt(*reg);*/ size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
-                _ => { /*src_reg = amd64_op_reg32(*reg);*/ size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Reg8(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Reg16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::Byte(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::UByte(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::I16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::U16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::I32(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::U32(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::I64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::U64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
+                LtacArg::F32(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
+                LtacArg::F64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
+                LtacArg::FltReg(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
+                LtacArg::FltReg64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
+                _ => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
             }
         
             // Load the array
