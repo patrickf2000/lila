@@ -383,7 +383,7 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Write the registers
     match &code.arg2 {
         LtacArg::Reg32(pos) => {
-            let reg = riscv64_op_reg32(*pos);
+            let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
 
@@ -431,7 +431,7 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0, "),
 
         LtacArg::Reg32(pos) => {
-            let reg = riscv64_op_reg32(*pos);
+            let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
             line.push_str(", ");
         },
