@@ -173,7 +173,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             LtacType::Func => {
                 riscv64_build_func(writer, &code);
-                stack_size = code.arg1_val;
+                stack_size = code.arg1_val + 16;
             },
             
             // Used to load function arguments
@@ -207,8 +207,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Pop => {},
             
             // Argument and function call instructions
-            LtacType::PushArg => riscv64_build_pusharg(writer, &code, false),
-            LtacType::KPushArg => riscv64_build_pusharg(writer, &code, true),
+            LtacType::PushArg => riscv64_build_pusharg(writer, &code, false, stack_size),
+            LtacType::KPushArg => riscv64_build_pusharg(writer, &code, true, stack_size),
             LtacType::Call => riscv64_build_call(writer, &code),
             LtacType::Syscall => {},
             
@@ -337,7 +337,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdUB => {},
             LtacType::LdW => {},
             LtacType::LdUW => {},
-            LtacType::Ld => riscv64_build_ld_str(writer, &code),
+            LtacType::Ld => riscv64_build_ld_str(writer, &code, stack_size),
             LtacType::LdU => {},
             LtacType::LdQ => {},
             LtacType::LdUQ => {},
@@ -349,7 +349,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrUB => {},
             LtacType::StrW => {},
             LtacType::StrUW => {},
-            LtacType::Str => riscv64_build_ld_str(writer, &code),
+            LtacType::Str => riscv64_build_ld_str(writer, &code, stack_size),
             LtacType::StrU => {},
             LtacType::StrQ => {},
             LtacType::StrUQ => {},
@@ -364,7 +364,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
 }
 
 // Builds the load-store instructions
-fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr) {
+fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_top : i32) {
     let mut line = String::new();
 
     match &code.instr_type {
@@ -388,7 +388,8 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write out the memory
     match &code.arg1 {
-        LtacArg::Mem(pos) => {
+        LtacArg::Mem(val) => {
+            let pos = stack_top - (*val);
             line.push_str("-");
             line.push_str(&pos.to_string());
             line.push_str("(s0)");

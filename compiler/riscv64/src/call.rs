@@ -5,7 +5,7 @@ use parser::ltac::{LtacInstr, LtacArg};
 use crate::utils::*;
 
 // Builds function/sytem call arguments
-pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool) {
+pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool, stack_top : i32) {
     let mut reg = riscv64_arg_reg(code.arg2_val);
 
     if is_karg {
@@ -16,7 +16,9 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
 
     match &code.arg1 {
 
-        LtacArg::Mem(pos) => {
+        LtacArg::Mem(val) => {
+            let pos = stack_top - (*val);
+            
             line.push_str("  lw ");
             line.push_str(&reg);
             line.push_str(", -");
