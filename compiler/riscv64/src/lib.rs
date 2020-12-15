@@ -374,8 +374,8 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
 
     match &code.instr_type {
-        LtacType::Ld => line.push_str("  ldr "),
-        LtacType::Str => line.push_str("  str "),
+        LtacType::Ld => line.push_str("  lw "),
+        LtacType::Str => line.push_str("  sw "),
 
         _ => {},
     }
@@ -395,9 +395,9 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Write out the memory
     match &code.arg1 {
         LtacArg::Mem(pos) => {
-            line.push_str("[sp, ");
+            line.push_str("-");
             line.push_str(&pos.to_string());
-            line.push_str("]");
+            line.push_str("(s0)");
         },
 
         _ => {},

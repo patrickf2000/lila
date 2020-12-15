@@ -35,7 +35,6 @@ fn get_arch() -> Arch {
 
 #[cfg(target_arch = "riscv64")]
 fn get_arch() -> Arch {
-    println!("Lila v0.1 (RISC-V)");
     Arch::Riscv64
 }
 
