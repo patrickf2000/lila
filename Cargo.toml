@@ -12,6 +12,7 @@ members = [
     "transform",
     "compiler/x86",
     "compiler/aarch64",
+    "compiler/riscv64",
     "compiler/ltac"
 ]
 
@@ -21,5 +22,6 @@ transform = { path = "transform" }
 example = { path = "compiler/example" }
 x86 = { path = "compiler/x86" }
 aarch64 = { path = "compiler/aarch64" }
+riscv64 = { path = "compiler/riscv64" }
 ltac_printer = { path = "compiler/ltac" }
 

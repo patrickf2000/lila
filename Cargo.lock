@@ -22,6 +22,7 @@ dependencies = [
  "example",
  "ltac_printer",
  "parser",
+ "riscv64",
  "transform",
  "x86",
 ]
@@ -36,6 +37,13 @@ dependencies = [
 [[package]]
 name = "parser"
 version = "0.1.0"
+
+[[package]]
+name = "riscv64"
+version = "0.0.2"
+dependencies = [
+ "parser",
+]
 
 [[package]]
 name = "transform"
