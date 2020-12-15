@@ -33,6 +33,8 @@ All the stuff here is either completely implemented
 
 Currently, I only support x86-64. The internal representations generate an CISC-like assembly, which lends itself well to x86. I just finished an optimization layer that converts the IR to a RISC-like assembly, which will allow for very easy porting to architectures such as Arm, MIPS, and PowerPC. See the "docs" folder for creating a new backend.
 
+Update (December 2020): I am beginning the port to RISC architectures, specifically Arm64 and RISC-V (64-bit). I will be frequently merging to the develop branch, but the latest work will be in the arm64 and riscv branches. I am taking a somewhat layered approach of doing some work on one architecture, then switching and doing the same work on the other.
+
 ### System Requirements
 
 All development is currently done on Linux Mint. Any version of Linux with a fairly recent version of Rust will work. Linux Mint/Ubuntu/Debian/other derivatives should work right out of the box. For other Linux distributions, you may need to adjust the paths for the linking step, which are location in "compiler/x86/src/lib.rs", under the "link" function. I will eventually address this shortcoming.
