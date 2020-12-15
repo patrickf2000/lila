@@ -33,6 +33,12 @@ fn get_arch() -> Arch {
     Arch::AArch64
 }
 
+#[cfg(target_arch = "riscv64")]
+fn get_arch() -> Arch {
+    println!("Lila v0.1 (RISC-V)");
+    Arch::Riscv64
+}
+
 // TODO: Is there a better way to do this?
 fn main() {
     let code = run();
@@ -132,6 +138,9 @@ fn run() -> i32 {
         } else if arch == Arch::AArch64 {
             aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
             aarch64::build_asm(&ltac.name, no_link);
+        } else if arch == Arch::Riscv64 {
+            riscv64::compile(&ltac).expect("Codegen failed with unknown error.");
+            riscv64::build_asm(&ltac.name, no_link);
         } else {
             // TODO
         }
@@ -143,6 +152,8 @@ fn run() -> i32 {
             x86::link(&all_names, &output, use_c, link_lib);
         } else if arch == Arch::AArch64 {
             aarch64::link(&all_names, &output, use_c, link_lib);
+        } else if arch == Arch::Riscv64 {
+            riscv64::link(&all_names, &output, use_c, link_lib);
         }
     }
     

@@ -30,11 +30,13 @@ use risc::*;
 pub enum Arch {
     X86_64,
     AArch64,
+    Riscv64,
 }
 
 // Architectures
 // 1-> x86-64
 // 2-> AArch64
+// 3-> Riscv64
 
 // The main transformation function
 pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Result<LtacFile, ()> {
@@ -43,7 +45,7 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Res
         Err(_e) => return Err(()),
     };
     
-    if risc_mode || arch == Arch::AArch64 {
+    if risc_mode || arch == Arch::AArch64 || arch == Arch::Riscv64 {
         file2 = match risc_optimize(&file2) {
             Ok(ltac) => ltac,
             Err(_e) => return Err(()),
@@ -88,6 +90,7 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     match arch {
                         Arch::X86_64 => instr.arg1 = LtacArg::I32(60),       // Linux x86-64
                         Arch::AArch64 => instr.arg1 = LtacArg::I32(93),       // Linux AArch64
+                        Arch::Riscv64 => {},
                     };
                     
                     file2.code.push(instr.clone());
@@ -123,6 +126,7 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     match arch {
                         Arch::X86_64 => instr.arg1 = LtacArg::I32(9),
                         Arch::AArch64 => instr.arg1 = LtacArg::I32(222),
+                        Arch::Riscv64 => {},
                     };
                     
                     file2.code.push(instr.clone());
@@ -176,6 +180,7 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     match arch {
                         Arch::X86_64 => instr.arg1 = LtacArg::I32(11),
                         Arch::AArch64 => instr.arg1 = LtacArg::I32(215),
+                        Arch::Riscv64 => {},
                     };
                     
                     file2.code.push(instr.clone());
