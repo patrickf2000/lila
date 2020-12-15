@@ -284,13 +284,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U32Div => {},
             LtacType::U32Mod => {},
             
-            // Signed 32-bit integer bitwise operations
-            LtacType::I32And => {},
-            LtacType::I32Or => {},
-            LtacType::I32Xor => {},
-            LtacType::I32Lsh => {},
-            LtacType::I32Rsh => {},
-            
             // Signed 32-bit vector math operations
             LtacType::I32VAdd => {},
             
@@ -472,7 +465,7 @@ fn riscv64_is_muldiv(instr_type : &LtacType) -> bool {
 fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     let mut instr = String::new();
-    let suffix = 'w';
+    let mut suffix = 'w';
 
     let is_muldiv = riscv64_is_muldiv(&code.instr_type);
 
@@ -483,7 +476,25 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::I32Mul => instr = "mul".to_string(),
         LtacType::I32Div => instr = "div".to_string(),
         LtacType::I32Mod => instr = "rem".to_string(),
+
+        LtacType::I32And => {
+            instr = "and".to_string();
+            suffix = 0 as char;
+        },
         
+        LtacType::I32Or => {
+            instr = "or".to_string();
+            suffix = 0 as char;
+        },
+        
+        LtacType::I32Xor => {
+            instr = "xor".to_string();
+            suffix = 0 as char;
+        },
+        
+        LtacType::I32Lsh => instr = "sll".to_string(),
+        LtacType::I32Rsh => instr = "srl".to_string(),
+            
         _ => {},
     }
 
@@ -501,7 +512,10 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         _ => {},
     }
 
-    instr.push(suffix);
+    if suffix != (0 as char) {
+        instr.push(suffix);
+    }
+    
     line.push_str("  ");
     line.push_str(&instr);
     line.push_str(" ");
