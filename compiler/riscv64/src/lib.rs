@@ -278,11 +278,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::WLsh => {},
             LtacType::WRsh => {},
             
-            // Signed 32-bit integer math opreations
-            LtacType::I32Mul => {},
-            LtacType::I32Div => {},
-            LtacType::I32Mod => {},
-            
             // Unsigned 32-bit integer math opreations
             LtacType::U32Add => {},
             LtacType::U32Mul => {},
@@ -460,22 +455,45 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         .expect("[RISCV64_build_mov] Write failed.");
 }
 
+// A small utility function to see if we are using a multiply-divide instruction
+fn riscv64_is_muldiv(instr_type : &LtacType) -> bool {
+    match instr_type {
+        LtacType::I32Mul
+        | LtacType::I32Div
+        | LtacType::I32Mod
+        => return true,
+
+        _ => return false,
+    }
+}
+
 // Builds the base integer instructions
 fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
     let mut instr = String::new();
     let suffix = 'w';
 
+    let is_muldiv = riscv64_is_muldiv(&code.instr_type);
+
     // Write the instruction type
     match &code.instr_type {
         LtacType::I32Add => instr = "add".to_string(),
         LtacType::I32Sub => instr = "sub".to_string(),
+        LtacType::I32Mul => instr = "mul".to_string(),
+        LtacType::I32Div => instr = "div".to_string(),
+        LtacType::I32Mod => instr = "rem".to_string(),
         
         _ => {},
     }
 
     // Check to see if we have an immediate as the second operand
     match &code.arg2 {
+        LtacArg::I32(val) if is_muldiv => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+        
         LtacArg::I32(_v) if code.instr_type == LtacType::I32Sub => instr = "addi".to_string(),
         LtacArg::I32(_v) => instr.push('i'),
 
@@ -512,6 +530,8 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
+
+        LtacArg::I32(_v) if is_muldiv => line.push_str("s2"),
     
         LtacArg::I32(val) => {
             if code.instr_type == LtacType::I32Sub && (*val) > 0 {
