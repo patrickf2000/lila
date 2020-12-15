@@ -194,6 +194,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovUB => {},
             LtacType::MovW => {},
             LtacType::MovUW => {},
+            LtacType::Mov => riscv64_build_mov(writer, &code),
             LtacType::MovU => {},
             LtacType::MovQ => {},
             LtacType::MovUQ => {},
@@ -408,13 +409,12 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr) {
         .expect("[RISCV64_build_ld_str] Write failed.");
 }
 
-// For RISC-V instructions that have a common syntax
-fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
+// Builds a RISC-V MOV instruction
+// On RISC-V, there are separate instructions for register and immediate moves
+fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
 
-    // Write the instruction type
-    // TODO: I would like to find a way to simplify this because it will become complicated
-    // very quickly
+    // Determine the instruction
     match &code.instr_type {
         LtacType::Mov => {
             match &code.arg2 {
@@ -423,22 +423,69 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             }
         },
 
-        LtacType::I32Add => {
-            match &code.arg2 {
-                LtacArg::I32(_v) => line.push_str("  addiw "),
-                _ => line.push_str("  addw "),
-            }
-        },
+        _ => {},
+    }
 
-        LtacType::I32Sub => {
-            match &code.arg2 {
-                LtacArg::I32(_v) => line.push_str("  addiw "),
-                _ => line.push_str("  subw "),
-            }
+    // Operands
+    // Write the first operand
+    match &code.arg1 {
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0, "),
+
+        LtacArg::Reg32(pos) => {
+            let reg = riscv64_op_reg(*pos);
+
+            line.push_str(&reg);
+            line.push_str(", ");
         },
         
         _ => {},
     }
+
+    // Write the second operand
+    match &code.arg2 {
+        LtacArg::Reg32(pos) => {
+            let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+    
+        LtacArg::I32(val) => line.push_str(&val.to_string()),
+
+        _ => {},
+    }
+
+    // Write the rest out
+    line.push_str("\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[RISCV64_build_mov] Write failed.");
+}
+
+// Builds the base integer instructions
+fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+    let mut instr = String::new();
+    let suffix = 'w';
+
+    // Write the instruction type
+    match &code.instr_type {
+        LtacType::I32Add => instr = "add".to_string(),
+        LtacType::I32Sub => instr = "sub".to_string(),
+        
+        _ => {},
+    }
+
+    // Check to see if we have an immediate as the second operand
+    match &code.arg2 {
+        LtacArg::I32(_v) if code.instr_type == LtacType::I32Sub => instr = "addi".to_string(),
+        LtacArg::I32(_v) => instr.push('i'),
+
+        _ => {},
+    }
+
+    instr.push(suffix);
+    line.push_str("  ");
+    line.push_str(&instr);
+    line.push_str(" ");
 
     // Write the first operand
     match &code.arg1 {
