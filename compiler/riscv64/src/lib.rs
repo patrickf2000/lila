@@ -278,8 +278,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::WRsh => {},
             
             // Signed 32-bit integer math opreations
-            LtacType::I32Add => {},
-            LtacType::I32Sub => {},
             LtacType::I32Mul => {},
             LtacType::I32Div => {},
             LtacType::I32Mod => {},
@@ -415,11 +413,27 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = String::new();
 
     // Write the instruction type
+    // TODO: I would like to find a way to simplify this because it will become complicated
+    // very quickly
     match &code.instr_type {
         LtacType::Mov => {
             match &code.arg2 {
                 LtacArg::I32(_v) => line.push_str("  li "),
                 _ => line.push_str("  mv "),
+            }
+        },
+
+        LtacType::I32Add => {
+            match &code.arg2 {
+                LtacArg::I32(_v) => line.push_str("  addiw "),
+                _ => line.push_str("  addw "),
+            }
+        },
+
+        LtacType::I32Sub => {
+            match &code.arg2 {
+                LtacArg::I32(_v) => line.push_str("  addiw "),
+                _ => line.push_str("  subw "),
             }
         },
         
@@ -432,8 +446,14 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
         LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
+
             line.push_str(&reg);
             line.push_str(", ");
+
+            if code.instr_type != LtacType::Mov {
+                line.push_str(&reg);
+                line.push_str(", ");
+            }
         },
         
         _ => {},
@@ -441,7 +461,18 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the second operand
     match &code.arg2 {
-        LtacArg::I32(val) => line.push_str(&val.to_string()),
+        LtacArg::Reg32(pos) => {
+            let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+    
+        LtacArg::I32(val) => {
+            if code.instr_type == LtacType::I32Sub && (*val) > 0 {
+                line.push_str("-");
+            }
+            
+            line.push_str(&val.to_string());
+        },
 
         _ => {},
     }
