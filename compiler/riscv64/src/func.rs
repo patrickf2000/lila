@@ -34,11 +34,16 @@ pub fn riscv64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
     line.push_str(&code.name);
     line.push_str(":\n");
     
-    line.push_str("  stp x29, x30, [sp, -");
+    line.push_str("  addi sp, sp, -");
     line.push_str(&code.arg1_val.to_string());
-    line.push_str("]!\n");
+    line.push_str("\n");
 
-    line.push_str("  mov x29, sp\n\n");
+    line.push_str("  sd ra, 24(sp)\n");
+    line.push_str("  sd s0, 16(sp)\n");
+    
+    line.push_str("  addi s0, sp, ");
+    line.push_str(&code.arg1_val.to_string());
+    line.push_str("\n\n");
 
     writer.write(&line.into_bytes())
         .expect("[RISCV64_build_func] Write failed.");
@@ -47,11 +52,14 @@ pub fn riscv64_build_func(writer : &mut BufWriter<File>, code : &LtacInstr) {
 // Builds a return statement
 pub fn riscv64_build_ret(writer : &mut BufWriter<File>, stack_size : i32) {
     let mut line = String::new();
-    line.push_str("  ldp x29, x30, [sp], ");
+    line.push_str("  ld ra, 24(sp)\n");
+    line.push_str("  ld s0, 16(sp)\n");
+    
+    line.push_str("  addi sp, sp, ");
     line.push_str(&stack_size.to_string());
     line.push_str("\n");
 
-    line.push_str("  ret\n");
+    line.push_str("  jr ra\n\n");
 
     writer.write(&line.into_bytes())
         .expect("[RISCV64_build_ret] Write failed.");

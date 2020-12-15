@@ -416,13 +416,19 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the instruction type
     match &code.instr_type {
-        LtacType::Mov => line.push_str("  mov "),
+        LtacType::Mov => {
+            match &code.arg2 {
+                LtacArg::I32(_v) => line.push_str("  li "),
+                _ => line.push_str("  mv "),
+            }
+        },
+        
         _ => {},
     }
 
     // Write the first operand
     match &code.arg1 {
-        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("w0, "),
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0, "),
 
         LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg32(*pos);
