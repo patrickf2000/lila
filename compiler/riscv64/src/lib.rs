@@ -181,8 +181,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdArgU8 => {},
             LtacType::LdArgI16 => {},
             LtacType::LdArgU16 => {},
-            LtacType::LdArgI32 => {},
-            LtacType::LdArgU32 => {},
+            LtacType::LdArgI32 | LtacType::LdArgU32 => riscv64_build_ldarg(writer, &code, stack_size),
             LtacType::LdArgI64 => {},
             LtacType::LdArgU64 => {},
             LtacType::LdArgF32 => {},
@@ -436,6 +435,8 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
+
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0"),
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
 
