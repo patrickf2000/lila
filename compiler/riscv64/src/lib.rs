@@ -446,6 +446,32 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_
             line.push_str("0(s2)");
         },
 
+        LtacArg::MemOffsetReg(pos, reg_pos, size) => {
+            // Load the array
+            let array_pos = stack_top - (*pos) + 8;
+            full_line.push_str("  ld s2, -");
+            full_line.push_str(&array_pos.to_string());
+            full_line.push_str("(s0)\n");
+
+            // Now for the offset
+            let reg = riscv64_op_reg(*reg_pos);
+
+            if (*size) == 4 {
+                full_line.push_str("  slli ");
+                full_line.push_str(&reg);
+                full_line.push_str(", ");
+                full_line.push_str(&reg);
+                full_line.push_str(", 2\n");
+            }
+
+            full_line.push_str("  add s2, s2, ");
+            full_line.push_str(&reg);
+            full_line.push_str("\n");
+
+            // Store the result
+            line.push_str("0(s2)");
+        },
+
         _ => {},
     }
 
