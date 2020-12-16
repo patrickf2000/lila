@@ -106,6 +106,7 @@ pub fn riscv64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, sta
     let mut line = String::new();
 
     match code.instr_type {
+        LtacType::LdArgI16 | LtacType::LdArgU16 => line.push_str("  sh "),
         LtacType::LdArgI32 | LtacType::LdArgU32 => line.push_str("  sw "),
         LtacType::LdArgPtr => line.push_str("  sd "),
 

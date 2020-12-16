@@ -26,9 +26,12 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
     let mut full_line = String::new();
 
     match &code.instr_type {
+        LtacType::LdW => line.push_str("  lh "),
+        LtacType::LdUW => line.push_str("  lhu "),
         LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
         LtacType::LdQ => line.push_str("  ld "),
-        
+
+        LtacType::StrW | LtacType::StrUW => line.push_str("  sh "),
         LtacType::Str | LtacType::StrU => line.push_str("  sw "),
         LtacType::StrQ => line.push_str("  sd "),
         
@@ -37,7 +40,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
 
     // Write the registers
     match &code.arg2 {
-        LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
+        LtacArg::Reg16(pos)
+        | LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
@@ -96,7 +100,9 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             full_line.push_str(&offset_pos.to_string());
             full_line.push_str("(s0)\n");
 
-            if (*size) == 4 {
+            if (*size) == 2 {
+                full_line.push_str("  slli s3, s3, 1\n");
+            } else if (*size) == 4 {
                 full_line.push_str("  slli s3, s3, 2\n");                
             }
 
@@ -117,11 +123,14 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             // Now for the offset
             let reg = riscv64_op_reg(*reg_pos);
 
-            if (*size) == 4 {
-                full_line.push_str("  slli ");
-                full_line.push_str(&reg);
-                full_line.push_str(", ");
-                full_line.push_str(&reg);
+            full_line.push_str("  slli ");
+            full_line.push_str(&reg);
+            full_line.push_str(", ");
+            full_line.push_str(&reg);
+
+            if (*size) == 2 {
+                full_line.push_str(", 1\n");
+            } else if (*size) == 4 {
                 full_line.push_str(", 2\n");
             }
 
@@ -151,6 +160,14 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Determine the instruction
     match &code.instr_type {
+        LtacType::MovW | LtacType::MovUW => {
+            match &code.arg2 {
+                LtacArg::I16(_v) => line.push_str("  li "),
+                LtacArg::U16(_v) => line.push_str("  li "),
+                _ => line.push_str("  mv "),
+            }
+        },
+    
         LtacType::Mov | LtacType::MovU => {
             match &code.arg2 {
                 LtacArg::I32(_v) => line.push_str("  li "),
@@ -167,9 +184,11 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Operands
     // Write the first operand
     match &code.arg1 {
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 |
         LtacArg::RetRegI32 | LtacArg::RetRegU32 |
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0, "),
 
+        LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
 
@@ -182,13 +201,18 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the second operand
     match &code.arg2 {
+        LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
 
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 |
         LtacArg::RetRegI32 | LtacArg::RetRegU32 |
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0"),
+
+        LtacArg::I16(val) => line.push_str(&val.to_string()),
+        LtacArg::U16(val) => line.push_str(&val.to_string()),
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),
