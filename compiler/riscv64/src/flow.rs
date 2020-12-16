@@ -56,6 +56,11 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
 
     // Now, write the second operand
     match &cmp.arg2 {
+        LtacArg::Reg32(pos) => {
+            let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+    
         LtacArg::I32(_v) => line.push_str("s2"),
 
         _ => {},
