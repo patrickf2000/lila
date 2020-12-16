@@ -20,6 +20,16 @@ use std::fs::File;
 use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
+// Builds unconditional jump
+pub fn riscv64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = "  j ".to_string();
+    line.push_str(&code.name);
+    line.push_str("\n\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[RISCV64_build_jump] Write failed.");
+}
+
 // Builds conditional jumps
 // On RISC-V, these are interesting; there's no comparison instruction, instead both things
 // happen in the branch instruction
