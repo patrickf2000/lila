@@ -19,6 +19,12 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
             line.push_str("\n");
         },
 
+        LtacArg::U32(val) => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
         _ => {},
     }
 
@@ -62,6 +68,7 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
         },
     
         LtacArg::I32(_v) => line.push_str("s2"),
+        LtacArg::U32(_v) => line.push_str("s2"),
 
         _ => {},
     }

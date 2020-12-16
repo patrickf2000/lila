@@ -1,6 +1,6 @@
 
 #OUTPUT
-#X: b5c6
+#X: a4b5c6d7
 #Y: 55aabb
 #END
 
@@ -15,7 +15,7 @@ func print_two(x:uint, y:uint)
 end
 
 func main -> int
-    ushort x = 0xA4B5C6
+    uint x = 0xA4B5C6D7
     print_two(x, 0x55AABB)
     
     return 0

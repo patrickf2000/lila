@@ -197,13 +197,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovUB => {},
             LtacType::MovW => {},
             LtacType::MovUW => {},
-            LtacType::MovU => {},
             LtacType::MovUQ => {},
             LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovI32Vec => {},
 
-            LtacType::Mov |
+            LtacType::Mov | LtacType::MovU |
             LtacType::MovQ => riscv64_build_mov(writer, &code),
             
             // Push/pop
@@ -221,8 +220,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U8Cmp => {},
             LtacType::I16Cmp => {},
             LtacType::U16Cmp => {},
-            LtacType::I32Cmp => cmp_instr = code,
-            LtacType::U32Cmp => {},
+            LtacType::I32Cmp | LtacType::U32Cmp => cmp_instr = code,
             LtacType::I64Cmp => {},
             LtacType::U64Cmp => {},
             LtacType::F32Cmp => {},
@@ -279,12 +277,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::WLsh => {},
             LtacType::WRsh => {},
             
-            // Unsigned 32-bit integer math opreations
-            LtacType::U32Add => {},
-            LtacType::U32Mul => {},
-            LtacType::U32Div => {},
-            LtacType::U32Mod => {},
-            
             // Signed 32-bit vector math operations
             LtacType::I32VAdd => {},
             
@@ -331,12 +323,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdUB => {},
             LtacType::LdW => {},
             LtacType::LdUW => {},
-            LtacType::LdU => {},
             LtacType::LdUQ => {},
             LtacType::LdF32 => {},
             LtacType::LdF64 => {},
 
-            LtacType::Ld |
+            LtacType::Ld | LtacType::LdU |
             LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size, true),
             
             // RISC store instructions
@@ -344,13 +335,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrUB => {},
             LtacType::StrW => {},
             LtacType::StrUW => {},
-            LtacType::StrU => {},
             LtacType::StrUQ => {},
             LtacType::StrF32 => {},
             LtacType::StrF64 => {},
             LtacType::StrPtr => {},
 
-            LtacType::Str |
+            LtacType::Str | LtacType::StrU |
             LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size, false),
             
             // All else
@@ -365,10 +355,10 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_
     let mut full_line = String::new();
 
     match &code.instr_type {
-        LtacType::Ld => line.push_str("  lw "),
+        LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
         LtacType::LdQ => line.push_str("  ld "),
         
-        LtacType::Str => line.push_str("  sw "),
+        LtacType::Str | LtacType::StrU => line.push_str("  sw "),
         LtacType::StrQ => line.push_str("  sd "),
         
         _ => {},
@@ -490,9 +480,10 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Determine the instruction
     match &code.instr_type {
-        LtacType::Mov => {
+        LtacType::Mov | LtacType::MovU => {
             match &code.arg2 {
                 LtacArg::I32(_v) => line.push_str("  li "),
+                LtacArg::U32(_v) => line.push_str("  li "),
                 _ => line.push_str("  mv "),
             }
         },
@@ -529,6 +520,7 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0"),
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
+        LtacArg::U32(val) => line.push_str(&val.to_string()),
 
         _ => {},
     }
@@ -543,9 +535,9 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 // A small utility function to see if we are using a multiply-divide instruction
 fn riscv64_is_muldiv(instr_type : &LtacType) -> bool {
     match instr_type {
-        LtacType::I32Mul
-        | LtacType::I32Div
-        | LtacType::I32Mod
+        LtacType::I32Mul | LtacType::U32Mul
+        | LtacType::I32Div | LtacType::U32Div
+        | LtacType::I32Mod | LtacType::U32Mod
         => return true,
 
         _ => return false,
@@ -562,11 +554,11 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the instruction type
     match &code.instr_type {
-        LtacType::I32Add => instr = "add".to_string(),
+        LtacType::I32Add | LtacType::U32Add => instr = "add".to_string(),
         LtacType::I32Sub => instr = "sub".to_string(),
-        LtacType::I32Mul => instr = "mul".to_string(),
-        LtacType::I32Div => instr = "div".to_string(),
-        LtacType::I32Mod => instr = "rem".to_string(),
+        LtacType::I32Mul | LtacType::U32Mul => instr = "mul".to_string(),
+        LtacType::I32Div | LtacType::U32Div => instr = "div".to_string(),
+        LtacType::I32Mod | LtacType::U32Mod => instr = "rem".to_string(),
 
         LtacType::I32And => {
             instr = "and".to_string();
@@ -596,9 +588,17 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&val.to_string());
             line.push_str("\n");
         },
+
+        LtacArg::U32(val) if is_muldiv => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
         
         LtacArg::I32(_v) if code.instr_type == LtacType::I32Sub => instr = "addi".to_string(),
         LtacArg::I32(_v) => instr.push('i'),
+
+        LtacArg::U32(_v) => instr.push('i'),
 
         _ => {},
     }
@@ -638,6 +638,7 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         },
 
         LtacArg::I32(_v) if is_muldiv => line.push_str("s2"),
+        LtacArg::U32(_v) if is_muldiv => line.push_str("s2"),
     
         LtacArg::I32(val) => {
             let mut num = *val;
@@ -652,6 +653,8 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             
             line.push_str(&num.to_string());
         },
+
+        LtacArg::U32(val) => line.push_str(&val.to_string()),
 
         _ => {},
     }
