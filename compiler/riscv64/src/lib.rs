@@ -266,32 +266,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U8Div => {},
             LtacType::U8Mod => {},
             
-            // Signed word (2-byte) math operations
-            LtacType::I16Add => {},
-            LtacType::I16Sub => {},
-            LtacType::I16Mul => {},
-            LtacType::I16Div => {},
-            LtacType::I16Mod => {},
-            
-            // Unsigned word (2-byte) math operations
-            LtacType::U16Add => {},
-            LtacType::U16Mul => {},
-            LtacType::U16Div => {},
-            LtacType::U16Mod => {},
-            
             // Byte bitwise operations
             LtacType::BAnd => {},
             LtacType::BOr => {},
             LtacType::BXor => {},
             LtacType::BLsh => {},
             LtacType::BRsh => {},
-            
-            // Word bitwise operations
-            LtacType::WAnd => {},
-            LtacType::WOr => {},
-            LtacType::WXor => {},
-            LtacType::WLsh => {},
-            LtacType::WRsh => {},
             
             // Signed 32-bit vector math operations
             LtacType::I32VAdd => {},
@@ -366,7 +346,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
 // A small utility function to see if we are using a multiply-divide instruction
 fn riscv64_is_muldiv(instr_type : &LtacType) -> bool {
     match instr_type {
-        LtacType::I32Mul | LtacType::U32Mul
+        LtacType::I16Mul | LtacType::U16Mul
+        | LtacType::I16Div | LtacType::U16Div
+        | LtacType::I16Mod | LtacType::U16Mod
+        | LtacType::I32Mul | LtacType::U32Mul
         | LtacType::I32Div | LtacType::U32Div
         | LtacType::I32Mod | LtacType::U32Mod
         => return true,
@@ -385,35 +368,56 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the instruction type
     match &code.instr_type {
-        LtacType::I32Add | LtacType::U32Add => instr = "add".to_string(),
-        LtacType::I32Sub => instr = "sub".to_string(),
-        LtacType::I32Mul | LtacType::U32Mul => instr = "mul".to_string(),
-        LtacType::I32Div | LtacType::U32Div => instr = "div".to_string(),
-        LtacType::I32Mod | LtacType::U32Mod => instr = "rem".to_string(),
+        LtacType::I16Add | LtacType::U16Add
+        | LtacType::I32Add | LtacType::U32Add => instr = "add".to_string(),
+        
+        LtacType::I16Sub | LtacType::I32Sub => instr = "sub".to_string(),
 
-        LtacType::I32And => {
+        LtacType::I16Mul | LtacType::U16Mul
+        | LtacType::I32Mul | LtacType::U32Mul => instr = "mul".to_string(),
+
+        LtacType::I16Div | LtacType::U16Div
+        | LtacType::I32Div | LtacType::U32Div => instr = "div".to_string(),
+
+        LtacType::I16Mod | LtacType::U16Mod
+        | LtacType::I32Mod | LtacType::U32Mod => instr = "rem".to_string(),
+
+        LtacType::WAnd | LtacType::I32And => {
             instr = "and".to_string();
             suffix = 0 as char;
         },
         
-        LtacType::I32Or => {
+        LtacType::WOr | LtacType::I32Or => {
             instr = "or".to_string();
             suffix = 0 as char;
         },
         
-        LtacType::I32Xor => {
+        LtacType::WXor | LtacType::I32Xor => {
             instr = "xor".to_string();
             suffix = 0 as char;
         },
         
-        LtacType::I32Lsh => instr = "sll".to_string(),
-        LtacType::I32Rsh => instr = "srl".to_string(),
+        LtacType::WLsh | LtacType::I32Lsh => instr = "sll".to_string(),
+        LtacType::WRsh | LtacType::I32Rsh => instr = "srl".to_string(),
             
         _ => {},
     }
 
     // Check to see if we have an immediate as the second operand
+    // TODO: Try to combine some of this
     match &code.arg2 {
+        LtacArg::I16(val) if is_muldiv => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
+        LtacArg::U16(val) if is_muldiv => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+        
         LtacArg::I32(val) if is_muldiv => {
             line.push_str("  li s2, ");
             line.push_str(&val.to_string());
@@ -425,6 +429,11 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&val.to_string());
             line.push_str("\n");
         },
+
+        LtacArg::I16(_v) if code.instr_type == LtacType::I16Sub => instr = "addi".to_string(),
+        LtacArg::I16(_v) => instr.push('i'),
+
+        LtacArg::U16(_v) => instr.push('i'),
         
         LtacArg::I32(_v) if code.instr_type == LtacType::I32Sub => instr = "addi".to_string(),
         LtacArg::I32(_v) => instr.push('i'),
@@ -444,9 +453,11 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the first operand
     match &code.arg1 {
-        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0, "),
+        LtacArg::RetRegI16 | LtacArg::RetRegU16
+        | LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0, "),
 
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg16(pos)
+        | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
 
             line.push_str(&reg);
@@ -463,13 +474,31 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the second operand
     match &code.arg2 {
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg16(pos)
+        | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
 
+        LtacArg::I16(_v) if is_muldiv => line.push_str("s2"),
+        LtacArg::U16(_v) if is_muldiv => line.push_str("s2"),
+
         LtacArg::I32(_v) if is_muldiv => line.push_str("s2"),
         LtacArg::U32(_v) if is_muldiv => line.push_str("s2"),
+
+        LtacArg::I16(val) => {
+            let mut num = *val;
+            
+            if code.instr_type == LtacType::I16Sub {
+                if num > 0 {
+                    line.push_str("-");
+                } else {
+                    num *= -1;
+                }
+            }
+            
+            line.push_str(&num.to_string());
+        },
     
         LtacArg::I32(val) => {
             let mut num = *val;
@@ -485,6 +514,7 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&num.to_string());
         },
 
+        LtacArg::U16(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),
 
         _ => {},
