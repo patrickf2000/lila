@@ -99,7 +99,9 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             full_line.push_str(&offset_pos.to_string());
             full_line.push_str("(s0)\n");
 
-            if (*size) == 4 {
+            if (*size) == 2 {
+                full_line.push_str("  slli s3, s3, 1\n");
+            } else if (*size) == 4 {
                 full_line.push_str("  slli s3, s3, 2\n");                
             }
 
@@ -120,11 +122,14 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             // Now for the offset
             let reg = riscv64_op_reg(*reg_pos);
 
-            if (*size) == 4 {
-                full_line.push_str("  slli ");
-                full_line.push_str(&reg);
-                full_line.push_str(", ");
-                full_line.push_str(&reg);
+            full_line.push_str("  slli ");
+            full_line.push_str(&reg);
+            full_line.push_str(", ");
+            full_line.push_str(&reg);
+
+            if (*size) == 2 {
+                full_line.push_str(", 1\n");
+            } else if (*size) == 4 {
                 full_line.push_str(", 2\n");
             }
 
