@@ -640,11 +640,17 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::I32(_v) if is_muldiv => line.push_str("s2"),
     
         LtacArg::I32(val) => {
-            if code.instr_type == LtacType::I32Sub && (*val) > 0 {
-                line.push_str("-");
+            let mut num = *val;
+            
+            if code.instr_type == LtacType::I32Sub {
+                if num > 0 {
+                    line.push_str("-");
+                } else {
+                    num *= -1;
+                }
             }
             
-            line.push_str(&val.to_string());
+            line.push_str(&num.to_string());
         },
 
         _ => {},
