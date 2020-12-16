@@ -1,7 +1,24 @@
+// This file is part of the Lila compiler
+// Copyright (C) 2020 Patrick Flynn
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; version 2.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 use std::io::{BufWriter, Write};
 use std::fs::File;
 
-use parser::ltac::{LtacInstr};
+use parser::ltac::{LtacInstr, LtacType, LtacArg};
+use crate::utils::*;
 
 // Builds an extern declaration
 pub fn riscv64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
@@ -82,4 +99,41 @@ pub fn riscv64_build_ret(writer : &mut BufWriter<File>, stack_size : i32) {
 
     writer.write(&line.into_bytes())
         .expect("[RISCV64_build_ret] Write failed.");
+}
+
+// Builds a load-arg statement
+pub fn riscv64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, stack_top : i32) {
+    let mut line = String::new();
+
+    match code.instr_type {
+        LtacType::LdArgI32 | LtacType::LdArgU32 => line.push_str("  sw "),
+        LtacType::LdArgPtr => line.push_str("  sd "),
+
+        _ => {},
+    }
+    
+    let reg = riscv64_arg_reg(code.arg2_val);
+    line.push_str(&reg);
+    line.push_str(", ");
+
+    match code.arg1 {
+        LtacArg::Mem(val) => {
+            let mut pos = stack_top - val;
+
+            if code.instr_type == LtacType::LdArgPtr {
+                pos += 8;
+            }
+            
+            line.push_str("-");
+            line.push_str(&pos.to_string());
+            line.push_str("(s0)");
+        },
+
+        _ => {},
+    }
+
+    line.push_str("\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[RISCV64_build_ldarg] Write failed.");
 }
