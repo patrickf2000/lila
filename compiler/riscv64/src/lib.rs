@@ -336,7 +336,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdF64 => {},
 
             LtacType::Ld |
-            LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size),
+            LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size, true),
             
             // RISC store instructions
             LtacType::StrB => {},
@@ -350,7 +350,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrPtr => {},
 
             LtacType::Str |
-            LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size),
+            LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size, false),
             
             // All else
             _ => riscv64_build_instr(writer, &code),
@@ -359,7 +359,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
 }
 
 // Builds the load-store instructions
-fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_top : i32) {
+fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_top : i32, is_load : bool) {
     let mut line = String::new();
     let mut full_line = String::new();
 
@@ -388,7 +388,12 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_
     // Write out the memory
     match &code.arg1 {
         LtacArg::Mem(val) => {
-            let pos = stack_top - (*val);
+            let mut pos = stack_top - (*val);
+
+            if code.instr_type == LtacType::LdQ || code.instr_type == LtacType::StrQ {
+                pos += 8;
+            }
+            
             line.push_str("-");
             line.push_str(&pos.to_string());
             line.push_str("(s0)");
@@ -396,23 +401,29 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_
 
         LtacArg::MemOffsetImm(pos, offset) => {
             // Load the array
-            let array_pos = stack_top - (*pos);
+            let array_pos = stack_top - (*pos) + 8;
             full_line.push_str("  ld s2, -");
             full_line.push_str(&array_pos.to_string());
             full_line.push_str("(s0)\n");
 
-            // Add the offset
-            full_line.push_str("  addi s2, s2, ");
-            full_line.push_str(&offset.to_string());
-            full_line.push_str("\n");
+            // The format changes slightly for load-store
+            if is_load {
+                line.push_str(&offset.to_string());
+                line.push_str("(s2)");
+            } else {
+                // Add the offset
+                full_line.push_str("  addi s2, s2, ");
+                full_line.push_str(&offset.to_string());
+                full_line.push_str("\n");
 
-            // Store the result
-            line.push_str("0(s2)");
+                // Store the result
+                line.push_str("0(s2)");
+            }
         },
 
         LtacArg::MemOffsetMem(pos, offset, size) => {
             // Load the array
-            let array_pos = stack_top - (*pos);
+            let array_pos = stack_top - (*pos) + 8;
             full_line.push_str("  ld s2, -");
             full_line.push_str(&array_pos.to_string());
             full_line.push_str("(s0)\n");

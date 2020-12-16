@@ -25,6 +25,16 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
             line.push_str(&pos.to_string());
             line.push_str("(s0)\n");
         },
+
+        LtacArg::Ptr(val) => {
+            let pos = stack_top - (*val) + 8;
+
+            line.push_str("  ld ");
+            line.push_str(&reg);
+            line.push_str(", -");
+            line.push_str(&pos.to_string());
+            line.push_str("(s0)\n");
+        },
         
         LtacArg::I32(val) => {
             line.push_str("  li ");
