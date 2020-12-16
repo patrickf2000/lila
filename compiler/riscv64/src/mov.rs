@@ -26,9 +26,11 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
     let mut full_line = String::new();
 
     match &code.instr_type {
+        LtacType::LdW | LtacType::LdUW => line.push_str("  lh "),
         LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
         LtacType::LdQ => line.push_str("  ld "),
-        
+
+        LtacType::StrW | LtacType::StrUW => line.push_str("  sh "),
         LtacType::Str | LtacType::StrU => line.push_str("  sw "),
         LtacType::StrQ => line.push_str("  sd "),
         
@@ -37,7 +39,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
 
     // Write the registers
     match &code.arg2 {
-        LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
+        LtacArg::Reg16(pos)
+        | LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
@@ -151,6 +154,14 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Determine the instruction
     match &code.instr_type {
+        LtacType::MovW | LtacType::MovUW => {
+            match &code.arg2 {
+                LtacArg::I16(_v) => line.push_str("  li "),
+                LtacArg::U16(_v) => line.push_str("  li "),
+                _ => line.push_str("  mv "),
+            }
+        },
+    
         LtacType::Mov | LtacType::MovU => {
             match &code.arg2 {
                 LtacArg::I32(_v) => line.push_str("  li "),
@@ -167,9 +178,11 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Operands
     // Write the first operand
     match &code.arg1 {
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 |
         LtacArg::RetRegI32 | LtacArg::RetRegU32 |
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0, "),
 
+        LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
 
@@ -182,13 +195,18 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the second operand
     match &code.arg2 {
+        LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
 
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 |
         LtacArg::RetRegI32 | LtacArg::RetRegU32 |
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0"),
+
+        LtacArg::I16(val) => line.push_str(&val.to_string()),
+        LtacArg::U16(val) => line.push_str(&val.to_string()),
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),

@@ -212,13 +212,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // All the move instructions
             LtacType::MovB => {},
             LtacType::MovUB => {},
-            LtacType::MovW => {},
-            LtacType::MovUW => {},
             LtacType::MovUQ => {},
             LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovI32Vec => {},
 
+            LtacType::MovW | LtacType::MovUW |
             LtacType::Mov | LtacType::MovU |
             LtacType::MovQ => riscv64_build_mov(writer, &code),
             
@@ -338,25 +337,23 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // RISC Load instructions
             LtacType::LdB => {},
             LtacType::LdUB => {},
-            LtacType::LdW => {},
-            LtacType::LdUW => {},
             LtacType::LdUQ => {},
             LtacType::LdF32 => {},
             LtacType::LdF64 => {},
 
+            LtacType::LdW | LtacType::LdUW |
             LtacType::Ld | LtacType::LdU |
             LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size, true),
             
             // RISC store instructions
             LtacType::StrB => {},
-            LtacType::StrUB => {},
-            LtacType::StrW => {},
-            LtacType::StrUW => {},
+            LtacType::StrUB => {}
             LtacType::StrUQ => {},
             LtacType::StrF32 => {},
             LtacType::StrF64 => {},
             LtacType::StrPtr => {},
 
+            LtacType::StrW | LtacType::StrUW |
             LtacType::Str | LtacType::StrU |
             LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size, false),
             
