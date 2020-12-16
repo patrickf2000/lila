@@ -8,10 +8,12 @@ use std::process::Command;
 use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 mod call;
+mod flow;
 mod func;
 mod utils;
 
 use call::*;
+use flow::*;
 use func::*;
 use utils::*;
 
@@ -162,6 +164,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
         .expect("[RISCV_code] Write failed");
         
     let mut stack_size = 0;
+    let mut cmp_instr : &LtacInstr = code.first().unwrap();
 
     for code in code.iter() {
         match &code.instr_type {
@@ -216,7 +219,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U8Cmp => {},
             LtacType::I16Cmp => {},
             LtacType::U16Cmp => {},
-            LtacType::I32Cmp => {},
+            LtacType::I32Cmp => cmp_instr = code,
             LtacType::U32Cmp => {},
             LtacType::I64Cmp => {},
             LtacType::U64Cmp => {},
@@ -226,14 +229,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // Branching instructions
             LtacType::Br => riscv64_build_jump(writer, &code),
-            LtacType::Be => {},
-            LtacType::Bne => {},
-            LtacType::Bl => {},
-            LtacType::Ble => {},
+            LtacType::Be | LtacType::Bne
+            | LtacType::Bl | LtacType::Ble
+            | LtacType::Bg | LtacType::Bge => riscv64_build_cond_jump(writer, &cmp_instr, &code),
             LtacType::Bfl => {},
             LtacType::Bfle => {},
-            LtacType::Bg => {},
-            LtacType::Bge => {},
             LtacType::Bfg => {},
             LtacType::Bfge => {},
             
