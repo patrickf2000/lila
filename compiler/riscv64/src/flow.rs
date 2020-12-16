@@ -38,7 +38,20 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
 
     // First, check the second operand of the comparison instruction. If its an immediate, we have
     // to load to a register (s2)
+    // TODO: Find a way to clean up
     match &cmp.arg2 {
+        LtacArg::I16(val) => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
+        LtacArg::U16(val) => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+        
         LtacArg::I32(val) => {
             line.push_str("  li s2, ");
             line.push_str(&val.to_string());
@@ -54,29 +67,61 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
         _ => {},
     }
 
+    // If we have small registers, we have to sign-extend
+    // TODO: Is there a way to clean up?
+    match &cmp.arg1 {
+        LtacArg::Reg16(pos) => {
+            let reg = riscv64_op_reg(*pos);
+
+            line.push_str("  sext.w ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+
+        _ => {},
+    }
+
+    match &cmp.arg2 {
+        LtacArg::Reg16(pos) => {
+            let reg = riscv64_op_reg(*pos);
+
+            line.push_str("  sext.w ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&reg);
+            line.push_str("\n");
+        },
+
+        _ => {},
+    }
+
     // Second, write the proper branch instruction
+    // TODO: Clean up?
     match &jmp.instr_type {
         LtacType::Be => line.push_str("  beq "),
         LtacType::Bne => line.push_str("  bne "),
 
-        LtacType::Bl if cmp.instr_type == LtacType::I32Cmp => line.push_str("  blt "),
-        LtacType::Bl if cmp.instr_type == LtacType::U32Cmp => line.push_str("  bltu "),
+        LtacType::Bl if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  blt "),
+        LtacType::Bl if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bltu "),
 
-        LtacType::Ble if cmp.instr_type == LtacType::I32Cmp => line.push_str("  ble "),
-        LtacType::Ble if cmp.instr_type == LtacType::U32Cmp => line.push_str("  bleu "),
+        LtacType::Ble if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  ble "),
+        LtacType::Ble if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bleu "),
 
-        LtacType::Bg if cmp.instr_type == LtacType::I32Cmp => line.push_str("  bgt "),
-        LtacType::Bg if cmp.instr_type == LtacType::U32Cmp => line.push_str("  bgtu "),
+        LtacType::Bg if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  bgt "),
+        LtacType::Bg if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bgtu "),
 
-        LtacType::Bge if cmp.instr_type == LtacType::I32Cmp => line.push_str("  bge "),
-        LtacType::Bge if cmp.instr_type == LtacType::U32Cmp => line.push_str("  bgeu "),
+        LtacType::Bge if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  bge "),
+        LtacType::Bge if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bgeu "),
 
         _ => {},
     }
 
     // Now, write the first operand
     match &cmp.arg1 {
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg16(pos)
+        | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
@@ -88,10 +133,14 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
 
     // Now, write the second operand
     match &cmp.arg2 {
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg16(pos)
+        | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
+
+        LtacArg::I16(_v) => line.push_str("s2"),
+        LtacArg::U16(_v) => line.push_str("s2"),
     
         LtacArg::I32(_v) => line.push_str("s2"),
         LtacArg::U32(_v) => line.push_str("s2"),
