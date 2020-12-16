@@ -225,7 +225,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrCmp => {},
             
             // Branching instructions
-            LtacType::Br => {},
+            LtacType::Br => riscv64_build_jump(writer, &code),
             LtacType::Be => {},
             LtacType::Bne => {},
             LtacType::Bl => {},
@@ -565,4 +565,14 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     writer.write(&line.into_bytes())
         .expect("[RISCV64_write_instr] Write failed.");
+}
+
+// Builds jump instructions
+fn riscv64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = "  j ".to_string();
+    line.push_str(&code.name);
+    line.push_str("\n\n");
+
+    writer.write(&line.into_bytes())
+        .expect("[RISCV64_build_jump] Write failed.");
 }
