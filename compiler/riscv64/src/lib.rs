@@ -196,13 +196,14 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovUB => {},
             LtacType::MovW => {},
             LtacType::MovUW => {},
-            LtacType::Mov => riscv64_build_mov(writer, &code),
             LtacType::MovU => {},
-            LtacType::MovQ => {},
             LtacType::MovUQ => {},
             LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovI32Vec => {},
+
+            LtacType::Mov |
+            LtacType::MovQ => riscv64_build_mov(writer, &code),
             
             // Push/pop
             LtacType::Push => {},
@@ -329,25 +330,27 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::LdUB => {},
             LtacType::LdW => {},
             LtacType::LdUW => {},
-            LtacType::Ld => riscv64_build_ld_str(writer, &code, stack_size),
             LtacType::LdU => {},
-            LtacType::LdQ => {},
             LtacType::LdUQ => {},
             LtacType::LdF32 => {},
             LtacType::LdF64 => {},
+
+            LtacType::Ld |
+            LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size),
             
             // RISC store instructions
             LtacType::StrB => {},
             LtacType::StrUB => {},
             LtacType::StrW => {},
             LtacType::StrUW => {},
-            LtacType::Str => riscv64_build_ld_str(writer, &code, stack_size),
             LtacType::StrU => {},
-            LtacType::StrQ => {},
             LtacType::StrUQ => {},
             LtacType::StrF32 => {},
             LtacType::StrF64 => {},
             LtacType::StrPtr => {},
+
+            LtacType::Str |
+            LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size),
             
             // All else
             _ => riscv64_build_instr(writer, &code),
@@ -361,14 +364,17 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_
 
     match &code.instr_type {
         LtacType::Ld => line.push_str("  lw "),
+        LtacType::LdQ => line.push_str("  ld "),
+        
         LtacType::Str => line.push_str("  sw "),
-
+        LtacType::StrQ => line.push_str("  sd "),
+        
         _ => {},
     }
 
     // Write the registers
     match &code.arg2 {
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
@@ -411,15 +417,18 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             }
         },
 
+        LtacType::MovQ => line.push_str("  mv "),
+
         _ => {},
     }
 
     // Operands
     // Write the first operand
     match &code.arg1 {
-        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0, "),
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 |
+        LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0, "),
 
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
 
             line.push_str(&reg);
@@ -431,12 +440,13 @@ fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the second operand
     match &code.arg2 {
-        LtacArg::Reg32(pos) => {
+        LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
 
-        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("a0"),
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 |
+        LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0"),
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
 
