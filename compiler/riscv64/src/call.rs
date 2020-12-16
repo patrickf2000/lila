@@ -37,7 +37,7 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
 
             match &code.arg2 {
                 LtacArg::I16(_v) => line.push_str("  lh "),
-                LtacArg::U16(_v) => line.push_str("  lh "),
+                LtacArg::U16(_v) => line.push_str("  lhu "),
 
                 _ => line.push_str("  lw "),
             }

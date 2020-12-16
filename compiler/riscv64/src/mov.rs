@@ -26,7 +26,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
     let mut full_line = String::new();
 
     match &code.instr_type {
-        LtacType::LdW | LtacType::LdUW => line.push_str("  lh "),
+        LtacType::LdW => line.push_str("  lh "),
+        LtacType::LdUW => line.push_str("  lhu "),
         LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
         LtacType::LdQ => line.push_str("  ld "),
 
