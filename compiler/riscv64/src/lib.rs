@@ -361,6 +361,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
 // Builds the load-store instructions
 fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_top : i32) {
     let mut line = String::new();
+    let mut full_line = String::new();
 
     match &code.instr_type {
         LtacType::Ld => line.push_str("  lw "),
@@ -393,13 +394,54 @@ fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_
             line.push_str("(s0)");
         },
 
+        LtacArg::MemOffsetImm(pos, offset) => {
+            // Load the array
+            let array_pos = stack_top - (*pos);
+            full_line.push_str("  ld s2, -");
+            full_line.push_str(&array_pos.to_string());
+            full_line.push_str("(s0)\n");
+
+            // Add the offset
+            full_line.push_str("  addi s2, s2, ");
+            full_line.push_str(&offset.to_string());
+            full_line.push_str("\n");
+
+            // Store the result
+            line.push_str("0(s2)");
+        },
+
+        LtacArg::MemOffsetMem(pos, offset, size) => {
+            // Load the array
+            let array_pos = stack_top - (*pos);
+            full_line.push_str("  ld s2, -");
+            full_line.push_str(&array_pos.to_string());
+            full_line.push_str("(s0)\n");
+
+            // Load the offset and the size
+            let offset_pos = stack_top - (*offset);
+            full_line.push_str("  lw s3, -");
+            full_line.push_str(&offset_pos.to_string());
+            full_line.push_str("(s0)\n");
+
+            if (*size) == 4 {
+                full_line.push_str("  slli s3, s3, 2\n");                
+            }
+
+            // Add the offset
+            full_line.push_str("  add s2, s2, s3\n");
+
+            // Store the result
+            line.push_str("0(s2)");
+        },
+
         _ => {},
     }
 
     // Write the rest out
     line.push_str("\n");
+    full_line.push_str(&line);
 
-    writer.write(&line.into_bytes())
+    writer.write(&full_line.into_bytes())
         .expect("[RISCV64_build_ld_str] Write failed.");
 }
 

@@ -31,11 +31,11 @@ pub fn riscv64_arg_reg(pos : i32) -> String {
 // S2 is for internal operations
 pub fn riscv64_op_reg(pos : i32) -> String {
     match pos {
-        0 => return "s3".to_string(),
-        1 => return "s4".to_string(),
-        2 => return "s5".to_string(),
-        3 => return "s6".to_string(),
-        4 => return "s7".to_string(),
+        0 => return "s4".to_string(),
+        1 => return "s5".to_string(),
+        2 => return "s6".to_string(),
+        3 => return "s7".to_string(),
+        4 => return "s8".to_string(),
         _ => return String::new(),
     };
 }
