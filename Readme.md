@@ -31,9 +31,13 @@ All the stuff here is either completely implemented
 
 ### Architecture Support
 
-Currently, I only support x86-64. The internal representations generate an CISC-like assembly, which lends itself well to x86. I just finished an optimization layer that converts the IR to a RISC-like assembly, which will allow for very easy porting to architectures such as Arm, MIPS, and PowerPC. See the "docs" folder for creating a new backend.
+Currently, only x86-64 is fully supported; other architectures are in progress. The LTAC IR (which translates to the final assembly) resembles CISC assembly, which makes it super easy to generate code for x86 (and besides, my computers all run it...). There is an optimization layer that converts the IR to RISC-like assembly which makes it much easier to port to other architectures. See the "docs" folder for creating a new backend.
 
-Update (December 2020): I am beginning the port to RISC architectures, specifically Arm64 and RISC-V (64-bit). I will be frequently merging to the develop branch, but the latest work will be in the arm64 and riscv branches. I am taking a somewhat layered approach of doing some work on one architecture, then switching and doing the same work on the other.
+Current state:   
+
+* x86-64: Fully supported, all tests pass
+* RISC-V (64-bit): About 50-60% supported; all integer, byte, short, loop, and several other tests pass
+* Arm64: Hello world and a few basic integer tests pass
 
 ### System Requirements
 
