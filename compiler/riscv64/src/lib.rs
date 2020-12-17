@@ -272,12 +272,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I64Lsh => {},
             LtacType::I64Rsh => {},
             
-            // Single-precision float operations
-            LtacType::F32Add => {},
-            LtacType::F32Sub => {},
-            LtacType::F32Mul => {},
-            LtacType::F32Div => {},
-            
             // Double-precision float operations
             LtacType::F64Add => {},
             LtacType::F64Sub => {},
@@ -367,6 +361,26 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         | LtacType::I16Mod | LtacType::U16Mod
         | LtacType::I32Mod | LtacType::U32Mod => instr = "rem".to_string(),
 
+        LtacType::F32Add => {
+            instr = "fadd.s".to_string();
+            suffix = 0 as char;
+        } ,
+        
+        LtacType::F32Sub => {
+            instr = "fsub.s".to_string();
+            suffix = 0 as char;
+        },
+        
+        LtacType::F32Mul => {
+            instr = "fmul.s".to_string();
+            suffix = 0 as char;
+        },
+        
+        LtacType::F32Div => {
+            instr = "fdiv.s".to_string();
+            suffix = 0 as char;
+        },
+
         LtacType::BAnd | LtacType::WAnd
         | LtacType::I32And => {
             instr = "and".to_string();
@@ -448,6 +462,16 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
         LtacArg::U32(_v) => instr.push('i'),
 
+        LtacArg::F32(val) => {
+            line.push_str("  lui s2, %hi(");
+            line.push_str(val);
+            line.push_str(")\n");
+
+            line.push_str("  flw fs2, %lo(");
+            line.push_str(val);
+            line.push_str(")(s2)\n");
+        },
+
         _ => {},
     }
 
@@ -478,6 +502,15 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 line.push_str(", ");
             }
         },
+
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+            let reg = riscv64_op_freg(*pos);
+            
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         _ => {},
     }
@@ -487,6 +520,11 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg8(pos) | LtacArg::Reg16(pos)
         | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+            let reg = riscv64_op_freg(*pos);
             line.push_str(&reg);
         },
 
@@ -544,6 +582,8 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::UByte(val) => line.push_str(&val.to_string()),
         LtacArg::U16(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),
+
+        LtacArg::F32(_v) => line.push_str("fs2"),
 
         _ => {},
     }

@@ -244,7 +244,7 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
                     line.push_str("  flw ");
                 },
 
-                _ => line.push_str("  mv "),
+                _ => line.push_str("  fmv.s.s "),
             }
         },
 
