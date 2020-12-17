@@ -60,7 +60,7 @@ fn run() -> i32 {
     let mut no_link = false;
     let mut pic = false;
     let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
-    let arch = get_arch();
+    let mut arch = get_arch();
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
     
@@ -85,6 +85,8 @@ fn run() -> i32 {
             "--risc" => risc_mode = true,
             "--no-link" => no_link = true,
             "-o" => next_output = true,
+            
+            "-march=riscv64" => arch = Arch::Riscv64,
             
             "-h" | "--help" => {
                 help();
