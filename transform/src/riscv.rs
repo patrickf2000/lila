@@ -125,7 +125,7 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             let mut next_instr = code.iter().nth(index + 1).unwrap().clone();
             
             if next_instr.instr_type == LtacType::StrF32 || next_instr.instr_type == LtacType::StrF64 {
-                next_instr.arg2 = instr2.arg2.clone();
+                next_instr.arg2 = instr2.arg1.clone();
             } else {
                 next_instr.arg1 = instr2.arg2.clone();
             }
