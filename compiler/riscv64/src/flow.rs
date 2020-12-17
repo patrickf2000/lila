@@ -30,6 +30,16 @@ pub fn riscv64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
         .expect("[RISCV64_build_jump] Write failed.");
 }
 
+// Small utility function
+fn riscv64_signed_cmp(instr : &LtacType) -> bool {
+    match instr {
+        LtacType::I8Cmp | LtacType::I16Cmp
+        | LtacType::I32Cmp => return true,
+
+        _ => return false,
+    }
+}
+
 // Builds conditional jumps
 // On RISC-V, these are interesting; there's no comparison instruction, instead both things
 // happen in the branch instruction
@@ -40,6 +50,18 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
     // to load to a register (s2)
     // TODO: Find a way to clean up
     match &cmp.arg2 {
+        LtacArg::Byte(val) => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
+        LtacArg::UByte(val) => {
+            line.push_str("  li s2, ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+        
         LtacArg::I16(val) => {
             line.push_str("  li s2, ");
             line.push_str(&val.to_string());
@@ -98,29 +120,28 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
     }
 
     // Second, write the proper branch instruction
-    // TODO: Clean up?
     match &jmp.instr_type {
         LtacType::Be => line.push_str("  beq "),
         LtacType::Bne => line.push_str("  bne "),
 
-        LtacType::Bl if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  blt "),
-        LtacType::Bl if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bltu "),
+        LtacType::Bl if riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  blt "),
+        LtacType::Bl if !riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  bltu "),
 
-        LtacType::Ble if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  ble "),
-        LtacType::Ble if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bleu "),
+        LtacType::Ble if riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  ble "),
+        LtacType::Ble if !riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  bleu "),
 
-        LtacType::Bg if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  bgt "),
-        LtacType::Bg if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bgtu "),
+        LtacType::Bg if riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  bgt "),
+        LtacType::Bg if !riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  bgtu "),
 
-        LtacType::Bge if cmp.instr_type == LtacType::I16Cmp || cmp.instr_type == LtacType::I32Cmp => line.push_str("  bge "),
-        LtacType::Bge if cmp.instr_type == LtacType::U16Cmp || cmp.instr_type == LtacType::U32Cmp => line.push_str("  bgeu "),
+        LtacType::Bge if riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  bge "),
+        LtacType::Bge if !riscv64_signed_cmp(&cmp.instr_type) => line.push_str("  bgeu "),
 
         _ => {},
     }
 
     // Now, write the first operand
     match &cmp.arg1 {
-        LtacArg::Reg16(pos)
+        LtacArg::Reg8(pos) | LtacArg::Reg16(pos)
         | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
@@ -133,11 +154,14 @@ pub fn riscv64_build_cond_jump(writer : &mut BufWriter<File>, cmp : &LtacInstr, 
 
     // Now, write the second operand
     match &cmp.arg2 {
-        LtacArg::Reg16(pos)
+        LtacArg::Reg8(pos) | LtacArg::Reg16(pos)
         | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
+
+        LtacArg::Byte(_v) => line.push_str("s2"),
+        LtacArg::UByte(_v) => line.push_str("s2"),
 
         LtacArg::I16(_v) => line.push_str("s2"),
         LtacArg::U16(_v) => line.push_str("s2"),
