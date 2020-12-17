@@ -30,9 +30,16 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
     };
     
     let code = file.code.clone();
-    let mut index = 0;
+    let mut skip_next = false;
     
-    for line in code.iter() {
+    for index in 0 .. code.len() {
+        if skip_next {
+            skip_next = false;
+            continue;
+        }
+        
+        let line = code.iter().nth(index).unwrap();
+        
         let mut instr2 = line.clone();
         let mut arg_count = 1;
         
@@ -52,7 +59,6 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             
             if !flt_arg {
                 file2.code.push(instr2);
-                index += 1;
                 continue;
             }
             
@@ -74,7 +80,6 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             
             if function_name != "printf" {
                 file2.code.push(instr2);
-                index += 1;
                 continue;
             }
             
@@ -106,12 +111,33 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             pusharg.arg2_val = arg_count + 1;
             file2.code.push(pusharg);
             
-            index += 1;
+        // For some odd reason, you cannot move between float registers on RISC-V
+        } else if instr2.instr_type == LtacType::MovF32 {
+            match &instr2.arg2 {
+                LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => {},
+                
+                _ => {
+                    file2.code.push(instr2);
+                    continue;
+                },
+            }
+            
+            let mut next_instr = code.iter().nth(index + 1).unwrap().clone();
+            
+            if next_instr.instr_type == LtacType::StrF32 || next_instr.instr_type == LtacType::StrF64 {
+                next_instr.arg2 = instr2.arg2.clone();
+            } else {
+                next_instr.arg1 = instr2.arg2.clone();
+            }
+            
+            file2.code.push(next_instr);
+            
+            skip_next = true;
+        
+        // Otherwise, just add the current line
         } else {
             file2.code.push(instr2);
         }
-        
-        index += 1;
     }
     
     Ok(file2)
