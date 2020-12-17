@@ -23,7 +23,8 @@ use crate::utils::*;
 // Builds function/sytem call arguments
 pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool, stack_top : i32) {
     let mut reg = riscv64_arg_reg(code.arg2_val);
-
+    let freg = riscv64_arg_freg(code.arg2_val);
+    
     if is_karg {
         reg = riscv64_karg_reg(code.arg2_val);
     }
@@ -41,6 +42,11 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
                 
                 LtacArg::I16(_v) => line.push_str("  lh "),
                 LtacArg::U16(_v) => line.push_str("  lhu "),
+
+                LtacArg::FltReg(_v) => {
+                    line.push_str("  flw ");
+                    reg = freg;
+                },
 
                 _ => line.push_str("  lw "),
             }

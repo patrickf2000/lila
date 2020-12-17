@@ -154,14 +154,14 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
             
             LtacDataType::FloatL => {
                 line.push_str(&data.name);
-                line.push_str(": .long ");
+                line.push_str(": .word ");
                 line.push_str(&data.val);
                 line.push_str("\n");
             },
             
             LtacDataType::DoubleL => {
                 line.push_str(&data.name);
-                line.push_str(": .quad ");
+                line.push_str(": .long ");
                 line.push_str(&data.val);
                 line.push_str("\n");
             },
@@ -199,24 +199,24 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // Used to load function arguments
             LtacType::LdArgI64 => {},
             LtacType::LdArgU64 => {},
-            LtacType::LdArgF32 => {},
             LtacType::LdArgF64 => {},
 
             LtacType::LdArgI8 | LtacType::LdArgU8
             | LtacType::LdArgI16 | LtacType::LdArgU16
-            | LtacType::LdArgI32 | LtacType::LdArgU32 
+            | LtacType::LdArgI32 | LtacType::LdArgU32
+            | LtacType::LdArgF32 
             | LtacType::LdArgPtr => riscv64_build_ldarg(writer, &code, stack_size),
             
             // All the move instructions
             LtacType::MovUQ => {},
-            LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovI32Vec => {},
 
             LtacType::MovB | LtacType::MovUB |
             LtacType::MovW | LtacType::MovUW |
             LtacType::Mov | LtacType::MovU |
-            LtacType::MovQ => riscv64_build_mov(writer, &code),
+            LtacType::MovQ |
+            LtacType::MovF32 => riscv64_build_mov(writer, &code),
             
             // Push/pop
             LtacType::Push => {},
@@ -291,24 +291,24 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // These are specific to RISC machines
             // RISC Load instructions
             LtacType::LdUQ => {},
-            LtacType::LdF32 => {},
             LtacType::LdF64 => {},
 
             LtacType::LdB | LtacType::LdUB |
             LtacType::LdW | LtacType::LdUW |
             LtacType::Ld | LtacType::LdU |
-            LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size, true),
+            LtacType::LdQ |
+            LtacType::LdF32 => riscv64_build_ld_str(writer, &code, stack_size, true),
             
             // RISC store instructions
             LtacType::StrUQ => {},
-            LtacType::StrF32 => {},
             LtacType::StrF64 => {},
             LtacType::StrPtr => {},
 
             LtacType::StrB | LtacType::StrUB |
             LtacType::StrW | LtacType::StrUW |
             LtacType::Str | LtacType::StrU |
-            LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size, false),
+            LtacType::StrQ | 
+            LtacType::StrF32 => riscv64_build_ld_str(writer, &code, stack_size, false),
             
             // All else
             _ => riscv64_build_instr(writer, &code),

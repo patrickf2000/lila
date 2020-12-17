@@ -32,11 +32,13 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         LtacType::LdUW => line.push_str("  lhu "),
         LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
         LtacType::LdQ => line.push_str("  ld "),
+        LtacType::LdF32 => line.push_str("  flw "),
 
         LtacType::StrB | LtacType::StrUB => line.push_str("  sb "),
         LtacType::StrW | LtacType::StrUW => line.push_str("  sh "),
         LtacType::Str | LtacType::StrU => line.push_str("  sw "),
         LtacType::StrQ => line.push_str("  sd "),
+        LtacType::StrF32 => line.push_str("  fsw "),
         
         _ => {},
     }
@@ -46,6 +48,11 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         LtacArg::Reg8(pos) | LtacArg::Reg16(pos)
         | LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+
+        LtacArg::FltReg(pos) => {
+            let reg = riscv64_op_freg(*pos);
             line.push_str(&reg);
         },
 
@@ -191,6 +198,20 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
         LtacType::MovQ => line.push_str("  mv "),
 
+        LtacType::MovF32 => {
+            match &code.arg2 {
+                LtacArg::F32(ref val) => {
+                    line.push_str("  lui a2, %hi(");
+                    line.push_str(&val);
+                    line.push_str(")\n");
+
+                    line.push_str("  flw ");
+                },
+
+                _ => line.push_str("  mv "),
+            }
+        },
+
         _ => {},
     }
 
@@ -209,6 +230,13 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
             line.push_str(", ");
         },
+
+        LtacArg::FltReg(pos) => {
+            let reg = riscv64_op_freg(*pos);
+
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         _ => {},
     }
@@ -218,6 +246,11 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg8(pos) | LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+
+        LtacArg::FltReg(pos) => {
+            let reg = riscv64_op_freg(*pos);
             line.push_str(&reg);
         },
 
@@ -234,6 +267,12 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),
+
+        LtacArg::F32(ref val) => {
+            line.push_str("%lo(");
+            line.push_str(&val);
+            line.push_str(")(a2)");
+        },
 
         _ => {},
     }
