@@ -33,6 +33,16 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
 
     match &code.arg1 {
 
+        LtacArg::Reg32(pos) => {
+            let src_reg = riscv64_op_reg(*pos);
+            
+            line.push_str("  mv ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&src_reg);
+            line.push_str("\n");
+        },
+
         LtacArg::Mem(val) => {
             let pos = stack_top - (*val);
 

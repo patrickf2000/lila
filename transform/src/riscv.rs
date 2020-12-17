@@ -103,7 +103,7 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             // Finally, create the pusharg
             let mut pusharg = ltac::create_instr(LtacType::PushArg);
             pusharg.arg1 = LtacArg::Reg32(0);
-            pusharg.arg2_val = arg_count;
+            pusharg.arg2_val = arg_count + 1;
             file2.code.push(pusharg);
             
             index += 1;

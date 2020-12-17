@@ -216,7 +216,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovW | LtacType::MovUW |
             LtacType::Mov | LtacType::MovU |
             LtacType::MovQ |
-            LtacType::MovF32 => riscv64_build_mov(writer, &code),
+            LtacType::MovF32 |
+            LtacType::MovF32Int => riscv64_build_mov(writer, &code),
             
             // Push/pop
             LtacType::Push => {},
@@ -309,6 +310,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Str | LtacType::StrU |
             LtacType::StrQ | 
             LtacType::StrF32 => riscv64_build_ld_str(writer, &code, stack_size, false),
+
+            // Misc instructions
+            LtacType::CvtF32F64 => riscv64_build_cvt(writer, &code),
             
             // All else
             _ => riscv64_build_instr(writer, &code),

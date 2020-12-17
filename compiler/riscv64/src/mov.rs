@@ -20,6 +20,42 @@ use std::fs::File;
 use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
+// Builds hardware conversion instructions
+pub fn riscv64_build_cvt(writer : &mut BufWriter<File>, code : &LtacInstr) {
+    let mut line = String::new();
+
+    match &code.instr_type {
+        LtacType::CvtF32F64 => line = "  fcvt.d.s ".to_string(),
+        _ => {},
+    }
+
+    match &code.arg1 {
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+            let reg = riscv64_op_freg(*pos);
+            line.push_str(&reg);
+        },
+
+        _ => {},
+    }
+
+    line.push_str(", ");
+
+    match &code.arg2 {
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+            let reg = riscv64_op_freg(*pos);
+            line.push_str(&reg);
+        },
+
+        _ => {},
+    }
+
+    line.push_str("\n");
+
+    // Write it all out
+    writer.write(&line.into_bytes())
+        .expect("[RISCV64_build_cvt] Write failed.");
+}
+
 // Builds the load-store instructions
 pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, stack_top : i32, is_load : bool) {
     let mut line = String::new();
@@ -212,6 +248,8 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             }
         },
 
+        LtacType::MovF32Int => line.push_str("  fmv.x.d "),
+
         _ => {},
     }
 
@@ -231,7 +269,7 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(", ");
         },
 
-        LtacArg::FltReg(pos) => {
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
             let reg = riscv64_op_freg(*pos);
 
             line.push_str(&reg);
@@ -249,7 +287,7 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             line.push_str(&reg);
         },
 
-        LtacArg::FltReg(pos) => {
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
             let reg = riscv64_op_freg(*pos);
             line.push_str(&reg);
         },
