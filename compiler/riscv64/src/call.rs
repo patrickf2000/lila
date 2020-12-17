@@ -36,6 +36,9 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
             let pos = stack_top - (*val);
 
             match &code.arg2 {
+                LtacArg::Byte(_v) => line.push_str("  lb "),
+                LtacArg::UByte(_v) => line.push_str("  lbu "),
+                
                 LtacArg::I16(_v) => line.push_str("  lh "),
                 LtacArg::U16(_v) => line.push_str("  lhu "),
 
@@ -59,6 +62,22 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
         },
 
         // TODO: Clean this up
+        LtacArg::Byte(val) => {
+            line.push_str("  li ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
+        LtacArg::UByte(val) => {
+            line.push_str("  li ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+        
         LtacArg::I16(val) => {
             line.push_str("  li ");
             line.push_str(&reg);

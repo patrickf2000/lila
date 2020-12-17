@@ -26,11 +26,14 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
     let mut full_line = String::new();
 
     match &code.instr_type {
+        LtacType::LdB => line.push_str("  lb "),
+        LtacType::LdUB => line.push_str("  lbu "),
         LtacType::LdW => line.push_str("  lh "),
         LtacType::LdUW => line.push_str("  lhu "),
         LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
         LtacType::LdQ => line.push_str("  ld "),
 
+        LtacType::StrB | LtacType::StrUB => line.push_str("  sb "),
         LtacType::StrW | LtacType::StrUW => line.push_str("  sh "),
         LtacType::Str | LtacType::StrU => line.push_str("  sw "),
         LtacType::StrQ => line.push_str("  sd "),
@@ -40,7 +43,7 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
 
     // Write the registers
     match &code.arg2 {
-        LtacArg::Reg16(pos)
+        LtacArg::Reg8(pos) | LtacArg::Reg16(pos)
         | LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
@@ -123,15 +126,17 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
             // Now for the offset
             let reg = riscv64_op_reg(*reg_pos);
 
-            full_line.push_str("  slli ");
-            full_line.push_str(&reg);
-            full_line.push_str(", ");
-            full_line.push_str(&reg);
+            if (*size) > 1 {
+                full_line.push_str("  slli ");
+                full_line.push_str(&reg);
+                full_line.push_str(", ");
+                full_line.push_str(&reg);
 
-            if (*size) == 2 {
-                full_line.push_str(", 1\n");
-            } else if (*size) == 4 {
-                full_line.push_str(", 2\n");
+                if (*size) == 2 {
+                    full_line.push_str(", 1\n");
+                } else if (*size) == 4 {
+                    full_line.push_str(", 2\n");
+                }
             }
 
             full_line.push_str("  add s2, s2, ");
@@ -160,6 +165,14 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Determine the instruction
     match &code.instr_type {
+        LtacType::MovB | LtacType::MovUB => {
+            match &code.arg2 {
+                LtacArg::Byte(_v) => line.push_str("  li "),
+                LtacArg::UByte(_v) => line.push_str("  li "),
+                _ => line.push_str("  mv "),
+            }
+        },
+        
         LtacType::MovW | LtacType::MovUW => {
             match &code.arg2 {
                 LtacArg::I16(_v) => line.push_str("  li "),
@@ -184,11 +197,12 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     // Operands
     // Write the first operand
     match &code.arg1 {
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 |
         LtacArg::RetRegI16 | LtacArg::RetRegU16 |
         LtacArg::RetRegI32 | LtacArg::RetRegU32 |
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0, "),
 
-        LtacArg::Reg16(pos) |
+        LtacArg::Reg8(pos) | LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
 
@@ -201,15 +215,19 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
     // Write the second operand
     match &code.arg2 {
-        LtacArg::Reg16(pos) |
+        LtacArg::Reg8(pos) | LtacArg::Reg16(pos) |
         LtacArg::Reg32(pos) | LtacArg::Reg64(pos) => {
             let reg = riscv64_op_reg(*pos);
             line.push_str(&reg);
         },
 
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 |
         LtacArg::RetRegI16 | LtacArg::RetRegU16 |
         LtacArg::RetRegI32 | LtacArg::RetRegU32 |
         LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("a0"),
+
+        LtacArg::Byte(val) => line.push_str(&val.to_string()),
+        LtacArg::UByte(val) => line.push_str(&val.to_string()),
 
         LtacArg::I16(val) => line.push_str(&val.to_string()),
         LtacArg::U16(val) => line.push_str(&val.to_string()),

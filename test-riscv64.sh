@@ -50,6 +50,8 @@ flags=""
 echo "Running all tests..."
 echo ""
 
+run_test 'test/byte/*.ls' 'clib' $flags
+
 run_test 'test/basic/*.ls' 'clib' $flags
 
 run_test 'test/int/*.ls' 'clib' $flags
