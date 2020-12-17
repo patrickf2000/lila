@@ -125,6 +125,18 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
             line.push_str(&val.to_string());
             line.push_str("\n");
         },
+
+        LtacArg::F32(ref val) => {
+            line.push_str("  lui s2, %hi(");
+            line.push_str(val);
+            line.push_str(")\n");
+
+            line.push_str("  flw ");
+            line.push_str(&freg);
+            line.push_str(", %lo(");
+            line.push_str(val);
+            line.push_str(")(s2)\n");
+        },
     
         LtacArg::PtrLcl(ref val) => {
             line.push_str("  lui a5, %hi(");
