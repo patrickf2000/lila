@@ -170,7 +170,7 @@ pub enum LtacType {
     // Type conversion instructions
     // These aren't used by default, but some of the transform layers might
     CvtF32F64,
-    MovF32Int,    // Move float register to int register
+    MovF64Int,    // Move float-64 register to int register
 }
 
 // Represents an instruction argument type

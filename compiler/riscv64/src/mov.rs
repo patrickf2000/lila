@@ -248,7 +248,7 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             }
         },
 
-        LtacType::MovF32Int => line.push_str("  fmv.x.d "),
+        LtacType::MovF64Int => line.push_str("  fmv.x.d "),
 
         _ => {},
     }

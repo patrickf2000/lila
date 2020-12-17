@@ -95,7 +95,7 @@ pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {
             file2.code.push(cvt_instr);
             
             // Now, move it to an integer register
-            let mut mv_instr = ltac::create_instr(LtacType::MovF32Int);
+            let mut mv_instr = ltac::create_instr(LtacType::MovF64Int);
             mv_instr.arg1 = LtacArg::Reg32(0);
             mv_instr.arg2 = LtacArg::FltReg64(pos);
             file2.code.push(mv_instr);

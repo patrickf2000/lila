@@ -259,7 +259,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // Misc instructions
             LtacType::CvtF32F64 => {},
-            LtacType::MovF32Int => {},
+            LtacType::MovF64Int => {},
             
             // Unknown
             // You should never see this

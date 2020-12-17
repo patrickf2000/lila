@@ -217,7 +217,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::Mov | LtacType::MovU |
             LtacType::MovQ |
             LtacType::MovF32 |
-            LtacType::MovF32Int => riscv64_build_mov(writer, &code),
+            LtacType::MovF64Int => riscv64_build_mov(writer, &code),
             
             // Push/pop
             LtacType::Push => {},
