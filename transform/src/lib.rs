@@ -55,7 +55,7 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Res
     }
     
     if arch == Arch::Riscv64 {
-        file2 = match riscv_optimize(&file) {
+        file2 = match riscv_optimize(&file2) {
             Ok(ltac) => ltac,
             Err(_e) => return Err(()),
         }
