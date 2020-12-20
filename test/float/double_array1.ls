@@ -8,11 +8,12 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    double[10] numbers = array
-    
+    numbers : double[10] = array
+    x : double = 0.0
+begin
     numbers[3] = 3.14
     
-    double x = numbers[3]
+    x = numbers[3]
     
     printf("X: %f\n", x)
     

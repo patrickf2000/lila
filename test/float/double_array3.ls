@@ -11,18 +11,20 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    double[10] numbers = array
-    double base = 2.15
+    numbers : double[10] = array
+    base : double = 2.15
+    x1, x2, x3, x4 : double = 0.0
+begin
     
     numbers[1] = 3.14 + base
     numbers[2] = 3.14 - base
     numbers[3] = 3.14 * base
     numbers[4] = 3.14 / base
     
-    double x1 = numbers[1]
-    double x2 = numbers[2]
-    double x3 = numbers[3]
-    double x4 = numbers[4]
+    x1 = numbers[1]
+    x2 = numbers[2]
+    x3 = numbers[3]
+    x4 = numbers[4]
     
     printf("X1: %f\n", x1)
     printf("X2: %f\n", x2)

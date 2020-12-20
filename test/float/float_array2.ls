@@ -18,10 +18,11 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    float[10] numbers = array
+    numbers : float[10] = array
+    i : int = 0
+    x : float = 1.0
+begin
     
-    int i = 0
-    float x = 1.0
     while i < 10
         numbers[i] = x * 2.3
         
@@ -31,7 +32,7 @@ func main -> int
     
     i = 0
     while i < 10
-        float x = numbers[i]
+        x = numbers[i]
         printf("%f\n", x)
         
         i = i + 1

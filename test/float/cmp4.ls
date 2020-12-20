@@ -12,8 +12,8 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    double x = 3.14
-    double y = 3.14
+    x, y : double = 3.14
+begin
     
     if x == y
         puts("Equal")

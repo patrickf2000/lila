@@ -8,11 +8,13 @@
 extern func printf(s:str, ...)
 
 func print_float(f:float)
+begin
     printf("Your float : %f\n", f)
 end
 
 func main -> int
-    float x = 4.232
+    x : float = 4.232
+begin
     print_float(x)
     return 0
 end

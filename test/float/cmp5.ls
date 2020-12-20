@@ -10,7 +10,8 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    float x = 3.14
+    x : float = 3.14
+begin
     
     if 3.14 == 3.14
         puts("Equal")

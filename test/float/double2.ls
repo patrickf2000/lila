@@ -13,11 +13,13 @@ extern func printf(s:str, ...)
 
 
 func main -> int
-    double x = 3.14
-    double a1 = x + 5.4
-    double a2 = x - 5.4
-    double a3 = x * 5.4
-    double a4 = x / 5.4
+    x : double = 3.14
+    a1, a2, a3, a4 : double = 0.0
+begin
+    a1 = x + 5.4
+    a2 = x - 5.4
+    a3 = x * 5.4
+    a4 = x / 5.4
     
     printf("X: %f\n", x)
     printf("X + 5.4 = %f\n", a1)
