@@ -13,7 +13,10 @@
 extern func puts(s:str, ...)
 
 func main -> int
-    int64 b1 = 100
+    b1 : int64 = 100
+    b2 : int64 = 100
+    b3 : int64 = 300
+begin
     
     #################################
     # Test 1
@@ -22,9 +25,6 @@ func main -> int
     else
         puts("Wrong")
     end
-    
-    int64 b2 = 100
-    int64 b3 = 300
     
     #################################
     # Test 2

@@ -10,7 +10,8 @@
 extern func puts(s:str)
 
 func main -> int
-    uint64 x = 123
+    x : uint64 = 123
+begin
     
     printf("%d\n", x)
     printf("%d\n", 10)

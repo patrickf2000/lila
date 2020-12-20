@@ -12,8 +12,14 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int64[10] numbers = array
-    int64 base = 2
+    numbers : int64[10] = array
+    base : int64 = 2
+    x1 : int64 = 0
+    x2 : int64 = 0
+    x3 : int64 = 0
+    x4 : int64 = 0
+    x5 : int64 = 0
+begin
     
     numbers[1] = 3 + base
     numbers[2] = 3 - base
@@ -21,11 +27,11 @@ func main -> int
     numbers[4] = 3 / base
     numbers[5] = 3 % base
     
-    int64 x1 = numbers[1]
-    int64 x2 = numbers[2]
-    int64 x3 = numbers[3]
-    int64 x4 = numbers[4]
-    int64 x5 = numbers[5]
+    x1 = numbers[1]
+    x2 = numbers[2]
+    x3 = numbers[3]
+    x4 = numbers[4]
+    x5 = numbers[5]
     
     printf("X1: %d\n", x1)
     printf("X2: %d\n", x2)

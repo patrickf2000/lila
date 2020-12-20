@@ -13,13 +13,19 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int64 x = 4
+    x : int64 = 4
+    a1 : int64 = 0
+    a2 : int64 = 0
+    a3 : int64 = 0
+    a4 : int64 = 0
+    a5 : int64 = 0
+begin
     
-    int64 a1 = x & 5
-    int64 a2 = x | 5
-    int64 a3 = x ^ 5
-    int64 a4 = x << 2
-    int64 a5 = x >> 2
+    a1 = x & 5
+    a2 = x | 5
+    a3 = x ^ 5
+    a4 = x << 2
+    a5 = x >> 2
     
     printf("X = %d\n", x)
     printf("x & 5 = %x\n", a1)
