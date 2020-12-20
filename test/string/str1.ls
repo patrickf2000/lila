@@ -9,9 +9,9 @@
 extern func puts(s:str)
 
 func main -> int
-    str s1 = "Hello!"
-    str s2 = s1
-    
+    s1 : str = "Hello!"
+    s2 : str = s1
+begin
     puts(s1)
     puts(s2)
     

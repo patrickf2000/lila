@@ -10,10 +10,11 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    char c = 'A'
+    c, c2 : char = 'A'
+begin
     printf("C: %c\n", c)
     
-    char c2 = c
+    c2 = c
     printf("C2: %c\n", c2)
     
     c = 'b'

@@ -9,9 +9,9 @@
 extern func puts(s:str)
 
 func test1
-    str s1 = "Hi!"
-    str s2 = "Hi!"
-    
+    s1 : str = "Hi!"
+    s2 : str = "Hi!"
+begin
     if s1 == s2
         puts("Equal")
     else
@@ -20,9 +20,9 @@ func test1
 end
 
 func test2
-    str s1 = "Hi!"
-    str s2 = "Hi, how are you?"
-    
+    s1 : str = "Hi!"
+    s2 : str = "Hi, how are you?"
+begin
     if s1 == s2
         puts("Equal")
     else
@@ -31,6 +31,7 @@ func test2
 end
 
 func main -> int
+begin
     test1()
     test2()
     return 0

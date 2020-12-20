@@ -59,8 +59,8 @@ run_test 'test/int64/*.ls' 'clib' $flags
 run_test 'test/byte/*.ls' 'clib' $flags
 run_test 'test/short/*.ls' 'clib' $flags
 run_test 'test/float/*.ls' 'clib' $flags
-#run_test 'test/char/*.ls' 'clib' $flags
-#run_test 'test/string/*.ls' 'clib' $flags
+run_test 'test/char/*.ls' 'clib' $flags
+run_test 'test/string/*.ls' 'clib' $flags
 
 #run_test 'test/ooop/*.ls' 'clib' $flags
 #run_test 'test/loop/*.ls' 'clib' $flags

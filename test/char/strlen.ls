@@ -13,8 +13,9 @@
 extern func printf(s:str, ...)
 
 func strlen(s:str) -> int
-    int len = 0
-    char c = 1
+    len : int = 0
+    c : char = 1
+begin
     
     while c != 0
         len = len + 1
@@ -25,17 +26,19 @@ func strlen(s:str) -> int
 end
 
 func main -> int
-    str s1 = "Hi!"
-    str s2 = "How are you?"
-    str s3 = s1
+    s1 : str = "Hi!"
+    s2 : str = "How are you?"
+    s3 : str = s1
+    len1, len2, len3 : int = 0
+begin
     
     printf("S1: %s\n", s1)
     printf("S2: %s\n", s2)
     printf("S3: %s\n", s3)
     
-    int len1 = strlen(s1)
-    int len2 = strlen(s2)
-    int len3 = strlen(s3)
+    len1 = strlen(s1)
+    len2 = strlen(s2)
+    len3 = strlen(s3)
     
     printf("Len1: %d\n", len1)
     printf("Len2: %d\n", len2)
