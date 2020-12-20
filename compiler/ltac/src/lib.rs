@@ -335,6 +335,10 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::PushArg => line.push_str("  pusharg "),
         LtacType::KPushArg => line.push_str("  kpusharg "),
         
+        // Other instructions
+        LtacType::CvtF32F64 => line.push_str("  cvt.f32.f64 "),
+        LtacType::MovF64Int => line.push_str("  mov.f64.i32 "),
+        
         _ => {},
     }
     

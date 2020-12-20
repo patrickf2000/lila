@@ -257,6 +257,10 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::StrF64 => {},
             LtacType::StrPtr => {},
             
+            // Misc instructions
+            LtacType::CvtF32F64 => {},
+            LtacType::MovF64Int => {},
+            
             // Unknown
             // You should never see this
             LtacType::None => {},

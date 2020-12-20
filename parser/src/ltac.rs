@@ -166,6 +166,11 @@ pub enum LtacType {
     
     // Vector instructions
     I32VAdd,
+    
+    // Type conversion instructions
+    // These aren't used by default, but some of the transform layers might
+    CvtF32F64,
+    MovF64Int,    // Move float-64 register to int register
 }
 
 // Represents an instruction argument type

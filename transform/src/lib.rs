@@ -23,8 +23,10 @@ use parser::ltac::{LtacFile, LtacType, LtacArg};
 
 // Import any local modules
 mod risc;
+mod riscv;
 
 use risc::*;
+use riscv::*;
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Arch {
@@ -47,6 +49,13 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Res
     
     if risc_mode || arch == Arch::AArch64 || arch == Arch::Riscv64 {
         file2 = match risc_optimize(&file2) {
+            Ok(ltac) => ltac,
+            Err(_e) => return Err(()),
+        }
+    }
+    
+    if arch == Arch::Riscv64 {
+        file2 = match riscv_optimize(&file2) {
             Ok(ltac) => ltac,
             Err(_e) => return Err(()),
         }

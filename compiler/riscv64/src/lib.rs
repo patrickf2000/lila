@@ -154,14 +154,14 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>) {
             
             LtacDataType::FloatL => {
                 line.push_str(&data.name);
-                line.push_str(": .long ");
+                line.push_str(": .word ");
                 line.push_str(&data.val);
                 line.push_str("\n");
             },
             
             LtacDataType::DoubleL => {
                 line.push_str(&data.name);
-                line.push_str(": .quad ");
+                line.push_str(": .long ");
                 line.push_str(&data.val);
                 line.push_str("\n");
             },
@@ -199,24 +199,25 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // Used to load function arguments
             LtacType::LdArgI64 => {},
             LtacType::LdArgU64 => {},
-            LtacType::LdArgF32 => {},
             LtacType::LdArgF64 => {},
 
             LtacType::LdArgI8 | LtacType::LdArgU8
             | LtacType::LdArgI16 | LtacType::LdArgU16
-            | LtacType::LdArgI32 | LtacType::LdArgU32 
+            | LtacType::LdArgI32 | LtacType::LdArgU32
+            | LtacType::LdArgF32 
             | LtacType::LdArgPtr => riscv64_build_ldarg(writer, &code, stack_size),
             
             // All the move instructions
             LtacType::MovUQ => {},
-            LtacType::MovF32 => {},
             LtacType::MovF64 => {},
             LtacType::MovI32Vec => {},
 
             LtacType::MovB | LtacType::MovUB |
             LtacType::MovW | LtacType::MovUW |
             LtacType::Mov | LtacType::MovU |
-            LtacType::MovQ => riscv64_build_mov(writer, &code),
+            LtacType::MovQ |
+            LtacType::MovF32 |
+            LtacType::MovF64Int => riscv64_build_mov(writer, &code),
             
             // Push/pop
             LtacType::Push => {},
@@ -271,12 +272,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::I64Lsh => {},
             LtacType::I64Rsh => {},
             
-            // Single-precision float operations
-            LtacType::F32Add => {},
-            LtacType::F32Sub => {},
-            LtacType::F32Mul => {},
-            LtacType::F32Div => {},
-            
             // Double-precision float operations
             LtacType::F64Add => {},
             LtacType::F64Sub => {},
@@ -291,24 +286,27 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             // These are specific to RISC machines
             // RISC Load instructions
             LtacType::LdUQ => {},
-            LtacType::LdF32 => {},
             LtacType::LdF64 => {},
 
             LtacType::LdB | LtacType::LdUB |
             LtacType::LdW | LtacType::LdUW |
             LtacType::Ld | LtacType::LdU |
-            LtacType::LdQ => riscv64_build_ld_str(writer, &code, stack_size, true),
+            LtacType::LdQ |
+            LtacType::LdF32 => riscv64_build_ld_str(writer, &code, stack_size, true),
             
             // RISC store instructions
             LtacType::StrUQ => {},
-            LtacType::StrF32 => {},
             LtacType::StrF64 => {},
             LtacType::StrPtr => {},
 
             LtacType::StrB | LtacType::StrUB |
             LtacType::StrW | LtacType::StrUW |
             LtacType::Str | LtacType::StrU |
-            LtacType::StrQ => riscv64_build_ld_str(writer, &code, stack_size, false),
+            LtacType::StrQ | 
+            LtacType::StrF32 => riscv64_build_ld_str(writer, &code, stack_size, false),
+
+            // Misc instructions
+            LtacType::CvtF32F64 => riscv64_build_cvt(writer, &code),
             
             // All else
             _ => riscv64_build_instr(writer, &code),
@@ -362,6 +360,26 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::I8Mod | LtacType::U8Mod
         | LtacType::I16Mod | LtacType::U16Mod
         | LtacType::I32Mod | LtacType::U32Mod => instr = "rem".to_string(),
+
+        LtacType::F32Add => {
+            instr = "fadd.s".to_string();
+            suffix = 0 as char;
+        } ,
+        
+        LtacType::F32Sub => {
+            instr = "fsub.s".to_string();
+            suffix = 0 as char;
+        },
+        
+        LtacType::F32Mul => {
+            instr = "fmul.s".to_string();
+            suffix = 0 as char;
+        },
+        
+        LtacType::F32Div => {
+            instr = "fdiv.s".to_string();
+            suffix = 0 as char;
+        },
 
         LtacType::BAnd | LtacType::WAnd
         | LtacType::I32And => {
@@ -444,6 +462,16 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
         LtacArg::U32(_v) => instr.push('i'),
 
+        LtacArg::F32(val) => {
+            line.push_str("  lui s2, %hi(");
+            line.push_str(val);
+            line.push_str(")\n");
+
+            line.push_str("  flw fs2, %lo(");
+            line.push_str(val);
+            line.push_str(")(s2)\n");
+        },
+
         _ => {},
     }
 
@@ -474,6 +502,15 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
                 line.push_str(", ");
             }
         },
+
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+            let reg = riscv64_op_freg(*pos);
+            
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&reg);
+            line.push_str(", ");
+        },
         
         _ => {},
     }
@@ -483,6 +520,11 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::Reg8(pos) | LtacArg::Reg16(pos)
         | LtacArg::Reg32(pos) => {
             let reg = riscv64_op_reg(*pos);
+            line.push_str(&reg);
+        },
+
+        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+            let reg = riscv64_op_freg(*pos);
             line.push_str(&reg);
         },
 
@@ -540,6 +582,8 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacArg::UByte(val) => line.push_str(&val.to_string()),
         LtacArg::U16(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),
+
+        LtacArg::F32(_v) => line.push_str("fs2"),
 
         _ => {},
     }

@@ -23,7 +23,8 @@ use crate::utils::*;
 // Builds function/sytem call arguments
 pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, is_karg : bool, stack_top : i32) {
     let mut reg = riscv64_arg_reg(code.arg2_val);
-
+    let freg = riscv64_arg_freg(code.arg2_val);
+    
     if is_karg {
         reg = riscv64_karg_reg(code.arg2_val);
     }
@@ -31,6 +32,16 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
     let mut line = String::new();
 
     match &code.arg1 {
+
+        LtacArg::Reg32(pos) => {
+            let src_reg = riscv64_op_reg(*pos);
+            
+            line.push_str("  mv ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&src_reg);
+            line.push_str("\n");
+        },
 
         LtacArg::Mem(val) => {
             let pos = stack_top - (*val);
@@ -41,6 +52,11 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
                 
                 LtacArg::I16(_v) => line.push_str("  lh "),
                 LtacArg::U16(_v) => line.push_str("  lhu "),
+
+                LtacArg::FltReg(_v) => {
+                    line.push_str("  flw ");
+                    reg = freg;
+                },
 
                 _ => line.push_str("  lw "),
             }
@@ -108,6 +124,18 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
             line.push_str(", ");
             line.push_str(&val.to_string());
             line.push_str("\n");
+        },
+
+        LtacArg::F32(ref val) => {
+            line.push_str("  lui s2, %hi(");
+            line.push_str(val);
+            line.push_str(")\n");
+
+            line.push_str("  flw ");
+            line.push_str(&freg);
+            line.push_str(", %lo(");
+            line.push_str(val);
+            line.push_str(")(s2)\n");
         },
     
         LtacArg::PtrLcl(ref val) => {

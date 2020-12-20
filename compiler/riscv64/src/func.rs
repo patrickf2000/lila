@@ -109,13 +109,20 @@ pub fn riscv64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, sta
         LtacType::LdArgI8 | LtacType::LdArgU8 => line.push_str("  sb "),
         LtacType::LdArgI16 | LtacType::LdArgU16 => line.push_str("  sh "),
         LtacType::LdArgI32 | LtacType::LdArgU32 => line.push_str("  sw "),
+        LtacType::LdArgF32 => line.push_str("  fsw "),
         LtacType::LdArgPtr => line.push_str("  sd "),
 
         _ => {},
     }
+
+    if code.instr_type == LtacType::LdArgF32 || code.instr_type == LtacType::LdArgF64 {
+        let reg = riscv64_arg_freg(code.arg2_val);
+        line.push_str(&reg);
+    } else {
+        let reg = riscv64_arg_reg(code.arg2_val);
+        line.push_str(&reg);
+    }
     
-    let reg = riscv64_arg_reg(code.arg2_val);
-    line.push_str(&reg);
     line.push_str(", ");
 
     match code.arg1 {

@@ -42,8 +42,20 @@ pub fn riscv64_arg_reg(pos : i32) -> String {
     };
 }
 
+pub fn riscv64_arg_freg(pos : i32) -> String {
+    match pos {
+        1 => return "fa0".to_string(),
+        2 => return "fa1".to_string(),
+        3 => return "fa2".to_string(),
+        4 => return "fa3".to_string(),
+        5 => return "fa4".to_string(),
+        6 => return "fa5".to_string(),
+        _ => return String::new(),
+    };
+}
+
 // Operation registers
-// S2 is for internal operations
+// S2 and S3 are for internal operations
 pub fn riscv64_op_reg(pos : i32) -> String {
     match pos {
         0 => return "s4".to_string(),
@@ -51,6 +63,18 @@ pub fn riscv64_op_reg(pos : i32) -> String {
         2 => return "s6".to_string(),
         3 => return "s7".to_string(),
         4 => return "s8".to_string(),
+        _ => return String::new(),
+    };
+}
+
+// FS2 and FS3 are for internal operations
+pub fn riscv64_op_freg(pos : i32) -> String {
+    match pos {
+        0 => return "fs4".to_string(),
+        1 => return "fs5".to_string(),
+        2 => return "fs6".to_string(),
+        3 => return "fs7".to_string(),
+        4 => return "fs8".to_string(),
         _ => return String::new(),
     };
 }
