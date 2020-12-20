@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cwd=`pwd`
-export PATH="$cwd/target/release/lilac:$PATH"
+export PATH="$cwd/target/release:$PATH"
 export LD_LIBRARY_PATH="$cwd/target:$LD_LIBRARY_PATH"
 
 test_count=0
@@ -11,7 +11,7 @@ function run_test() {
     do
     	name=`basename $entry .ls`
         
-        dashc $entry -o $name -llila
+         lilac $entry -o $name -llila
     
 	    ../test.py $entry ./$name ""
 	    
