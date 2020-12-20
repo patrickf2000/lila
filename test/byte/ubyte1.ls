@@ -13,8 +13,9 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    byte b1 = 0xF2
-    ubyte b2 = 0xF2
+    b1 : byte = 0xF2
+    b2 : ubyte = 0xF2
+begin
     
     printf("B1: %x\n", b1)
     printf("B2: %x\n", b2)

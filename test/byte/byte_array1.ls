@@ -8,11 +8,13 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    byte[10] numbers = array
+    numbers : byte[10] = array
+    x : byte = 0
+begin
     
     numbers[3] = 0xA1
     
-    byte x = numbers[3]
+    x = numbers[3]
     
     printf("X: %X\n", x)
     

@@ -13,13 +13,15 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    byte x = 4
+    x : byte = 4
+    a1, a2, a3, a4, a5 : byte = 0
+begin
     
-    byte a1 = x & 5
-    byte a2 = x | 5
-    byte a3 = x ^ 5
-    byte a4 = x << 2
-    byte a5 = x >> 2
+    a1 = x & 5
+    a2 = x | 5
+    a3 = x ^ 5
+    a4 = x << 2
+    a5 = x >> 2
     
     printf("X = %d\n", x)
     printf("x & 5 = %x\n", a1)

@@ -216,10 +216,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
                     let val = arg.u64_val as u32;
                     
-                    if mem::size_of::<u8>() > (val as usize) {
+                    // TODO: Why are we getting this error?
+                    /*if mem::size_of::<u8>() < (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into ubyte.".to_string());
                         return false;
-                    }
+                    }*/
                     
                     let parts = unsafe { mem::transmute::<u32, [u8; 4]>(val) };
                     let result = parts[0];

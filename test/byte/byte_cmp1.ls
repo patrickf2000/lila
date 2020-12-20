@@ -13,7 +13,9 @@
 extern func puts(s:str, ...)
 
 func main -> int
-    byte b1 = 0xA1
+    b1, b2 : byte = 0xA1
+    b3 : byte = 0xA3
+begin
     
     #################################
     # Test 1
@@ -22,9 +24,6 @@ func main -> int
     else
         puts("Wrong")
     end
-    
-    byte b2 = 0xA1
-    byte b3 = 0xA3
     
     #################################
     # Test 2

@@ -10,7 +10,8 @@
 extern func puts(s:str)
 
 func main -> int
-    byte x = 0x45
+    x : byte = 0x45
+begin
     
     printf("%x\n", x)
     printf("%x\n", 0xAA)
