@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: You can only assign a string to a string.
-# -> [15] str s2 = i
+# -> [15] s2 : str = i
 #
 #END
 
@@ -10,10 +10,10 @@
 extern func puts(s:str)
 
 func main -> int
-    int i = 20
-    str s1 = "Hello!"
-    str s2 = i
-    
+    i : int = 20
+    s1 : str = "Hello!"
+    s2 : str = i
+begin
     puts(s1)
     puts(s2)
     

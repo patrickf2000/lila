@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid use of subtraction operator.
-# -> [16] ubyte aa = x - 5
+# -> [17] aa = x - 5
 #
 #END
 
@@ -10,13 +10,14 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    ubyte x = 20
-    
-    ubyte a1 = x + 5
-    ubyte aa = x - 5
-    ubyte a2 = x * 5
-    ubyte a3 = x / 5
-    ubyte a4 = x % 6
+    x : ubyte = 20
+    a1, aa, a2, a3, a4 : ubyte = 0
+begin
+    a1 = x + 5
+    aa = x - 5
+    a2 = x * 5
+    a3 = x / 5
+    a4 = x % 6
     
     printf("x + 5 = %d\n", a1)
     printf("x * 5 = %d\n", a2)

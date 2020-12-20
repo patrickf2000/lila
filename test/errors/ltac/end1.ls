@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Expected return in function: main
-# -> [14] end
+# -> [15] end
 #
 #END
 
@@ -10,6 +10,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x = 10
+    x : int = 10
+begin
 end
 

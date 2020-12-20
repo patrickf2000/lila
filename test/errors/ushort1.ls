@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid use of subtraction operator.
-# -> [17] ushort aa = x - 5
+# -> [18] aa = x - 5
 #
 #END
 
@@ -10,13 +10,14 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    ushort x = 20
-    
-    ushort a1 = x + 5
-    ushort a2 = x * 5
-    ushort aa = x - 5
-    ushort a3 = x / 5
-    ushort a4 = x % 6
+    x : ushort = 20
+    a1, a2, aa, a3, a4, a5 : ushort = 0
+begin
+    a1 = x + 5
+    a2 = x * 5
+    aa = x - 5
+    a3 = x / 5
+    a4 = x % 6
     
     printf("x + 5 = %d\n", a1)
     printf("x * 5 = %d\n", a2)

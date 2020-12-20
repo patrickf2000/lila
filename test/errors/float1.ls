@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Only integers and strings are valid in system calls.
-# -> [13] syscall(60, 3.14)
+# -> [14] syscall(60, 3.14)
 #
 #END
 
@@ -10,6 +10,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
+begin
     syscall(60, 3.14)
     return 0
 end

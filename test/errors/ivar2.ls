@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Expected assignment operator.
-# -> [13] int x 10
+# -> [13] x : int 10
 #
 #END
 
@@ -10,7 +10,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x 10
+    x : int 10
+begin
     return 0
 end
 

@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid token in expression.
-# -> [14] numbers[1] = =
+# -> [15] numbers[1] = =
 #
 #END
 
@@ -10,7 +10,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int[10] numbers = array
+    numbers : int[10] = array
+begin
     numbers[1] = =
     
     return 0

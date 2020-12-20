@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid use of negation operator.
-# -> [14] uint64 y = -x
+# -> [16] y = -x
 #
 #END
 
@@ -10,8 +10,10 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    uint64 x = 9
-    uint64 y = -x
+    x, y : uint64 = 0
+begin
+    x = 9
+    y = -x
 
     return 0
 end

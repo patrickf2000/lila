@@ -1,6 +1,6 @@
 
 #OUTPUT
-#Syntax Error: Expected variable name.
+#Syntax Error: Invalid context- Expecting "begin" before code.
 # -> [13] int = 10
 #
 #END
@@ -11,6 +11,7 @@ extern func printf(s:str, ...)
 
 func main -> int
     int = 10
+begin
     return 0
 end
 

@@ -12,5 +12,6 @@ const int myconst = x
 extern func printf(s:str, ...)
 
 func main -> int
+begin
     return 0
 end

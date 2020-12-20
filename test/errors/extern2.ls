@@ -10,6 +10,7 @@
 extern func (s:str, ...)
 
 func main -> int
+begin
     return 0
 end
 

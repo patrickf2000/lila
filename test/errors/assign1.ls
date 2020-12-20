@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid assignment or call.
-# -> [14] x + 2 * 3
+# -> [15] x + 2 * 3
 #
 #END
 
@@ -10,7 +10,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x = 10
+    x : int = 10
+begin
     x + 2 * 3
     return 0
 end

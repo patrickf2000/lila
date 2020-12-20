@@ -12,5 +12,6 @@ const const1 = 20
 extern func printf(s:str, ...)
 
 func main -> int
+begin
     return 0
 end

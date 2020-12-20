@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Negation invalid for this type.
-# -> [13] uint x = -9
+# -> [13] x : uint = -9
 #
 #END
 
@@ -10,8 +10,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    uint x = -9
-
+    x : uint = -9
+begin
     return 0
 end
 

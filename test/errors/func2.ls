@@ -10,6 +10,7 @@
 extern func printf(s:str, ...)
 
 func main -> intt
+begin
     return 0
 end
 

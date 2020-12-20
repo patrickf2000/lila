@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid function, constant, or variable name: y
-# -> [15] int answer = x * y
+# -> [16] answer = x * y
 #
 #END
 
@@ -10,9 +10,10 @@
 extern func puts(s:str)
 
 func main -> int
-    int x = 6
-    
-    int answer = x * y
+    x : int = 6
+    answer : int = 0
+begin
+    answer = x * y
     printf("Answer: %d\n", answer)
     
     return 0
