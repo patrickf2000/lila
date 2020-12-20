@@ -1,7 +1,7 @@
 
 func main -> int
-    int x = 20
-    int y = 30
+    x : int = 20
+    y : int = 30
 begin
     printf("X: %d | Y: %d\n", x, y)
     return 0

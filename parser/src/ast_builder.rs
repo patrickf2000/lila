@@ -202,21 +202,10 @@ fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree :
             new_layer -= 1;
         },
         
-        Token::Byte if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Byte),
-        Token::UByte if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UByte),
-        Token::Short if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Short),
-        Token::UShort if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UShort),
-        Token::Int if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int),
-        Token::UInt if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UInt),
-        Token::Int64 if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Int64),
-        Token::UInt64 if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::UInt64),
-        Token::Float if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Float),
-        Token::Double if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Double),
-        Token::Char if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Char),
-        Token::TStr if !in_code => code = build_var_dec(&mut scanner, tree, syntax, AstModType::Str),
         Token::Const => code = build_const(&mut scanner, tree, syntax, layer),
         
         Token::Id(ref val) if in_code => code = build_id(&mut scanner, tree, val.to_string(), syntax),
+        Token::Id(ref val) => code = build_var_dec(&mut scanner, tree, val.to_string(), syntax),
         
         Token::If if in_code => {
             code = build_cond(&mut scanner, tree, Token::If, syntax);
@@ -258,20 +247,54 @@ fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree :
 }
 
 // Builds an integer variable declaration
-fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, dtype : AstModType) -> bool {
+fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax : &mut ErrorManager) -> bool {
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec, scanner);
+    var_dec.name = name;
+    
+    // Gather information
+    // The first token should be the colon, followed by the type and optionally array arguments
+    let mut token = scanner.get_token();
+    
+    if token != Token::Colon {
+        syntax.syntax_error(scanner, "Expected \':\' after variable name.".to_string());
+        return false;
+    }
+    
+    // Now for the type
     let mut is_array = false;
+    let dtype : AstModType;
+    
+    token = scanner.get_token();
+    
+    match token {
+        Token::Byte => dtype = AstModType::Byte,
+        Token::UByte => dtype = AstModType::UByte,
+        Token::Short => dtype = AstModType::Short,
+        Token::UShort => dtype = AstModType::UShort,
+        Token::Int => dtype = AstModType::Int,
+        Token::UInt => dtype = AstModType::UInt,
+        Token::Int64 => dtype = AstModType::Int64,
+        Token::UInt64 => dtype = AstModType::UInt64,
+        Token::Float => dtype = AstModType::Float,
+        Token::Double => dtype = AstModType::Double,
+        Token::Char => dtype = AstModType::Char,
+        Token::TStr => dtype = AstModType::Str,
+        
+        _ => {
+            syntax.syntax_error(scanner, "Invalid type.".to_string());
+            return false;
+        },
+    }
         
     let mut data_type = AstMod {
         mod_type : dtype.clone(),
     };
     
-    // Gather information
-    // The first token should be the name
-    let mut token = scanner.get_token();
+    // Check for arrays
+    token = scanner.get_token();
     
     match token {
-        Token::Id(ref val) => var_dec.name = val.to_string(),
+        Token::Assign => {},
         
         Token::LBracket => {
             is_array = true;
@@ -280,26 +303,13 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
             }
             
             token = scanner.get_token();
-            match token {
-                Token::Id(ref val) => var_dec.name = val.to_string(),
-                _ => {
-                    syntax.syntax_error(scanner, "Expected array name.".to_string());
-                    return false;
-                },
+            
+            if token != Token::Assign {
+                syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
+                return false;
             }
         },
         
-        _ => {
-            syntax.syntax_error(scanner, "Expected variable name.".to_string());
-            return false;
-        },
-    }
-    
-    // The next token should be the assign operator
-    token = scanner.get_token();
-    
-    match token {
-        Token::Assign => {},
         _ => {
             syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
             return false;
