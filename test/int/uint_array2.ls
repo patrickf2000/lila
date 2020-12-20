@@ -18,9 +18,11 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    uint[10] numbers = array
-    
-    uint i = 0
+    numbers : uint[10] = array
+    i : uint = 0
+    x : uint = 0
+begin
+
     while i < 10
         numbers[i] = i * 2
         i = i + 1
@@ -28,7 +30,7 @@ func main -> int
     
     i = 0
     while i < 10
-        int x = numbers[i]
+        x = numbers[i]
         printf("%d\n", x)
         i = i + 1
     end

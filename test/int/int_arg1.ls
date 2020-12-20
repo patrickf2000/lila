@@ -8,12 +8,14 @@
 extern func printf(s:str, ...)
 
 func add_two(x:int, y:int)
-    int answer = x + y
+    answer : int = x + y
+begin
     printf("Result: %d\n", answer)
 end
 
 func main -> int
-    int x = 22
+    x : int = 22
+begin
     add_two(20, x)
     return 0
 end

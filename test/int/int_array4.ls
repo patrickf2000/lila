@@ -12,20 +12,25 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int[10] numbers = array
-    int base = 2
-    
+    numbers : int[10] = array
+    base : int = 2
+    x1 : int = 0
+    x2 : int = 0
+    x3 : int = 0
+    x4 : int = 0
+    x5 : int = 0
+begin  
     numbers[1] = 3 + base
     numbers[2] = 3 - base
     numbers[3] = 3 * base
     numbers[4] = 3 / base
     numbers[5] = 3 % base
     
-    int x1 = numbers[1]
-    int x2 = numbers[2]
-    int x3 = numbers[3]
-    int x4 = numbers[4]
-    int x5 = numbers[5]
+    x1 = numbers[1]
+    x2 = numbers[2]
+    x3 = numbers[3]
+    x4 = numbers[4]
+    x5 = numbers[5]
     
     printf("X1: %d\n", x1)
     printf("X2: %d\n", x2)

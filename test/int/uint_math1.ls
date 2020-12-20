@@ -11,12 +11,17 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    uint x = 20
+    x : uint = 20
+    a1 : uint = 0
+    a2 : uint = 0
+    a3 : uint = 0
+    a4 : uint = 0
+begin
     
-    uint a1 = x + 5
-    uint a2 = x * 5
-    uint a3 = x / 5
-    uint a4 = x % 6
+    a1 = x + 5
+    a2 = x * 5
+    a3 = x / 5
+    a4 = x % 6
     
     printf("x + 5 = %d\n", a1)
     printf("x * 5 = %d\n", a2)

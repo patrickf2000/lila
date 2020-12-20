@@ -9,13 +9,13 @@ extern func printf(s:str, ...)
 
 # Raises the base to a power
 func pow(base:int, n:int) -> int
-    int base = 2
-    int n = 4
-    int result = 1
-    
+    result : int = 1
+    i : int = 0
+begin
+  
     # Calculate
     while n != 0
-        int i = n & 1
+        i = n & 1
         if i != 0
             result = result * base
         end
@@ -27,12 +27,13 @@ func pow(base:int, n:int) -> int
     return result
 end
 
+# 2 ** 4 = 16
 func main -> int
-    # 2 ** 4 = 16
-    
-    int base = 2
-    int n = 4
-    int result = pow(base, n)
+    base   : int = 2
+    n      : int = 4
+    result : int = 0
+begin
+    result = pow(base, n)
     
     printf("%d ** %d = %d\n", base, n, result)
     

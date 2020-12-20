@@ -10,8 +10,8 @@
 extern func puts(s:str)
 
 func main -> int
-    int x = 123
-    
+    x : int = 123
+begin   
     printf("%d\n", x)
     printf("%d\n", 10)
     

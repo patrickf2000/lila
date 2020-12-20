@@ -10,8 +10,8 @@
 extern func puts(s:str)
 
 func main -> int
-    int x = 0x11223344
-    
+    x : int = 0x11223344
+begin
     printf("%x\n", x)
     printf("%x\n", 0xAABBCCDD)
     

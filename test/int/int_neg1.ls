@@ -14,35 +14,37 @@
 extern func printf(s:str, ...)
 
 func test1
-    int x = -6 + -9
+    x : int = -6 + -9
+begin
     printf("X: %d\n", x)
 end
 
 func test2
-    int x = -9
-    int y = 20 + x - -9
-    
+    x : int = -9
+    y : int = 20 + x - -9
+begin
     printf("X: %d\n", x)
     printf("Y: %d\n", y)
 end
 
 func test3
-    int x = 9
-    int y = -x
-    
+    x : int = 9
+    y : int = -x
+begin  
     printf("X: %d\n", x)
     printf("Y: %d\n", y)
 end
 
 func test4
-    int x = 10
-    int y = -x + 30 + -x
-    
+    x : int = 10
+    y : int = -x + 30 + -x
+begin
     printf("X: %d\n", x)
     printf("Y: %d\n", y)
 end
 
 func main -> int
+begin
     test1()
     test2()
     test3()

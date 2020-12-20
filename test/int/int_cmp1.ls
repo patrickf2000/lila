@@ -10,7 +10,8 @@
 extern func puts(s:str)
 
 func main() -> int
-    int x = 3
+    x : int = 3
+begin
     
     if x == 5
         puts("Correct")

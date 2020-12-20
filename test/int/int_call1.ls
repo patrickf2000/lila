@@ -11,14 +11,18 @@
 extern func printf(s:str, ...)
 
 func add_two(x:int, y:int) -> int
-    int answer = x + y
+    answer : int = x + y
+begin
     printf("Answer: %d\n", answer)
     return answer
 end
 
 func main -> int
-    int answer1 = add_two(10, 5)
-    int answer2 = add_two(6, 3) * 2
+    answer1 : int = 0
+    answer2 : int = 0
+begin
+    answer1 = add_two(10, 5)
+    answer2 = add_two(6, 3) * 2
     
     printf("Answer1: %d\n", answer1)
     printf("Answer2: %d\n", answer2)

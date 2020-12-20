@@ -10,7 +10,8 @@
 extern func puts(s:str)
 
 func main -> int
-    uint x = 0x11223344
+    x : uint = 0x11223344
+begin
     
     printf("%x\n", x)
     printf("%x\n", 0xAABBCCDD)
