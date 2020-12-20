@@ -9,16 +9,18 @@
 extern func printf(s:str, ...)
 
 func print_num(msg:str, ...)
-    uint x = ldarg(2, uint)
-    uint y = ldarg(3, uint)
+    x, y : uint = 0
+begin
+    x = ldarg(2, uint)
+    y = ldarg(3, uint)
     
     printf("%s: %d, %d\n", msg, x, y)
 end
 
 func main -> int
-    uint x = 4
-    uint y = 6
-    
+    x : uint = 4
+    y : uint = 6
+begin
     print_num("Numbers: ", 10, 20)
     print_num("Numbers: ", y, x)
     

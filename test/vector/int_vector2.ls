@@ -13,11 +13,12 @@ extern func puts(s:str)
 extern func printf(s:str, ...)
 
 func print_numbers(list:int[], length:int)
+    i, x : int = 0
+begin
     printf("[")
 
-    int i = 0
     while i < length
-        int x = list[i]
+        x = list[i]
         printf("%d ", x)
         
         i = i + 1
@@ -27,7 +28,8 @@ func print_numbers(list:int[], length:int)
 end
 
 func init_numbers(list:int[], len:int, seed:int)
-    int i = 0
+    i : int = 0
+begin
     while i < len
         list[i] = i * seed
         i = i + 1
@@ -35,9 +37,9 @@ func init_numbers(list:int[], len:int, seed:int)
 end
 
 func main -> int
-    int[16] numbers = array
-    int[8] numbers_sum = array
-    
+    numbers : int[16] = array
+    numbers_sum : int[8] = array
+begin
     init_numbers(numbers, 16, 2)
     
     puts("Numbers:")

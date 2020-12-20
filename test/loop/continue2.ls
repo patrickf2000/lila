@@ -41,8 +41,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x = 0
-    
+    x, i : int = 0
+begin
     while x < 20 
         x = x + 1
         
@@ -54,7 +54,7 @@ func main -> int
             continue
         end
         
-        int i = 0
+        i = 0
         while i < x
             if i == 15
                 break

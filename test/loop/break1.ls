@@ -22,7 +22,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x = 0
+    x : int = 0
+begin
     
     while x <= 30 
         if x > 15

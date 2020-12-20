@@ -16,37 +16,45 @@ extern func printf(s:str, ...)
 
 # All the get number functions
 func get_num32 -> int
-    int x = 20
-    int y = 30
-    int answer = x + y
+    x : int = 20
+    y : int = 30
+    answer : int = 0
+begin
+    answer = x + y
     return answer
 end
 
 func get_numu32 -> uint
-    uint x = 20
-    uint y = 30
-    uint answer = x + y
+    x : uint = 20
+    y : uint = 30
+    answer : uint = 0
+begin
+    answer = x + y
     return answer
 end
 
 func get_num64 -> int64
-    int64 x = 20
-    int64 y = 30
-    int64 answer = x + y
+    x : int64 = 20
+    y : int64 = 30
+    answer : int64 = 0
+begin
+    answer = x + y
     return answer
 end
 
 func get_numu64 -> uint64
-    uint64 x = 20
-    uint64 y = 30
-    uint64 answer = x + y
+    x : uint64 = 20
+    y : uint64 = 30
+    answer : uint64 = 0
+begin
+    answer = x + y
     return answer
 end
 
 # Output should be 5, then 105
 func test1
-    int total = 0
-    
+    total : int = 0
+begin
     total = total + 5
     printf("T32: %d\n", total)
     
@@ -57,8 +65,8 @@ func test1
 end
 
 func test2
-    uint total = 0
-    
+    total : uint = 0
+begin
     total = total + 5
     printf("Tu32: %d\n", total)
     
@@ -69,8 +77,8 @@ func test2
 end
 
 func test3
-    int64 total = 0
-    
+    total : int64 = 0
+begin
     total = total + 5
     printf("T64: %d\n", total)
     
@@ -81,8 +89,8 @@ func test3
 end
 
 func test4
-    uint64 total = 0
-    
+    total : uint64 = 0
+begin
     total = total + 5
     printf("Tu64: %d\n", total)
     
@@ -93,6 +101,7 @@ func test4
 end
 
 func main -> int
+begin
     test1()
     test2()
     test3()

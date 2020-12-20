@@ -16,8 +16,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x = 0
-    
+    x : int = 0
+begin
     while x < 10 
         printf("Num: %d\n", x)
         x = x + 1

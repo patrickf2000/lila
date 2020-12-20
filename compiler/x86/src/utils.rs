@@ -157,12 +157,12 @@ pub fn amd64_op_reg64(pos : i32) -> String {
 // xmm0 and xmm1 are reserved for internal operations
 pub fn amd64_op_flt(pos : i32) -> String {
     match pos {
-        0 => return "xmm3".to_string(),
-        1 => return "xmm4".to_string(),
-        2 => return "xmm5".to_string(),
-        3 => return "xmm6".to_string(),
-        4 => return "xmm7".to_string(),
-        5 => return "xmm8".to_string(),
+        0 => return "xmm10".to_string(),
+        1 => return "xmm11".to_string(),
+        2 => return "xmm12".to_string(),
+        3 => return "xmm13".to_string(),
+        4 => return "xmm14".to_string(),
+        5 => return "xmm15".to_string(),
         _ => return String::new(),
     }
 }

@@ -48,14 +48,14 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    int x = 0
-    
+    x, i : int = 0
+begin 
     while x <= 30 
         if x > 20
             break
         end
         
-        int i = 0
+        i = 0
         while i <= x
             printf("*");
             i = i + 1
