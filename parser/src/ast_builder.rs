@@ -251,9 +251,28 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax 
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec, scanner);
     var_dec.name = name;
     
+    // This will hold any additional names (for multi-variable declarations)
+    // If the list is empty, we only have one declaration
+    let mut extra_names : Vec<String> = Vec::new();
+    
     // Gather information
     // The first token should be the colon, followed by the type and optionally array arguments
     let mut token = scanner.get_token();
+    
+    while token == Token::Comma {
+        token = scanner.get_token();
+        
+        match token {
+            Token::Id(ref val) => extra_names.push(val.to_string()),
+            
+            _ => {
+                syntax.syntax_error(scanner, "Expected variable name.".to_string());
+                return false;
+            },
+        }
+        
+        token = scanner.get_token();
+    }
     
     if token != Token::Colon {
         syntax.syntax_error(scanner, "Expected \':\' after variable name.".to_string());
@@ -346,7 +365,12 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax 
     }
     
     var_dec.modifiers.push(data_type);
-    ast::add_stmt(tree, var_dec);
+    ast::add_stmt(tree, var_dec.clone());
+    
+    for n in extra_names.iter() {
+        var_dec.name = n.to_string();
+        ast::add_stmt(tree, var_dec.clone());
+    }
     
     true
 }
