@@ -10,12 +10,14 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func print_two(x:ushort, y:ushort)
+begin
     printf("X: %x\n", x)
     printf("Y: %x\n", y)
 end
 
 func main -> int
-    ushort x = 0xA4B5
+    x : ushort = 0xA4B5
+begin
     print_two(x, 0x55AA)
     
     return 0

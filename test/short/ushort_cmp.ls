@@ -13,7 +13,9 @@
 extern func puts(s:str, ...)
 
 func main -> int
-    ushort b1 = 0xA1B1
+    b1, b2 : ushort = 0xA1B1
+    b3 : ushort = 0xA3B3
+begin
     
     #################################
     # Test 1
@@ -22,9 +24,6 @@ func main -> int
     else
         puts("Wrong")
     end
-    
-    ushort b2 = 0xA1B1
-    ushort b3 = 0xA3B3
     
     #################################
     # Test 2

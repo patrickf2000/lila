@@ -13,13 +13,15 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    short x = 4
+    x : short = 4
+    a1, a2, a3, a4, a5 : short = 0
+begin
     
-    short a1 = x & 5
-    short a2 = x | 5
-    short a3 = x ^ 5
-    short a4 = x << 2
-    short a5 = x >> 2
+    a1 = x & 5
+    a2 = x | 5
+    a3 = x ^ 5
+    a4 = x << 2
+    a5 = x >> 2
     
     printf("X = %d\n", x)
     printf("x & 5 = %x\n", a1)

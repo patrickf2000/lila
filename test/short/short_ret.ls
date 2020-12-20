@@ -10,17 +10,21 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func short1 -> short
+begin
     return 0xA1B1
 end
 
 func short2 -> short
-    short x = 0xAFBF
+    x : short = 0xAFBF
+begin
     return x
 end
 
 func main -> int
-    short s1 = short1()
-    short s2 = short2()
+    s1, s2 : short = 0
+begin
+    s1 = short1()
+    s2 = short2()
     
     printf("S1: %x\n", s1)
     printf("S2: %x\n", s2)

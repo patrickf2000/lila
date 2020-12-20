@@ -232,10 +232,10 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 } else if var.data_type == DataType::Short || var.data_type == DataType::ShortDynArray {
                     let val = arg.u64_val as i32;
                     
-                    if mem::size_of::<u16>() > (val as usize) {
+                    /*if mem::size_of::<u16>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into short.".to_string());
                         return false;
-                    }
+                    }*/
                     
                     let parts = unsafe { mem::transmute::<i32, [i16; 2]>(val) };
                     let mut result = parts[0];
@@ -252,10 +252,10 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
                     let val = arg.u64_val as u32;
                     
-                    if mem::size_of::<u16>() > (val as usize) {
+                    /*if mem::size_of::<u16>() > (val as usize) {
                         builder.syntax.ltac_error(&line, "Integer is too big to fit into ushort.".to_string());
                         return false;
-                    }
+                    }*/
                     
                     let parts = unsafe { mem::transmute::<u32, [u16; 2]>(val) };
                     let result = parts[0];

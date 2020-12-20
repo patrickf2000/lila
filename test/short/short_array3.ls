@@ -9,28 +9,31 @@
 extern func printf(s:str, ...)
 
 func test1
-    short[10] numbers = array
-    
-    int i = 5
+    numbers : short[10] = array
+    x : short = 0
+    i : int = 5
+begin
     numbers[i+1] = 22
     
-    short x = numbers[6]
+    x = numbers[6]
     
     printf("X: %d\n", x)
 end
 
 func test2
-    short[10] numbers = array
-    
-    int i = 5
+    numbers : short[10] = array
+    x : short = 0
+    i : int = 5
+begin
     numbers[6] = 25
     
-    short x = numbers[i+1]
+    x = numbers[i+1]
     
     printf("X: %d\n", x)
 end
 
 func main -> int
+begin
     test1()
     test2()
     

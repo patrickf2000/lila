@@ -13,8 +13,9 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    short b1 = 0xFFF2
-    ushort b2 = 0xFFF2
+    b1 : short = 0xFFF2
+    b2 : ushort = 0xFFF2
+begin
     
     printf("B1: %x\n", b1)
     printf("B2: %x\n", b2)
