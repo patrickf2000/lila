@@ -57,7 +57,7 @@ begin
         
         i = 0
         while i <= x
-            printf("*");
+            printf("*")
             i = i + 1
             
             if i == 10

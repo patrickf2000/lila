@@ -20,6 +20,7 @@
 pub enum Token {
     Unknown,
     Eof,
+    EoI,
     
     Module,
     Use,
@@ -90,37 +91,49 @@ pub enum Token {
     StringL(String),
 }
 
-pub struct Lex {
+pub struct Line {
     input : String,
     line_no : i32,
+    all_tokens : Vec<Token>,
+}
+
+pub struct Lex {
+    current_input : String,
+    current_line_no : i32,
+    current_line : usize,
     pos : usize,
     index : usize,
-    all_tokens : Vec<Token>,
+    lines : Vec<Line>,
+    current_tokens : Vec<Token>,
 }
 
 impl Lex {
     pub fn get_current_line(&mut self) -> String {
-        self.input.clone()
+        self.current_input.clone()
     }
     
     pub fn get_line_no(&mut self) -> i32 {
-        self.line_no
+        self.current_line_no
     }
 
-    pub fn tokenize(&mut self, line_no : i32) {
-        self.line_no = line_no;
+    pub fn tokenize(&mut self, input : String, line_no : i32) {
+        let mut line = Line {
+            input : input.clone(),
+            line_no : line_no,
+            all_tokens : Vec::new(),
+        };
     
         self.index = 0;
         let mut current = String::new();
         let mut in_quote = false;
         
-        let length = self.input.len();
+        let length = input.len();
         
         while self.index < length {
-            let c = self.input.chars().nth(self.index).unwrap();
+            let c = input.chars().nth(self.index).unwrap();
             let c2 : char;
             if self.index + 1 < length {
-                c2 = self.input.chars().nth(self.index+1).unwrap();
+                c2 = input.chars().nth(self.index+1).unwrap();
             } else {
                 c2 = '\0';
             }
@@ -132,10 +145,10 @@ impl Lex {
             
             // Check to see if we have a char literal
             if c == '\'' {
-                let c = self.input.chars().nth(self.index+1).unwrap();
+                let c = input.chars().nth(self.index+1).unwrap();
                 
                 let token = Token::CharL(c);
-                self.all_tokens.push(token);
+                line.all_tokens.push(token);
                 
                 self.index += 3;
                 continue;
@@ -147,7 +160,7 @@ impl Lex {
                     in_quote = false;
                     
                     let token = Token::StringL(current);
-                    self.all_tokens.push(token);
+                    line.all_tokens.push(token);
                     current = String::new();
                 } else {
                     in_quote = true;
@@ -167,16 +180,16 @@ impl Lex {
             if self.is_symbol(c) {
                 if current.len() > 0 {
                     let token = self.get_keyword(current);
-                    self.all_tokens.push(token);
+                    line.all_tokens.push(token);
                     current = String::new();
                 }
                 
                 let symbol = self.get_symbol(c, c2);
-                self.all_tokens.push(symbol);
+                line.all_tokens.push(symbol);
             } else if c == ' ' || c == '\t' {
                 if current.len() > 0 {
                     let token = self.get_keyword(current);
-                    self.all_tokens.push(token);
+                    line.all_tokens.push(token);
                     current = String::new();
                 }
             } else {
@@ -188,17 +201,31 @@ impl Lex {
         
         if current.len() > 0 {
             let token = self.get_keyword(current);
-            self.all_tokens.push(token);
+            line.all_tokens.push(token);
         }
+        
+        self.lines.push(line);
     }
     
     pub fn get_token(&mut self) -> Token {
         let token : Token;
         
-        if self.pos >= self.all_tokens.len() {
+        if self.pos >= self.current_tokens.len() && self.current_line >= self.lines.len() {
+            token = Token::EoI;
+        } else if self.pos >= self.current_tokens.len() {
+            self.current_tokens = self.lines[self.current_line].all_tokens.clone();
+            
+            self.pos = 0;
+            self.current_line += 1;
+            
             token = Token::Eof;
         } else {
-            token = self.all_tokens[self.pos].clone();
+            if self.pos == 0 && self.current_line > 0 {
+                self.current_input = self.lines[self.current_line-1].input.clone();
+                self.current_line_no = self.lines[self.current_line-1].line_no;
+            }
+            
+            token = self.current_tokens[self.pos].clone();
             self.pos += 1;
         }
         
@@ -372,13 +399,14 @@ impl Lex {
     }
 }
 
-pub fn create_lex(input : String) -> Lex {
+pub fn create_lex() -> Lex {
     Lex {
-        input : input,
-        line_no : 0,
+        current_line_no : 0,
+        current_input : String::new(),
+        current_line : 0,
         pos : 0,
         index : 0,
-        all_tokens : Vec::new(),
+        lines : Vec::new(),
+        current_tokens : Vec::new(),
     }
 }
-

@@ -54,6 +54,8 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
     let mut layer = 0;
     let mut in_begin = false;
     
+    let mut scanner = create_lex();
+    
     for line in reader.lines() {
         let mut current = line.unwrap();
         current = current.trim().to_string();
@@ -63,9 +65,17 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
             continue;
         }
         
-        let (ret, new_layer, begin) = build_line(current, line_no, layer, in_begin, &mut tree, syntax);
+        scanner.tokenize(current, line_no);
+    }
+    
+    loop {
+        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, &mut tree, syntax);
         layer = new_layer;
         in_begin = begin;
+        
+        if done {
+            break;
+        }
         
         if !ret {
             syntax.print_errors();
@@ -76,6 +86,8 @@ pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Re
     Ok(tree)
 }
 
+// 12/21/2020- This is untested following the lexical analyzer redesign
+//
 // Loads a module into the current tree
 // TODO:
 //      1) This should go into the module builder
@@ -94,10 +106,12 @@ fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager
     
     let reader = BufReader::new(file);
     
-    // Read the file line by line
+    // Read the thing line by line
     let mut line_no = 0;
     let mut layer = 0;
     let mut in_begin = false;
+    
+    let mut scanner = create_lex();
     
     for line in reader.lines() {
         let mut current = line.unwrap();
@@ -108,9 +122,17 @@ fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager
             continue;
         }
         
-        let (ret, new_layer, begin) = build_line(current, line_no, layer, in_begin, tree, syntax);
+        scanner.tokenize(current, line_no);
+    }
+    
+    loop {
+        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, tree, syntax);
         layer = new_layer;
         in_begin = begin;
+        
+        if done {
+            break;
+        }
         
         if !ret {
             return false;
@@ -121,10 +143,7 @@ fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager
 }
 
 // Converts a line to an AST node
-fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree : &mut AstTree, syntax : &mut ErrorManager) -> (bool, i32, bool) {
-    let mut scanner = create_lex(line);
-    scanner.tokenize(line_no);
-    
+fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstTree, syntax : &mut ErrorManager) -> (bool, i32, bool, bool) {    
     let mut code = true;
     let mut new_layer = layer;
     let mut in_code = in_begin;
@@ -135,8 +154,8 @@ fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree :
     match token {
         Token::Module => {
             if tree.module.len() > 0 {
-                syntax.syntax_error(&mut scanner, "Duplicate module declarations.".to_string());
-                return (false, 0, false);
+                syntax.syntax_error(scanner, "Duplicate module declarations.".to_string());
+                return (false, 0, false, false);
             }
             
             token = scanner.get_token();
@@ -144,8 +163,8 @@ fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree :
             match token {
                 Token::Id(ref val) => tree.module = val.clone(),
                 _ => {
-                    syntax.syntax_error(&mut scanner, "Module names must be an identifier.".to_string());
-                    return (false, 0, false);
+                    syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
+                    return (false, 0, false, false);
                 },
             }
         },
@@ -157,8 +176,8 @@ fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree :
             match token {
                 Token::Id(ref val) => module = val.clone(),
                 _ => {
-                    syntax.syntax_error(&mut scanner, "Module names must be an identifier.".to_string());
-                    return (false, 0, false);
+                    syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
+                    return (false, 0, false, false);
                 },
             }
             
@@ -170,80 +189,81 @@ fn build_line(line : String, line_no : i32, layer : i32, in_begin : bool, tree :
             match token {
                 Token::Func => {},
                 _ => {
-                    syntax.syntax_error(&mut scanner, "Expected \"func\" keyword.".to_string());
-                    return (false, 0, false);
+                    syntax.syntax_error(scanner, "Expected \"func\" keyword.".to_string());
+                    return (false, 0, false, false);
                 }
             }
                 
-            code = build_func(&mut scanner, tree, syntax, true)
+            code = build_func(scanner, tree, syntax, true)
         },
         
         Token::Func => {
             in_code = false;
-            code = build_func(&mut scanner, tree, syntax, false);
+            code = build_func(scanner, tree, syntax, false);
             new_layer += 1;
         },
         
         // Indicates the end of the variable section and start of the code section
         Token::Begin => {
             if in_code {
-                syntax.syntax_error(&mut scanner, "Unexpected \"begin\"-> Already in code.".to_string());
-                return (false, 0, false);
+                syntax.syntax_error(scanner, "Unexpected \"begin\"-> Already in code.".to_string());
+                return (false, 0, false, false);
             } else {
                 in_code = true;
             }
         },
         
-        Token::Return if in_code => code = build_return(&mut scanner, tree, syntax),
-        Token::Exit if in_code => code = build_exit(&mut scanner, tree, syntax),
+        Token::Return if in_code => code = build_return(scanner, tree, syntax),
+        Token::Exit if in_code => code = build_exit(scanner, tree, syntax),
         
         Token::End => {
-            build_end(&mut scanner, tree);
+            build_end(scanner, tree);
             new_layer -= 1;
         },
         
-        Token::Const => code = build_const(&mut scanner, tree, syntax, layer),
+        Token::Const => code = build_const(scanner, tree, syntax, layer),
         
-        Token::Id(ref val) if in_code => code = build_id(&mut scanner, tree, val.to_string(), syntax),
-        Token::Id(ref val) => code = build_var_dec(&mut scanner, tree, val.to_string(), syntax),
+        Token::Id(ref val) if in_code => code = build_id(scanner, tree, val.to_string(), syntax),
+        Token::Id(ref val) => code = build_var_dec(scanner, tree, val.to_string(), syntax),
         
         Token::If if in_code => {
-            code = build_cond(&mut scanner, tree, Token::If, syntax);
+            code = build_cond(scanner, tree, Token::If, syntax);
             new_layer += 1;
         },
         
-        Token::Elif if in_code => code = build_cond(&mut scanner, tree, Token::Elif, syntax),
-        Token::Else if in_code => code = build_cond(&mut scanner, tree, Token::Else, syntax),
+        Token::Elif if in_code => code = build_cond(scanner, tree, Token::Elif, syntax),
+        Token::Else if in_code => code = build_cond(scanner, tree, Token::Else, syntax),
         
         Token::While if in_code => {
-            code = build_cond(&mut scanner, tree, Token::While, syntax);
+            code = build_cond(scanner, tree, Token::While, syntax);
             new_layer += 1;
         },
         
         Token::Break if in_code => {
-            let br = ast::create_stmt(AstStmtType::Break, &mut scanner);
+            let br = ast::create_stmt(AstStmtType::Break, scanner);
             ast::add_stmt(tree, br);
         },
         
         Token::Continue if in_code => {
-            let cont = ast::create_stmt(AstStmtType::Continue, &mut scanner);
+            let cont = ast::create_stmt(AstStmtType::Continue, scanner);
             ast::add_stmt(tree, cont);
         },
         
         Token::Eof => {},
+        Token::EoI => return (true, 0, false, true),
         
         _ => {
             if in_code {
-                syntax.syntax_error(&mut scanner, "Invalid token or context.".to_string());
+                syntax.syntax_error(scanner, "Invalid token or context.".to_string());
             } else {
-                syntax.syntax_error(&mut scanner, "Invalid context- Expecting \"begin\" before code.".to_string());
+                syntax.syntax_error(scanner, "Invalid context- Expecting \"begin\" before code.".to_string());
             }
             
             code = false;
         }
     }
     
-    (code, new_layer, in_code)
+    (code, new_layer, in_code, false)
 }
 
 // Builds an integer variable declaration
