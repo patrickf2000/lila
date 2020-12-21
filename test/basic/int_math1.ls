@@ -19,13 +19,14 @@
 extern func printf(s:str, ...)
 
 func test1
-    int x = 20
-
-    int a1 = x + 5
-    int a2 = x - 5
-    int a3 = x * 5
-    int a4 = x / 5
-    int a5 = x % 6
+    x : int = 20
+    a1, a2, a3, a4, a5 : int = 0
+begin
+    a1 = x + 5
+    a2 = x - 5
+    a3 = x * 5
+    a4 = x / 5
+    a5 = x % 6
 
     printf("X: %d\n", x)
     printf("x + 5 = %d\n", a1)
@@ -36,13 +37,14 @@ func test1
 end
 
 func test2
-    int x = 4
-
-    int a1 = x & 5
-    int a2 = x | 5
-    int a3 = x ^ 5
-    int a4 = x << 2
-    int a5 = x >> 2
+    x : int = 4
+    a1, a2, a3, a4, a5 : int = 0
+begin
+    a1 = x & 5
+    a2 = x | 5
+    a3 = x ^ 5
+    a4 = x << 2
+    a5 = x >> 2
 
     printf("X = %d\n", x)
     printf("x & 5 = %x\n", a1)
@@ -53,6 +55,7 @@ func test2
 end
 
 func main -> int
+begin
     test1()
     test2()
     return 0

@@ -8,6 +8,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
+begin
     printf("Hello!\n")
     
     return 0

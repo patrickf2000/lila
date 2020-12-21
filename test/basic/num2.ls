@@ -10,11 +10,11 @@
 extern func printf(s:str, ...)
 
 func main -> int
+    x : int = 15
+begin
     printf("Hello!\n")
 
-    int x = 15
     printf("X: %d\n", x)
-
     printf("X2: %d\n", 23)
     
     return 0
