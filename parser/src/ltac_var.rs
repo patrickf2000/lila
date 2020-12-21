@@ -146,6 +146,12 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
             builder.stack_pos += 8;
         },
         
+        // TODO: We will need better type detection
+        AstModType::Enum(ref val) => {
+            data_type = DataType::Enum(val.to_string());
+            builder.stack_pos += 4;
+        },
+        
         // Do we need an error here? Really, it should never get to this pointer
         AstModType::None => return (false, arg_no, flt_arg_no),
     }

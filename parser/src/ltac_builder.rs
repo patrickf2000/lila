@@ -54,6 +54,7 @@ pub enum DataType {
     DoubleDynArray,
     Char,
     Str,
+    Enum(String),
 }
 
 #[derive(Clone)]
@@ -421,6 +422,7 @@ pub fn ast_to_datatype(ast_mod : &AstMod) -> DataType {
         AstModType::DoubleDynArray => return DataType::DoubleDynArray,
         AstModType::Char => return DataType::Char,
         AstModType::Str => return DataType::Str,
+        AstModType::Enum(_v) => return DataType::Int,        // TODO: We will need better type detection
         
         // Do we need an error here? Really, it should never get to this pointer
         AstModType::None => return DataType::Void,

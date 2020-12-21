@@ -98,6 +98,7 @@ pub enum AstModType {
     DoubleDynArray,
     Char,
     Str,
+    Enum(String),
 }
 
 // Represents the top of an AST tree
@@ -409,6 +410,7 @@ impl AstMod {
             AstModType::DoubleDynArray => print!("DoubleDynArray"),
             AstModType::Char => print!("Char"),
             AstModType::Str => print!("Str"),
+            AstModType::Enum(ref val) => print!("Enum({})", val),
         }
         
         if is_func {
@@ -483,6 +485,19 @@ pub fn add_func_enum(tree : &mut AstTree, new_enum : AstEnum) {
     let top_func_pos = tree.functions.len() - 1;
     let top_func = &mut tree.functions[top_func_pos];
     &top_func.enums.push(new_enum);
+}
+
+pub fn enum_exists(tree : &mut AstTree, to_find : String) -> bool {
+    let top_func_pos = tree.functions.len() - 1;
+    let top_func = &mut tree.functions[top_func_pos];
+    
+    for e in top_func.enums.iter() {
+        if e.name == to_find {
+            return true;
+        }
+    }
+    
+    false
 }
 
 pub fn create_byte(val : u8) -> AstArg {

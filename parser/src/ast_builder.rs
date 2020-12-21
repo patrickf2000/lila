@@ -341,6 +341,15 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax 
         Token::Char => dtype = AstModType::Char,
         Token::TStr => dtype = AstModType::Str,
         
+        Token::Id(ref val) => {
+            if !ast::enum_exists(tree, val.to_string()) {
+                syntax.syntax_error(scanner, "Invalid enumeration.".to_string());
+                return false;
+            }
+            
+            dtype = AstModType::Enum(val.to_string());
+        },
+        
         _ => {
             syntax.syntax_error(scanner, "Invalid type.".to_string());
             return false;
