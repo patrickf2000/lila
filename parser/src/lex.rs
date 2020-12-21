@@ -62,6 +62,7 @@ pub enum Token {
     Assign,
     Colon,
     Comma,
+    Semicolon,
     Arrow,
     Any,
     OpAdd,
@@ -242,6 +243,7 @@ impl Lex {
             '=' => return true,
             ':' => return true,
             ',' => return true,
+            ';' => return true,
             '+' => return true,
             '-' => return true,
             '*' => return true,
@@ -318,6 +320,7 @@ impl Lex {
             
             ':' => return Token::Colon,
             ',' => return Token::Comma,
+            ';' => return Token::Semicolon,
             '+' => return Token::OpAdd,
             '*' => return Token::OpMul,
             '/' => return Token::OpDiv,

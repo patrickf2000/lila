@@ -274,6 +274,7 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             },
             
             Token::Comma => {},
+            Token::Eof => {},
             
             _ => {
                 syntax.syntax_error(scanner, "Invalid token in expression.".to_string());

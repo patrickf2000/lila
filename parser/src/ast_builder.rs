@@ -356,7 +356,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax 
     }
     
     // Build the remaining arguments
-    if !build_args(scanner, &mut var_dec, Token::Eof, syntax) {
+    if !build_args(scanner, &mut var_dec, Token::Semicolon, syntax) {
         return false;
     }
     
@@ -481,7 +481,7 @@ fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, synt
     let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
     var_assign.name = name;
     
-    if !build_args(scanner, &mut var_assign, Token::Eof, syntax) {
+    if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
         return false;
     }
     
