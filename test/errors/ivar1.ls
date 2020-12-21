@@ -12,6 +12,6 @@ extern func printf(s:str, ...)
 func main -> int
     int = 10
 begin
-    return 0
+    return 0;
 end
 

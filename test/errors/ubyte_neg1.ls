@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Negation invalid for this type.
-# -> [13] x : ubyte = -9
+# -> [13] x : ubyte = -9;
 #
 #END
 
@@ -10,8 +10,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : ubyte = -9
+    x : ubyte = -9;
 begin
-    return 0
+    return 0;
 end
 

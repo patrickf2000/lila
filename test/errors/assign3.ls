@@ -10,9 +10,9 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : int = 5
+    x : int = 5;
 begin
     x = =
-    return 0
+    return 0;
 end
 

@@ -10,12 +10,12 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : int = 20
+    x : int = 20;
 begin
     if x > =
         printf("%d\n", x)
     end
     
-    return 0
+    return 0;
 end
 

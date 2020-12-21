@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Invalid string variable.
-# -> [14] s2 : str = s100
+# -> [14] s2 : str = s100;
 #
 #END
 
@@ -10,11 +10,11 @@
 extern func puts(s:str)
 
 func main -> int
-    s1 : str = "Hello!"
-    s2 : str = s100
+    s1 : str = "Hello!";
+    s2 : str = s100;
 begin
-    puts(s1)
-    puts(s2)
+    puts(s1);
+    puts(s2);
     
-    return 0
+    return 0;
 end

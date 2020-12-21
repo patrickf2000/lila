@@ -7,22 +7,22 @@
 
 func free -> int
 begin
-    return 0
+    return 0;
 end
 
 func _start
-    numbers : int[10] = array
-    x : int = 0
+    numbers : int[10] = array;
+    x : int = 0;
 begin
-    numbers[3] = 22
+    numbers[3] = 22;
     
-    x = numbers[3]
+    x = numbers[3];
     
     if x == 22
-        syscall(1, 1, "Correct!\n", 9)
+        syscall(1, 1, "Correct!\n", 9);
     end
     
-    exit
+    exit;
 end
 
 

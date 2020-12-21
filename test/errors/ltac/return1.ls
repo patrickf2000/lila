@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Cannot return value in void function: main
-# -> [14] return 0
+# -> [14] return 0;
 #
 #END
 
@@ -11,6 +11,6 @@ extern func printf(s:str, ...)
 
 func main()
 begin
-    return 0
+    return 0;
 end
 

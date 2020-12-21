@@ -10,10 +10,10 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : int[10] = array
+    numbers : int[10] = array;
 begin
     numbers[1] = =
     
-    return 0
+    return 0;
 end
 

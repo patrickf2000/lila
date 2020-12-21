@@ -1,7 +1,7 @@
 
 #OUTPUT
 #Syntax Error: Negation invalid for this type.
-# -> [13] x : short = -0xABCD
+# -> [13] x : short = -0xABCD;
 #
 #END
 
@@ -10,8 +10,8 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : short = -0xABCD
+    x : short = -0xABCD;
 begin
-    return 0
+    return 0;
 end
 

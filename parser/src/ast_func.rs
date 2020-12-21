@@ -226,7 +226,7 @@ pub fn build_exit(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
     let mut exit = ast::create_stmt(AstStmtType::Exit, scanner);
     
     // Build arguments
-    if !build_args(scanner, &mut exit, Token::Eof, syntax) {
+    if !build_args(scanner, &mut exit, Token::Semicolon, syntax) {
         return false;
     }
     

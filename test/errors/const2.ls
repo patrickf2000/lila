@@ -13,5 +13,5 @@ extern func printf(s:str, ...)
 
 func main -> int
 begin
-    return 0
+    return 0;
 end
