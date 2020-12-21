@@ -10,15 +10,15 @@
 extern func puts(s:str)
 
 func main -> int
-    x : uint64 = 123
+    x : uint64 = 123;
 begin
     
-    printf("%d\n", x)
-    printf("%d\n", 10)
+    printf("%d\n", x);
+    printf("%d\n", 10);
     
-    x = 88
-    printf("%d\n", x)
+    x = 88;
+    printf("%d\n", x);
     
-    return 0
+    return 0;
 end
 

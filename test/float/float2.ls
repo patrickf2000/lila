@@ -10,15 +10,15 @@ extern func printf(s:str, ...)
 
 func print_float(f:float)
 begin
-    printf("Your float : %f\n", f)
+    printf("Your float : %f\n", f);
 end
 
 func main -> int
-    x : float = 4.232
+    x : float = 4.232;
 begin
-    print_float(x)
-    print_float(756.231434)
+    print_float(x);
+    print_float(756.231434);
     
-    return 0
+    return 0;
 end
 

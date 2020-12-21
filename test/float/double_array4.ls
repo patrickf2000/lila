@@ -9,33 +9,33 @@
 extern func printf(s:str, ...)
 
 func test1
-    numbers : double[10] = array
-    x : double = 0.0
-    i : int = 5
+    numbers : double[10] = array;
+    x : double = 0.0;
+    i : int = 5;
 begin
-    numbers[i+1] = 22.0
+    numbers[i+1] = 22.0;
     
-    x = numbers[6]
+    x = numbers[6];
     
-    printf("X: %f\n", x)
+    printf("X: %f\n", x);
 end
 
 func test2
-    numbers : double[10] = array
-    x : double = 0.0
-    i : int = 5
+    numbers : double[10] = array;
+    x : double = 0.0;
+    i : int = 5;
 begin
-    numbers[6] = 25.0
+    numbers[6] = 25.0;
     
-    x = numbers[i+1]
+    x = numbers[i+1];
     
-    printf("X: %f\n", x)
+    printf("X: %f\n", x);
 end
 
 func main -> int
 begin
-    test1()
-    test2()
+    test1();
+    test2();
     
-    return 0
+    return 0;
 end

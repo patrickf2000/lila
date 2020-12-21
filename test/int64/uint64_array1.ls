@@ -9,32 +9,32 @@
 extern func printf(s:str, ...)
 
 func test1
-    numbers : uint64[10] = array
-    x : uint64 = 0
+    numbers : uint64[10] = array;
+    x : uint64 = 0;
 begin
-    numbers[3] = 22
+    numbers[3] = 22;
     
-    x = numbers[3]
+    x = numbers[3];
     
-    printf("X: %d\n", x)
+    printf("X: %d\n", x);
 end
 
 func test2
-    numbers : uint64[10] = array
-    x : uint64 = 0
-    i : int = 5
+    numbers : uint64[10] = array;
+    x : uint64 = 0;
+    i : int = 5;
 begin
-    numbers[i] = 25
+    numbers[i] = 25;
     
-    x = numbers[i]
+    x = numbers[i];
     
-    printf("X: %d\n", x)
+    printf("X: %d\n", x);
 end
 
 func main -> int
 begin
-    test1()
-    test2()
+    test1();
+    test2();
     
-    return 0
+    return 0;
 end

@@ -11,24 +11,24 @@ extern func puts(s:str)
 
 func get_float -> float
 begin
-    return 5.443
+    return 5.443;
 end
 
 func get_double -> double
 begin
-    return 2.00001
+    return 2.00001;
 end
 
 func main -> int
-    f : float = 0.0
-    d : double = 0.0
+    f : float = 0.0;
+    d : double = 0.0;
 begin
-    f = get_float()
-    printf("F: %f\n", f)
+    f = get_float();
+    printf("F: %f\n", f);
     
-    d = get_double()
-    printf("D: %f\n", d)
+    d = get_double();
+    printf("D: %f\n", d);
     
-    return 0
+    return 0;
 end
 

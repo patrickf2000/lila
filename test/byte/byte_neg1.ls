@@ -14,47 +14,47 @@
 extern func printf(s:str, ...)
 
 func test1
-    x : byte = -6 + -9
+    x : byte = -6 + -9;
 begin
-    printf("X: %d\n", x)
+    printf("X: %d\n", x);
 end
 
 func test2
-    x : byte = -9
-    y : byte = 0
+    x : byte = -9;
+    y : byte = 0;
 begin
-    y = 20 + x - -9
+    y = 20 + x - -9;
     
-    printf("X: %d\n", x)
-    printf("Y: %d\n", y)
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func test3
-    x, y : byte = 0
+    x, y : byte = 0;
 begin
-    x = 9
-    y = -x
+    x = 9;
+    y = -x;
     
-    printf("X: %d\n", x)
-    printf("Y: %d\n", y)
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func test4
-    x, y : byte = 0
+    x, y : byte = 0;
 begin
-    x = 10
-    y = -x + 30 + -x
+    x = 10;
+    y = -x + 30 + -x;
     
-    printf("X: %d\n", x)
-    printf("Y: %d\n", y)
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func main -> int
 begin
-    test1()
-    test2()
-    test3()
-    test4()
+    test1();
+    test2();
+    test3();
+    test4();
 
-    return 0
+    return 0;
 end

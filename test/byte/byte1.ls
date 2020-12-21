@@ -10,14 +10,14 @@
 extern func puts(s:str)
 
 func main -> int
-    x : byte = 0x45
+    x : byte = 0x45;
 begin
     
-    printf("%x\n", x)
-    printf("%x\n", 0xAA)
+    printf("%x\n", x);
+    printf("%x\n", 0xAA);
     
-    x = 0x88
-    printf("%x\n", x)
+    x = 0x88;
+    printf("%x\n", x);
     
-    return 0
+    return 0;
 end

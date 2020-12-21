@@ -18,28 +18,28 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : float[10] = array
-    i : int = 0
-    x : float = 1.0
+    numbers : float[10] = array;
+    i : int = 0;
+    x : float = 1.0;
 begin
     
     while i < 10
-        numbers[i] = x * 2.3
+        numbers[i] = x * 2.3;
         
-        x = x + 1.0
-        i = i + 1
+        x = x + 1.0;
+        i = i + 1;
     end
     
-    i = 0
+    i = 0;
     while i < 10
-        x = numbers[i]
-        printf("%f\n", x)
+        x = numbers[i];
+        printf("%f\n", x);
         
-        i = i + 1
+        i = i + 1;
     end
     
-    printf("Done\n")
+    printf("Done\n");
     
-    return 0
+    return 0;
 end
 

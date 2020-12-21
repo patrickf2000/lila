@@ -8,14 +8,14 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : double[10] = array
-    x : double = 0.0
+    numbers : double[10] = array;
+    x : double = 0.0;
 begin
-    numbers[3] = 3.14
+    numbers[3] = 3.14;
     
-    x = numbers[3]
+    x = numbers[3];
     
-    printf("X: %f\n", x)
+    printf("X: %f\n", x);
     
-    return 0
+    return 0;
 end

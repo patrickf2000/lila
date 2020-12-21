@@ -11,15 +11,15 @@ extern func puts(s:str)
 
 func print_two(x:ubyte, y:ubyte)
 begin
-    printf("X: %x\n", x)
-    printf("Y: %x\n", y)
+    printf("X: %x\n", x);
+    printf("Y: %x\n", y);
 end
 
 func main -> int
-    x : ubyte = 0xA4
+    x : ubyte = 0xA4;
 begin
-    print_two(x, 0x55)
+    print_two(x, 0x55);
     
-    return 0
+    return 0;
 end
 

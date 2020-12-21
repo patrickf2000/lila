@@ -12,38 +12,38 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    x, y : double = 3.14
+    x, y : double = 3.14;
 begin
     
     if x == y
-        puts("Equal")
+        puts("Equal");
     else
-        puts("Not equal")
+        puts("Not equal");
     end
     
-    y = 4.44
+    y = 4.44;
     if x != y
-        puts("Not equal")
+        puts("Not equal");
     else
-        puts("Equal")
+        puts("Equal");
     end
     
-    y = 5.5532
+    y = 5.5532;
     if x == y
-        puts("Equal")
+        puts("Equal");
     elif x < y
-        puts("Less")
+        puts("Less");
     else
-        puts("Idk")
+        puts("Idk");
     end
     
-    y = 1.1000009
+    y = 1.1000009;
     if x > y
-        puts("Greater")
+        puts("Greater");
     else
-        puts("Idk")
+        puts("Idk");
     end
     
-    return 0
+    return 0;
 end
 

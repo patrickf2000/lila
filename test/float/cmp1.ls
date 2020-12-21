@@ -12,35 +12,35 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    x : float = 3.14
+    x : float = 3.14;
 begin
     
     if x == 3.14
-        puts("Equal")
+        puts("Equal");
     else
-        puts("Not equal")
+        puts("Not equal");
     end
     
     if x != 4.44
-        puts("Not equal")
+        puts("Not equal");
     else
-        puts("Equal")
+        puts("Equal");
     end
     
     if x == 5.5532
-        puts("Equal")
+        puts("Equal");
     elif x < 5.5532
-        puts("Less")
+        puts("Less");
     else
-        puts("Idk")
+        puts("Idk");
     end
     
     if x > 1.1000009
-        puts("Greater")
+        puts("Greater");
     else
-        puts("Idk")
+        puts("Idk");
     end
     
-    return 0
+    return 0;
 end
 

@@ -13,23 +13,23 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : short = 4
-    a1, a2, a3, a4, a5 : short = 0
+    x : short = 4;
+    a1, a2, a3, a4, a5 : short = 0;
 begin
     
-    a1 = x & 5
-    a2 = x | 5
-    a3 = x ^ 5
-    a4 = x << 2
-    a5 = x >> 2
+    a1 = x & 5;
+    a2 = x | 5;
+    a3 = x ^ 5;
+    a4 = x << 2;
+    a5 = x >> 2;
     
-    printf("X = %d\n", x)
-    printf("x & 5 = %x\n", a1)
-    printf("x | 5 = %x\n", a2)
-    printf("x ^ 5 = %x\n", a3)
-    printf("x << 2 = %x\n", a4)
-    printf("x >> 2 = %x\n", a5)
+    printf("X = %d\n", x);
+    printf("x & 5 = %x\n", a1);
+    printf("x | 5 = %x\n", a2);
+    printf("x ^ 5 = %x\n", a3);
+    printf("x << 2 = %x\n", a4);
+    printf("x >> 2 = %x\n", a5);
     
-    return 0
+    return 0;
 end
 

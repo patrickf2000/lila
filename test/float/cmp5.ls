@@ -10,21 +10,21 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    x : float = 3.14
+    x : float = 3.14;
 begin
     
     if 3.14 == 3.14
-        puts("Equal")
+        puts("Equal");
     else
-        puts("Not equal")
+        puts("Not equal");
     end
     
     if 3.14 == x
-        puts("Equal")
+        puts("Equal");
     else
-        puts("Not equal")
+        puts("Not equal");
     end
     
-    return 0
+    return 0;
 end
 

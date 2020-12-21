@@ -12,26 +12,26 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : int64 = 20
-    a1 : int64 = 0
-    a2 : int64 = 0
-    a3 : int64 = 0
-    a4 : int64 = 0
-    a5 : int64 =0
+    x : int64 = 20;
+    a1 : int64 = 0;
+    a2 : int64 = 0;
+    a3 : int64 = 0;
+    a4 : int64 = 0;
+    a5 : int64 = 0;
 begin
     
-    a1 = x + 5
-    a2 = x - 5
-    a3 = x * 5
-    a4 = x / 5
-    a5 = x % 6
+    a1 = x + 5;
+    a2 = x - 5;
+    a3 = x * 5;
+    a4 = x / 5;
+    a5 = x % 6;
     
-    printf("x + 5 = %d\n", a1)
-    printf("x - 5 = %d\n", a2)
-    printf("x * 5 = %d\n", a3)
-    printf("x / 5 = %d\n", a4)
-    printf("x % 6 = %d\n", a5)
+    printf("x + 5 = %d\n", a1);
+    printf("x - 5 = %d\n", a2);
+    printf("x * 5 = %d\n", a3);
+    printf("x / 5 = %d\n", a4);
+    printf("x % 6 = %d\n", a5);
     
-    return 0
+    return 0;
 end
 

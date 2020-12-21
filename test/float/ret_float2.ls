@@ -10,27 +10,27 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func get_float -> float
-    x : float = 132.32222
+    x : float = 132.32222;
 begin
-    return x
+    return x;
 end
 
 func get_double -> double
-    x : double = 1234.5678
+    x : double = 1234.5678;
 begin
-    return x
+    return x;
 end
 
 func main -> int
-    f : float = 0.0
-    d : double = 0.0
+    f : float = 0.0;
+    d : double = 0.0;
 begin
-    f = get_float()
-    printf("F: %f\n", f)
+    f = get_float();
+    printf("F: %f\n", f);
     
-    d = get_double()
-    printf("D: %f\n", d)
+    d = get_double();
+    printf("D: %f\n", d);
     
-    return 0
+    return 0;
 end
 
