@@ -15,6 +15,8 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+use std::collections::HashMap;
+
 use crate::lex::*;
 
 // Represents AST statement types
@@ -113,6 +115,7 @@ pub struct AstFunc {
     pub statements : Vec<AstStmt>,
     pub args : Vec<AstStmt>,
     pub modifiers : Vec<AstMod>,
+    pub enums : Vec<AstEnum>,
     pub line : String,
 }
 
@@ -124,6 +127,13 @@ pub struct AstConst {
     
     pub line : String,
     pub line_no : i32,
+}
+
+// Represents an enumeration
+pub struct AstEnum {
+    pub name : String,
+    pub data_type : AstMod,
+    pub values : HashMap<String, i32>,
 }
 
 // Represents a statement
@@ -216,6 +226,20 @@ impl AstConst {
     }
 }
 
+// Enum implementation
+impl AstEnum {
+    pub fn print(&self) {
+        print!("    ");
+        print!("ENUM {} ", self.name);
+        
+        for (name,val) in self.values.iter() {
+            print!("{}({}) ", name, val);
+        }
+        
+        println!("");
+    }
+}
+
 // Function implementation
 impl AstFunc {
     pub fn print(&self) {
@@ -234,6 +258,10 @@ impl AstFunc {
         
         for arg in self.args.iter() {
             arg.print(true);
+        }
+        
+        for e in self.enums.iter() {
+            e.print();
         }
         
         for stmt in self.statements.iter() {
@@ -399,6 +427,7 @@ pub fn create_extern_func(name : String) -> AstFunc {
         statements : Vec::new(),
         args : Vec::new(),
         modifiers : Vec::new(),
+        enums : Vec::new(),
         line : String::new(),
     }
 }
@@ -410,6 +439,7 @@ pub fn create_func(name : String) -> AstFunc {
         statements : Vec::new(),
         args : Vec::new(),
         modifiers : Vec::new(),
+        enums : Vec::new(),
         line : String::new(),
     }
 }
@@ -447,6 +477,12 @@ pub fn add_stmt(tree : &mut AstTree, stmt : AstStmt) {
     let top_func_pos = tree.functions.len() - 1;
     let top_func = &mut tree.functions[top_func_pos];
     &top_func.statements.push(stmt);
+}
+
+pub fn add_func_enum(tree : &mut AstTree, new_enum : AstEnum) {
+    let top_func_pos = tree.functions.len() - 1;
+    let top_func = &mut tree.functions[top_func_pos];
+    &top_func.enums.push(new_enum);
 }
 
 pub fn create_byte(val : u8) -> AstArg {

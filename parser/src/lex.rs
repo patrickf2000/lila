@@ -25,6 +25,8 @@ pub enum Token {
     Module,
     Use,
     
+    Enum,
+    
     Extern,
     Func,
     LdArg,
@@ -368,6 +370,7 @@ impl Lex {
             "..." => token = Token::Any,
             "module" => token = Token::Module,
             "use" => token = Token::Use,
+            "enum" => token = Token::Enum,
             "extern" => token = Token::Extern,
             "func" => token = Token::Func,
             "ldarg" => token = Token::LdArg,
