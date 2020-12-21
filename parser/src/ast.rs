@@ -131,6 +131,7 @@ pub struct AstConst {
 }
 
 // Represents an enumeration
+#[derive(Clone)]
 pub struct AstEnum {
     pub name : String,
     pub data_type : AstMod,

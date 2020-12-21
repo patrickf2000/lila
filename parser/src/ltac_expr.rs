@@ -513,6 +513,32 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     continue;
                 }
                 
+                // Check enumerated values
+                // TODO: I don't like this
+                match var.data_type {
+                    DataType::Enum(ref name) => {
+                        match builder.clone().enums.get(name) {
+                            Some(t) => {
+                                let num = match t.values.get(&arg.str_val) {
+                                    Some(n) => *n,
+                                    None => 0,
+                                };
+                                
+                                instr.arg2 = LtacArg::I32(num);
+                            },
+                    
+                            None => instr.arg2 = LtacArg::Empty,
+                        }
+                    },
+                    
+                    _ => {},
+                }
+                
+                if instr.arg2 != LtacArg::Empty {
+                    builder.file.code.push(instr.clone());
+                    continue;
+                }
+                
                 // Check functions
                 match builder.clone().functions.get(&arg.str_val) {
                     Some(t) => {

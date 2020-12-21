@@ -8,6 +8,10 @@ func main -> int
     t : Token = X;
 begin
     printf("%d\n", x);
+    printf("T: %d\n", t);
+    
+    t = Y;
+    printf("T: %d\n", t);
     
     return 0;
 end

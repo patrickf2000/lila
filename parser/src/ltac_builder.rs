@@ -81,6 +81,7 @@ pub struct LtacBuilder {
     pub global_consts : HashMap<String, LtacArg>,
     
     // Variable-related values
+    pub enums : HashMap<String, AstEnum>,        // HashMap for easier searching
     pub vars : HashMap<String, Var>,
     pub stack_pos : i32,
     
@@ -110,6 +111,7 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         current_func : String::new(),
         current_type : DataType::Void,
         global_consts : HashMap::new(),
+        enums : HashMap::new(),
         vars : HashMap::new(),
         stack_pos : 0,
         block_layer : 0,
@@ -262,6 +264,14 @@ impl LtacBuilder {
                 // Set the current function and type
                 self.current_func = func.name.clone();
                 
+                // Copy the enumerations
+                self.enums.clear();
+                
+                for e in func.enums.iter() {
+                    self.enums.insert(e.name.clone(), e.clone());
+                }
+                
+                // Set function type
                 match self.functions.get(&self.current_func) {
                     Some(t) => self.current_type = t.clone(),
                     None => self.current_type = DataType::Void,
