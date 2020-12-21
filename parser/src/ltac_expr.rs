@@ -30,11 +30,13 @@ use crate::ltac_func::*;
 
 // Builds assignments for numerical variables
 pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {
+    builder.syntax.set_data(line);
+
     let args = &line.args;
     let first_type = args.first().unwrap().arg_type.clone();
     let reg_no = 1;
     
-    if !build_var_expr(builder, args, line, var, reg_no) {
+    if !build_var_expr(builder, args, var, reg_no) {
         return false;
     }
     
@@ -78,7 +80,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 match builder.vars.get(&first_arg.str_val) {
                     Some(v) => instr.arg1 = LtacArg::MemOffsetMem(var.pos, v.pos, offset_size),
                     None => {
-                        builder.syntax.ltac_error(line, "Invalid offset variable.".to_string());
+                        builder.syntax.ltac_error2("Invalid offset variable.".to_string());
                         return false;
                     },
                 }
@@ -91,7 +93,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
                 is_param : false,
             };
             
-            build_var_expr(builder, &line.sub_args, &line, &var2, 0);
+            build_var_expr(builder, &line.sub_args, &var2, 0);
             instr.arg1 = LtacArg::MemOffsetReg(var.pos, 0, offset_size);
         }
     }
@@ -103,7 +105,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
 
 // TODO: I would eventually like to get rid of the "line" parameter
 // Doing so may require work in the ltac_builder module.
-fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstStmt, var : &Var, reg_no : i32) -> bool {
+fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, reg_no : i32) -> bool {
 
     // The control variable for negatives
     let mut negate_next = false;
@@ -139,7 +141,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             
             // Right paren- decrement working register
             AstArgType::OpRParen => {
-                build_var_expr(builder, &sub_expr, line, var, reg_no+1);
+                build_var_expr(builder, &sub_expr, var, reg_no+1);
                 
                 instr.arg2 = reg_for_type(&var.data_type, reg_no+1);
                 builder.file.code.push(instr.clone());
@@ -151,7 +153,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             // Assign byte literals
             AstArgType::ByteL => {
                 if negate_next {
-                    builder.syntax.ltac_error(&line, "Negation invalid for this type.".to_string());
+                    builder.syntax.ltac_error2("Negation invalid for this type.".to_string());
                     return false;
                 }
             
@@ -160,7 +162,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
                     instr.arg2 = LtacArg::UByte(arg.u8_val);
                 } else {
-                    builder.syntax.ltac_error(&line, "Invalid use of byte literal.".to_string());
+                    builder.syntax.ltac_error2("Invalid use of byte literal.".to_string());
                     return false;
                 }
                 
@@ -170,7 +172,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
             // Assign short literals
             AstArgType::ShortL => {
                 if negate_next {
-                    builder.syntax.ltac_error(&line, "Negation invalid for this type.".to_string());
+                    builder.syntax.ltac_error2("Negation invalid for this type.".to_string());
                     return false;
                 }
                 
@@ -179,7 +181,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
                     instr.arg2 = LtacArg::U16(arg.u16_val);
                 } else {
-                    builder.syntax.ltac_error(&line, "Invalid use of short literal.".to_string());
+                    builder.syntax.ltac_error2("Invalid use of short literal.".to_string());
                     return false;
                 }
                     
@@ -296,13 +298,13 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     
                 // Invalid
                 } else {
-                    builder.syntax.ltac_error(&line, "Invalid use of integer.".to_string());
+                    builder.syntax.ltac_error2("Invalid use of integer.".to_string());
                     return false;
                 }
                 
                 // If the negate flag is still active at this point, we used it in the wrong place.
                 if negate_next {
-                    builder.syntax.ltac_error(&line, "Negation invalid for this type.".to_string());
+                    builder.syntax.ltac_error2("Negation invalid for this type.".to_string());
                     return false;
                 }
             },
@@ -322,7 +324,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     builder.file.code.push(instr.clone());
                     
                 } else {
-                    builder.syntax.ltac_error(&line, "Invalid use of float literal.".to_string());
+                    builder.syntax.ltac_error2("Invalid use of float literal.".to_string());
                     return false;
                 }
                 
@@ -338,7 +340,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     builder.file.code.push(instr.clone());
                     
                 } else {
-                    builder.syntax.ltac_error(&line, "Invalid use of char literal.".to_string());
+                    builder.syntax.ltac_error2("Invalid use of char literal.".to_string());
                 }
             },
             
@@ -380,7 +382,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     match builder.vars.get(&first_arg.str_val) {
                                         Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
                                         None => {
-                                            builder.syntax.ltac_error(line, "Invalid offset variable.".to_string());
+                                            builder.syntax.ltac_error2("Invalid offset variable.".to_string());
                                             return false;
                                         },
                                     };
@@ -399,7 +401,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                     is_param : false,
                                 };
                                 
-                                build_var_expr(builder, &arg.sub_args, &line, &var2, 0);
+                                build_var_expr(builder, &arg.sub_args, &var2, 0);
                                 
                                 let mut instr2 = mov_for_type(&v.data_type);
                                 instr2.arg1 = reg_for_type(&v.data_type, 0);
@@ -468,7 +470,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                                 },
                                 
                                 _ => {
-                                    builder.syntax.ltac_error(line, "Invalid use of negation operator.".to_string());
+                                    builder.syntax.ltac_error2("Invalid use of negation operator.".to_string());
                                     return false;
                                 },
                             }
@@ -497,7 +499,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 // Check system call
                 if arg.str_val == "syscall" {
                     if var.data_type != DataType::Int && var.data_type != DataType::UInt {
-                        builder.syntax.ltac_error(line, "You can only assign system call returns to integers.".to_string());
+                        builder.syntax.ltac_error2("You can only assign system call returns to integers.".to_string());
                         return false;
                     }
                     
@@ -544,7 +546,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                 instr.arg2 = n_arg;
                 
                 if error {
-                    builder.syntax.ltac_error(line, "Invalid return.".to_string());
+                    builder.syntax.ltac_error2("Invalid return.".to_string());
                     return false;
                 }
                 
@@ -563,7 +565,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     let mut msg = "Invalid function, constant, or variable name: ".to_string();
                     msg.push_str(&arg.str_val);
                 
-                    builder.syntax.ltac_error(line, msg);
+                    builder.syntax.ltac_error2(msg);
                     return false;
                 }
                 
@@ -611,7 +613,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Add),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of addition operator.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of addition operator.".to_string());
                         return false;
                     },
                 }
@@ -631,7 +633,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Sub),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of subtraction operator.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of subtraction operator.".to_string());
                         return false;
                     },
                 }
@@ -655,7 +657,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Mul),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of multiplication operator.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of multiplication operator.".to_string());
                         return false;
                     },
                 }
@@ -679,7 +681,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Div),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of division operator.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of division operator.".to_string());
                         return false;
                     },
                 }
@@ -701,7 +703,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::U64Mod),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Modulo is only valid with integer values.".to_string());
+                        builder.syntax.ltac_error2("Modulo is only valid with integer values.".to_string());
                         return false;
                     },
                 }
@@ -721,7 +723,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64And),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of logical and.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of logical and.".to_string());
                         return false;
                     },
                 }
@@ -741,7 +743,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Or),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of logical or.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of logical or.".to_string());
                         return false;
                     },
                 }
@@ -761,7 +763,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Xor),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of logical xor.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of logical xor.".to_string());
                         return false;
                     },
                 }
@@ -781,7 +783,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Lsh),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of left shift.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of left shift.".to_string());
                         return false;
                     },
                 }
@@ -801,7 +803,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, line : &AstSt
                     DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Rsh),
                     
                     _ => {
-                        builder.syntax.ltac_error(line, "Invalid use of right shift.".to_string());
+                        builder.syntax.ltac_error2("Invalid use of right shift.".to_string());
                         return false;
                     },
                 }

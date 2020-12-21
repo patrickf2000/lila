@@ -29,11 +29,15 @@ pub struct SyntaxError {
 #[derive(Clone)]
 pub struct ErrorManager {
     pub errors : Vec<SyntaxError>,
+    pub current_ln : String,
+    pub current_ln_no : i32,
 }
 
 pub fn create_error_manager() -> ErrorManager {
     ErrorManager {
         errors : Vec::new(),
+        current_ln : String::new(),
+        current_ln_no : 0,
     }
 }
 
@@ -59,6 +63,22 @@ impl ErrorManager {
         };
         
         self.errors.push(error);
+    }
+    
+    pub fn ltac_error2(&mut self, msg : String) {
+        let error = SyntaxError {
+            line_no : self.current_ln_no,
+            line : self.current_ln.clone(),
+            message : msg,
+        };
+        
+        self.errors.push(error);
+    }
+    
+    // Set the current line to make it easier to call LTAC errors
+    pub fn set_data(&mut self, stmt : &AstStmt) {
+        self.current_ln = stmt.line.clone();
+        self.current_ln_no = stmt.line_no;
     }
     
     // Called to print any syntax errors
