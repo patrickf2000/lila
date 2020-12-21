@@ -12,45 +12,45 @@ extern func puts(s:str)
 extern func printf(s:str, ...)
 
 func print_numbers(list:int[], length:int)
-    i : int = 0
-    x : int = 0
+    i : int = 0;
+    x : int = 0;
 begin
-    printf("[")
+    printf("[");
 
     while i < length
-        x = list[i]
-        printf("%d ", x)
+        x = list[i];
+        printf("%d ", x);
         
-        i = i + 1
+        i = i + 1;
     end
     
-    printf("]\n")
+    printf("]\n");
 end
 
 func init_numbers(list:int[], length:int, seed:int)
-    i : int = 0
+    i : int = 0;
 begin
 
     while i < length
-        list[i] = i * seed
-        i = i + 1
+        list[i] = i * seed;
+        i = i + 1;
     end
 end
 
 func main -> int
-    numbers1 : int[8] = array
-    numbers2 : int[8] = array
+    numbers1 : int[8] = array;
+    numbers2 : int[8] = array;
 begin
     
-    init_numbers(numbers1, 8, 2)
-    init_numbers(numbers2, 8, 31)
+    init_numbers(numbers1, 8, 2);
+    init_numbers(numbers2, 8, 31);
     
-    puts("Numbers1:")
-    print_numbers(numbers1, 8)
+    puts("Numbers1:");
+    print_numbers(numbers1, 8);
     
-    puts("Numbers2:")
-    print_numbers(numbers2, 8)
+    puts("Numbers2:");
+    print_numbers(numbers2, 8);
     
-    return 0
+    return 0;
 end
 

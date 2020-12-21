@@ -10,13 +10,13 @@
 extern func puts(s:str)
 
 func main -> int
-    x : int = 0x11223344
+    x : int = 0x11223344;
 begin
-    printf("%x\n", x)
-    printf("%x\n", 0xAABBCCDD)
+    printf("%x\n", x);
+    printf("%x\n", 0xAABBCCDD);
     
-    x = 0x11118888
-    printf("%x\n", x)
+    x = 0x11118888;
+    printf("%x\n", x);
     
-    return 0
+    return 0;
 end

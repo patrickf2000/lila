@@ -10,21 +10,21 @@
 extern func puts(s:str)
 
 func main() -> int
-    x : int = 3
+    x : int = 3;
 begin
     
     if x == 5
-        puts("Correct")
+        puts("Correct");
     elif x == 3
-        puts("Also correct!")
+        puts("Also correct!");
         if x == 3
-            puts("Idk!!")
+            puts("Idk!!");
         end
     else
-        puts("Idk")
+        puts("Idk");
     end
 
-    puts("Hello!")
-    return 0
+    puts("Hello!");
+    return 0;
 end
 

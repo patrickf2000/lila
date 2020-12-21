@@ -506,7 +506,7 @@ fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String, 
     }
     
     // Tokens being assigned to the array
-    if !build_args(scanner, &mut array_assign, Token::Eof, syntax) {
+    if !build_args(scanner, &mut array_assign, Token::Semicolon, syntax) {
         return false;
     }
     
