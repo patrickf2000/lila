@@ -68,6 +68,7 @@ run_test 'test/loop/*.ls' 'clib' $flags
 run_test 'test/ldarg/*.ls' 'clib' $flags
 run_test 'test/const/*.ls' 'clib' $flags
 run_test 'test/func/*.ls' 'clib' $flags
+run_test 'test/enum/*.ls' 'clib' $flags
 
 run_test 'test/errors/*.ls' 'clib' "error"
 run_test 'test/errors/ltac/*.ls' "clib" "error"
