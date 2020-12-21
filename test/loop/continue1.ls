@@ -26,21 +26,21 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x : int = 0
+    x : int = 0;
 begin
     while x < 20 
-        x = x + 1
+        x = x + 1;
         
         if x == 5
-            continue
+            continue;
         elif x == 10
-            continue
+            continue;
         elif x == 15
-            continue
+            continue;
         end
         
-        printf("Num: %d\n", x)
+        printf("Num: %d\n", x);
     end
     
-    return 0
+    return 0;
 end

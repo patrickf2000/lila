@@ -48,27 +48,27 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x, i : int = 0
+    x, i : int = 0;
 begin 
     while x <= 30 
         if x > 20
-            break
+            break;
         end
         
-        i = 0
+        i = 0;
         while i <= x
-            printf("*")
-            i = i + 1
+            printf("*");
+            i = i + 1;
             
             if i == 10
-                break
+                break;
             end
         end
-        puts("")
+        puts("");
         
-        printf("Num: %d\n", x)
-        x = x + 1
+        printf("Num: %d\n", x);
+        x = x + 1;
     end
     
-    return 0
+    return 0;
 end

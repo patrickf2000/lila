@@ -239,14 +239,26 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
             new_layer += 1;
         },
         
+        // TODO: For break and continue
+        // Create a common function for the lack of semicolons
         Token::Break if in_code => {
             let br = ast::create_stmt(AstStmtType::Break, scanner);
             ast::add_stmt(tree, br);
+            
+            if scanner.get_token() != Token::Semicolon {
+                syntax.syntax_error(scanner, "Expected terminator".to_string());
+                return (false, 0, false, false);
+            }
         },
         
         Token::Continue if in_code => {
             let cont = ast::create_stmt(AstStmtType::Continue, scanner);
             ast::add_stmt(tree, cont);
+            
+            if scanner.get_token() != Token::Semicolon {
+                syntax.syntax_error(scanner, "Expected terminator".to_string());
+                return (false, 0, false, false);
+            }
         },
         
         Token::Eof => {},
@@ -470,6 +482,13 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
         tree.constants.push(constant);
     } else {
         syntax.syntax_error(scanner, "Constants are not yet supported on the local level.".to_string());
+        return false;
+    }
+    
+    token = scanner.get_token();
+    
+    if token != Token::Semicolon {
+        syntax.syntax_error(scanner, "Expected terminator.".to_string());
         return false;
     }
     

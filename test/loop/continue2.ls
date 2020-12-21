@@ -41,41 +41,41 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    x, i : int = 0
+    x, i : int = 0;
 begin
     while x < 20 
-        x = x + 1
+        x = x + 1;
         
         if x == 5
-            continue
+            continue;
         elif x == 10
-            continue
+            continue;
         elif x == 15
-            continue
+            continue;
         end
         
-        i = 0
+        i = 0;
         while i < x
             if i == 15
-                break
+                break;
             end
             
             if i == 4
-                printf("|")
+                printf("|");
             elif i == 8
-                printf("|")
+                printf("|");
             elif i == 12
-                printf("|")
+                printf("|");
             else
-                printf("*")
+                printf("*");
             end
             
-            i = i + 1
+            i = i + 1;
         end
-        puts("")
+        puts("");
         
-        printf("Num: %d\n", x)
+        printf("Num: %d\n", x);
     end
     
-    return 0
+    return 0;
 end

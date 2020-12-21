@@ -311,7 +311,7 @@ pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String,
     let token = scanner.get_token();
         
     if token != Token::Semicolon {
-        syntax.syntax_error(scanner, "Expected terminator.".to_string());
+        syntax.syntax_error(scanner, "Expected terminator".to_string());
         return false;
     }
     

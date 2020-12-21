@@ -9,20 +9,20 @@
 extern func printf(s:str, ...)
 
 func print_num(msg:str, ...)
-    x, y : double = 0.0
+    x, y : double = 0.0;
 begin
-    x = ldarg(1, double)
-    y = ldarg(2, double)
+    x = ldarg(1, double);
+    y = ldarg(2, double);
     
-    printf("%s: %f, %f\n", msg, x, y)
+    printf("%s: %f, %f\n", msg, x, y);
 end
 
 func main -> int
-    x : double = 1.1
-    y : double = 1.2
+    x : double = 1.1;
+    y : double = 1.2;
 begin
-    print_num("Numbers: ", 5.5, 5.6)
-    print_num("Numbers: ", x, y)
+    print_num("Numbers: ", 5.5, 5.6);
+    print_num("Numbers: ", x, y);
     
-    return 0
+    return 0;
 end

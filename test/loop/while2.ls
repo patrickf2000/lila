@@ -28,24 +28,24 @@ extern func printf(s:str, ...)
 extern func puts(s:str)
 
 func main -> int
-    x, i : int = 0
+    x, i : int = 0;
 begin
     while x < 10 
         if x == 5
-            puts("Halfway!")
+            puts("Halfway!");
         end
         
-        i = 0
+        i = 0;
         while i < x
-            printf("*")
-            i = i + 1
+            printf("*");
+            i = i + 1;
         end
-        puts("")
+        puts("");
     
-        printf("Num: %d\n", x)
-        x = x + 1
+        printf("Num: %d\n", x);
+        x = x + 1;
     end
     
-    return 0
+    return 0;
 end
 
