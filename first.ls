@@ -9,6 +9,6 @@ begin
     x = 20;
     printf("%d\n", x);
     
-    return 0
+    return 0;
 end
 

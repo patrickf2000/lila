@@ -9,8 +9,8 @@ extern func printf(s:str, ...)
 
 func main -> int
 begin
-    printf("Hello!\n")
+    printf("Hello!\n");
     
-    return 0
+    return 0;
 end
 

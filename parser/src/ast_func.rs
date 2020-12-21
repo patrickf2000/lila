@@ -212,7 +212,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
 pub fn build_return(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let mut ret = ast::create_stmt(AstStmtType::Return, scanner);
     
-    if !build_args(scanner, &mut ret, Token::Eof, syntax) {
+    if !build_args(scanner, &mut ret, Token::Semicolon, syntax) {
         return false;
     }
     
