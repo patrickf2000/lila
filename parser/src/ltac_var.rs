@@ -34,121 +34,145 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
     let name = line.name.clone();
     let ast_data_type = &line.modifiers[0];
     let data_type : DataType;
+    let sub_type : DataType;
     
     match &ast_data_type.mod_type {
         AstModType::Byte => {
             data_type = DataType::Byte;
+            sub_type = DataType::None;
             builder.stack_pos += 1;
-        },
-        
-        AstModType::ByteDynArray => {
-            data_type = DataType::ByteDynArray;
-            builder.stack_pos += 8
         },
         
         AstModType::UByte => {
             data_type = DataType::UByte;
+            sub_type = DataType::None;
             builder.stack_pos += 1;
         },
         
+        AstModType::ByteDynArray => {
+            data_type = DataType::Ptr;
+            sub_type = DataType::Byte;
+            builder.stack_pos += 8
+        },
+        
         AstModType::UByteDynArray => {
-            data_type = DataType::UByteDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::UByte;
             builder.stack_pos += 8;
         },
         
         AstModType::Short => {
             data_type = DataType::Short;
+            sub_type = DataType::None;
             builder.stack_pos += 2;
         },
         
         AstModType::UShort => {
             data_type = DataType::UShort;
+            sub_type = DataType::None;
             builder.stack_pos += 2;
         },
         
         AstModType::ShortDynArray => {
-            data_type = DataType::ShortDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::Short;
             builder.stack_pos += 8;
         },
         
         AstModType::UShortDynArray => {
-            data_type = DataType::UShortDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::UShort;
             builder.stack_pos += 8;
         },
     
         AstModType::Int => {
             data_type = DataType::Int;
+            sub_type = DataType::None;
             builder.stack_pos += 4;
         },
         
         AstModType::UInt => {
             data_type = DataType::UInt;
+            sub_type = DataType::None;
             builder.stack_pos += 4;
         },
         
         AstModType::IntDynArray => {
-            data_type = DataType::IntDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::Int;
             builder.stack_pos += 8
         },
         
         AstModType::UIntDynArray => {
-            data_type = DataType::UIntDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::UInt;
             builder.stack_pos += 8;
         },
         
         AstModType::Int64 => {
             data_type = DataType::Int64;
+            sub_type = DataType::None;
             builder.stack_pos += 8;
         },
         
         AstModType::UInt64 => {
             data_type = DataType::UInt64;
+            sub_type = DataType::None;
             builder.stack_pos += 8;
         },
         
         AstModType::I64DynArray => {
-            data_type = DataType::I64DynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::Int64;
             builder.stack_pos += 8;
         },
         
         AstModType::U64DynArray => {
-            data_type = DataType::U64DynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::UInt64;
             builder.stack_pos += 8;
         },
         
         AstModType::Float => {
             data_type = DataType::Float;
+            sub_type = DataType::None;
             builder.stack_pos += 4;
         },
         
         AstModType::Double => {
             data_type = DataType::Double;
+            sub_type = DataType::None;
             builder.stack_pos += 8;
         },
         
         AstModType::FloatDynArray => {
-            data_type = DataType::FloatDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::Float;
             builder.stack_pos += 8;
         },
         
         AstModType::DoubleDynArray => {
-            data_type = DataType::DoubleDynArray;
+            data_type = DataType::Ptr;
+            sub_type = DataType::Double;
             builder.stack_pos += 8;
         },
         
         AstModType::Char => {
             data_type = DataType::Char;
-            builder.stack_pos += 8;
+            sub_type = DataType::None;
+            builder.stack_pos += 1;
         },
         
         AstModType::Str => {
             data_type = DataType::Str;
+            sub_type = DataType::None;
             builder.stack_pos += 8;
         },
         
         // TODO: We will need better type detection
         AstModType::Enum(ref val) => {
             data_type = DataType::Enum(val.to_string());
+            sub_type = DataType::None;
             builder.stack_pos += 4;
         },
         
@@ -164,6 +188,7 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
     let v = Var {
         pos : builder.stack_pos,
         data_type : data_type,
+        sub_type : sub_type,
         is_param : is_param,
     };
     
@@ -171,7 +196,7 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
     
     // If we have a function argument, add the load instruction
     if is_param {
-        let data_type = ast_to_datatype(ast_data_type);
+        let (data_type, _) = ast_to_datatype(ast_data_type);
         let mem = LtacArg::Mem(builder.stack_pos);
         let ld : LtacInstr;
         
@@ -203,11 +228,7 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     
     let code : bool;
     
-    if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
-       var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
-       var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray ||
-       var.data_type == DataType::I64DynArray || var.data_type == DataType::U64DynArray ||
-       var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray {
+    if var.data_type == DataType::Ptr {
         code = build_dyn_array(builder, &line, &var);
     } else if var.data_type == DataType::Str {
         code = build_str_assign(builder, &line, &var);
@@ -236,7 +257,7 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
             AstArgType::Id => {
                 match &builder.vars.get(&arg.str_val) {
                     Some(v) => {
-                        if v.data_type != DataType::Str && v.data_type != DataType::ByteDynArray && v.data_type != DataType::UByteDynArray {
+                        if v.data_type != DataType::Str && v.sub_type != DataType::Byte && v.sub_type != DataType::UByte {
                             builder.syntax.ltac_error(line, "You can only assign a string to a string.".to_string());
                             return false;
                         }
@@ -255,7 +276,8 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                 if instr.arg2 == LtacArg::Empty {
                     match &builder.clone().functions.get(&arg.str_val) {
                         Some(t) => {
-                            if **t != DataType::Str && **t != DataType::ByteDynArray && **t != DataType::UByteDynArray {
+                            // TODO: Better detection with whether its byte or ubyte
+                            if **t != DataType::Str && **t != DataType::Ptr {
                                 builder.syntax.ltac_error(line, "You can only assign string or byte arrays to string variables.".to_string());
                                 return false;
                             }

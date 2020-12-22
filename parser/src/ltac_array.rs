@@ -39,13 +39,7 @@ pub fn build_array_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
 // An internal function to free any dynamic arrays in the current context
 pub fn free_arrays(builder : &mut LtacBuilder, ignore : String) {
     for (name, var) in &builder.vars {
-        if (var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray ||
-            var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray ||
-            var.data_type == DataType::IntDynArray || var.data_type == DataType::UIntDynArray ||
-            var.data_type == DataType::I64DynArray || var.data_type == DataType::U64DynArray ||
-            var.data_type == DataType::FloatDynArray || var.data_type == DataType::DoubleDynArray)
-            && !var.is_param && *name != ignore {
-            
+        if var.data_type == DataType::Ptr && !var.is_param && *name != ignore {
             let mut pusharg = ltac::create_instr(LtacType::PushArg);
             pusharg.arg1 = LtacArg::Ptr(var.pos);
             pusharg.arg2_val = 1;
@@ -67,12 +61,12 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         let arg = sub_args.last().unwrap();
         let mut size = 4;
         
-        if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray {
+        if var.sub_type == DataType::Byte || var.sub_type == DataType::UByte {
             size = 1;
-        } else if var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray {
+        } else if var.sub_type == DataType::Short || var.sub_type == DataType::UShort {
             size = 2;
-        } else if  var.data_type == DataType::I64DynArray || var.data_type == DataType::U64DynArray
-                || var.data_type == DataType::DoubleDynArray {
+        } else if  var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64
+                || var.sub_type == DataType::Double {
             size = 8;
         }
         
@@ -173,6 +167,7 @@ pub fn build_i32array_vector_math(builder : &mut LtacBuilder, line : &AstStmt, v
     // The last loaded memory position
     let mut last_pos = 0;
 
+    // TODO: This code is kind of awful
     for arg in line.args.iter() {
         match &arg.arg_type {
             AstArgType::Id => {

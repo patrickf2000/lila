@@ -53,22 +53,22 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         instr.arg2_val = top.arg2_val;
         
     } else {
-        instr = mov_for_type(&var.data_type);
+        instr = mov_for_type(&var.data_type, &var.sub_type);
         instr.arg1 = LtacArg::Mem(var.pos);
-        instr.arg2 = reg_for_type(&var.data_type, reg_no);
+        instr.arg2 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
     }
     
     // If we have an array, there's additional work
-    if line.sub_args.len() > 0 {
+    if line.sub_args.len() > 0 && var.data_type == DataType::Ptr {
         let first_arg = line.sub_args.last().unwrap();
         let mut offset_size = 4;
         
-        if var.data_type == DataType::ByteDynArray || var.data_type == DataType::UByteDynArray {
+        if var.sub_type == DataType::Byte|| var.sub_type == DataType::UByte {
             offset_size = 1;
-        } else if var.data_type == DataType::ShortDynArray || var.data_type == DataType::UShortDynArray {
+        } else if var.sub_type == DataType::Short || var.sub_type == DataType::UShort {
             offset_size = 2;
-        } else if var.data_type == DataType::I64DynArray || var.data_type == DataType::U64DynArray 
-            || var.data_type == DataType::DoubleDynArray {
+        } else if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64
+            || var.sub_type == DataType::Double {
             offset_size = 8;
         }
         
@@ -90,6 +90,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
             let var2 = Var {
                 pos : 0,
                 data_type : DataType::Int,
+                sub_type : DataType::None,
                 is_param : false,
             };
             
@@ -110,8 +111,8 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
     // The control variable for negatives
     let mut negate_next = false;
     
-    let mut instr = mov_for_type(&var.data_type);
-    instr.arg1 = reg_for_type(&var.data_type, reg_no);
+    let mut instr = mov_for_type(&var.data_type, &var.sub_type);
+    instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
     
     // Control variables for sub-expressions
     let mut is_sub_expr = false;
@@ -143,7 +144,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             AstArgType::OpRParen => {
                 build_var_expr(builder, &sub_expr, var, reg_no+1);
                 
-                instr.arg2 = reg_for_type(&var.data_type, reg_no+1);
+                instr.arg2 = reg_for_type(&var.data_type, &var.sub_type, reg_no+1);
                 builder.file.code.push(instr.clone());
                 
                 sub_expr = Vec::new();
@@ -157,9 +158,9 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     return false;
                 }
             
-                if var.data_type == DataType::Byte || var.data_type == DataType::ByteDynArray {
+                if var.data_type == DataType::Byte || var.sub_type == DataType::Byte {
                     instr.arg2 = LtacArg::Byte(arg.u8_val as i8);
-                } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
+                } else if var.data_type == DataType::UByte || var.sub_type == DataType::UByte {
                     instr.arg2 = LtacArg::UByte(arg.u8_val);
                 } else {
                     builder.syntax.ltac_error2("Invalid use of byte literal.".to_string());
@@ -176,9 +177,9 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     return false;
                 }
                 
-                if var.data_type == DataType::Short || var.data_type == DataType::ShortDynArray {
+                if var.data_type == DataType::Short || var.sub_type == DataType::Short {
                     instr.arg2 = LtacArg::I16(arg.u16_val as i16);
-                } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
+                } else if var.data_type == DataType::UShort || var.sub_type == DataType::UShort {
                     instr.arg2 = LtacArg::U16(arg.u16_val);
                 } else {
                     builder.syntax.ltac_error2("Invalid use of short literal.".to_string());
@@ -194,7 +195,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             AstArgType::IntL => {
                 // Bytes
                 if var.data_type == DataType::Byte || var.data_type == DataType::Char
-                    || var.data_type == DataType::ByteDynArray {
+                    || var.sub_type == DataType::Byte {
                     let val = arg.u64_val as i32;
                     
                     // TODO: Why the hell is this an error? Its getting thrown when using char values
@@ -215,7 +216,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     builder.file.code.push(instr.clone());
                     
                 // UByte
-                } else if var.data_type == DataType::UByte || var.data_type == DataType::UByteDynArray {
+                } else if var.data_type == DataType::UByte || var.sub_type == DataType::UByte {
                     let val = arg.u64_val as u32;
                     
                     // TODO: Why are we getting this error?
@@ -231,7 +232,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     builder.file.code.push(instr.clone());
                     
                 // Short
-                } else if var.data_type == DataType::Short || var.data_type == DataType::ShortDynArray {
+                } else if var.data_type == DataType::Short || var.sub_type == DataType::Short {
                     let val = arg.u64_val as i32;
                     
                     /*if mem::size_of::<u16>() > (val as usize) {
@@ -251,7 +252,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     builder.file.code.push(instr.clone());
                     
                 // UShort
-                } else if var.data_type == DataType::UShort || var.data_type == DataType::UShortDynArray {
+                } else if var.data_type == DataType::UShort || var.sub_type == DataType::UShort {
                     let val = arg.u64_val as u32;
                     
                     /*if mem::size_of::<u16>() > (val as usize) {
@@ -266,7 +267,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     builder.file.code.push(instr.clone());
                     
                 // Integers and integer arrays
-                } else if var.data_type == DataType::Int || var.data_type == DataType::IntDynArray {
+                } else if var.data_type == DataType::Int || var.sub_type == DataType::Int {
                     let mut val = arg.u64_val as i32;
                     
                     if negate_next {
@@ -277,11 +278,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     instr.arg2 = LtacArg::I32(val);
                     builder.file.code.push(instr.clone());
                     
-                } else if var.data_type == DataType::UInt || var.data_type == DataType::UIntDynArray {
+                } else if var.data_type == DataType::UInt || var.sub_type == DataType::UInt {
                     instr.arg2 = LtacArg::U32(arg.u64_val as u32);
                     builder.file.code.push(instr.clone());
                     
-                } else if var.data_type == DataType::Int64  || var.data_type == DataType::I64DynArray {
+                } else if var.data_type == DataType::Int64  || var.sub_type == DataType::Int64 {
                     let mut val = arg.u64_val as i64;
                     
                     if negate_next {
@@ -292,7 +293,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     instr.arg2 = LtacArg::I64(val);
                     builder.file.code.push(instr.clone());
                     
-                } else if var.data_type == DataType::UInt64 || var.data_type == DataType::U64DynArray {
+                } else if var.data_type == DataType::UInt64 || var.sub_type == DataType::UInt64 {
                     instr.arg2 = LtacArg::U64(arg.u64_val);
                     builder.file.code.push(instr.clone());
                     
@@ -313,12 +314,12 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             // Assign float literals
             
             AstArgType::FloatL => {
-                if var.data_type == DataType::Float || var.data_type == DataType::FloatDynArray {
+                if var.data_type == DataType::Float || var.sub_type == DataType::Float {
                     let name = builder.build_float(arg.f64_val, false, negate_next);
                     instr.arg2 = LtacArg::F32(name);
                     builder.file.code.push(instr.clone());
                 
-                } else if var.data_type == DataType::Double || var.data_type == DataType::DoubleDynArray {
+                } else if var.data_type == DataType::Double || var.sub_type == DataType::Double {
                     let name = builder.build_float(arg.f64_val, true, negate_next);
                     instr.arg2 = LtacArg::F64(name);
                     builder.file.code.push(instr.clone());
@@ -349,6 +350,8 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             // ===============================================================
             // Variables and functions
             
+            // TODO: This really needs to get cleaned up. I started to, there's a separate function near the bottom
+            // for managing any function calls within an expression
             AstArgType::Id => {
                 let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
                 let mut pop_float = true;
@@ -359,13 +362,13 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                         instr.arg2 = LtacArg::Mem(v.pos);
                         
                         let mut size = 1;
-                        if v.data_type == DataType::ShortDynArray || v.data_type == DataType::UShortDynArray {
+                        if v.sub_type == DataType::Short || v.sub_type == DataType::UShort {
                             size = 2;
-                        } else if v.data_type == DataType::IntDynArray  || v.data_type == DataType::UIntDynArray
-                            || v.data_type == DataType::FloatDynArray {
+                        } else if v.sub_type == DataType::Int || v.sub_type == DataType::UInt
+                            || v.sub_type == DataType::Float {
                             size = 4;
-                        } else if  v.data_type == DataType::I64DynArray || v.data_type == DataType::U64DynArray
-                            || v.data_type == DataType::DoubleDynArray {
+                        } else if  v.sub_type == DataType::Int64 || v.sub_type == DataType::UInt64
+                            || v.sub_type == DataType::Double {
                             size = 8;
                         }
                         
@@ -377,7 +380,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                                     let offset = (first_arg.u64_val as i32) * size;
                                     instr.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
                                 } else if first_arg.arg_type == AstArgType::Id {
-                                    let mut instr2 = mov_for_type(&v.data_type);
+                                    let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
                                     
                                     match builder.vars.get(&first_arg.str_val) {
                                         Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
@@ -388,8 +391,8 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                                     };
                                     
                                     // Choose the proper registers
-                                    instr2.arg1 = reg_for_type(&v.data_type, reg_no);
-                                    instr.arg2 = reg_for_type(&v.data_type, reg_no);
+                                    instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, reg_no);
+                                    instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, reg_no);
                                     
                                     builder.file.code.push(instr2);
                                 }
@@ -398,17 +401,18 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                                 let var2 = Var {
                                     pos : 0,
                                     data_type : DataType::Int,
+                                    sub_type : DataType::None,
                                     is_param : false,
                                 };
                                 
                                 build_var_expr(builder, &arg.sub_args, &var2, 0);
                                 
-                                let mut instr2 = mov_for_type(&v.data_type);
-                                instr2.arg1 = reg_for_type(&v.data_type, 0);
+                                let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+                                instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
                                 instr2.arg2 = LtacArg::MemOffsetReg(v.pos, 0, size);
                                 builder.file.code.push(instr2);
                                 
-                                instr.arg2 = reg_for_type(&v.data_type, 0);
+                                instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
                             }
                         }
                         
@@ -418,11 +422,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                         // instr: mov r1, 0
                         //        sub r1, mem
                         if negate_next {
-                            instr.arg2 = reg_for_type(&v.data_type, 0);
+                            instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
                             
                             // The first argument is the same register
-                            let mut instr2 = mov_for_type(&v.data_type);
-                            instr2.arg1 = reg_for_type(&v.data_type, 0);
+                            let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+                            instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
                             
                             match v.data_type {
                                 DataType::Byte => {
@@ -581,8 +585,8 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 let position = position_arg.u64_val as i32;
                 
                 let ast_data_type = arg.sub_modifiers.first().unwrap();
-                let data_type = ast_to_datatype(&ast_data_type);
-                let reg = reg_for_type(&data_type, reg_no+1);
+                let (data_type, sub_type) = ast_to_datatype(&ast_data_type);
+                let reg = reg_for_type(&data_type, &sub_type, reg_no+1);
                 
                 let ld_instr = ldarg_for_type(&data_type, reg.clone(), position);
                 builder.file.code.push(ld_instr);
@@ -605,12 +609,23 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     DataType::UByte => instr = ltac::create_instr(LtacType::U8Add),
                     DataType::Short => instr = ltac::create_instr(LtacType::I16Add),
                     DataType::UShort => instr = ltac::create_instr(LtacType::U16Add),
-                    DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::I32Add),
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::U32Add),
-                    DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::I64Add),
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::U64Add),
-                    DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::F32Add),
-                    DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Add),
+                    DataType::Int => instr = ltac::create_instr(LtacType::I32Add),
+                    DataType::UInt => instr = ltac::create_instr(LtacType::U32Add),
+                    DataType::Int64 => instr = ltac::create_instr(LtacType::I64Add),
+                    DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Add),
+                    DataType::Float => instr = ltac::create_instr(LtacType::F32Add),
+                    DataType::Double => instr = ltac::create_instr(LtacType::F64Add),
+                    
+                    DataType::Ptr if var.sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::I8Add),
+                    DataType::Ptr if var.sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::U8Add),
+                    DataType::Ptr if var.sub_type == DataType::Short => instr = ltac::create_instr(LtacType::I16Add),
+                    DataType::Ptr if var.sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::U16Add),
+                    DataType::Ptr if var.sub_type == DataType::Int => instr = ltac::create_instr(LtacType::I32Add),
+                    DataType::Ptr if var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::U32Add),
+                    DataType::Ptr if var.sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::I64Add),
+                    DataType::Ptr if var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Add),
+                    DataType::Ptr if var.sub_type == DataType::Float => instr = ltac::create_instr(LtacType::F32Add),
+                    DataType::Ptr if var.sub_type == DataType::Double => instr = ltac::create_instr(LtacType::F64Add),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of addition operator.".to_string());
@@ -618,7 +633,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Subtraction
@@ -627,10 +642,17 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 match var.data_type {
                     DataType::Byte => instr = ltac::create_instr(LtacType::I8Sub),
                     DataType::Short => instr = ltac::create_instr(LtacType::I16Sub),
-                    DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::I32Sub),
-                    DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::I64Sub),
-                    DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::F32Sub),
-                    DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Sub),
+                    DataType::Int => instr = ltac::create_instr(LtacType::I32Sub),
+                    DataType::Int64 => instr = ltac::create_instr(LtacType::I64Sub),
+                    DataType::Float => instr = ltac::create_instr(LtacType::F32Sub),
+                    DataType::Double => instr = ltac::create_instr(LtacType::F64Sub),
+                    
+                    DataType::Ptr if var.sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::I8Sub),
+                    DataType::Ptr if var.sub_type == DataType::Short => instr = ltac::create_instr(LtacType::I16Sub),
+                    DataType::Ptr if var.sub_type == DataType::Int => instr = ltac::create_instr(LtacType::I32Sub),
+                    DataType::Ptr if var.sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::I64Sub),
+                    DataType::Ptr if var.sub_type == DataType::Float => instr = ltac::create_instr(LtacType::F32Sub),
+                    DataType::Ptr if var.sub_type == DataType::Double => instr = ltac::create_instr(LtacType::F64Sub),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of subtraction operator.".to_string());
@@ -638,7 +660,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Multiplication
@@ -649,12 +671,23 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     DataType::UByte => instr = ltac::create_instr(LtacType::U8Mul),
                     DataType::Short => instr = ltac::create_instr(LtacType::I16Mul),
                     DataType::UShort => instr = ltac::create_instr(LtacType::U16Mul),
-                    DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::I32Mul),
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::U32Mul),
-                    DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::I64Mul),
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::U64Mul),
-                    DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::F32Mul),
-                    DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Mul),
+                    DataType::Int => instr = ltac::create_instr(LtacType::I32Mul),
+                    DataType::UInt => instr = ltac::create_instr(LtacType::U32Mul),
+                    DataType::Int64 => instr = ltac::create_instr(LtacType::I64Mul),
+                    DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Mul),
+                    DataType::Float => instr = ltac::create_instr(LtacType::F32Mul),
+                    DataType::Double => instr = ltac::create_instr(LtacType::F64Mul),
+                    
+                    DataType::Ptr if var.sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::I8Mul),
+                    DataType::Ptr if var.sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::U8Mul),
+                    DataType::Ptr if var.sub_type == DataType::Short => instr = ltac::create_instr(LtacType::I16Mul),
+                    DataType::Ptr if var.sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::U16Mul),
+                    DataType::Ptr if var.sub_type == DataType::Int => instr = ltac::create_instr(LtacType::I32Mul),
+                    DataType::Ptr if var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::U32Mul),
+                    DataType::Ptr if var.sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::I64Mul),
+                    DataType::Ptr if var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Mul),
+                    DataType::Ptr if var.sub_type == DataType::Float => instr = ltac::create_instr(LtacType::F32Mul),
+                    DataType::Ptr if var.sub_type == DataType::Double => instr = ltac::create_instr(LtacType::F64Mul),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of multiplication operator.".to_string());
@@ -662,7 +695,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Division
@@ -673,12 +706,23 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     DataType::UByte => instr = ltac::create_instr(LtacType::U8Div),
                     DataType::Short => instr = ltac::create_instr(LtacType::I16Div),
                     DataType::UShort => instr = ltac::create_instr(LtacType::U16Div),
-                    DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::I32Div),
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::U32Div),
-                    DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::I64Div),
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::U64Div),
-                    DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::F32Div),
-                    DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::F64Div),
+                    DataType::Int => instr = ltac::create_instr(LtacType::I32Div),
+                    DataType::UInt => instr = ltac::create_instr(LtacType::U32Div),
+                    DataType::Int64 => instr = ltac::create_instr(LtacType::I64Div),
+                    DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Div),
+                    DataType::Float => instr = ltac::create_instr(LtacType::F32Div),
+                    DataType::Double => instr = ltac::create_instr(LtacType::F64Div),
+                    
+                    DataType::Ptr if var.sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::I8Div),
+                    DataType::Ptr if var.sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::U8Div),
+                    DataType::Ptr if var.sub_type == DataType::Short => instr = ltac::create_instr(LtacType::I16Div),
+                    DataType::Ptr if var.sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::U16Div),
+                    DataType::Ptr if var.sub_type == DataType::Int => instr = ltac::create_instr(LtacType::I32Div),
+                    DataType::Ptr if var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::U32Div),
+                    DataType::Ptr if var.sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::I64Div),
+                    DataType::Ptr if var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Div),
+                    DataType::Ptr if var.sub_type == DataType::Float => instr = ltac::create_instr(LtacType::F32Div),
+                    DataType::Ptr if var.sub_type == DataType::Double => instr = ltac::create_instr(LtacType::F64Div),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of division operator.".to_string());
@@ -686,7 +730,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Modulo
@@ -697,10 +741,19 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     DataType::UByte => instr = ltac::create_instr(LtacType::U8Mod),
                     DataType::Short => instr = ltac::create_instr(LtacType::I16Mod),
                     DataType::UShort => instr = ltac::create_instr(LtacType::U16Mod),
-                    DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::I32Mod),
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::U32Mod),
-                    DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::I64Mod),
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::U64Mod),
+                    DataType::Int => instr = ltac::create_instr(LtacType::I32Mod),
+                    DataType::UInt => instr = ltac::create_instr(LtacType::U32Mod),
+                    DataType::Int64 => instr = ltac::create_instr(LtacType::I64Mod),
+                    DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Mod),
+                    
+                    DataType::Ptr if var.sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::I8Mod),
+                    DataType::Ptr if var.sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::U8Mod),
+                    DataType::Ptr if var.sub_type == DataType::Short => instr = ltac::create_instr(LtacType::I16Mod),
+                    DataType::Ptr if var.sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::U16Mod),
+                    DataType::Ptr if var.sub_type == DataType::Int => instr = ltac::create_instr(LtacType::I32Mod),
+                    DataType::Ptr if var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::U32Mod),
+                    DataType::Ptr if var.sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::I64Mod),
+                    DataType::Ptr if var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::U64Mod),
                     
                     _ => {
                         builder.syntax.ltac_error2("Modulo is only valid with integer values.".to_string());
@@ -708,7 +761,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Logical AND
@@ -717,10 +770,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 match var.data_type {
                     DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BAnd),
                     DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WAnd),
-                    DataType::Int | DataType::IntDynArray |
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::I32And),
-                    DataType::Int64 | DataType::I64DynArray |
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64And),
+                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32And),
+                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64And),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32And),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64And),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of logical and.".to_string());
@@ -728,7 +785,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Logical OR
@@ -737,10 +794,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 match var.data_type {
                     DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BOr),
                     DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WOr),
-                    DataType::Int | DataType::IntDynArray |
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::I32Or),
-                    DataType::Int64 | DataType::I64DynArray |
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Or),
+                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Or),
+                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Or),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Or),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Or),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of logical or.".to_string());
@@ -748,7 +809,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Logical XOR
@@ -757,10 +818,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 match var.data_type {
                     DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BXor),
                     DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WXor),
-                    DataType::Int | DataType::IntDynArray |
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::I32Xor),
-                    DataType::Int64 | DataType::I64DynArray |
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Xor),
+                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Xor),
+                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Xor),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Xor),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Xor),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of logical xor.".to_string());
@@ -768,7 +833,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Left shift
@@ -777,10 +842,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 match var.data_type {
                     DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BLsh),
                     DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WLsh),
-                    DataType::Int | DataType::IntDynArray |
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::I32Lsh),
-                    DataType::Int64 | DataType::I64DynArray |
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Lsh),
+                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Lsh),
+                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Lsh),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Lsh),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Lsh),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of left shift.".to_string());
@@ -788,7 +857,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             // Right shift
@@ -797,10 +866,14 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 match var.data_type {
                     DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BRsh),
                     DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WRsh),
-                    DataType::Int | DataType::IntDynArray |
-                    DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::I32Rsh),
-                    DataType::Int64 | DataType::I64DynArray |
-                    DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::I64Rsh),
+                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Rsh),
+                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Rsh),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Rsh),
+                    
+                    DataType::Ptr
+                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Rsh),
                     
                     _ => {
                         builder.syntax.ltac_error2("Invalid use of right shift.".to_string());
@@ -808,7 +881,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     },
                 }
                 
-                instr.arg1 = reg_for_type(&var.data_type, reg_no);
+                instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
             _ => {},
@@ -822,9 +895,9 @@ fn build_expr_func_call(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, r
     match builder.clone().functions.get(&arg.str_val) {
         Some(t) => {
             // First, push the current register
-            let mut store = mov_for_type(&*t);
+            let mut store = mov_for_type(&*t, &DataType::None);        // TODO: Replace this
             store.arg1 = LtacArg::Mem(var.pos);
-            store.arg2 = reg_for_type(&*t, reg_no);
+            store.arg2 = reg_for_type(&*t, &DataType::None, reg_no);    // TODO: Replace this
             builder.file.code.push(store.clone());
             
             // Create a statement to build the rest of the function call
@@ -834,7 +907,7 @@ fn build_expr_func_call(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, r
             build_func_call(builder, &stmt);
                    
             //Restore the current register
-            store.arg1 = reg_for_type(&*t, reg_no);
+            store.arg1 = reg_for_type(&*t, &DataType::None, reg_no);        // TODO: Replace this
             store.arg2 = LtacArg::Mem(var.pos);
             builder.file.code.push(store);
             

@@ -31,29 +31,21 @@ use crate::ltac_var::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum DataType {
+    None,
     Void,
     Byte,
-    ByteDynArray,
     UByte,
-    UByteDynArray,
     Short,
     UShort,
-    ShortDynArray,
-    UShortDynArray,
     Int,
     UInt,
-    IntDynArray,
-    UIntDynArray,
     Int64,
     UInt64,
-    I64DynArray,
-    U64DynArray,
     Float,
     Double,
-    FloatDynArray,
-    DoubleDynArray,
     Char,
     Str,
+    Ptr,
     Enum(String),
 }
 
@@ -61,6 +53,7 @@ pub enum DataType {
 pub struct Var {
     pub pos : i32,
     pub data_type : DataType,
+    pub sub_type : DataType,        // Only in the case of enums and pointers
     pub is_param : bool,
 }
 
@@ -76,6 +69,7 @@ pub struct LtacBuilder {
     pub functions : HashMap<String, DataType>,
     pub current_func : String,
     pub current_type : DataType,
+    pub current_sub_type : DataType,
     
     // Constants
     pub global_consts : HashMap<String, LtacArg>,
@@ -110,6 +104,7 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         functions : HashMap::new(),
         current_func : String::new(),
         current_type : DataType::Void,
+        current_sub_type : DataType::None,
         global_consts : HashMap::new(),
         enums : HashMap::new(),
         vars : HashMap::new(),
@@ -147,7 +142,7 @@ impl LtacBuilder {
     // Builds the constant table
     fn build_global_constants(&mut self, tree : &AstTree) -> bool {
         for c in tree.constants.iter() {
-            let data_type = ast_to_datatype(&c.data_type);
+            let (data_type, _) = ast_to_datatype(&c.data_type);
             let val = &c.value;
             let arg : LtacArg;
             
@@ -248,7 +243,8 @@ impl LtacBuilder {
             
             if func.modifiers.len() > 0 {
                 let func_mod = func.modifiers.first().unwrap();
-                func_type = ast_to_datatype(&func_mod);
+                let (ft, _) = ast_to_datatype(&func_mod);
+                func_type = ft;
             }
         
             self.functions.insert(name, func_type);
@@ -408,57 +404,84 @@ impl LtacBuilder {
 
 }
 
-pub fn ast_to_datatype(ast_mod : &AstMod) -> DataType {
+// Return: Base Type, Sub Type
+pub fn ast_to_datatype(ast_mod : &AstMod) -> (DataType, DataType) {
     match &ast_mod.mod_type {
-        AstModType::Byte => return DataType::Byte,
-        AstModType::ByteDynArray => return DataType::ByteDynArray,
-        AstModType::UByte => return DataType::UByte,
-        AstModType::UByteDynArray => return DataType::UByteDynArray,
-        AstModType::Short => return DataType::Short,
-        AstModType::UShort => return DataType::UShort,
-        AstModType::ShortDynArray => return DataType::ShortDynArray,
-        AstModType::UShortDynArray => return DataType::UShortDynArray,
-        AstModType::Int => return DataType::Int,
-        AstModType::UInt => return DataType::UInt,
-        AstModType::IntDynArray => return DataType::IntDynArray,
-        AstModType::UIntDynArray => return DataType::UIntDynArray,
-        AstModType::Int64 => return DataType::Int64,
-        AstModType::UInt64 => return DataType::UInt64,
-        AstModType::I64DynArray => return DataType::I64DynArray,
-        AstModType::U64DynArray => return DataType::U64DynArray,
-        AstModType::Float => return DataType::Float,
-        AstModType::Double => return DataType::Double,
-        AstModType::FloatDynArray => return DataType::FloatDynArray,
-        AstModType::DoubleDynArray => return DataType::DoubleDynArray,
-        AstModType::Char => return DataType::Char,
-        AstModType::Str => return DataType::Str,
-        AstModType::Enum(_v) => return DataType::Int,        // TODO: We will need better type detection
+        AstModType::Byte => return (DataType::Byte, DataType::None),
+        AstModType::UByte => return (DataType::UByte, DataType::None),
+        AstModType::ByteDynArray => return (DataType::Ptr, DataType::Byte),
+        AstModType::UByteDynArray => return (DataType::Ptr, DataType::UByte),
+        
+        AstModType::Short => return (DataType::Short, DataType::None),
+        AstModType::UShort => return (DataType::UShort, DataType::None),
+        AstModType::ShortDynArray => return (DataType::Ptr, DataType::Short),
+        AstModType::UShortDynArray => return (DataType::Ptr, DataType::UShort),
+        
+        AstModType::Int => return (DataType::Int, DataType::None),
+        AstModType::UInt => return (DataType::UInt, DataType::None),
+        AstModType::IntDynArray => return (DataType::Ptr, DataType::Int),
+        AstModType::UIntDynArray => return (DataType::Ptr, DataType::UInt),
+        
+        AstModType::Int64 => return (DataType::Int64, DataType::None),
+        AstModType::UInt64 => return (DataType::UInt64, DataType::None),
+        AstModType::I64DynArray => return (DataType::Ptr, DataType::Int64),
+        AstModType::U64DynArray => return (DataType::Ptr, DataType::UInt64),
+        
+        AstModType::Float => return (DataType::Float, DataType::None),
+        AstModType::Double => return (DataType::Double, DataType::None),
+        AstModType::FloatDynArray => return (DataType::Ptr, DataType::Float),
+        AstModType::DoubleDynArray => return (DataType::Ptr, DataType::Double),
+        
+        AstModType::Char => return (DataType::Char, DataType::None),
+        AstModType::Str => return (DataType::Str, DataType::None),
+        AstModType::Enum(_v) => return (DataType::Int,  DataType::None),       // TODO: We will need better type detection
         
         // Do we need an error here? Really, it should never get to this pointer
-        AstModType::None => return DataType::Void,
+        AstModType::None => return (DataType::Void, DataType::None),
     }
 }
 
 // Returns a move statement for a given type
-pub fn mov_for_type(data_type :& DataType) -> LtacInstr {
+pub fn mov_for_type(data_type : &DataType, sub_type : &DataType) -> LtacInstr {
     let mut instr = ltac::create_instr(LtacType::Mov);
     
     match data_type {
-        DataType::Byte | DataType::ByteDynArray => instr = ltac::create_instr(LtacType::MovB),
-        DataType::UByte | DataType::UByteDynArray => instr = ltac::create_instr(LtacType::MovUB),
+        // Bytes
+        DataType::Byte => instr = ltac::create_instr(LtacType::MovB),
+        DataType::UByte => instr = ltac::create_instr(LtacType::MovUB),
         
-        DataType::Short | DataType::ShortDynArray => instr = ltac::create_instr(LtacType::MovW),
-        DataType::UShort | DataType::UShortDynArray => instr = ltac::create_instr(LtacType::MovUW),
+        DataType::Ptr if *sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::MovB),
+        DataType::Ptr if *sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::MovUB),
         
-        DataType::Int | DataType::IntDynArray => instr = ltac::create_instr(LtacType::Mov),
-        DataType::UInt | DataType::UIntDynArray => instr = ltac::create_instr(LtacType::MovU),
+        // Short
+        DataType::Short => instr = ltac::create_instr(LtacType::MovW),
+        DataType::UShort => instr = ltac::create_instr(LtacType::MovUW),
         
-        DataType::Int64 | DataType::I64DynArray => instr = ltac::create_instr(LtacType::MovQ),
-        DataType::UInt64 | DataType::U64DynArray => instr = ltac::create_instr(LtacType::MovUQ),
+        DataType::Ptr if *sub_type == DataType::Short => instr = ltac::create_instr(LtacType::MovW),
+        DataType::Ptr if *sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::MovUW),
         
-        DataType::Float | DataType::FloatDynArray => instr = ltac::create_instr(LtacType::MovF32),
-        DataType::Double | DataType::DoubleDynArray => instr = ltac::create_instr(LtacType::MovF64),
+        // Int
+        DataType::Int => instr = ltac::create_instr(LtacType::Mov),
+        DataType::UInt => instr = ltac::create_instr(LtacType::MovU),
         
+        DataType::Ptr if *sub_type == DataType::Int => instr = ltac::create_instr(LtacType::Mov),
+        DataType::Ptr if *sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::MovU),
+        
+        // Int64
+        DataType::Int64 => instr = ltac::create_instr(LtacType::MovQ),
+        DataType::UInt64 => instr = ltac::create_instr(LtacType::MovUQ),
+        
+        DataType::Ptr if *sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::MovQ),
+        DataType::Ptr if *sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::MovUQ),
+        
+        // Double
+        DataType::Float => instr = ltac::create_instr(LtacType::MovF32),
+        DataType::Double => instr = ltac::create_instr(LtacType::MovF64),
+        
+        DataType::Ptr if *sub_type == DataType::Float => instr = ltac::create_instr(LtacType::MovF32),
+        DataType::Ptr if *sub_type == DataType::Double => instr = ltac::create_instr(LtacType::MovF64),
+        
+        // String
         DataType::Char | DataType::Str => instr = ltac::create_instr(LtacType::MovB),
         
         _ => {},
@@ -468,25 +491,46 @@ pub fn mov_for_type(data_type :& DataType) -> LtacInstr {
 }
 
 // Returns a register for a given type
-pub fn reg_for_type(data_type : &DataType, reg_no : i32) -> LtacArg {
+pub fn reg_for_type(data_type : &DataType, sub_type : &DataType, reg_no : i32) -> LtacArg {
     let mut arg = LtacArg::Reg32(reg_no);
     
     match data_type {
-        DataType::Byte | DataType::ByteDynArray => arg = LtacArg::Reg8(reg_no),
-        DataType::UByte | DataType::UByteDynArray => arg = LtacArg::Reg8(reg_no),
+        // Byte
+        DataType::Byte => arg = LtacArg::Reg8(reg_no),
+        DataType::UByte => arg = LtacArg::Reg8(reg_no),
         
-        DataType::Short | DataType::ShortDynArray => arg = LtacArg::Reg16(reg_no),
-        DataType::UShort | DataType::UShortDynArray => arg = LtacArg::Reg16(reg_no),
+        DataType::Ptr
+        if *sub_type == DataType::Byte || *sub_type == DataType::UByte => arg = LtacArg::Reg8(reg_no),
         
-        DataType::Int | DataType::IntDynArray => arg = LtacArg::Reg32(reg_no),
-        DataType::UInt | DataType::UIntDynArray => arg = LtacArg::Reg32(reg_no),
+        // Short
+        DataType::Short => arg = LtacArg::Reg16(reg_no),
+        DataType::UShort => arg = LtacArg::Reg16(reg_no),
         
-        DataType::Int64 | DataType::I64DynArray => arg = LtacArg::Reg64(reg_no),
-        DataType::UInt64 | DataType::U64DynArray => arg = LtacArg::Reg64(reg_no),
+        DataType::Ptr
+        if *sub_type == DataType::Short || *sub_type == DataType::UShort => arg = LtacArg::Reg16(reg_no),
         
-        DataType::Float | DataType::FloatDynArray => arg = LtacArg::FltReg(reg_no),
-        DataType::Double | DataType::DoubleDynArray => arg = LtacArg::FltReg64(reg_no),
+        // Int
+        DataType::Int => arg = LtacArg::Reg32(reg_no),
+        DataType::UInt => arg = LtacArg::Reg32(reg_no),
         
+        DataType::Ptr
+        if *sub_type == DataType::Int || *sub_type == DataType::UInt => arg = LtacArg::Reg32(reg_no),
+        
+        // Int-64
+        DataType::Int64 => arg = LtacArg::Reg64(reg_no),
+        DataType::UInt64 => arg = LtacArg::Reg64(reg_no),
+        
+        DataType::Ptr
+        if *sub_type == DataType::Int64 || *sub_type == DataType::UInt64 => arg = LtacArg::Reg64(reg_no),
+        
+        // Float
+        DataType::Float => arg = LtacArg::FltReg(reg_no),
+        DataType::Double => arg = LtacArg::FltReg64(reg_no),
+        
+        DataType::Ptr if *sub_type == DataType::Float => arg = LtacArg::FltReg(reg_no),
+        DataType::Ptr if *sub_type == DataType::Double => arg = LtacArg::FltReg64(reg_no),
+        
+        // String
         DataType::Char | DataType::Str => arg = LtacArg::Reg8(reg_no),
         
         _ => {},
@@ -515,8 +559,7 @@ pub fn ldarg_for_type(data_type : &DataType, dest : LtacArg, pos : i32) -> LtacI
         DataType::Float => arg = ltac::create_instr(LtacType::LdArgF32),
         DataType::Double => arg = ltac::create_instr(LtacType::LdArgF64),
         
-        DataType::ByteDynArray | DataType::IntDynArray |
-        DataType::Str => arg = ltac::create_instr(LtacType::LdArgPtr),
+        DataType::Ptr | DataType::Str => arg = ltac::create_instr(LtacType::LdArgPtr),
         
         _ => return arg,
     }
