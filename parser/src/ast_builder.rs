@@ -168,6 +168,11 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
                     return (false, 0, false, false);
                 },
             }
+            
+            if scanner.get_token() != Token::Semicolon {
+                syntax.syntax_error(scanner, "Expecting terminator".to_string());
+                return (false, 0, false, false);
+            }
         },
         
         Token::Use => {
@@ -180,6 +185,11 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
                     syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
                     return (false, 0, false, false);
                 },
+            }
+            
+            if scanner.get_token() != Token::Semicolon {
+                syntax.syntax_error(scanner, "Expecting terminator".to_string());
+                return (false, 0, false, false);
             }
             
             code = include_module(module, tree, syntax);
