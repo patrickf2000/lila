@@ -27,40 +27,36 @@ begin
         i = i + 1;
     end
     
+    length = length - 1;
     return length;
 end
 
-# Join to strings
-func strcat(s1:str, s2:str) -> str
+# Add character to string
+func append(s1:str, c:ubyte) -> str
     len1 : int = strlen(s1);
-    len2 : int = strlen(s2);
-    length : int = len1 + len2 + 1;
-    index, i2 : int = 0;
-    
-    b1 : byte = 0;
+    length : int = len1 + 2;
+    index : int = 0;
     new_str : byte[length] = array;
 begin
+printf("%c\n", c);
     while index < len1
-        b1 = len1[index];
-        new_str[index] = b1;
+        new_str[index] = s1[index];
         index = index + 1;
     end
     
-    while i2 < len2
-        b1 = len2[i2];
-        new_str[index] = b1;
-        index = index + 1;
-        i2 = i2 + 1;
-    end
+    index = index + 1;
+    
+    new_str[index] = c;
+    #new_str[index+1] = 0;
     
     return new_str;
 end
 
 func main -> int
     len : int = 0;
-    str1 : str = "Hello!";
+    str1 : str = "Hello";
     str2 : str = " How are you?";
-    str3 : str = strcat(str1, str2);
+    str3 : str = append(str1, '!');
 begin
     len = strlen(str1);
     printf("Length1: %d\n", len);
