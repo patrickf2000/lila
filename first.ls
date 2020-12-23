@@ -32,22 +32,19 @@ begin
 end
 
 # Add character to string
-func append(s1:str, c:ubyte) -> str
+func append(s1:str, c:char) -> str
     len1 : int = strlen(s1);
     length : int = len1 + 2;
     index : int = 0;
     new_str : byte[length] = array;
 begin
-printf("%c\n", c);
     while index < len1
         new_str[index] = s1[index];
         index = index + 1;
     end
     
-    index = index + 1;
-    
     new_str[index] = c;
-    #new_str[index+1] = 0;
+    new_str[index+1] = 0;
     
     return new_str;
 end

@@ -31,7 +31,7 @@ fn token_to_mod(token : &Token, is_array : bool) -> AstMod {
         Token::Byte => mod_type = AstModType::Byte,
         
         Token::UByte if is_array => mod_type = AstModType::UByteDynArray,
-        Token::UByte => mod_type = AstModType::UByte,
+        Token::UByte | Token::Char => mod_type = AstModType::UByte,
         
         Token::Short if is_array => mod_type = AstModType::ShortDynArray,
         Token::Short => mod_type = AstModType::Short,
@@ -43,7 +43,6 @@ fn token_to_mod(token : &Token, is_array : bool) -> AstMod {
         Token::Int => mod_type = AstModType::Int,
         
         Token::UInt => mod_type = AstModType::UInt,
-        //Token::Byte if is_array => mod_type = AstModType::ByteDynArray,
         
         Token::Int64 => mod_type = AstModType::Int64,
         Token::UInt64 => mod_type = AstModType::UInt64,

@@ -40,6 +40,15 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     // Build the arguments
     for arg in line.args.iter() {
         match &arg.arg_type {
+            AstArgType::CharL => {
+                let mut push = ltac::create_instr(arg_type.clone());
+                push.arg1 = LtacArg::UByte(arg.char_val as u8);
+                push.arg2_val = arg_no;
+                builder.file.code.push(push);
+                
+                arg_no += 1;
+            },
+            
             AstArgType::ByteL => {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg1 = LtacArg::UByte(arg.u8_val);
