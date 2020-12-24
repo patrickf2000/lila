@@ -98,6 +98,7 @@ pub enum AstModType {
     DoubleDynArray,
     Char,
     Str,
+    StrDynArray,
     Enum(String),
 }
 
@@ -411,6 +412,7 @@ impl AstMod {
             AstModType::DoubleDynArray => print!("DoubleDynArray"),
             AstModType::Char => print!("Char"),
             AstModType::Str => print!("Str"),
+            AstModType::StrDynArray => print!("StrDynArray "),
             AstModType::Enum(ref val) => print!("Enum({})", val),
         }
         

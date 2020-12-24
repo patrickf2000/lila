@@ -68,7 +68,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
         } else if var.sub_type == DataType::Short || var.sub_type == DataType::UShort {
             offset_size = 2;
         } else if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64
-            || var.sub_type == DataType::Double {
+            || var.sub_type == DataType::Double || var.sub_type == DataType::Str {
             offset_size = 8;
         }
         
@@ -345,7 +345,17 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 }
             },
             
-            AstArgType::StringL => {},
+            AstArgType::StringL => {
+                let name = builder.build_string(arg.str_val.clone());
+                
+                let mut instr2 = ltac::create_instr(LtacType::MovQ);
+                instr2.arg1 = LtacArg::Reg64(0);
+                instr2.arg2 = LtacArg::PtrLcl(name); 
+                builder.file.code.push(instr2);
+                
+                instr.arg2 = LtacArg::Reg64(0);
+                builder.file.code.push(instr.clone());
+            },
             
             // ===============================================================
             // Variables and functions
@@ -368,7 +378,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                             || v.sub_type == DataType::Float {
                             size = 4;
                         } else if  v.sub_type == DataType::Int64 || v.sub_type == DataType::UInt64
-                            || v.sub_type == DataType::Double {
+                            || v.sub_type == DataType::Double || var.sub_type == DataType::Str {
                             size = 8;
                         }
                         

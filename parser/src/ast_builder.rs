@@ -417,6 +417,7 @@ fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax 
                 AstModType::UInt64 => data_type.mod_type = AstModType::U64DynArray,
                 AstModType::Float => data_type.mod_type = AstModType::FloatDynArray,
                 AstModType::Double => data_type.mod_type = AstModType::DoubleDynArray,
+                AstModType::Str => data_type.mod_type = AstModType::StrDynArray,
                 
                 _ => {},
             }
