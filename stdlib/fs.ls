@@ -6,7 +6,7 @@ module std;
 use std.string;
 use std.io;
 
-func get_char(file:int) -> char
+func getChar(file:int) -> char
     buf : byte[1] = array;
     c : char = 0;
     code : int = 0;
@@ -21,13 +21,13 @@ begin
     return c;
 end
 
-func get_line(file:int) -> str
+func getLine(file:int) -> str
     line : byte[100] = array;
     i : int = 0;
     c : char = 1;
 begin
     while c != 0x0
-        c = get_char(file);
+        c = getChar(file);
         
         if c == 0x0
             break;

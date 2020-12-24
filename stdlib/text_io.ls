@@ -68,7 +68,7 @@ func readLn() -> str
     index : int = 0;
 begin
     while c != 0xA
-        c = get_char(0);
+        c = getChar(0);
         
         if c == 0xA
             break;
@@ -88,7 +88,7 @@ func readInt() -> int
     b : byte = 0x0;
 begin
     while b != 0x0
-       b = get_char(0);
+       b = getChar(0);
        
        if b == 0x0
            break;
