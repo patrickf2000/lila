@@ -20,19 +20,17 @@ fi
 
 # Order matters
 $lilac ../stdlib/x86_64.ls -o x86_64.o --no-link --pic
-$lilac ../stdlib/math.ls -o math.o --no-link --pic
 $lilac ../stdlib/string.ls -o string.o --no-link --pic
 $lilac ../stdlib/io.ls -o io.o --no-link --pic
-$lilac ../stdlib/unix.ls -o unix.o --no-link --pic
 $lilac ../stdlib/fs.ls -o fs.o --no-link --pic
+$lilac ../stdlib/text_io.ls -o text_io.o --no-link --pic
 
 $lilac -o liblila.so --lib \
     x86_64.o \
-    io.o \
-    math.o \
     string.o \
-    unix.o \
-    fs.o
+    io.o \
+    fs.o \
+    text_io.o
     
 rm *.o
 

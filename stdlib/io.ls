@@ -1,103 +1,44 @@
 
+# Provides access to several common IO system calls
+
 module std;
 
 use std.arch.x86_64;
-use std.string;
-use std.fs;
 
-func num_length(num:int) -> int
-    len : int = 0;
+func open(path:str) -> int
+    fd : int = 0;
 begin
-    while num != 0
-        num = num / 10;
-        len = len + 1;
-    end
-    
-    return len;
+    fd = syscall(linux_open, path, 2);
+    return fd;
 end
 
-func print_int(num:int)
-    length : int = num_length(num);
-    x : int = length - 1;
-    digit : int = 0;
-    b_digit : byte = 0;
-    number : byte[length] = array;
+func create(path:str) -> int
+    fd : int = 0;
 begin
-    while num != 0
-        digit = num % 10;
-        num = num / 10;
-        b_digit = digit + '0';
-        number[x] = b_digit;
-        x = x - 1;
-    end
-    
-    syscall(linux_write, STDOUT, number, length);
+    fd = syscall(linux_create, path, 2);
+    return fd;
 end
 
-func println_int(num:int)
+func read(fd:int, buf:byte[], size:int) -> int
+    code : int = 0;
 begin
-    print_int(num);
-    syscall(linux_write, STDOUT, "\n", 1);
+    code = syscall(linux_read, fd, buf, size);
+    return code;
 end
 
-func println(s:str)
-    length : int = strlen(s);
+func write(fd:int, buf:byte[], size:int) -> int
+    code : int = 0;
 begin
-    syscall(linux_write, STDOUT, s, length);
-    syscall(linux_write, STDOUT, "\n", 1);
+    code = syscall(linux_write, fd, buf, size);
+    return code;
 end
 
-func print(s:str)
-    length : int = strlen(s);
+func lseek(fd:int, offset:int64, whence:int)
 begin
-    syscall(linux_write, STDOUT, s, length);
+    syscall(linux_lseek, fd, offset, whence);
 end
 
-func println_str(s1:str, s2:str)
-    s1_len : int = strlen(s1);
-    s2_len : int = strlen(s2);
+func close(fd:int)
 begin
-    syscall(linux_write, STDOUT, s1, s1_len);
-    syscall(linux_write, STDOUT, s2, s2_len);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
-func readln() -> str
-    line : byte[100] = array;
-    c : char = 0;
-    index : int = 0;
-begin
-    while c != 0xA
-        c = get_char(0);
-        
-        if c == 0xA
-            break;
-        elif c == 0x0
-            break;
-        end
-        
-        line[index] = c;
-        index = index + 1;
-    end
-    
-    return line;
-end
-
-func readint() -> int
-    result : int = 0;
-    b : byte = 0x0;
-begin
-    while b != 0x0
-       b = get_char(0);
-       
-       if b == 0x0
-           break;
-       end
-       
-       b = b - 48;
-       result = result * 10;
-       result = result + b;
-    end
-    
-    return result;
+    syscall(linux_close, fd);
 end

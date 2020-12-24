@@ -4,7 +4,7 @@
 module std;
 
 use std.string;
-use std.unix;
+use std.io;
 
 func get_char(file:int) -> char
     buf : byte[1] = array;
