@@ -53,6 +53,7 @@ fn token_to_mod(token : &Token, is_array : bool) -> AstMod {
         Token::Double if is_array => mod_type = AstModType::DoubleDynArray,
         Token::Double => mod_type = AstModType::Double,
         
+        Token::TStr if is_array => mod_type = AstModType::StrDynArray,
         Token::TStr => mod_type = AstModType::Str,
         
         _ => mod_type = AstModType::None,
