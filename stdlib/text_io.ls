@@ -36,7 +36,7 @@ end
 
 func printLnInt(num:int)
 begin
-    print_int(num);
+    printInt(num);
     syscall(linux_write, STDOUT, "\n", 1);
 end
 
