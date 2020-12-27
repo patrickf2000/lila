@@ -109,9 +109,9 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
     
     if use_c {
         if !is_lib {
-            args.push("/usr/lib/x86_64-linux-gnu/crti.o");
-            args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
-            args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
+            args.push("/usr/lib64/crti.o");
+            args.push("/usr/lib64/crtn.o");
+            args.push("/usr/lib64/crt1.o");
         }
         
         args.push("-lc");
