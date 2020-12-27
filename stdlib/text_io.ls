@@ -34,6 +34,13 @@ begin
     syscall(linux_write, STDOUT, number, length);
 end
 
+func printLnStrInt(s:str, num:int)
+begin
+    print(s);
+    printInt(num);
+    syscall(linux_write, STDOUT, "\n", 1);
+end
+
 func printLnInt(num:int)
 begin
     printInt(num);

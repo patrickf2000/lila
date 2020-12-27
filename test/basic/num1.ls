@@ -6,13 +6,13 @@
 
 #RET 5
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func main -> int
     x : int = 15;
 begin
-    printf("Hello!\n");
-    printf("X: %d\n", x);
+    printLn("Hello!");
+    printLnStrInt("X: ", x);
     
     return 5;
 end

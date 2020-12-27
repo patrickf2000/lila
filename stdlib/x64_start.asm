@@ -12,6 +12,6 @@ _start:
     lea rsi, 8[rsp]
     call main
     
+    mov rdi, rax
     mov rax, 60
-    mov rdi, 0
     syscall

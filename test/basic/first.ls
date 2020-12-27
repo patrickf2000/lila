@@ -5,11 +5,11 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func main -> int
 begin
-    printf("Hello!\n");
+    printLn("Hello!");
     
     return 0;
 end
