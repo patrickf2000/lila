@@ -139,9 +139,22 @@ begin
     syscall(linux_write, STDOUT, "\n", 1);
 end
 
+func printLnStrHex(s:str, num:int)
+begin
+    print(s);
+    printHex(num);
+    syscall(linux_write, STDOUT, "\n", 1);
+end
+
 func printLnInt(num:int)
 begin
     printInt(num);
+    syscall(linux_write, STDOUT, "\n", 1);
+end
+
+func printLnHex(num:int)
+begin
+    printHex(num);
     syscall(linux_write, STDOUT, "\n", 1);
 end
 
