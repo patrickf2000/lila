@@ -14,7 +14,9 @@ func main(argc:int, argv:str[]) -> int
     index : int = 0;
     x : int = -92;
 begin
-    printLnInt(x);
+    printHex(0xBACD);
+    printLn("");
+    
     print("Argc: ");
     printLnInt(argc);
 

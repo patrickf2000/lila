@@ -29,6 +29,82 @@ begin
     return num;
 end
 
+func getHexLength(num:int) -> int
+    len : int = 0;
+begin
+    while num > 16
+        len = len + 1;
+        num = num / 16;
+    end
+    
+    len = len + 1;
+    
+    return len;
+end
+
+func getHexDigit(digit:int) -> byte
+begin
+    if digit == 1
+        return '1';
+    elif digit == 2
+        return '2';
+    elif digit == 3
+        return '3';
+    elif digit == 4
+        return '4';
+    elif digit == 5
+        return '5';
+    elif digit == 6
+        return '6';
+    elif digit == 7
+        return '7';
+    elif digit == 8
+        return '8';
+    elif digit == 9
+        return '9';
+    elif digit == 10
+        return 'a';
+    elif digit == 11
+        return 'b';
+    elif digit == 12
+        return 'c';
+    elif digit == 13
+        return 'd';
+    elif digit == 14
+        return 'e';
+    elif digit == 15
+        return 'f';
+    end
+    
+    return '0';
+end
+
+func printHex(num:int)
+    length : int = getHexLength(num);
+    x : int = length - 1;
+    digit : int = 0;
+    b_digit : byte = 0;
+    number : byte[length] = array;
+begin
+    if num == 0
+        syscall(linux_write, STDOUT, "0", 1);
+    else
+        while num >= 16
+            digit = num % 16;
+            num = num / 16;
+            
+            b_digit = getHexDigit(digit);
+            number[x] = b_digit;
+            x = x - 1;
+        end
+        
+        b_digit = getHexDigit(num);
+        number[x] = b_digit;
+        
+        syscall(linux_write, STDOUT, number, length);
+    end
+end
+
 func printInt(n:int)
     num : int = check_neg(n);
     length : int = numLength(num);
