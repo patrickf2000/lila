@@ -6,7 +6,7 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func test1
     numbers : int64[10] = array;
@@ -17,7 +17,7 @@ begin
     
     x = numbers[3];
     
-    printf("X: %d\n", x);
+    printLnStrInt("X: ", x);
 end
 
 func test2
@@ -30,7 +30,7 @@ begin
     
     x = numbers[i];
     
-    printf("X: %d\n", x);
+    printLnStrInt("X: ", x);
 end
 
 func main -> int

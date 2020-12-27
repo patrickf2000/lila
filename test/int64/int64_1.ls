@@ -7,17 +7,17 @@
 
 #RET 0
 
-extern func puts(s:str)
+use std.text_io;
 
 func main -> int
     x : int64 = 123;
 begin
     
-    printf("%d\n", x);
-    printf("%d\n", 10);
+    printLnInt(x);
+    printLnInt(10);
     
     x = 88;
-    printf("%d\n", x);
+    printLnInt(x);
     
     return 0;
 end
