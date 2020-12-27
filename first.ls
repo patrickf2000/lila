@@ -7,15 +7,18 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func main(argc:int, argv:str[]) -> int
     line : str = "";
     index : int = 0;
 begin    
+    print("Argc: ");
+    printLnInt(argc);
+
     while index < argc
         line = argv[index];
-        printf("Str: %s\n", line);
+        printLn2("Str: ", line);
         
         index = index + 1;
     end

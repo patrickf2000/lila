@@ -115,6 +115,12 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
         }
         
         args.push("-lc");
+    } else {
+        if !is_lib {
+            args.push("/usr/lib/lila/lrt.o");
+        }
+        
+        args.push("-llila");
     }
     
     args.push("-dynamic-linker");

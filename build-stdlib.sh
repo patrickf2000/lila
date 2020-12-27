@@ -19,6 +19,7 @@ if [[ -f liblila.so ]] ; then
 fi
 
 # Order matters
+# Build the standard library
 $lilac ../stdlib/x86_64.ls -o x86_64.o --no-link --pic
 $lilac ../stdlib/string.ls -o string.o --no-link --pic
 $lilac ../stdlib/io.ls -o io.o --no-link --pic
@@ -33,6 +34,8 @@ $lilac -o liblila.so --lib \
     text_io.o
     
 rm *.o
+
+as ../stdlib/x64_start.asm -o lrt.o
 
 cd ..
 
