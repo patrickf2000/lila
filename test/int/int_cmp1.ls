@@ -7,24 +7,24 @@
 
 #RET 0
 
-extern func puts(s:str)
+use std.text_io;
 
 func main() -> int
     x : int = 3;
 begin
     
     if x == 5
-        puts("Correct");
+        printLn("Correct");
     elif x == 3
-        puts("Also correct!");
+        printLn("Also correct!");
         if x == 3
-            puts("Idk!!");
+            printLn("Idk!!");
         end
     else
-        puts("Idk");
+        printLn("Idk");
     end
 
-    puts("Hello!");
+    printLn("Hello!");
     return 0;
 end
 

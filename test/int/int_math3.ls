@@ -9,7 +9,7 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func main -> int
     x : int = 20;
@@ -26,11 +26,11 @@ begin
     a4 = x / 5;
     a5 = x % 6;
     
-    printf("x + 5 = %d\n", a1);
-    printf("x - 5 = %d\n", a2);
-    printf("x * 5 = %d\n", a3);
-    printf("x / 5 = %d\n", a4);
-    printf("x % 6 = %d\n", a5);
+    printLnStrInt("x + 5 = ", a1);
+    printLnStrInt("x - 5 = ", a2);
+    printLnStrInt("x * 5 = ", a3);
+    printLnStrInt("x / 5 = ", a4);
+    printLnStrInt("x % 6 = ", a5);
     
     return 0;
 end

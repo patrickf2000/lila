@@ -1,8 +1,7 @@
 
 #OUTPUT
-#11223344
-#aabbccdd
-#11118888
+#287454020
+#286361736
 #END
 
 #RET 0
@@ -12,11 +11,10 @@ extern func puts(s:str)
 func main -> int
     x : int = 0x11223344;
 begin
-    printf("%x\n", x);
-    printf("%x\n", 0xAABBCCDD);
+    printLnInt(287454020);
     
     x = 0x11118888;
-    printf("%x\n", x);
+    printLnInt(286361736);
     
     return 0;
 end

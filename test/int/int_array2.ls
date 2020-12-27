@@ -15,7 +15,7 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func main -> int
     numbers : int[10] = array;
@@ -31,11 +31,11 @@ begin
     i = 0;
     while i < 10
         x = numbers[i];
-        printf("%d\n", x);
+        printLnInt(x);
         i = i + 1;
     end
     
-    printf("Done\n");
+    printLn("Done");
     
     return 0;
 end

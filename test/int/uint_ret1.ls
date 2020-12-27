@@ -1,14 +1,13 @@
 
 #OUTPUT
-#U1: a1b1c1
-#U2: afbfcf
+#U1: 10596801
+#U2: 11517903
 #U3: 20
 #END
 
 #RET 0
 
-extern func printf(s:str, ...)
-extern func puts(s:str)
+use std.text_io;
 
 func uint1 -> uint
 begin
@@ -35,9 +34,9 @@ begin
     u2 = uint2();
     u3 = uint3();
     
-    printf("U1: %x\n", u1);
-    printf("U2: %x\n", u2);
-    printf("U3: %d\n", u3);
+    printLnStrInt("U1: ", u1);
+    printLnStrInt("U2: ", u2);
+    printLnStrInt("U3: ", u3);
     
     return 0;
 end

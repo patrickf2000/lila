@@ -12,7 +12,9 @@ use std.text_io;
 func main(argc:int, argv:str[]) -> int
     line : str = "";
     index : int = 0;
-begin    
+    x : int = -92;
+begin
+    printLnInt(x);
     print("Argc: ");
     printLnInt(argc);
 

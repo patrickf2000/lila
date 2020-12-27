@@ -1,7 +1,7 @@
 
 #OUTPUT
-#X: 22
-#X: 25
+#22
+#25
 #END
 
 #RET 0
@@ -17,7 +17,7 @@ begin
     
     x = numbers[6];
     
-    printf("X: %d\n", x);
+    printLnInt(x);
 end
 
 func test2
@@ -29,7 +29,7 @@ begin
     
     x = numbers[i+1];
     
-    printf("X: %d\n", x);
+    printLnInt(x);
 end
 
 func main -> int

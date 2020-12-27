@@ -5,12 +5,12 @@
 
 #RET 0
 
-extern func printf(s:str, ...)
+use std.text_io;
 
 func add_two(x:int, y:int)
     answer : int = x + y;
 begin
-    printf("Result: %d\n", answer);
+    printLnStrInt("Result: ", answer);
 end
 
 func main -> int

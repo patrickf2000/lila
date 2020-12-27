@@ -8,6 +8,10 @@ use std.fs;
 func numLength(num:int) -> int
     len : int = 0;
 begin
+    if num < 0
+        len = 1;
+    end
+    
     while num != 0
         num = num / 10;
         len = len + 1;
@@ -16,22 +20,40 @@ begin
     return len;
 end
 
-func printInt(num:int)
+func check_neg(num:int) -> int
+begin
+    if num < 0
+        num = num * -1;
+    end
+    
+    return num;
+end
+
+func printInt(n:int)
+    num : int = check_neg(n);
     length : int = numLength(num);
     x : int = length - 1;
-    digit : int = 0;
+    digit, is_neg : int = 0;
     b_digit : byte = 0;
     number : byte[length] = array;
 begin
-    while num != 0
-        digit = num % 10;
-        num = num / 10;
-        b_digit = digit + '0';
-        number[x] = b_digit;
-        x = x - 1;
+    if num == 0
+        syscall(linux_write, STDOUT, "0", 1);
+    else
+        if n < 0
+            syscall(linux_write, STDOUT, "-", 1);
+        end
+        
+        while num != 0
+            digit = num % 10;
+            num = num / 10;
+            b_digit = digit + '0';
+            number[x] = b_digit;
+            x = x - 1;
+        end
+        
+        syscall(linux_write, STDOUT, number, length);
     end
-    
-    syscall(linux_write, STDOUT, number, length);
 end
 
 func printLnStrInt(s:str, num:int)

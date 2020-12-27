@@ -8,23 +8,24 @@
 
 #RET 0
 
-extern func puts(s:str)
-extern func printf(s:str, ...)
+use std.text_io;
 
 func print_numbers(list:int[], length:int)
     i : int = 0;
     x : int = 0;
 begin
-    printf("[");
+    print("[");
 
     while i < length
         x = list[i];
-        printf("%d ", x);
+        
+        printInt(x);
+        print(" ");
         
         i = i + 1;
     end
     
-    printf("]\n");
+    printLn("]");
 end
 
 func init_numbers(list:int[], length:int, seed:int)
@@ -45,10 +46,10 @@ begin
     init_numbers(numbers1, 8, 2);
     init_numbers(numbers2, 8, 31);
     
-    puts("Numbers1:");
+    printLn("Numbers1:");
     print_numbers(numbers1, 8);
     
-    puts("Numbers2:");
+    printLn("Numbers2:");
     print_numbers(numbers2, 8);
     
     return 0;
