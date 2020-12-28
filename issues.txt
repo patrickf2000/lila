@@ -4,6 +4,8 @@ We need math in return statements.
 
 Continue has issues with nested loops
 
+I think else has issues in nested loops
+
 Remove ldarg
 -> Instead, replace with optional parameters
     

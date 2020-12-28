@@ -507,7 +507,6 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     if line.stmt_type == AstStmtType::If {
         builder.block_layer += 1;
         create_label(builder, true);
-        //create_label(builder, false);
         
         // A dummy placeholder
         let code_block : Vec<LtacInstr> = Vec::new();
@@ -516,7 +515,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         let mut jmp = ltac::create_instr(LtacType::Br);
         jmp.name = builder.top_label_stack.last().unwrap().to_string();
         builder.file.code.push(jmp);
-    
+        
         let mut label = ltac::create_instr(LtacType::Label);
         match builder.label_stack.pop() {
             Some(name) => {
@@ -526,17 +525,19 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
             
             None => {},
         }
-        
-        if line.stmt_type == AstStmtType::Else {
-            return;
-        }
     }
     
     create_label(builder, false);
     
+    // If block_layer > 2, label needs to go after block
+    
     let cmp_block = build_cmp(builder, line);
     for ln in cmp_block.iter() {
         builder.file.code.push(ln.clone());
+    }
+    
+    if line.stmt_type == AstStmtType::Else {
+        return;
     }
     
     // Add the instruction

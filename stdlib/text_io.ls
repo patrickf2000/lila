@@ -48,6 +48,15 @@ begin
                 syscall(linux_write, STDOUT, buf, 1);
             elif c == 's'
                 print(i64_arg);
+            else
+                buf[0] = 37;
+                syscall(linux_write, STDOUT, buf, 1);
+                
+                buf[0] = c;
+                syscall(linux_write, STDOUT, buf, 1);
+                
+                i = i + 1;
+                continue;
             end
             
             arg_index = arg_index + 1;
@@ -59,6 +68,7 @@ begin
                 i = i + 1;
             end
             
+            i = i + 1;
         else
             buf[0] = c;
             syscall(linux_write, STDOUT, buf, 1);

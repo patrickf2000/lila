@@ -14,7 +14,8 @@ func main(argc:int, argv:str[]) -> int
     line : str = "";
     index : int = 0;
 begin
-    printf("Hello! %d, %x, %c, %s\n", 6, 10, 'Z', "Yo!");
+    printf("Hello! % %d, %x, %c, %s\n", 6, 10, 'Z', "Yo!");
+    printf("5 % 6 = %d\n", 67);
     printLn("");
     
     print("Argc: ");
