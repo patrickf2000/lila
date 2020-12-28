@@ -6,7 +6,7 @@
 
 use std.arch.x86_64;
 
-func _start
+func main
 begin
     syscall(linux_exit, 10);
 end

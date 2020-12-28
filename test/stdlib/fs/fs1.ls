@@ -13,7 +13,7 @@ use std.io;
 use std.fs;
 use std.text_io;
 
-func _start
+func main
     file : int = 0;
     c : char = 1;
     buf : byte[1] = array;

@@ -9,7 +9,7 @@
 use std.text_io;
 use std.arch.x86_64;
 
-func _start
+func main
     msg : str = "Hello!";
 begin
     printLn(msg);

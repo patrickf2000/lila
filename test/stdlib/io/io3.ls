@@ -11,7 +11,7 @@
 use std.text_io;
 use std.io;
 
-func _start
+func main
     line : str = "> ";
     line2 : str = "ls";
 begin

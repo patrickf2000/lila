@@ -3,7 +3,7 @@
 
 module std;
 
-use std.arch.x86_64;
+use std.arch.x86_64 if "x86_64";
 
 func open(path:str) -> int
     fd : int = 0;

@@ -10,7 +10,7 @@
 use std.text_io;
 use std.io;
 
-func _start
+func main
     num : int = 3;
 begin
     printInt(1);
