@@ -55,12 +55,18 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
 
                 LtacArg::I64(_v) => {
                     line.push_str("  ld ");
-                    pos += 8;
+
+                    if pos + 8 == stack_top {
+                        pos += 8;
+                    }
                 },
                 
                 LtacArg::U64(_v) => {
                     line.push_str("  ld ");
-                    pos += 8;
+
+                    if pos + 8 == stack_top {
+                        pos += 8;
+                    }
                 },
 
                 LtacArg::FltReg(_v) => {

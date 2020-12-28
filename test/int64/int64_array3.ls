@@ -10,7 +10,7 @@ extern func printf(s:str, ...)
 
 func test1
     numbers : int64[10] = array;
-    i : int64 = 5;
+    i : int = 5;
     x : int64 = 0;
 begin
     numbers[i+1] = 22;
@@ -22,7 +22,7 @@ end
 
 func test2
     numbers : int64[10] = array;
-    i : int64 = 5;
+    i : int = 5;
     x : int64 = 0;
 begin
     numbers[6] = 25;

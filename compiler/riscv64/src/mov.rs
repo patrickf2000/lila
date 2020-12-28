@@ -104,7 +104,9 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
 
             if code.instr_type == LtacType::LdQ || code.instr_type == LtacType::LdUQ 
                 || code.instr_type == LtacType::StrQ || code.instr_type == LtacType::StrUQ {
-                pos += 8;
+                if pos + 8 == stack_top {
+                    pos += 8;
+                }
             }
             
             line.push_str("-");
@@ -151,6 +153,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
                 full_line.push_str("  slli s3, s3, 1\n");
             } else if (*size) == 4 {
                 full_line.push_str("  slli s3, s3, 2\n");                
+            } else if (*size) == 8 {
+                full_line.push_str("  slli s3, s3, 3\n");
             }
 
             // Add the offset
@@ -180,6 +184,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
                     full_line.push_str(", 1\n");
                 } else if (*size) == 4 {
                     full_line.push_str(", 2\n");
+                } else if (*size) == 8 {
+                    full_line.push_str(", 3\n");
                 }
             }
 
