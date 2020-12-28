@@ -18,6 +18,7 @@
 use std::collections::HashMap;
 
 use crate::lex::*;
+use crate::Arch;
 
 // Represents AST statement types
 #[derive(PartialEq, Clone)]
@@ -98,12 +99,14 @@ pub enum AstModType {
     DoubleDynArray,
     Char,
     Str,
+    StrDynArray,
     Enum(String),
 }
 
 // Represents the top of an AST tree
 pub struct AstTree {
     pub file_name : String,
+    pub arch : Arch,
     pub module : String,
     pub functions : Vec<AstFunc>,
     pub constants : Vec<AstConst>,
@@ -411,6 +414,7 @@ impl AstMod {
             AstModType::DoubleDynArray => print!("DoubleDynArray"),
             AstModType::Char => print!("Char"),
             AstModType::Str => print!("Str"),
+            AstModType::StrDynArray => print!("StrDynArray "),
             AstModType::Enum(ref val) => print!("Enum({})", val),
         }
         

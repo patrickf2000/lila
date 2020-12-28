@@ -434,6 +434,7 @@ pub fn ast_to_datatype(ast_mod : &AstMod) -> (DataType, DataType) {
         
         AstModType::Char => return (DataType::Char, DataType::None),
         AstModType::Str => return (DataType::Str, DataType::None),
+        AstModType::StrDynArray => return (DataType::Ptr, DataType::Str),
         AstModType::Enum(_v) => return (DataType::Int,  DataType::None),       // TODO: We will need better type detection
         
         // Do we need an error here? Really, it should never get to this pointer
@@ -484,6 +485,8 @@ pub fn mov_for_type(data_type : &DataType, sub_type : &DataType) -> LtacInstr {
         // String
         DataType::Char | DataType::Str => instr = ltac::create_instr(LtacType::MovB),
         
+        DataType::Ptr if *sub_type == DataType::Str => instr = ltac::create_instr(LtacType::MovQ),
+        
         _ => {},
     }
     
@@ -532,6 +535,9 @@ pub fn reg_for_type(data_type : &DataType, sub_type : &DataType, reg_no : i32) -
         
         // String
         DataType::Char | DataType::Str => arg = LtacArg::Reg8(reg_no),
+        
+        DataType::Ptr
+        if *sub_type == DataType::Str => arg = LtacArg::Reg64(reg_no),
         
         _ => {},
     }

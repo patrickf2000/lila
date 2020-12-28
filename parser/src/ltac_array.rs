@@ -66,7 +66,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         } else if var.sub_type == DataType::Short || var.sub_type == DataType::UShort {
             size = 2;
         } else if  var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64
-                || var.sub_type == DataType::Double {
+                || var.sub_type == DataType::Double || var.sub_type == DataType::Str {
             size = 8;
         }
         

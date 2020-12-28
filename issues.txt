@@ -1,0 +1,10 @@
+We need array detection- we should not be able to index a variable that's not an array
+
+We need math in return statements.
+
+Remove ldarg
+-> Instead, replace with optional parameters
+    
+Function checking
+
+In a top level if-else, the final label (I think the end label) isn't printed in the right place; it should go after the block

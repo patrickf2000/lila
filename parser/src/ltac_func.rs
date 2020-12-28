@@ -40,6 +40,15 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     // Build the arguments
     for arg in line.args.iter() {
         match &arg.arg_type {
+            AstArgType::CharL => {
+                let mut push = ltac::create_instr(arg_type.clone());
+                push.arg1 = LtacArg::UByte(arg.char_val as u8);
+                push.arg2_val = arg_no;
+                builder.file.code.push(push);
+                
+                arg_no += 1;
+            },
+            
             AstArgType::ByteL => {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg1 = LtacArg::UByte(arg.u8_val);
@@ -219,7 +228,7 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         let mut mov = ltac::create_instr(LtacType::Mov);
         
         match &builder.current_type {
-            DataType::Byte => {
+            DataType::Byte | DataType::Char => {
                 mov = ltac::create_instr(LtacType::MovB);
                 mov.arg1 = LtacArg::RetRegI8;
             },
@@ -280,6 +289,10 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 } else {
                     mov.arg2 = LtacArg::Byte(arg1.u8_val as i8);
                 }
+            },
+            
+            AstArgType::CharL => {
+                mov.arg2 = LtacArg::Byte(arg1.char_val as i8);
             },
             
             AstArgType::ShortL => {

@@ -109,12 +109,18 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
     
     if use_c {
         if !is_lib {
-            args.push("/usr/lib/x86_64-linux-gnu/crti.o");
-            args.push("/usr/lib/x86_64-linux-gnu/crtn.o");
-            args.push("/usr/lib/x86_64-linux-gnu/crt1.o");
+            args.push("/usr/lib64/crti.o");
+            args.push("/usr/lib64/crtn.o");
+            args.push("/usr/lib64/crt1.o");
         }
         
         args.push("-lc");
+    } else {
+        if !is_lib {
+            args.push("/usr/lib/lila/lrt.o");
+        }
+        
+        args.push("-llila");
     }
     
     args.push("-dynamic-linker");
@@ -415,7 +421,19 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         LtacType::Mov | LtacType::MovU |
         LtacType::MovB | LtacType::MovUB |
         LtacType::MovW | LtacType::MovUW |
-        LtacType::MovQ | LtacType::MovUQ => line.push_str("  mov "),
+        LtacType::MovQ | LtacType::MovUQ => {
+            match &code.arg2 {
+                LtacArg::PtrLcl(ref val) if is_pic => {
+                    line.push_str("  lea r15, ");
+                    line.push_str(&val);
+                    line.push_str("[rip]\n");
+                },
+                _ => {},
+            }
+            
+            line.push_str("  mov ");
+        },
+        
         LtacType::MovF32 => {
             match &code.arg1 {
                 LtacArg::MemOffsetImm(_p, _o) => line.push_str("  mov "),
@@ -785,8 +803,12 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
         LtacArg::F32(_v) | LtacArg::F64(_v) => line.push_str("xmm8\n"),
         
         LtacArg::PtrLcl(ref val) => {
-            line.push_str("OFFSET FLAT:");
-            line.push_str(&val);
+            if is_pic {
+                line.push_str("r15");
+            } else {
+                line.push_str("OFFSET FLAT:");
+                line.push_str(&val);
+            }
         },
         
         _ => {},

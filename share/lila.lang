@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language _name="Dash" version="1.0" _section="Sources" globs="*.ds;*.di" mimetypes="">
+<language _name="Lila" version="1.0" _section="Sources" globs="*.ls;*.lh" mimetypes="">
 	
 	<escape-char>\</escape-char>
 
@@ -69,6 +69,7 @@
         <keyword>use</keyword>
 		<keyword>func</keyword>
 		<keyword>extern</keyword>
+		<keyword>begin</keyword>
 		<keyword>end</keyword>
 		<keyword>return</keyword>
 		<keyword>if</keyword>
