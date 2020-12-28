@@ -109,6 +109,7 @@ pub fn riscv64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, sta
         LtacType::LdArgI8 | LtacType::LdArgU8 => line.push_str("  sb "),
         LtacType::LdArgI16 | LtacType::LdArgU16 => line.push_str("  sh "),
         LtacType::LdArgI32 | LtacType::LdArgU32 => line.push_str("  sw "),
+        LtacType::LdArgI64 | LtacType::LdArgU64 => line.push_str("  sd "),
         LtacType::LdArgF32 => line.push_str("  fsw "),
         LtacType::LdArgPtr => line.push_str("  sd "),
 
@@ -129,8 +130,11 @@ pub fn riscv64_build_ldarg(writer : &mut BufWriter<File>, code : &LtacInstr, sta
         LtacArg::Mem(val) => {
             let mut pos = stack_top - val;
 
-            if code.instr_type == LtacType::LdArgPtr {
-                pos += 8;
+            if code.instr_type == LtacType::LdArgI64 || code.instr_type == LtacType::LdArgU64
+                || code.instr_type == LtacType::LdArgPtr {
+                if pos + 8 == stack_top {
+                    pos += 8;
+                }
             }
             
             line.push_str("-");
