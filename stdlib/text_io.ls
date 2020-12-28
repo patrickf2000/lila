@@ -105,7 +105,7 @@ end
 func getHexLength(num:int) -> int
     len : int = 0;
 begin
-    while num > 16
+    while num > 15
         len = len + 1;
         num = num / 16;
     end
@@ -161,8 +161,14 @@ func printHex(num:int)
 begin
     if num == 0
         syscall(linux_write, STDOUT, "0", 1);
+    elif num <= 15
+        b_digit = getHexDigit(num);
+        number[0] = b_digit;
+        
+        syscall(linux_write, STDOUT, number, 1);
+        return;
     else
-        while num >= 16
+        while num > 15
             digit = num % 16;
             num = num / 16;
             

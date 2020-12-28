@@ -529,8 +529,6 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     
     create_label(builder, false);
     
-    // If block_layer > 2, label needs to go after block
-    
     let cmp_block = build_cmp(builder, line);
     for ln in cmp_block.iter() {
         builder.file.code.push(ln.clone());
