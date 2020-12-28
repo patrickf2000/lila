@@ -1,3 +1,10 @@
 We need array detection- we should not be able to index a variable that's not an array
 
 We need math in return statements.
+
+Continue has issues with nested loops
+
+Remove ldarg
+-> Instead, replace with optional parameters
+    
+Function checking

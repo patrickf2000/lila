@@ -8,13 +8,13 @@
 #RET 0
 
 use std.text_io;
+use std.string;
 
 func main(argc:int, argv:str[]) -> int
     line : str = "";
     index : int = 0;
-    x : int = -92;
 begin
-    printHex(0xBACD);
+    printf("Hello! %d, %x, %c, %s\n", 6, 10, 'Z', "Yo!");
     printLn("");
     
     print("Argc: ");

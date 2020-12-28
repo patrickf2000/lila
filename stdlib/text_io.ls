@@ -5,6 +5,69 @@ use std.arch.x86_64;
 use std.string;
 use std.fs;
 
+# The printf function
+func printf(fmt:str, arg1:int64, arg2:int64, arg3:int64, arg4:int64, arg5:int64)
+    args : int64[5] = array;
+    c : char = 0;
+    i, length : int = 0;
+    buf : byte[1] = array;
+    
+    arg_index : int = 0;
+    i64_arg : int64 = 0;
+    i_arg : int = 0;
+    c_arg : char = 0;
+    s_arg : str = "";
+begin
+    args[0] = arg1;
+    args[1] = arg2;
+    args[2] = arg3;
+    args[3] = arg4;
+    args[4] = arg5;
+    
+    # First, determine the length
+    length = strlen(fmt);
+    
+    while i < length
+        c = fmt[i];
+        
+        if c == '%'
+            i = i + 1;
+            c = fmt[i];
+            
+            i64_arg = args[arg_index];
+            
+            if c == 'd'
+                i_arg = i64_arg;
+                printInt(i_arg);
+            elif c == 'x'
+                i_arg = i64_arg;
+                printHex(i_arg);
+            elif c == 'c'
+                c_arg = i64_arg;
+                buf[0] = c_arg;
+                syscall(linux_write, STDOUT, buf, 1);
+            elif c == 's'
+                print(i64_arg);
+            end
+            
+            arg_index = arg_index + 1;
+            i = i + 1;
+        elif c == '\'
+            if c == 'n'
+                syscall(linux_write, STDOUT, "\n", 1);
+            
+                i = i + 1;
+            end
+            
+        else
+            buf[0] = c;
+            syscall(linux_write, STDOUT, buf, 1);
+            
+            i = i + 1;
+        end
+    end
+end
+
 func numLength(num:int) -> int
     len : int = 0;
 begin
