@@ -18,7 +18,7 @@
 // Kernel argument registers
 pub fn riscv64_karg_reg(pos : i32) -> String {
     match pos {
-        1 => return "a8".to_string(),
+        1 => return "a7".to_string(),
         2 => return "a0".to_string(),
         3 => return "a1".to_string(),
         4 => return "a2".to_string(),

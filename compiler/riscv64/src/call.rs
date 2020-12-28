@@ -167,3 +167,11 @@ pub fn riscv64_build_call(writer : &mut BufWriter<File>, code : &LtacInstr) {
     writer.write(&line.into_bytes())
         .expect("[RISCV64_build_call] Write failed.");
 }
+
+// Builds a system call
+pub fn riscv64_build_syscall(writer : &mut BufWriter<File>) {
+    let line = "  scall\n\n".to_string();
+
+    writer.write(&line.into_bytes())
+        .expect("[RISCV64_build_syscall] Write failed.");
+}
