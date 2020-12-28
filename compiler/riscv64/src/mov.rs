@@ -67,13 +67,13 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         LtacType::LdW => line.push_str("  lh "),
         LtacType::LdUW => line.push_str("  lhu "),
         LtacType::Ld | LtacType::LdU => line.push_str("  lw "),
-        LtacType::LdQ => line.push_str("  ld "),
+        LtacType::LdQ | LtacType::LdUQ => line.push_str("  ld "),
         LtacType::LdF32 => line.push_str("  flw "),
 
         LtacType::StrB | LtacType::StrUB => line.push_str("  sb "),
         LtacType::StrW | LtacType::StrUW => line.push_str("  sh "),
         LtacType::Str | LtacType::StrU => line.push_str("  sw "),
-        LtacType::StrQ => line.push_str("  sd "),
+        LtacType::StrQ | LtacType::StrUQ => line.push_str("  sd "),
         LtacType::StrF32 => line.push_str("  fsw "),
         
         _ => {},
@@ -102,7 +102,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         LtacArg::Mem(val) => {
             let mut pos = stack_top - (*val);
 
-            if code.instr_type == LtacType::LdQ || code.instr_type == LtacType::StrQ {
+            if code.instr_type == LtacType::LdQ || code.instr_type == LtacType::LdUQ 
+                || code.instr_type == LtacType::StrQ || code.instr_type == LtacType::StrUQ {
                 pos += 8;
             }
             
@@ -232,8 +233,14 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
             }
         },
 
-        LtacType::MovQ => line.push_str("  mv "),
-
+        LtacType::MovQ | LtacType::MovUQ => {
+            match &code.arg2 {
+                LtacArg::I64(_v) => line.push_str("  li "),
+                LtacArg::U64(_v) => line.push_str("  li "),
+                _ => line.push_str("  mv "),
+            }
+        },
+        
         LtacType::MovF32 => {
             match &code.arg2 {
                 LtacArg::F32(ref val) => {
@@ -305,6 +312,9 @@ pub fn riscv64_build_mov(writer : &mut BufWriter<File>, code : &LtacInstr) {
     
         LtacArg::I32(val) => line.push_str(&val.to_string()),
         LtacArg::U32(val) => line.push_str(&val.to_string()),
+
+        LtacArg::I64(val) => line.push_str(&val.to_string()),
+        LtacArg::U64(val) => line.push_str(&val.to_string()),
 
         LtacArg::F32(ref val) => {
             line.push_str("%lo(");

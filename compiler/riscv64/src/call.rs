@@ -44,7 +44,7 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
         },
 
         LtacArg::Mem(val) => {
-            let pos = stack_top - (*val);
+            let mut pos = stack_top - (*val);
 
             match &code.arg2 {
                 LtacArg::Byte(_v) => line.push_str("  lb "),
@@ -52,6 +52,16 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
                 
                 LtacArg::I16(_v) => line.push_str("  lh "),
                 LtacArg::U16(_v) => line.push_str("  lhu "),
+
+                LtacArg::I64(_v) => {
+                    line.push_str("  ld ");
+                    pos += 8;
+                },
+                
+                LtacArg::U64(_v) => {
+                    line.push_str("  ld ");
+                    pos += 8;
+                },
 
                 LtacArg::FltReg(_v) => {
                     line.push_str("  flw ");
@@ -119,6 +129,22 @@ pub fn riscv64_build_pusharg(writer : &mut BufWriter<File>, code : &LtacInstr, i
         },
 
         LtacArg::U32(val) => {
+            line.push_str("  li ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
+        LtacArg::I64(val) => {
+            line.push_str("  li ");
+            line.push_str(&reg);
+            line.push_str(", ");
+            line.push_str(&val.to_string());
+            line.push_str("\n");
+        },
+
+        LtacArg::U64(val) => {
             line.push_str("  li ");
             line.push_str(&reg);
             line.push_str(", ");
