@@ -1,18 +1,18 @@
 
 #OUTPUT
-#16
+#Y: 16
 #END
 
 #RET 3
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func main -> int
     x : int = 4;
     y : int = x * 3 + x;
 begin
     
-    printLnInt(y);
+    printf("Y: %d\n", y);
     
     return 3;
 end

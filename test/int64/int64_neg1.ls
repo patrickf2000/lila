@@ -11,12 +11,12 @@
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func test1
     x : int64 = -6 + -9;
 begin
-    printLnStrInt("X: ", x);
+    printf("X: %d\n", x);
 end
 
 func test2
@@ -26,16 +26,16 @@ begin
     x = -9;
     y = 20 + x - -9;
     
-    printLnStrInt("X: ", x);
-    printLnStrInt("Y: ", y);
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func test3
     x : int64 = 9;
     y : int64 = -x;
 begin    
-    printLnStrInt("X: ", x);
-    printLnStrInt("Y: ", y);
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func test4
@@ -45,8 +45,8 @@ begin
     x = 10;
     y = -x + 30 + -x;
     
-    printLnStrInt("X: ", x);
-    printLnStrInt("Y: ", y);
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func main -> int

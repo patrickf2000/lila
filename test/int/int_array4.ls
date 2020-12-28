@@ -9,7 +9,7 @@
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func main -> int
     numbers : int[10] = array;
@@ -32,11 +32,11 @@ begin
     x4 = numbers[4];
     x5 = numbers[5];
     
-    printLnStrInt("X1: ", x1);
-    printLnStrInt("X2: ", x2);
-    printLnStrInt("X3: ", x3);
-    printLnStrInt("X4: ", x4);
-    printLnStrInt("X5: ", x5);
+    printf("X1: %d\n", x1);
+    printf("X2: %d\n", x2);
+    printf("X3: %d\n", x3);
+    printf("X4: %d\n", x4);
+    printf("X5: %d\n", x5);
     
     return 0;
 end

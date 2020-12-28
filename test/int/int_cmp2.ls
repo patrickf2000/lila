@@ -10,7 +10,7 @@
 
 #RET 0
 
-use std.text_io;
+extern func puts(s:str, ...)
 
 func main -> int
     b1 : int = 100;
@@ -21,48 +21,48 @@ begin
     #################################
     # Test 1
     if b1 == 100
-        printLn("Correct");
+        puts("Correct");
     else
-        printLn("Wrong");
+        puts("Wrong");
     end
     
     #################################
     # Test 2
     
     if b1 == b2
-        printLn("Correct");
+        puts("Correct");
     else
-        printLn("Wrong");
+        puts("Wrong");
     end
     
     if b1 == b3
-        printLn("Correct");
+        puts("Correct");
     else
-        printLn("Wrong");
+        puts("Wrong");
     end
     
     #################################
     # Test 3
     
     if b1 == 200
-        printLn("Correct");
+        puts("Correct");
     else
-        printLn("Wrong");
+        puts("Wrong");
     end
     
     #################################
     # Test 4
     
     if 100 == b1
-        printLn("Correct");
+        puts("Correct");
     else
-        printLn("Wrong");
+        puts("Wrong");
     end
     
     if 200 == b1
-        printLn("Correct");
+        puts("Correct");
     else
-        printLn("Wrong");
+        puts("Wrong");
     end
     
     return 0;

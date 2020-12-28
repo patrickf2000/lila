@@ -6,18 +6,18 @@
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func main -> int
     x : int = 22;
     y : int = 3;
 begin
     
-    printLnStrInt("X1: ", x);
+    printf("X1: %d\n", x);
 
     x = 44 * y;
     
-    printLnStrInt("X2: ", x);
+    printf("X2: %d\n", x);
     
     return 0;
 end

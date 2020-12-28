@@ -1,17 +1,18 @@
 
 #OUTPUT
-#X: -1531590953
-#Y: 5614267
+#X: a4b5c6d7
+#Y: 55aabb
 #END
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
+extern func puts(s:str)
 
 func print_two(x:uint, y:uint)
 begin
-    printLnStrInt("X: ", x);
-    printLnStrInt("Y: ", y);
+    printf("X: %x\n", x);
+    printf("Y: %x\n", y);
 end
 
 func main -> int

@@ -5,7 +5,7 @@
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 # Raises the base to a power
 func pow(base:int, n:int) -> int
@@ -35,11 +35,7 @@ func main -> int
 begin
     result = pow(base, n);
     
-    printInt(base);
-    print(" ** ");
-    printInt(n);
-    print(" = ");
-    printLnInt(result);
+    printf("%d ** %d = %d\n", base, n, result);
     
     return 0;
 end

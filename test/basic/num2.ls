@@ -7,15 +7,15 @@
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func main -> int
     x : int = 15;
 begin
-    printLn("Hello!");
+    printf("Hello!\n");
 
-    printLnStrInt("X: ", x);
-    printLnStrInt("X2: ", 23);
+    printf("X: %d\n", x);
+    printf("X2: %d\n", 23);
     
     return 0;
 end

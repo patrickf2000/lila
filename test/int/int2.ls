@@ -1,22 +1,22 @@
 
 #OUTPUT
 #11223344
-#aabbccd
+#aabbccdd
 #11118888
 #END
 
 #RET 0
 
-use std.text_io;
+extern func puts(s:str)
 
 func main -> int
     x : int = 0x11223344;
 begin
-    printLnHex(x);
-    printLnHex(0xAABBCCD);
+    printf("%x\n", x);
+    printf("%x\n", 0xAABBCCDD);
     
     x = 0x11118888;
-    printLnHex(x);
+    printf("%x\n", x);
     
     return 0;
 end

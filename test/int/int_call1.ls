@@ -8,12 +8,12 @@
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func add_two(x:int, y:int) -> int
     answer : int = x + y;
 begin
-    printLnStrInt("Answer: ", answer);
+    printf("Answer: %d\n", answer);
     return answer;
 end
 
@@ -24,8 +24,8 @@ begin
     answer1 = add_two(10, 5);
     answer2 = add_two(6, 3) * 2;
     
-    printLnStrInt("Answer1: ", answer1);
-    printLnStrInt("Answer2: ", answer2);
+    printf("Answer1: %d\n", answer1);
+    printf("Answer2: %d\n", answer2);
     
     return 0;
 end

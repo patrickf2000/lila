@@ -1,8 +1,8 @@
 
 #OUTPUT
-#287454020
-#-1430532899
-#286361736
+#11223344
+#aabbccdd
+#11118888
 #END
 
 #RET 0
@@ -13,11 +13,11 @@ func main -> int
     x : uint = 0x11223344;
 begin
     
-    printLnInt(287454020);
-    printLnInt(2864434397);
+    printf("%x\n", x);
+    printf("%x\n", 0xAABBCCDD);
     
     x = 0x11118888;
-    printLnInt(286361736);
+    printf("%x\n", x);
     
     return 0;
 end

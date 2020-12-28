@@ -10,13 +10,13 @@
 #x & 5 = 4
 #x | 5 = 5
 #x ^ 5 = 1
-#x << 2 = 16
+#x << 2 = 10
 #x >> 2 = 1
 #END
 
 #RET 0
 
-use std.text_io;
+extern func printf(s:str, ...)
 
 func test1
     x : int = 20;
@@ -28,12 +28,12 @@ begin
     a4 = x / 5;
     a5 = x % 6;
 
-    printLnStrInt("X: ", x);
-    printLnStrInt("x + 5 = ", a1);
-    printLnStrInt("x - 5 = ", a2);
-    printLnStrInt("x * 5 = ", a3);
-    printLnStrInt("x / 5 = ", a4);
-    printLnStrInt("x % 6 = ", a5);
+    printf("X: %d\n", x);
+    printf("x + 5 = %d\n", a1);
+    printf("x - 5 = %d\n", a2);
+    printf("x * 5 = %d\n", a3);
+    printf("x / 5 = %d\n", a4);
+    printf("x % 6 = %d\n", a5);
 end
 
 func test2
@@ -46,12 +46,12 @@ begin
     a4 = x << 2;
     a5 = x >> 2;
 
-    printLnStrInt("X = ", x);
-    printLnStrInt("x & 5 = ", a1);
-    printLnStrInt("x | 5 = ", a2);
-    printLnStrInt("x ^ 5 = ", a3);
-    printLnStrInt("x << 2 = ", a4);
-    printLnStrInt("x >> 2 = ", a5);
+    printf("X = %d\n", x);
+    printf("x & 5 = %x\n", a1);
+    printf("x | 5 = %x\n", a2);
+    printf("x ^ 5 = %x\n", a3);
+    printf("x << 2 = %x\n", a4);
+    printf("x >> 2 = %x\n", a5);
 end
 
 func main -> int
@@ -60,4 +60,3 @@ begin
     test2();
     return 0;
 end
-
