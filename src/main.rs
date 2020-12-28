@@ -20,8 +20,8 @@ use std::env;
 use std::process;
 
 use parser;
+use parser::Arch;
 use transform;
-use transform::Arch;
 
 #[cfg(target_arch = "x86_64")]
 fn get_arch() -> Arch {
@@ -99,7 +99,7 @@ fn run() -> i32 {
     
     if print_ast {
         let input = inputs.last().unwrap();
-        let ast = match parser::get_ast(&input) {
+        let ast = match parser::get_ast(&input, arch) {
             Ok(ast) => ast,
             Err(_e) => return 1,
         };
@@ -117,7 +117,7 @@ fn run() -> i32 {
         }
     
         // Build the LTAC portion
-        let mut ltac = match parser::parse(input) {
+        let mut ltac = match parser::parse(input, arch) {
             Ok(ltac) => ltac,
             Err(_e) => return 1,
         };

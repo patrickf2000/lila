@@ -25,6 +25,7 @@ use crate::ast::*;
 use crate::lex::{Token, Lex, create_lex};
 use crate::module;
 use crate::syntax::ErrorManager;
+use crate::Arch;
 
 use crate::ast_func::*;
 use crate::ast_utils::*;
@@ -37,9 +38,10 @@ use crate::ast_utils::*;
 // In Quik, each line is a self-contained expression; as a result, we read a line
 // and then lexically analyze and build an AST node from it
 //
-pub fn build_ast(path : String, name : String, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
+pub fn build_ast(path : String, arch : Arch, name : String, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
     let mut tree = AstTree {
         file_name : name,
+        arch : arch,
         module : String::new(),
         functions : Vec::new(),
         constants : Vec::new(),
@@ -177,6 +179,7 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
         
         Token::Use => {
             let module : String;
+            let mut do_include = true;
             token = scanner.get_token();
             
             match token {
@@ -187,12 +190,47 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
                 },
             }
             
-            if scanner.get_token() != Token::Semicolon {
+            token = scanner.get_token();
+            
+            if token == Token::If {
+                token = scanner.get_token();
+                
+                let arch_str = match token {
+                    Token::StringL(ref val) => val.clone(),
+                    _ => {
+                        syntax.syntax_error(scanner, "Expected string with architecture type.".to_string());
+                        return (false, 0, false, false);
+                    },
+                };
+                
+                token = scanner.get_token();
+                if token != Token::Semicolon {
+                    syntax.syntax_error(scanner, "Expecting terminator".to_string());
+                    return (false, 0, false, false);
+                }
+                
+                let arch2 = match arch_str.as_str() {
+                    "x86_64" => Arch::X86_64,
+                    "aarch64" => Arch::AArch64,
+                    "riscv64" => Arch::Riscv64,
+                    
+                    _ => {
+                        syntax.syntax_error(scanner, "Invalid architecture".to_string());
+                        return (false, 0, false, false);
+                    },
+                };
+                
+                if arch2 != tree.arch {
+                    do_include = false;
+                }
+            } else if token != Token::Semicolon {
                 syntax.syntax_error(scanner, "Expecting terminator".to_string());
                 return (false, 0, false, false);
             }
             
-            code = include_module(module, tree, syntax);
+            if do_include {
+                code = include_module(module, tree, syntax);
+            }
         },
     
         Token::Extern => {

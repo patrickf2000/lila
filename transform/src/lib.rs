@@ -20,6 +20,7 @@ use std::collections::HashMap;
 
 use parser::ltac;
 use parser::ltac::{LtacFile, LtacType, LtacArg};
+use parser::Arch;
 
 // Import any local modules
 mod risc;
@@ -27,13 +28,6 @@ mod riscv;
 
 use risc::*;
 use riscv::*;
-
-#[derive(PartialEq, Clone, Copy)]
-pub enum Arch {
-    X86_64,
-    AArch64,
-    Riscv64,
-}
 
 // Architectures
 // 1-> x86-64

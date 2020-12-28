@@ -7,8 +7,11 @@
 
 #RET 0
 
-use std.text_io;
-use std.string;
+module default;
+
+use std.arch.x86_64 if "x86_64";
+#use std.arch.x86_64 if "riscv64";
+#use std.arch.x86_64;
 
 func main(argc:int, argv:str[]) -> int
     line : str = "";

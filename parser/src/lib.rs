@@ -33,6 +33,13 @@ mod lex;
 mod module;
 mod syntax;
 
+#[derive(PartialEq, Clone, Copy)]
+pub enum Arch {
+    X86_64,
+    AArch64,
+    Riscv64,
+}
+
 // Import what we need
 use std::path::Path;
 
@@ -40,11 +47,11 @@ use ast::AstTree;
 use ltac::LtacFile;
 
 // Returns the ast
-pub fn get_ast(path : &String) -> Result<AstTree, ()> {
+pub fn get_ast(path : &String, arch : Arch) -> Result<AstTree, ()> {
     let mut syntax = syntax::create_error_manager();
 
     let name = get_name(path);
-    let tree = match ast_builder::build_ast(path.to_string(), name.clone(), &mut syntax) {
+    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), &mut syntax) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };
@@ -53,8 +60,8 @@ pub fn get_ast(path : &String) -> Result<AstTree, ()> {
 }
 
 // The main parse function
-pub fn parse(path : String) -> Result<LtacFile, ()> {
-    let tree = match get_ast(&path.to_string()) {
+pub fn parse(path : String, arch : Arch) -> Result<LtacFile, ()> {
+    let tree = match get_ast(&path.to_string(), arch) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };
