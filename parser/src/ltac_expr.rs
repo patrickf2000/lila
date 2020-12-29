@@ -362,148 +362,11 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             // Variables and functions
             
             AstArgType::Id if builder.var_exists(&arg.str_val) => {
-                let v = match builder.get_var(&arg.str_val) {
-                    Ok(v) => v.clone(),
-                    Err(_e) => return false,    // This really shouldn't happen
-                };
-                
-                let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
-                let mut pop_float = true;
-                
-                instr.arg2 = LtacArg::Mem(v.pos);
-                
-                let mut size = 1;
-                if v.sub_type == DataType::Short || v.sub_type == DataType::UShort {
-                    size = 2;
-                } else if v.sub_type == DataType::Int || v.sub_type == DataType::UInt
-                    || v.sub_type == DataType::Float {
-                    size = 4;
-                } else if  v.sub_type == DataType::Int64 || v.sub_type == DataType::UInt64
-                    || v.sub_type == DataType::Double || var.sub_type == DataType::Str {
-                    size = 8;
+                if !build_expr_var(builder, &arg, &var, reg_no, negate_next, &mut instr) {
+                    return false;
                 }
-                
-                if arg.sub_args.len() > 0 {
-                    let first_arg = arg.sub_args.last().unwrap();
-                    
-                    if arg.sub_args.len() == 1 {
-                        if first_arg.arg_type == AstArgType::IntL {
-                            let offset = (first_arg.u64_val as i32) * size;
-                            instr.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
-                        } else if first_arg.arg_type == AstArgType::Id {
-                            let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
-                            
-                            match builder.vars.get(&first_arg.str_val) {
-                                Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
-                                None => {
-                                    builder.syntax.ltac_error2("Invalid offset variable.".to_string());
-                                    return false;
-                                },
-                            };
-                            
-                            // Choose the proper registers
-                            instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, reg_no);
-                            instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, reg_no);
-                            
-                            builder.file.code.push(instr2);
-                        }
-                    } else {
-                        // Create a dummy variable so the types stay correct
-                        let var2 = Var {
-                            pos : 0,
-                            data_type : DataType::Int,
-                            sub_type : DataType::None,
-                            is_param : false,
-                        };
-                        
-                        build_var_expr(builder, &arg.sub_args, &var2, 0);
-                        
-                        let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
-                        instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
-                        instr2.arg2 = LtacArg::MemOffsetReg(v.pos, 0, size);
-                        builder.file.code.push(instr2);
-                        
-                        instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
-                    }
-                }
-                
-                // Negate variable if needed
-                // Variable negation is simply the value subtracted from 0
-                //
-                // instr: mov r1, 0
-                //        sub r1, mem
-                if negate_next {
-                    instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
-                    
-                    // The first argument is the same register
-                    let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
-                    instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
-                    
-                    match v.data_type {
-                        DataType::Byte => {
-                            instr2.arg2 = LtacArg::Byte(0);
-                            builder.file.code.push(instr2.clone());
-                            
-                            instr2.instr_type = LtacType::I8Sub;
-                        },
-                        
-                        DataType::Short => {
-                            instr2.arg2 = LtacArg::I16(0);
-                            builder.file.code.push(instr2.clone());
-                            
-                            instr2.instr_type = LtacType::I16Sub;
-                        },
-                        
-                        DataType::Int => {
-                            instr2.arg2 = LtacArg::I32(0);
-                            builder.file.code.push(instr2.clone());
-                            
-                            instr2.instr_type = LtacType::I32Sub;
-                        },
-                        
-                        DataType::Int64 => {
-                            instr2.arg2 = LtacArg::I64(0);
-                            builder.file.code.push(instr2.clone());
-                            
-                            instr2.instr_type = LtacType::I64Sub;
-                        },
-                        
-                        DataType::Float => {
-                            instr2.arg2 = LtacArg::F32(zero);
-                            builder.file.code.push(instr2.clone());
-                            
-                            instr2.instr_type = LtacType::F32Sub;
-                            pop_float = false;
-                        },
-                        
-                        DataType::Double => {
-                            instr2.arg2 = LtacArg::F64(zero);
-                            builder.file.code.push(instr2.clone());
-                            
-                            instr2.instr_type = LtacType::F64Sub;
-                            pop_float = false;
-                        },
-                        
-                        _ => {
-                            builder.syntax.ltac_error2("Invalid use of negation operator.".to_string());
-                            return false;
-                        },
-                    }
-                    
-                    // Set the memory and push the second operand
-                    instr2.arg2 = LtacArg::Mem(v.pos);
-                    builder.file.code.push(instr2);
-                    
-                    negate_next = false;
-                }
-                
-                // Pop the extra float we created at the top if we don't need it
-                if pop_float {
-                    builder.file.data.pop();
-                }
-                
-                // Add the instruction
-                builder.file.code.push(instr.clone());
+                  
+                negate_next = false;  
             },
             
             // System calls
@@ -891,6 +754,151 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
         }
     }
     
+    true
+}
+
+// Builds a variable reference within an expression
+pub fn build_expr_var(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, reg_no : i32, negate_next : bool, instr : &mut LtacInstr) -> bool {
+    let v = match builder.get_var(&arg.str_val) {
+        Ok(v) => v.clone(),
+        Err(_e) => return false,    // This really shouldn't happen
+    };
+    
+    let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
+    let mut pop_float = true;
+    
+    instr.arg2 = LtacArg::Mem(v.pos);
+    
+    let mut size = 1;
+    if v.sub_type == DataType::Short || v.sub_type == DataType::UShort {
+        size = 2;
+    } else if v.sub_type == DataType::Int || v.sub_type == DataType::UInt
+        || v.sub_type == DataType::Float {
+        size = 4;
+    } else if  v.sub_type == DataType::Int64 || v.sub_type == DataType::UInt64
+        || v.sub_type == DataType::Double || var.sub_type == DataType::Str {
+        size = 8;
+    }
+    
+    if arg.sub_args.len() > 0 {
+        let first_arg = arg.sub_args.last().unwrap();
+        
+        if arg.sub_args.len() == 1 {
+            if first_arg.arg_type == AstArgType::IntL {
+                let offset = (first_arg.u64_val as i32) * size;
+                instr.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
+            } else if first_arg.arg_type == AstArgType::Id {
+                let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+                
+                match builder.vars.get(&first_arg.str_val) {
+                    Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
+                    None => {
+                        builder.syntax.ltac_error2("Invalid offset variable.".to_string());
+                        return false;
+                    },
+                };
+                
+                // Choose the proper registers
+                instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, reg_no);
+                instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, reg_no);
+                
+                builder.file.code.push(instr2);
+            }
+        } else {
+            // Create a dummy variable so the types stay correct
+            let var2 = Var {
+                pos : 0,
+                data_type : DataType::Int,
+                sub_type : DataType::None,
+                is_param : false,
+            };
+            
+            build_var_expr(builder, &arg.sub_args, &var2, 0);
+            
+            let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+            instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
+            instr2.arg2 = LtacArg::MemOffsetReg(v.pos, 0, size);
+            builder.file.code.push(instr2);
+            
+            instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
+        }
+    }
+    
+    // Negate variable if needed
+    // Variable negation is simply the value subtracted from 0
+    //
+    // instr: mov r1, 0
+    //        sub r1, mem
+    if negate_next {
+        instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
+        
+        // The first argument is the same register
+        let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+        instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
+        
+        match v.data_type {
+            DataType::Byte => {
+                instr2.arg2 = LtacArg::Byte(0);
+                builder.file.code.push(instr2.clone());
+                
+                instr2.instr_type = LtacType::I8Sub;
+            },
+            
+            DataType::Short => {
+                instr2.arg2 = LtacArg::I16(0);
+                builder.file.code.push(instr2.clone());
+                
+                instr2.instr_type = LtacType::I16Sub;
+            },
+            
+            DataType::Int => {
+                instr2.arg2 = LtacArg::I32(0);
+                builder.file.code.push(instr2.clone());
+                
+                instr2.instr_type = LtacType::I32Sub;
+            },
+            
+            DataType::Int64 => {
+                instr2.arg2 = LtacArg::I64(0);
+                builder.file.code.push(instr2.clone());
+                
+                instr2.instr_type = LtacType::I64Sub;
+            },
+            
+            DataType::Float => {
+                instr2.arg2 = LtacArg::F32(zero);
+                builder.file.code.push(instr2.clone());
+                
+                instr2.instr_type = LtacType::F32Sub;
+                pop_float = false;
+            },
+            
+            DataType::Double => {
+                instr2.arg2 = LtacArg::F64(zero);
+                builder.file.code.push(instr2.clone());
+                
+                instr2.instr_type = LtacType::F64Sub;
+                pop_float = false;
+            },
+            
+            _ => {
+                builder.syntax.ltac_error2("Invalid use of negation operator.".to_string());
+                return false;
+            },
+        }
+        
+        // Set the memory and push the second operand
+        instr2.arg2 = LtacArg::Mem(v.pos);
+        builder.file.code.push(instr2);
+    }
+    
+    // Pop the extra float we created at the top if we don't need it
+    if pop_float {
+        builder.file.data.pop();
+    }
+    
+    // Add the instruction
+    builder.file.code.push(instr.clone());
     true
 }
 
