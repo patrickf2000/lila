@@ -23,6 +23,7 @@ pub mod ltac;
 mod ast_builder;
 mod ast_func;
 mod ast_utils;
+mod ast_var;
 mod ltac_builder;
 mod ltac_expr;
 mod ltac_array;
