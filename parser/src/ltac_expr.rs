@@ -20,13 +20,14 @@
 
 use std::mem;
 
-use crate::ltac_builder::*;
 use crate::ast;
 use crate::ast::{AstStmt, AstArg, AstStmtType, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacArg, LtacInstr};
 
+use crate::ltac_builder::*;
 use crate::ltac_func::*;
+use crate::ltac_utils::*;
 
 // Builds assignments for numerical variables
 pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -> bool {

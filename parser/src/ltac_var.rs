@@ -25,6 +25,7 @@ use crate::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::ltac_expr::*;
 use crate::ltac_array::*;
 use crate::ltac_func::*;
+use crate::ltac_utils::*;
 
 // Builds an LTAC variable declaration
 pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32, flt_arg_no_o : i32) -> (bool, i32, i32) {
