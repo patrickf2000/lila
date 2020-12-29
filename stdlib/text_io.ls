@@ -1,7 +1,7 @@
 
 module std;
 
-use std.arch.x86_64 if "x86_64";
+use core.arch.x86_64 if "x86_64";
 use std.arch.riscv64 if "riscv64";
 use std.string;
 use std.fs;

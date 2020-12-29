@@ -56,6 +56,7 @@ fn run() -> i32 {
     let mut print_ast = false;
     let mut print_ltac = false;
     let mut use_c = false;
+    let mut use_corelib = true;
     let mut link_lib = false;
     let mut no_link = false;
     let mut inc_start = true;
@@ -87,6 +88,13 @@ fn run() -> i32 {
             "--no-link" => no_link = true,
             "--no-start" => inc_start = false,
             "-o" => next_output = true,
+            
+            "--no-corelib" => {
+                use_corelib = false;
+                
+                println!("Warning: You have disabled the use of the core library.");
+                println!("Certain core functions may not work.");
+            },
             
             "-march=riscv64" => arch = Arch::Riscv64,
             
@@ -152,7 +160,7 @@ fn run() -> i32 {
     // Link
     if !no_link && !print_ltac {
         if arch == Arch::X86_64 {
-            x86::link(&all_names, &output, use_c, link_lib, inc_start);
+            x86::link(&all_names, &output, use_c, use_corelib, link_lib, inc_start);
         } else if arch == Arch::AArch64 {
             aarch64::link(&all_names, &output, use_c, link_lib);
         } else if arch == Arch::Riscv64 {

@@ -85,7 +85,7 @@ pub fn build_asm(name : &String, no_link : bool) {
 }
  
 // Link everything
-pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : bool, inc_start : bool) {
+pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, use_corelib : bool, is_lib : bool, inc_start : bool) {
     let mut names : Vec<String> = Vec::new();
     let mut libs : Vec<String> = Vec::new();
     
@@ -121,6 +121,10 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, is_lib : b
         }
         
         args.push("-llila");
+        
+        if use_corelib {
+            args.push("-llila_core");
+        }
     }
     
     args.push("-dynamic-linker");
