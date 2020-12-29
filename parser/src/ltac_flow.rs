@@ -134,7 +134,16 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
             cmp.arg1 = LtacArg::FltReg(0);
         },
         
-        AstArgType::StringL => {},
+        AstArgType::StringL => {
+            let name = builder.build_string(arg1.str_val.clone());
+            
+            let mut instr2 = ltac::create_instr(LtacType::PushArg);
+            instr2.arg1 = LtacArg::PtrLcl(name);
+            instr2.arg2_val = 1;
+            builder.file.code.push(instr2);
+            
+            cmp = ltac::create_instr(LtacType::StrCmp);
+        },
         
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::MovU);
@@ -312,7 +321,14 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
             }
         },
         
-        AstArgType::StringL => {},
+        AstArgType::StringL => {
+            let name = builder.build_string(arg2.str_val.clone());
+            
+            let mut instr2 = ltac::create_instr(LtacType::PushArg);
+            instr2.arg1 = LtacArg::PtrLcl(name);
+            instr2.arg2_val = 2;
+            builder.file.code.push(instr2); 
+        },
         
         AstArgType::Id => {
             let mut mov = ltac::create_instr(LtacType::Mov);

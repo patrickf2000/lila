@@ -146,7 +146,7 @@ fn ltac_build_cmd(writer : &mut BufWriter<File>, code : &LtacInstr) {
 
 // String comparisons
 fn ltac_build_strcmp(writer : &mut BufWriter<File>) {
-    writer.write(b"  str.cmp")
+    writer.write(b"  str.cmp\n")
         .expect("[LTAC_build_strcmp] Write failed.");
 }
 

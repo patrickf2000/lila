@@ -38,7 +38,7 @@ use utils::*;
 use vector::*;
 use risc::*;
 
-pub fn compile(ltac_file : &LtacFile, pic : bool, is_risc : bool) -> io::Result<()> {
+pub fn compile(ltac_file : &LtacFile, pic : bool, is_risc : bool, use_c : bool) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
     name.push_str(&ltac_file.name);
     name.push_str(".asm");
@@ -52,7 +52,7 @@ pub fn compile(ltac_file : &LtacFile, pic : bool, is_risc : bool) -> io::Result<
         .expect("[AMD64_setup] Write failed.");
     
     write_data(&mut writer, &ltac_file.data, pic);
-    write_code(&mut writer, &ltac_file.code, pic, is_risc);
+    write_code(&mut writer, &ltac_file.code, pic, is_risc, use_c);
     
     Ok(())
 }
@@ -192,7 +192,7 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>, pic : bool) 
 }
 
 // Writes the .text section
-fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bool, is_risc : bool) {
+fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bool, is_risc : bool, use_c : bool) {
     let line = ".text\n".to_string();
     writer.write(&line.into_bytes())
         .expect("[AMD64_code] Write failed");
@@ -221,7 +221,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, is_pic : bo
             LtacType::Call => amd64_build_call(writer, &code),
             LtacType::Syscall => amd64_build_syscall(writer),
             
-            LtacType::StrCmp => amd64_build_strcmp(writer, &code),
+            LtacType::StrCmp => amd64_build_strcmp(writer, use_c),
             
             LtacType::Br => amd64_build_jump(writer, &code),
             LtacType::Be => amd64_build_jump(writer, &code),
@@ -888,10 +888,15 @@ fn amd64_build_jump(writer : &mut BufWriter<File>, code : &LtacInstr) {
 }
 
 // Builds a string comparison
-fn amd64_build_strcmp(writer : &mut BufWriter<File>, _code : &LtacInstr) {
+fn amd64_build_strcmp(writer : &mut BufWriter<File>, use_c : bool) {
     let mut line = String::new();
     line.push_str("  call strcmp\n");
-    line.push_str("  cmp eax, 0\n");
+    
+    if use_c {
+        line.push_str("  cmp eax, 0\n");
+    } else {
+        line.push_str("  cmp eax, 1\n");
+    }
     
     writer.write(&line.into_bytes())
         .expect("[AMD64_build_strcmp] Write failed.");
