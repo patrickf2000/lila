@@ -343,7 +343,7 @@ impl LtacBuilder {
     }
     
     // Searches for and returns a variable
-    pub fn var_exists(&mut self, name : &String) -> bool {
+    pub fn var_exists(&self, name : &String) -> bool {
         match &self.vars.get(name) {
             Some(_v) => return true,
             _ => return false,
