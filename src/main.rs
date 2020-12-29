@@ -58,6 +58,7 @@ fn run() -> i32 {
     let mut use_c = false;
     let mut link_lib = false;
     let mut no_link = false;
+    let mut inc_start = true;
     let mut pic = false;
     let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
     let mut arch = get_arch();
@@ -84,6 +85,7 @@ fn run() -> i32 {
             "--pic" => pic = true,
             "--risc" => risc_mode = true,
             "--no-link" => no_link = true,
+            "--no-start" => inc_start = false,
             "-o" => next_output = true,
             
             "-march=riscv64" => arch = Arch::Riscv64,
@@ -150,7 +152,7 @@ fn run() -> i32 {
     // Link
     if !no_link && !print_ltac {
         if arch == Arch::X86_64 {
-            x86::link(&all_names, &output, use_c, link_lib);
+            x86::link(&all_names, &output, use_c, link_lib, inc_start);
         } else if arch == Arch::AArch64 {
             aarch64::link(&all_names, &output, use_c, link_lib);
         } else if arch == Arch::Riscv64 {
@@ -171,9 +173,11 @@ fn help() {
     println!("--lib \t\t Generate a dynamic library.");
     println!("--pic \t\t Generate position independent code (x86 only- you need this if you are building a library)");
     println!("--no-link \t Only generate an object file.");
+    println!("--no-start \t Do not link with start files.");
     println!("-l<lib> \t Link to a certain library.");
     println!("-o <name> \t Specify the output name.");
     println!("--risc \t\t Run the RISC optimizer regardless of platform (the x86 code generator can convert RISC instructions).");
     println!("-h, --help \t Display this message and exit.");
     println!("");
 }
+

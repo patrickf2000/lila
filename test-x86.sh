@@ -26,6 +26,8 @@ function run_test() {
         else
             if [[ $2 == "sys" ]] ; then
                 cargo run $entry $3 -o $name
+            elif [[ $2 == "sys2" ]] ; then
+                cargo run $entry $3 -o $name --no-start
             elif [[ $2 == "clib" ]] ; then
                 cargo run $entry --use-c $3 -o $name
             fi
@@ -74,7 +76,7 @@ run_test 'test/errors/*.ls' 'clib' "error"
 run_test 'test/errors/ltac/*.ls' "clib" "error"
 
 run_test 'test/vector/*.ls' 'clib'
-#run_test 'test/syscall/x86-64/*.ls' 'sys'
+run_test 'test/syscall/x86-64/*.ls' 'sys2'
 
 echo ""
 echo "$test_count tests passed successfully."
