@@ -356,6 +356,21 @@ impl LtacBuilder {
             _ => return Err(()),
         }
     }
+    
+    // Searches for and returns a function
+    pub fn function_exists(&self, name : &String) -> bool {
+        match &self.functions.get(name) {
+            Some(_v) => return true,
+            _ => return false,
+        }
+    }
+    
+    pub fn get_function(&self, name : &String) -> Result<&DataType, ()> {
+        match &self.functions.get(name) {
+            Some(v) => return Ok(v),
+            _ => return Err(()),
+        }
+    }
 
     // Builds a string and adds it to the data section
     pub fn build_string(&mut self, val : String) -> String {
