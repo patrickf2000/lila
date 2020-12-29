@@ -151,28 +151,8 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
     let mut token = scanner.get_token();
     
     match token {
-        Token::Module => {
-            if tree.module.len() > 0 {
-                syntax.syntax_error(scanner, "Duplicate module declarations.".to_string());
-                return (false, 0, false, false);
-            }
-            
-            token = scanner.get_token();
-            
-            match token {
-                Token::Id(ref val) => tree.module = val.clone(),
-                _ => {
-                    syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
-                    return (false, 0, false, false);
-                },
-            }
-            
-            if scanner.get_token() != Token::Semicolon {
-                syntax.syntax_error(scanner, "Expecting terminator".to_string());
-                return (false, 0, false, false);
-            }
-        },
         
+        Token::Module => code = build_module(scanner, tree, syntax),
         Token::Use => code = build_use(scanner, tree, syntax),
     
         Token::Extern => {

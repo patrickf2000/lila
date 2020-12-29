@@ -29,6 +29,31 @@ use crate::ast::*;
 use crate::lex::{Token, Lex};
 use crate::syntax::ErrorManager;
 
+// Builds a "module" declaration
+pub fn build_module(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+    if tree.module.len() > 0 {
+        syntax.syntax_error(scanner, "Duplicate module declarations.".to_string());
+        return false;
+    }
+    
+    let token = scanner.get_token();
+    
+    match token {
+        Token::Id(ref val) => tree.module = val.clone(),
+        _ => {
+            syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
+            return false;
+        },
+    }
+    
+    if scanner.get_token() != Token::Semicolon {
+        syntax.syntax_error(scanner, "Expecting terminator".to_string());
+        return false;
+    }
+    
+    true
+}
+
 // Builds a "use" declaration
 pub fn build_use(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let module : String;
