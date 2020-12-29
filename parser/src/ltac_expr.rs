@@ -526,48 +526,9 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             
             // Function calls
             AstArgType::Id if builder.function_exists(&arg.str_val) => {
-                let t = match builder.get_function(&arg.str_val) {
-                    Ok(t) => t.clone(),
-                    Err(_e) => return false,
-                };
-            
-                // First, push the current register
-                let mut store = mov_for_type(&t, &DataType::None);        // TODO: Replace this
-                store.arg1 = LtacArg::Mem(var.pos);
-                store.arg2 = reg_for_type(&t, &DataType::None, reg_no);    // TODO: Replace this
-                builder.file.code.push(store.clone());
-                
-                // Create a statement to build the rest of the function call
-                let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
-                stmt.name = arg.str_val.clone();
-                stmt.args = arg.sub_args.clone();
-                build_func_call(builder, &stmt);
-                       
-                //Restore the current register
-                store.arg1 = reg_for_type(&t, &DataType::None, reg_no);        // TODO: Replace this
-                store.arg2 = LtacArg::Mem(var.pos);
-                builder.file.code.push(store);
-                
-                match t {
-                    DataType::Byte => instr.arg2 = LtacArg::RetRegI8,
-                    DataType::UByte => instr.arg2 = LtacArg::RetRegU8,
-                    DataType::Short => instr.arg2 = LtacArg::RetRegI16,
-                    DataType::UShort => instr.arg2 = LtacArg::RetRegU16,
-                    DataType::Int => instr.arg2 = LtacArg::RetRegI32,
-                    DataType::UInt => instr.arg2 = LtacArg::RetRegU32,
-                    DataType::Int64 => instr.arg2 = LtacArg::RetRegI64,
-                    DataType::UInt64 => instr.arg2 = LtacArg::RetRegU64,
-                    DataType::Float => instr.arg2 = LtacArg::RetRegF32,
-                    DataType::Double => instr.arg2 = LtacArg::RetRegF64,
-                    
-                    _ => {
-                        builder.syntax.ltac_error2("Invalid return.".to_string());
-                        return false;
-                    },
+                if !build_expr_func_call(builder, &arg, &var, reg_no, &mut instr) {
+                    return false;
                 }
-                
-                // Add the line
-                builder.file.code.push(instr.clone());
             },
             
             // Constants
@@ -930,6 +891,53 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
         }
     }
     
+    true
+}
+
+// Builds a function call within an expression
+pub fn build_expr_func_call(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, reg_no : i32, instr : &mut LtacInstr) -> bool {
+    let t = match builder.get_function(&arg.str_val) {
+        Ok(t) => t.clone(),
+        Err(_e) => return false,
+    };
+
+    // First, push the current register
+    let mut store = mov_for_type(&t, &DataType::None);        // TODO: Replace this
+    store.arg1 = LtacArg::Mem(var.pos);
+    store.arg2 = reg_for_type(&t, &DataType::None, reg_no);    // TODO: Replace this
+    builder.file.code.push(store.clone());
+
+    // Create a statement to build the rest of the function call
+    let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
+    stmt.name = arg.str_val.clone();
+    stmt.args = arg.sub_args.clone();
+    build_func_call(builder, &stmt);
+           
+    //Restore the current register
+    store.arg1 = reg_for_type(&t, &DataType::None, reg_no);        // TODO: Replace this
+    store.arg2 = LtacArg::Mem(var.pos);
+    builder.file.code.push(store);
+
+    match t {
+        DataType::Byte => instr.arg2 = LtacArg::RetRegI8,
+        DataType::UByte => instr.arg2 = LtacArg::RetRegU8,
+        DataType::Short => instr.arg2 = LtacArg::RetRegI16,
+        DataType::UShort => instr.arg2 = LtacArg::RetRegU16,
+        DataType::Int => instr.arg2 = LtacArg::RetRegI32,
+        DataType::UInt => instr.arg2 = LtacArg::RetRegU32,
+        DataType::Int64 => instr.arg2 = LtacArg::RetRegI64,
+        DataType::UInt64 => instr.arg2 = LtacArg::RetRegU64,
+        DataType::Float => instr.arg2 = LtacArg::RetRegF32,
+        DataType::Double => instr.arg2 = LtacArg::RetRegF64,
+        
+        _ => {
+            builder.syntax.ltac_error2("Invalid return.".to_string());
+            return false;
+        },
+    }
+
+    // Add the line
+    builder.file.code.push(instr.clone());
     true
 }
 
