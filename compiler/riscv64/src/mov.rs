@@ -102,6 +102,8 @@ pub fn riscv64_build_ld_str(writer : &mut BufWriter<File>, code : &LtacInstr, st
         LtacArg::Mem(val) => {
             let mut pos = stack_top - (*val);
 
+            // If you comment the if condition out, all the integer tests pass. If you don't, all but one array test passes
+            // We need to look into this
             if code.instr_type == LtacType::LdQ || code.instr_type == LtacType::LdUQ 
                 || code.instr_type == LtacType::StrQ || code.instr_type == LtacType::StrUQ {
                 if pos + 8 == stack_top {
