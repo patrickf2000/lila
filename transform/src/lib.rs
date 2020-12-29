@@ -120,7 +120,18 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     file2.code.pop();
                     
                     // Push the memory location and size to the hash map
-                    mm_map.insert(pos_instr.arg1_val, size_instr.arg1_val);
+                    let pos = match &pos_instr.arg1 {
+                        LtacArg::Mem(pos) => *pos,
+                        LtacArg::Ptr(pos) => *pos,
+                        _ => 0,
+                    };
+                    
+                    let size = match &size_instr.arg1 {
+                        LtacArg::I32(val) => *val,
+                        _ => 0,
+                    };
+                    
+                    mm_map.insert(pos, size);
                     
                     // System call number (for mmap)
                     let mut instr = ltac::create_instr(LtacType::KPushArg);
@@ -176,34 +187,29 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     let addr_instr = code.iter().nth(index-1).unwrap();
                     file2.code.pop();
                     
-                    // System call number (for munmap)
-                    let mut instr = ltac::create_instr(LtacType::KPushArg);
-                    instr.arg2_val = 1;
-                    
-                    match arch {
-                        Arch::X86_64 => instr.arg1 = LtacArg::I32(11),
-                        Arch::AArch64 => instr.arg1 = LtacArg::I32(215),
-                        Arch::Riscv64 => {},
-                    };
-                    
-                    file2.code.push(instr.clone());
-                    
                     // Address
+                    let mut instr = ltac::create_instr(LtacType::PushArg);
                     instr.arg1 = addr_instr.arg1.clone();
-                    instr.arg2_val = 2;
+                    instr.arg2_val = 1;
                     file2.code.push(instr.clone());
                     
                     // Memory segment size
-                    match &mm_map.get(&addr_instr.arg1_val) {
-                        Some(size) => instr.arg1_val = **size,
-                        None => {},
+                    let pos = match &addr_instr.arg1 {
+                        LtacArg::Ptr(pos) => *pos,
+                        _ => 0,
+                    };
+                    
+                    match &mm_map.get(&pos) {
+                        Some(size) => instr.arg1 = LtacArg::I32(**size),
+                        None => instr.arg1 = LtacArg::I32(0),
                     }
                     
-                    instr.arg2_val = 3;
+                    instr.arg2_val = 2;
                     file2.code.push(instr.clone());
                     
                     // The system call
-                    instr = ltac::create_instr(LtacType::Syscall);
+                    instr = ltac::create_instr(LtacType::Call);
+                    instr.name = "free".to_string();
                     file2.code.push(instr.clone());
                 }
             },
