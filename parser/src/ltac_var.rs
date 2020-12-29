@@ -262,75 +262,75 @@ pub fn build_str_assign(builder : &mut LtacBuilder, line : &AstStmt, var : &Var)
                 instr.arg2 = LtacArg::PtrLcl(name);
             },
             
-            AstArgType::Id => {
-                match &builder.vars.get(&arg.str_val) {
-                    Some(v) => {
-                        if v.data_type != DataType::Str && v.sub_type != DataType::Str
-                                && v.sub_type != DataType::Byte && v.sub_type != DataType::UByte {
-                            builder.syntax.ltac_error(line, "You can only assign a string to a string.".to_string());
-                            return false;
-                        } else if v.data_type == DataType::Ptr && v.sub_type == DataType::Str {
-                            let mut instr2 = ltac::create_instr(LtacType::MovQ);
-                            instr2.arg1 = LtacArg::Reg64(0);
-                            instr2.arg2 = LtacArg::Mem(v.pos);
-                            
-                            if arg.sub_args.len() > 0 {
-                                let first_arg = arg.sub_args.last().unwrap();
-                                let size = 8;
-                            
-                                if arg.sub_args.len() == 1 {
-                                    if first_arg.arg_type == AstArgType::IntL {
-                                        let offset = (first_arg.u64_val as i32) * size;
-                                        instr2.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
-                                    } else if first_arg.arg_type == AstArgType::Id {
-                                        match builder.vars.get(&first_arg.str_val) {
-                                            Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
-                                            None => {
-                                                builder.syntax.ltac_error2("Invalid offset variable.".to_string());
-                                                return false;
-                                            },
-                                        };
-                                    }
-                                }
-                            }
-                            
-                            builder.file.code.push(instr2);
-                        } else {
-                            let mut instr2 = ltac::create_instr(LtacType::MovQ);
-                            instr2.arg1 = LtacArg::Reg64(0);
-                            instr2.arg2 = LtacArg::Mem(v.pos);
-                            builder.file.code.push(instr2);
-                        }
-                        
-                        instr.arg2 = LtacArg::Reg64(0);
-                    },
+            // Build an ID value based on a variable
+            AstArgType::Id if builder.var_exists(&arg.str_val) => {
+                let v = match &builder.get_var(&arg.str_val) {
+                    Ok(v) => v.clone(),
+                    Err(_e) => return false,
+                };
+            
+                if v.data_type != DataType::Str && v.sub_type != DataType::Str
+                        && v.sub_type != DataType::Byte && v.sub_type != DataType::UByte {
+                    builder.syntax.ltac_error(line, "You can only assign a string to a string.".to_string());
+                    return false;
+                } else if v.data_type == DataType::Ptr && v.sub_type == DataType::Str {
+                    let mut instr2 = ltac::create_instr(LtacType::MovQ);
+                    instr2.arg1 = LtacArg::Reg64(0);
+                    instr2.arg2 = LtacArg::Mem(v.pos);
                     
-                    None => instr.arg2 = LtacArg::Empty,
+                    if arg.sub_args.len() > 0 {
+                        let first_arg = arg.sub_args.last().unwrap();
+                        let size = 8;
+                    
+                        if arg.sub_args.len() == 1 {
+                            if first_arg.arg_type == AstArgType::IntL {
+                                let offset = (first_arg.u64_val as i32) * size;
+                                instr2.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
+                            } else if first_arg.arg_type == AstArgType::Id {
+                                match &builder.get_var(&first_arg.str_val) {
+                                    Ok(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
+                                    Err(_e) => {
+                                        builder.syntax.ltac_error2("Invalid offset variable.".to_string());
+                                        return false;
+                                    },
+                                };
+                            }
+                        }
+                    }
+                    
+                    builder.file.code.push(instr2);
+                } else {
+                    let mut instr2 = ltac::create_instr(LtacType::MovQ);
+                    instr2.arg1 = LtacArg::Reg64(0);
+                    instr2.arg2 = LtacArg::Mem(v.pos);
+                    builder.file.code.push(instr2);
                 }
                 
-                if instr.arg2 == LtacArg::Empty {
-                    match &builder.clone().functions.get(&arg.str_val) {
-                        Some(t) => {
-                            // TODO: Better detection with whether its byte or ubyte
-                            if **t != DataType::Str && **t != DataType::Ptr {
-                                builder.syntax.ltac_error(line, "You can only assign string or byte arrays to string variables.".to_string());
-                                return false;
-                            }
-                            
-                            instr.arg2 = LtacArg::RetRegI64;
-                            
-                            // Create a statement to build the rest of the function call
-                            let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
-                            stmt.name = arg.str_val.clone();
-                            stmt.args = arg.sub_args.clone();
-                            build_func_call(builder, &stmt);
-                        },
-                        
-                        None => {
-                            builder.syntax.ltac_error(line, "Invalid string variable.".to_string());
+                instr.arg2 = LtacArg::Reg64(0);
+            },
+            
+            AstArgType::Id => {
+                match &builder.clone().functions.get(&arg.str_val) {
+                    Some(t) => {
+                        // TODO: Better detection with whether its byte or ubyte
+                        if **t != DataType::Str && **t != DataType::Ptr {
+                            builder.syntax.ltac_error(line, "You can only assign string or byte arrays to string variables.".to_string());
                             return false;
-                        },
-                    }
+                        }
+                        
+                        instr.arg2 = LtacArg::RetRegI64;
+                        
+                        // Create a statement to build the rest of the function call
+                        let mut stmt = ast::create_orphan_stmt(AstStmtType::FuncCall);
+                        stmt.name = arg.str_val.clone();
+                        stmt.args = arg.sub_args.clone();
+                        build_func_call(builder, &stmt);
+                    },
+                    
+                    None => {
+                        builder.syntax.ltac_error(line, "Invalid string variable.".to_string());
+                        return false;
+                    },
                 }
             },
             

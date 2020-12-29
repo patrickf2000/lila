@@ -341,6 +341,21 @@ impl LtacBuilder {
         
         code
     }
+    
+    // Searches for and returns a variable
+    pub fn var_exists(&mut self, name : &String) -> bool {
+        match &self.vars.get(name) {
+            Some(_v) => return true,
+            _ => return false,
+        }
+    }
+    
+    pub fn get_var(&self, name : &String) -> Result<&Var, ()> {
+        match &self.vars.get(name) {
+            Some(v) => return Ok(v),
+            _ => return Err(()),
+        }
+    }
 
     // Builds a string and adds it to the data section
     pub fn build_string(&mut self, val : String) -> String {
