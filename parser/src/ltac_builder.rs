@@ -371,6 +371,21 @@ impl LtacBuilder {
             _ => return Err(()),
         }
     }
+    
+    // Searches for and returns constants
+    pub fn const_exists(&self, name : &String) -> bool {
+        match &self.global_consts.get(name) {
+            Some(_v) => return true,
+            _ => return false,
+        }
+    }
+    
+    pub fn get_const(&self, name : &String) -> Result<&LtacArg, ()> {
+        match &self.global_consts.get(name) {
+            Some(arg) => return Ok(arg),
+            _ => return Err(()),
+        }
+    }
 
     // Builds a string and adds it to the data section
     pub fn build_string(&mut self, val : String) -> String {

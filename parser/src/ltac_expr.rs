@@ -570,8 +570,19 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 builder.file.code.push(instr.clone());
             },
             
-            // TODO: This really needs to get cleaned up. I started to, there's a separate function near the bottom
-            // for managing any function calls within an expression
+            // Constants
+            AstArgType::Id if builder.const_exists(&arg.str_val) => {
+                // Check constants
+                let const_arg = match builder.get_const(&arg.str_val) {
+                    Ok(c) => c.clone(),
+                    Err(_e) => return false,             // We shouldn't get here
+                };
+                
+                instr.arg2 = const_arg;
+                builder.file.code.push(instr.clone());
+            }
+            
+            // Check enumerations, and throw an error if there is no such thing
             AstArgType::Id => {
                 
                 // Check enumerated values
@@ -600,22 +611,12 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     continue;
                 }
                 
-                // Check constants
-                let const_arg = match builder.global_consts.get(&arg.str_val) {
-                    Some(c) => c.clone(),
-                    None => LtacArg::Empty,
-                };
-                
-                if const_arg == LtacArg::Empty {
-                    let mut msg = "Invalid function, constant, or variable name: ".to_string();
-                    msg.push_str(&arg.str_val);
-                
-                    builder.syntax.ltac_error2(msg);
-                    return false;
-                }
-                
-                instr.arg2 = const_arg;
-                builder.file.code.push(instr.clone());
+                // If we get to this point, throw an error
+                let mut msg = "Invalid function, constant, or variable name: ".to_string();
+                msg.push_str(&arg.str_val);
+            
+                builder.syntax.ltac_error2(msg);
+                return false;
             },
             
             // Ldarg statement
