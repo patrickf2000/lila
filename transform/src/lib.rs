@@ -133,48 +133,15 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
                     
                     mm_map.insert(pos, size);
                     
-                    // System call number (for mmap)
-                    let mut instr = ltac::create_instr(LtacType::KPushArg);
+                    // Make the call
+                    let mut instr = ltac::create_instr(LtacType::PushArg);
+                    instr.arg1 = LtacArg::I32(size);
                     instr.arg2_val = 1;
-                    
-                    match arch {
-                        Arch::X86_64 => instr.arg1 = LtacArg::I32(9),
-                        Arch::AArch64 => instr.arg1 = LtacArg::I32(222),
-                        Arch::Riscv64 => {},
-                    };
-                    
                     file2.code.push(instr.clone());
                     
-                    // Address (0 by default)
-                    instr.arg1 = LtacArg::I32(0);
-                    instr.arg2_val = 2;
-                    file2.code.push(instr.clone());
-                    
-                    // Memory segment size
-                    instr.arg1 = size_instr.arg1.clone();
-                    instr.arg2_val = 3;
-                    file2.code.push(instr.clone());
-                    
-                    // All other are various flags and stuff
-                    instr.arg1 = LtacArg::I32(3);
-                    instr.arg2_val = 4;
-                    file2.code.push(instr.clone());
-                    
-                    instr.arg1 = LtacArg::I32(34);
-                    instr.arg2_val = 5;
-                    file2.code.push(instr.clone());
-                    
-                    instr.arg1 = LtacArg::I32(-1);
-                    instr.arg2_val = 6;
-                    file2.code.push(instr.clone());
-                    
-                    instr.arg1 = LtacArg::I32(0);
-                    instr.arg2_val = 7;
-                    file2.code.push(instr.clone());
-                    
-                    // The system call
-                    instr = ltac::create_instr(LtacType::Syscall);
-                    file2.code.push(instr.clone());
+                    instr = ltac::create_instr(LtacType::Call);
+                    instr.name = "malloc".to_string();
+                    file2.code.push(instr);
                 }
             },
             

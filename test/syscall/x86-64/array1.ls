@@ -5,11 +5,6 @@
 
 #RET 0
 
-func free -> int
-begin
-    return 0;
-end
-
 func _start
     numbers : int[10] = array;
     x : int = 0;

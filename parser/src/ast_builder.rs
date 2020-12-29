@@ -54,6 +54,9 @@ pub fn build_ast(path : String, arch : Arch, name : String, syntax : &mut ErrorM
         .expect("Error: Unable to open input file.");
     let reader = BufReader::new(file);
     
+    // Include the core modules
+    include_module("core.mem".to_string(), &mut tree, syntax);
+    
     // Read the thing line by line
     let mut line_no = 0;
     let mut layer = 0;

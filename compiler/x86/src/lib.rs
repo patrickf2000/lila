@@ -120,11 +120,11 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, use_coreli
             args.push("/usr/lib/lila/lrt.o");
         }
         
-        args.push("-llila");
-        
         if use_corelib {
             args.push("-llila_core");
         }
+        
+        args.push("-llila");
     }
     
     args.push("-dynamic-linker");
