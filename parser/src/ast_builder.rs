@@ -23,12 +23,13 @@ use std::collections::HashMap;
 use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex, create_lex};
-use crate::module;
 use crate::syntax::ErrorManager;
 use crate::Arch;
 
 use crate::ast_func::*;
 use crate::ast_utils::*;
+use crate::module;
+use crate::module::*;
 
 // The AST building function
 // This function opens the file and reads a line; 
@@ -89,13 +90,8 @@ pub fn build_ast(path : String, arch : Arch, name : String, syntax : &mut ErrorM
     Ok(tree)
 }
 
-// 12/21/2020- This is untested following the lexical analyzer redesign
-//
 // Loads a module into the current tree
-// TODO:
-//      1) This should go into the module builder
-//      2) There should be something for the system-wide modules
-fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
     let path = module::get_module_path(&name);
     
     // Open the file
@@ -177,61 +173,7 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
             }
         },
         
-        Token::Use => {
-            let module : String;
-            let mut do_include = true;
-            token = scanner.get_token();
-            
-            match token {
-                Token::Id(ref val) => module = val.clone(),
-                _ => {
-                    syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
-                    return (false, 0, false, false);
-                },
-            }
-            
-            token = scanner.get_token();
-            
-            if token == Token::If {
-                token = scanner.get_token();
-                
-                let arch_str = match token {
-                    Token::StringL(ref val) => val.clone(),
-                    _ => {
-                        syntax.syntax_error(scanner, "Expected string with architecture type.".to_string());
-                        return (false, 0, false, false);
-                    },
-                };
-                
-                token = scanner.get_token();
-                if token != Token::Semicolon {
-                    syntax.syntax_error(scanner, "Expecting terminator".to_string());
-                    return (false, 0, false, false);
-                }
-                
-                let arch2 = match arch_str.as_str() {
-                    "x86_64" => Arch::X86_64,
-                    "aarch64" => Arch::AArch64,
-                    "riscv64" => Arch::Riscv64,
-                    
-                    _ => {
-                        syntax.syntax_error(scanner, "Invalid architecture".to_string());
-                        return (false, 0, false, false);
-                    },
-                };
-                
-                if arch2 != tree.arch {
-                    do_include = false;
-                }
-            } else if token != Token::Semicolon {
-                syntax.syntax_error(scanner, "Expecting terminator".to_string());
-                return (false, 0, false, false);
-            }
-            
-            if do_include {
-                code = include_module(module, tree, syntax);
-            }
-        },
+        Token::Use => code = build_use(scanner, tree, syntax),
     
         Token::Extern => {
             token = scanner.get_token();
