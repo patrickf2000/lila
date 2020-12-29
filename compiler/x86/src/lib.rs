@@ -119,12 +119,6 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, use_coreli
         if !is_lib && inc_start {
             args.push("/usr/lib/lila/lrt.o");
         }
-        
-        if use_corelib {
-            args.push("-llila_core");
-        }
-        
-        args.push("-llila");
     }
     
     args.push("-dynamic-linker");
@@ -144,6 +138,14 @@ pub fn link(all_names : &Vec<String>, output : &String, use_c : bool, use_coreli
         
     args.push("-o");
     args.push(output);
+    
+    if !use_c && use_corelib {
+        args.push("-llila");
+        
+        if use_corelib {
+            args.push("-llila_core");
+        }
+    }
     
     let ld = Command::new("ld")
         .args(args.as_slice())

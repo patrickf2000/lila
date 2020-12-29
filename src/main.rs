@@ -109,7 +109,7 @@ fn run() -> i32 {
     
     if print_ast {
         let input = inputs.last().unwrap();
-        let ast = match parser::get_ast(&input, arch) {
+        let ast = match parser::get_ast(&input, arch, use_corelib) {
             Ok(ast) => ast,
             Err(_e) => return 1,
         };
@@ -127,7 +127,7 @@ fn run() -> i32 {
         }
     
         // Build the LTAC portion
-        let mut ltac = match parser::parse(input, arch) {
+        let mut ltac = match parser::parse(input, arch, use_corelib) {
             Ok(ltac) => ltac,
             Err(_e) => return 1,
         };

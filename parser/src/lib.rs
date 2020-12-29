@@ -49,11 +49,11 @@ use ast::AstTree;
 use ltac::LtacFile;
 
 // Returns the ast
-pub fn get_ast(path : &String, arch : Arch) -> Result<AstTree, ()> {
+pub fn get_ast(path : &String, arch : Arch, include_core : bool) -> Result<AstTree, ()> {
     let mut syntax = syntax::create_error_manager();
 
     let name = get_name(path);
-    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), &mut syntax) {
+    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), include_core, &mut syntax) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };
@@ -62,8 +62,8 @@ pub fn get_ast(path : &String, arch : Arch) -> Result<AstTree, ()> {
 }
 
 // The main parse function
-pub fn parse(path : String, arch : Arch) -> Result<LtacFile, ()> {
-    let tree = match get_ast(&path.to_string(), arch) {
+pub fn parse(path : String, arch : Arch, include_core : bool) -> Result<LtacFile, ()> {
+    let tree = match get_ast(&path.to_string(), arch, include_core) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };

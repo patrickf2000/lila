@@ -40,7 +40,7 @@ use crate::module::*;
 // In Quik, each line is a self-contained expression; as a result, we read a line
 // and then lexically analyze and build an AST node from it
 //
-pub fn build_ast(path : String, arch : Arch, name : String, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
+pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
     let mut tree = AstTree {
         file_name : name,
         arch : arch,
@@ -55,7 +55,9 @@ pub fn build_ast(path : String, arch : Arch, name : String, syntax : &mut ErrorM
     let reader = BufReader::new(file);
     
     // Include the core modules
-    include_module("core.mem".to_string(), &mut tree, syntax);
+    if include_core {
+        include_module("core.mem".to_string(), &mut tree, syntax);
+    }
     
     // Read the thing line by line
     let mut line_no = 0;
