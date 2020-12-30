@@ -15,3 +15,5 @@ Add strlen and as a builtin (since its in the corelib)
 
 Octal type and literals
 
+Better array syntax; some sort of reference operator
+
