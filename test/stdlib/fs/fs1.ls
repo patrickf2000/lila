@@ -23,17 +23,17 @@ func main
 begin
     file = open("./file.txt");
     if file < 0
-        printLn("Unable to open file.");
-        sys_exit(1);
+        println("Unable to open file.");
+        exit;
     end
     
     while len > 0
         line = getLine(file);
-        printLn(line);
+        println(line);
         
         len = strlen(line);
     end
     
     close(file);
-    sys_exit(0);
+    exit;
 end

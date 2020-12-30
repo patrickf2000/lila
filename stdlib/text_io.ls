@@ -3,7 +3,9 @@ module std;
 
 use core.arch.x86_64 if "x86_64";
 use std.arch.riscv64 if "riscv64";
+
 use std.string;
+use std.text_utils;
 use std.fs;
 
 # The printf function
@@ -79,80 +81,7 @@ begin
     end
 end
 
-func numLength(num:int) -> int
-    len : int = 0;
-begin
-    if num < 0
-        len = 1;
-    end
-    
-    while num != 0
-        num = num / 10;
-        len = len + 1;
-    end
-    
-    return len;
-end
-
-func check_neg(num:int) -> int
-begin
-    if num < 0
-        num = num * -1;
-    end
-    
-    return num;
-end
-
-func getHexLength(num:int) -> int
-    len : int = 0;
-begin
-    while num > 15
-        len = len + 1;
-        num = num / 16;
-    end
-    
-    len = len + 1;
-    
-    return len;
-end
-
-func getHexDigit(digit:int) -> byte
-begin
-    if digit == 1
-        return '1';
-    elif digit == 2
-        return '2';
-    elif digit == 3
-        return '3';
-    elif digit == 4
-        return '4';
-    elif digit == 5
-        return '5';
-    elif digit == 6
-        return '6';
-    elif digit == 7
-        return '7';
-    elif digit == 8
-        return '8';
-    elif digit == 9
-        return '9';
-    elif digit == 10
-        return 'a';
-    elif digit == 11
-        return 'b';
-    elif digit == 12
-        return 'c';
-    elif digit == 13
-        return 'd';
-    elif digit == 14
-        return 'e';
-    elif digit == 15
-        return 'f';
-    end
-    
-    return '0';
-end
-
+# Prints a number as a hex number
 func printHex(num:int)
     length : int = getHexLength(num);
     x : int = length - 1;
@@ -185,6 +114,7 @@ begin
     end
 end
 
+# Print an integer
 func printInt(n:int)
     num : int = check_neg(n);
     length : int = numLength(num);
@@ -212,54 +142,7 @@ begin
     end
 end
 
-func printLnStrInt(s:str, num:int)
-begin
-    print(s);
-    printInt(num);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
-func printLnStrHex(s:str, num:int)
-begin
-    print(s);
-    printHex(num);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
-func printLnInt(num:int)
-begin
-    printInt(num);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
-func printLnHex(num:int)
-begin
-    printHex(num);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
-func printLn(s:str)
-    length : int = strlen(s);
-begin
-    syscall(linux_write, STDOUT, s, length);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
-func print(s:str)
-    length : int = strlen(s);
-begin
-    syscall(linux_write, STDOUT, s, length);
-end
-
-func printLn2(s1:str, s2:str)
-    s1_len : int = strlen(s1);
-    s2_len : int = strlen(s2);
-begin
-    syscall(linux_write, STDOUT, s1, s1_len);
-    syscall(linux_write, STDOUT, s2, s2_len);
-    syscall(linux_write, STDOUT, "\n", 1);
-end
-
+# Read a line of text from std input
 func readLn() -> str
     line : byte[100] = array;
     c : char = 0;
@@ -281,6 +164,7 @@ begin
     return line;
 end
 
+# Read an integer from std input
 func readInt() -> int
     result : int = 0;
     b : byte = 0x0;
@@ -299,3 +183,4 @@ begin
     
     return result;
 end
+

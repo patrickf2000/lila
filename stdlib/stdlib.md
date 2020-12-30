@@ -6,13 +6,13 @@ The Lila standard library is not essential, but highly recommended. Please see t
 
 ### text_io
 
-* printf -> Works similar to C printf   
-* printInt -> Output an integer   
-* printHex -> Output an integer as a hex value   
+* printf -> Works similar to C printf (DONE)   
+* printInt -> Output an integer (DONE)   
+* printHex -> Output an integer as a hex value (DONE)   
 * printFloat -> Output a floating point value   
 * printDouble -> Output a double value
-* readLn -> Read a string from standard input   
-* readInt -> Read an int from standard input   
+* readLn -> Read a string from standard input (DONE)   
+* readInt -> Read an int from standard input (DONE)   
 
 ### file_io
 

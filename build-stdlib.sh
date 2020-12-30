@@ -37,12 +37,14 @@ rm *.o
 $lilac ../stdlib/string.ls -o string.o --no-link --pic
 $lilac ../stdlib/io.ls -o io.o --no-link --pic
 $lilac ../stdlib/fs.ls -o fs.o --no-link --pic
+$lilac ../stdlib/text_utils.ls -o text_utils.o --no-link --pic
 $lilac ../stdlib/text_io.ls -o text_io.o --no-link --pic
 
 $lilac -o liblila.so --lib \
     string.o \
     io.o \
     fs.o \
+    text_utils.o \
     text_io.o
     
 rm *.o
