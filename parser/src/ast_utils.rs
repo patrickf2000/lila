@@ -146,11 +146,6 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 }
             },
             
-            Token::Array => {
-                let arg = ast::create_arg(AstArgType::Array);
-                args.push(arg);
-            },
-            
             Token::OpAdd => {
                 let arg = ast::create_arg(AstArgType::OpAdd);
                 

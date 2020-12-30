@@ -105,13 +105,6 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
             if !build_args(scanner, &mut var_dec, Token::RBracket, syntax) {
                 return false;
             }
-            
-            token = scanner.get_token();
-            
-            if token != Token::Assign {
-                syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
-                return false;
-            }
         },
         
         _ => {
@@ -120,34 +113,35 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
         },
     }
     
-    // Build the remaining arguments
-    if !build_args(scanner, &mut var_dec, Token::Semicolon, syntax) {
-        return false;
-    }
-    
-    var_dec.args = check_operations(&var_dec.args);
-    
-    // If we have the array, check the array type
+    // If we have an array, make sure we have the proper syntax and end with the terminator
+    // Otherwise, build the assignment
     if is_array {
-        if var_dec.args.len() == 1 && var_dec.args.last().unwrap().arg_type == AstArgType::Array {
-            match &dtype {
-                AstModType::Byte | AstModType::Char => data_type.mod_type = AstModType::ByteDynArray,
-                AstModType::UByte => data_type.mod_type = AstModType::UByteDynArray,
-                AstModType::Short => data_type.mod_type = AstModType::ShortDynArray,
-                AstModType::UShort => data_type.mod_type = AstModType::UShortDynArray,
-                AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
-                AstModType::UInt => data_type.mod_type = AstModType::UIntDynArray,
-                AstModType::Int64 => data_type.mod_type = AstModType::I64DynArray,
-                AstModType::UInt64 => data_type.mod_type = AstModType::U64DynArray,
-                AstModType::Float => data_type.mod_type = AstModType::FloatDynArray,
-                AstModType::Double => data_type.mod_type = AstModType::DoubleDynArray,
-                AstModType::Str => data_type.mod_type = AstModType::StrDynArray,
-                
-                _ => {},
-            }
-        } else {
-            //TODO
+        match &dtype {
+            AstModType::Byte | AstModType::Char => data_type.mod_type = AstModType::ByteDynArray,
+            AstModType::UByte => data_type.mod_type = AstModType::UByteDynArray,
+            AstModType::Short => data_type.mod_type = AstModType::ShortDynArray,
+            AstModType::UShort => data_type.mod_type = AstModType::UShortDynArray,
+            AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
+            AstModType::UInt => data_type.mod_type = AstModType::UIntDynArray,
+            AstModType::Int64 => data_type.mod_type = AstModType::I64DynArray,
+            AstModType::UInt64 => data_type.mod_type = AstModType::U64DynArray,
+            AstModType::Float => data_type.mod_type = AstModType::FloatDynArray,
+            AstModType::Double => data_type.mod_type = AstModType::DoubleDynArray,
+            AstModType::Str => data_type.mod_type = AstModType::StrDynArray,
+            
+            _ => {},
         }
+        
+        if scanner.get_token() != Token::Semicolon {
+            syntax.syntax_error(scanner, "Expected terminator.".to_string());
+            return false;
+        }
+    } else {
+        if !build_args(scanner, &mut var_dec, Token::Semicolon, syntax) {
+            return false;
+        }
+        
+        var_dec.args = check_operations(&var_dec.args);
     }
     
     var_dec.modifiers.push(data_type);

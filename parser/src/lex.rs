@@ -55,7 +55,6 @@ pub enum Token {
     Double,
     Char,
     TStr,
-    Array,
     
     LParen,
     RParen,
@@ -397,7 +396,6 @@ impl Lex {
             "while" => token = Token::While,
             "break" => token = Token::Break,
             "continue" => token = Token::Continue,
-            "array" => token = Token::Array,
             _ => token = Token::Id(current.clone()),
         };
         
