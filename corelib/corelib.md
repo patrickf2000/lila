@@ -4,13 +4,13 @@ This contains the documentation for the Lila core library. Certain operations in
 
 ### mem
 
-* malloc -> Allocate memory   
-* free -> Free memory   
+* malloc -> Allocate memory [DONE]   
+* free -> Free memory [DONE]   
 
 ### string
 
-* strlen -> Get string length   
-* strcmp -> Compare strings (1 -> they are equal, 0 -> they are not)   
+* strlen -> Get string length [DONE]   
+* strcmp -> Compare strings (1 -> they are equal, 0 -> they are not) [DONE]   
 
 ### io
 

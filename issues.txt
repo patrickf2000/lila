@@ -8,3 +8,8 @@ Remove ldarg
 Function checking
 
 In a top level if-else, the final label (I think the end label) isn't printed in the right place; it should go after the block
+
+Module including- we need a way to not include duplicate modules
+
+Add strlen and as a builtin (since its in the corelib)
+
