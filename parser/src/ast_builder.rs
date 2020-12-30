@@ -58,6 +58,7 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     if include_core {
         include_module("core.mem".to_string(), &mut tree, syntax);
         include_module("core.string".to_string(), &mut tree, syntax);
+        include_module("core.io".to_string(), &mut tree, syntax);
     }
     
     // Read the thing line by line
