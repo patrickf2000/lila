@@ -161,6 +161,20 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 }
             },
             
+            Token::AddrOf => {
+                let arg = build_addrof(scanner, syntax);
+                
+                if arg.arg_type == AstArgType::None {
+                    return false;
+                }
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
+            },
+            
             Token::OpAdd => {
                 let arg = ast::create_arg(AstArgType::OpAdd);
                 

@@ -67,6 +67,7 @@ pub enum Token {
     Arrow,
     Any,
     Sizeof,
+    AddrOf,
     OpAdd,
     OpSub,
     OpMul,
@@ -257,6 +258,7 @@ impl Lex {
             '&' => return true,
             '|' => return true,
             '^' => return true,
+            '@' => return true,
             _ => return false,
         }
     }
@@ -331,6 +333,8 @@ impl Lex {
             '&' => return Token::OpAnd,
             '|' => return Token::OpOr,
             '^' => return Token::OpXor,
+            
+            '@' => return Token::AddrOf,
             
             _ => return Token::Unknown,
         }

@@ -42,6 +42,8 @@ pub enum LtacType {
     MovF64,
     MovI32Vec,
     
+    LdAddr,
+    
     // Push/pop
     // These are mainly used on stack machines, but x86 has these instructions
     Push,

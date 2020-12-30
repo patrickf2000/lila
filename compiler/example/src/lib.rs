@@ -95,6 +95,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::MovF64 => {},
             LtacType::MovI32Vec => {},
             
+            LtacType::LdAddr => {},
+            
             // Push/pop
             LtacType::Push => {},
             LtacType::Pop => {},

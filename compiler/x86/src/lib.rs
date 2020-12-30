@@ -457,6 +457,8 @@ fn amd64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr, is_pic : 
             }
         },
         
+        LtacType::LdAddr => line.push_str("  lea "),
+        
         LtacType::I8Add | LtacType::U8Add |
         LtacType::I16Add | LtacType::U16Add |
         LtacType::I32Add | LtacType::U32Add |

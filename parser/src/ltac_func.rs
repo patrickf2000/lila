@@ -102,6 +102,30 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 arg_no += 1;
             },
             
+            AstArgType::AddrOf => {
+                let name_arg = arg.sub_args.first().unwrap();
+                let ref_var = match builder.get_var(&name_arg.str_val) {
+                    Ok(v) => v,
+                    
+                    Err(_e) => {
+                        builder.syntax.ltac_error2("Unknown variable reference.".to_string());
+                        return false;
+                    },
+                };
+                
+                let mut instr2 = ltac::create_instr(LtacType::LdAddr);
+                instr2.arg1 = LtacArg::Reg64(0);
+                instr2.arg2 = LtacArg::Mem(ref_var.pos);
+                builder.file.code.push(instr2);
+                
+                let mut push = ltac::create_instr(arg_type.clone());
+                push.arg1 = LtacArg::Reg64(0);
+                push.arg2_val = arg_no;
+                builder.file.code.push(push);
+                
+                arg_no += 1;
+            },
+            
             AstArgType::Id => {
                 let mut push = ltac::create_instr(arg_type.clone());
                 push.arg2_val = arg_no;

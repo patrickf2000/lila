@@ -223,3 +223,24 @@ pub fn build_sizeof(scanner : &mut Lex, syntax : &mut ErrorManager) -> AstArg {
     sizeof
 }
 
+// Builds an address-of operation (load the address of a variable)
+pub fn build_addrof(scanner : &mut Lex, syntax : &mut ErrorManager) -> AstArg {
+    let mut addrof = ast::create_arg(AstArgType::AddrOf);
+    let token = scanner.get_token();
+    
+    match token {
+        Token::Id(ref val) => {
+            let mut arg = ast::create_arg(AstArgType::Id);
+            arg.str_val = val.to_string();
+            addrof.sub_args.push(arg);
+        },
+        
+        _ => {
+            syntax.syntax_error(scanner, "Expected variable name.".to_string());
+            return ast::create_arg(AstArgType::None);
+        },
+    }
+    
+    addrof
+}
+

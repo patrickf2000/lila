@@ -195,6 +195,9 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::MovF64 => line.push_str("  mov.f64 "),
         LtacType::MovI32Vec => line.push_str("  mov.i32.vec "),
         
+        // Load address
+        LtacType::LdAddr => line.push_str("  ldaddr "),
+        
         // Push and pop
         LtacType::Push => line.push_str("  push "),
         LtacType::Pop => line.push_str("  pop "),
