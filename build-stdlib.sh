@@ -23,11 +23,13 @@ fi
 $lilac ../corelib/x86_64.ls -o x86_64.o --no-link --pic --no-corelib
 $lilac ../corelib/mem.ls -o mem.o --no-link --pic --no-corelib
 $lilac ../corelib/string.ls -o string.o --no-link --pic --no-corelib
+$lilac ../corelib/io.ls -o io.o --no-link --pic --no-corelib
 
 ar -rc liblila_core.a \
     x86_64.o \
     mem.o \
-    string.o
+    string.o \
+    io.o
     
 rm *.o
 

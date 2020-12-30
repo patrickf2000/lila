@@ -36,7 +36,7 @@ use riscv::*;
 
 // The main transformation function
 pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Result<LtacFile, ()> {
-    let mut file2 = match check_builtins(file, arch, use_c) {
+    let mut file2 = match check_builtins(file, use_c) {
         Ok(ltac) => ltac,
         Err(_e) => return Err(()),
     };
@@ -61,7 +61,7 @@ pub fn run(file : &LtacFile, arch : Arch, use_c : bool, risc_mode : bool) -> Res
 // Scans the code for malloc, free, and exit instructions
 // If we are using the C libraries, these are simply transforms to a function call
 // Otherwise, we must transform them to a system call
-fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFile, ()> {
+fn check_builtins(file : &LtacFile, use_c : bool) -> Result<LtacFile, ()> {
     let mut file2 = LtacFile {
         name : file.name.clone(),
         data : file.data.clone(),
@@ -75,37 +75,24 @@ fn check_builtins(file : &LtacFile, arch : Arch, use_c : bool) -> Result<LtacFil
     
     for line in code.iter() {
         match &line.instr_type {
+            
+            // We have a separate exit type for two reasons
+            // First, when we exit, we want to make sure to de-allocate everything
+            // Second, because "exit" is a keyword, the corelib function has a different name
             LtacType::Exit => {
-                if use_c {
-                    let mut instr = ltac::create_instr(LtacType::PushArg);
-                    instr.arg1 = line.arg1.clone();
-                    instr.arg2_val = 1;
-                    file2.code.push(instr);
+                let mut instr = ltac::create_instr(LtacType::PushArg);
+                instr.arg1 = line.arg1.clone();
+                instr.arg2_val = 1;
+                file2.code.push(instr);
                     
+                if use_c {
                     instr = ltac::create_instr(LtacType::Call);
                     instr.name = "exit".to_string();
                     file2.code.push(instr);
                 } else {
-                    // System call number (for exit)
-                    let mut instr = ltac::create_instr(LtacType::KPushArg);
-                    instr.arg2_val = 1;
-                    
-                    match arch {
-                        Arch::X86_64 => instr.arg1 = LtacArg::I32(60),       // Linux x86-64
-                        Arch::AArch64 => instr.arg1 = LtacArg::I32(93),       // Linux AArch64
-                        Arch::Riscv64 => {},
-                    };
-                    
-                    file2.code.push(instr.clone());
-                    
-                    // Exit code
-                    instr.arg1 = line.arg1.clone();
-                    instr.arg2_val = 2;
-                    file2.code.push(instr.clone());
-                    
-                    // The system call
-                    instr = ltac::create_instr(LtacType::Syscall);
-                    file2.code.push(instr.clone());
+                    instr = ltac::create_instr(LtacType::Call);
+                    instr.name = "sys_exit".to_string();
+                    file2.code.push(instr);
                 }
             },
         

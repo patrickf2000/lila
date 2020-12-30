@@ -44,7 +44,3 @@ begin
     syscall(linux_close, fd);
 end
 
-func sys_exit(code:int)
-begin
-    syscall(linux_exit, code);
-end

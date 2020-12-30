@@ -14,7 +14,7 @@ This contains the documentation for the Lila core library. Certain operations in
 
 ### io
 
-* sys_exit -> Exit the program   
+* sys_exit -> Exit the program [DONE]   
 * println -> Output a string (new line)   
 * print -> Output a string (no new line)   
 
