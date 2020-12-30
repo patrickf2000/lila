@@ -13,7 +13,6 @@ func printf(fmt:str, arg1:int64, arg2:int64, arg3:int64, arg4:int64, arg5:int64)
     args : int64[5];
     c : char = 0;
     i, length : int = 0;
-    buf : byte[1];
     
     arg_index : int = 0;
     i64_arg : int64 = 0;
@@ -47,16 +46,12 @@ begin
                 printHex(i_arg);
             elif c == 'c'
                 c_arg = i64_arg;
-                buf[0] = c_arg;
-                syscall(linux_write, STDOUT, buf, 1);
+                syscall(linux_write, STDOUT, @c_arg, 1);
             elif c == 's'
                 print(i64_arg);
             else
-                buf[0] = 37;
-                syscall(linux_write, STDOUT, buf, 1);
-                
-                buf[0] = c;
-                syscall(linux_write, STDOUT, buf, 1);
+                syscall(linux_write, STDOUT, "%", 1);
+                syscall(linux_write, STDOUT, @c, 1);
                 
                 i = i + 1;
                 continue;
@@ -73,8 +68,7 @@ begin
             
             i = i + 1;
         else
-            buf[0] = c;
-            syscall(linux_write, STDOUT, buf, 1);
+            syscall(linux_write, STDOUT, @c, 1);
             
             i = i + 1;
         end
