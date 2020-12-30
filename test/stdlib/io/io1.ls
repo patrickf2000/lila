@@ -7,7 +7,7 @@
 #RET 0
 
 use std.text_io;
-use std.arch.x86_64;
+use core.arch.x86_64;
 
 func main
     msg : str = "Hello!";

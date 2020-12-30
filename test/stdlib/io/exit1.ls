@@ -4,7 +4,7 @@
 
 #RET 10
 
-use std.arch.x86_64;
+use core.arch.x86_64;
 
 func main
 begin
