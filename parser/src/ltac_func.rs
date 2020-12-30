@@ -124,8 +124,15 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                             push.arg2 = LtacArg::U16(0);
                             
                         } else if v.data_type == DataType::Ptr {
-                            if v.sub_type == DataType::Byte || v.sub_type == DataType::Int {
-                                push.arg1 = LtacArg::Ptr(v.pos);
+                            push.arg1 = LtacArg::Ptr(v.pos);
+                            
+                            // Push the size if we are not making a system call
+                            if arg_type != LtacType::KPushArg {
+                                let mut push2 = ltac::create_instr(LtacType::PushArg);
+                                push2.arg1 = LtacArg::Mem(v.pos - 8);
+                                push2.arg2 = LtacArg::I32(0);
+                                push2.arg2_val = arg_no + 1;
+                                builder.file.code.push(push2);
                             }
                             
                         } else if v.data_type == DataType::Str {
@@ -151,6 +158,10 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                         } else {
                             push.arg2_val = arg_no;
                             arg_no += 1;
+                            
+                            if v.data_type == DataType::Ptr && arg_type != LtacType::KPushArg {
+                                arg_no += 1;
+                            }
                         }
                     },
                     

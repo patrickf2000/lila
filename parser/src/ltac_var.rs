@@ -217,6 +217,16 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         } else {
             ld = ldarg_for_type(&data_type, mem, arg_no);
             arg_no += 1;
+            
+            // If we have a pointer, make sure to load the size
+            if data_type == DataType::Ptr {
+                let mut arg2 = ltac::create_instr(LtacType::LdArgI32);
+                arg2.arg1 = LtacArg::Mem(builder.stack_pos - 8);
+                arg2.arg2_val = arg_no;
+                builder.file.code.push(arg2);
+                
+                arg_no += 1;
+            }
         }
         
         builder.file.code.push(ld);

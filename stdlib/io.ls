@@ -37,7 +37,7 @@ begin
     return code;
 end
 
-func write(fd:int, buf:byte[], size:int) -> int
+func write(fd:int, buf:str, size:int) -> int
     code : int = 0;
 begin
     code = syscall(linux_write, fd, buf, size);
