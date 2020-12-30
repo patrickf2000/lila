@@ -7,7 +7,7 @@ use std.io;
 
 func main -> int
     fd : int = 0;
-    buf : byte[5] = array;
+    buf : byte[5];
 begin
     fd = open("file.txt");
     

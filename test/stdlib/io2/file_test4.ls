@@ -24,7 +24,7 @@ end
 
 func main -> int
     fd : int = 0;
-    buf : byte[5] = array;
+    buf : byte[5];
     pos : int64 = -3;
 begin
     fd = create("./first.txt");

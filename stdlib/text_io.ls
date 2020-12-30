@@ -10,10 +10,10 @@ use std.fs;
 
 # The printf function
 func printf(fmt:str, arg1:int64, arg2:int64, arg3:int64, arg4:int64, arg5:int64)
-    args : int64[5] = array;
+    args : int64[5];
     c : char = 0;
     i, length : int = 0;
-    buf : byte[1] = array;
+    buf : byte[1];
     
     arg_index : int = 0;
     i64_arg : int64 = 0;
@@ -87,7 +87,7 @@ func printHex(num:int)
     x : int = length - 1;
     digit : int = 0;
     b_digit : byte = 0;
-    number : byte[length] = array;
+    number : byte[length];
 begin
     if num == 0
         syscall(linux_write, STDOUT, "0", 1);
@@ -121,7 +121,7 @@ func printInt(n:int)
     x : int = length - 1;
     digit, is_neg : int = 0;
     b_digit : byte = 0;
-    number : byte[length] = array;
+    number : byte[length];
 begin
     if num == 0
         syscall(linux_write, STDOUT, "0", 1);
@@ -144,7 +144,7 @@ end
 
 # Read a line of text from std input
 func readLn() -> str
-    line : byte[100] = array;
+    line : byte[100];
     c : char = 0;
     index : int = 0;
 begin

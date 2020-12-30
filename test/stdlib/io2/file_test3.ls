@@ -12,7 +12,7 @@ end
 
 func main -> int
     fd : int = 0;
-    buf : byte[5] = array;
+    buf : byte[5];
 begin
     fd = create("./first.txt");
     if fd < 0

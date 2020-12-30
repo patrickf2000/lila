@@ -38,7 +38,7 @@ func strcat(s1:str, s2:str) -> str
     length : int = len1 + len2 + 1;
     index, i2 : int = 0;
     
-    new_str : byte[length] = array;
+    new_str : byte[length];
 begin
     while index < len1
         new_str[index] = s1[index];
@@ -59,7 +59,7 @@ func str_append(s1:str, c:char) -> str
     len1 : int = strlen(s1);
     length : int = len1 + 2;
     index : int = 0;
-    new_str : byte[length] = array;
+    new_str : byte[length];
 begin
     while index < len1
         new_str[index] = s1[index];
@@ -71,3 +71,4 @@ begin
     
     return new_str;
 end
+

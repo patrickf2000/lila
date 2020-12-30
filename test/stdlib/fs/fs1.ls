@@ -16,7 +16,7 @@ use std.text_io;
 func main
     file : int = 0;
     c : char = 1;
-    buf : byte[1] = array;
+    buf : byte[1];
     
     len, num : int = 1;
     line : str = "";

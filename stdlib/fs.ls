@@ -7,7 +7,7 @@ use std.string;
 use std.io;
 
 func getChar(file:int) -> char
-    buf : byte[1] = array;
+    buf : byte[1];
     c : char = 0;
     code : int = 0;
 begin
@@ -22,7 +22,7 @@ begin
 end
 
 func getLine(file:int) -> str
-    line : byte[100] = array;
+    line : byte[100];
     i : int = 0;
     c : char = 1;
 begin
