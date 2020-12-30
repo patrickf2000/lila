@@ -25,12 +25,12 @@ The Lila standard library is not essential, but highly recommended. Please see t
 
 Note that most of these are wrappers around Linux system calls
 
-* open -> Open a file for reading   
-* create -> Create a new file   
-* read -> Read from a file   
-* write -> Write to a file   
-* lseek -> Move the position in a file   
-* close -> Close a file   
+* open -> Open a file for reading (DONE)   
+* create -> Create a new file (DONE)   
+* read -> Read from a file (DONE)   
+* write -> Write to a file (DONE)   
+* lseek -> Move the position in a file (DONE)   
+* close -> Close a file (DONE)   
 
 ### mem
 

@@ -33,6 +33,7 @@ echo ""
 cd target
 
 run_test '../test/stdlib/io/*.ls'
+run_test '../test/stdlib/text_io/*.ls'
 
 # Generate test file
 if [[ -f ./file.txt ]] ; then
@@ -43,7 +44,12 @@ echo "I am good." >> file.txt
 echo "Excellent." >> file.txt
 echo "" >> file.txt
 
+if [[ -f first.txt ]] ; then
+    rm first.txt
+fi
+
 run_test '../test/stdlib/fs/*.ls'
+run_test '../test/stdlib/io2/*.ls'
 
 cd ..
 
