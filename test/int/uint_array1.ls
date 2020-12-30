@@ -9,7 +9,7 @@
 extern func printf(s:str, ...)
 
 func test1
-    numbers : uint[10] = array;
+    numbers : uint[10];
     x : uint = 0;
 begin
     numbers[3] = 22;
@@ -20,7 +20,7 @@ begin
 end
 
 func test2
-    numbers : uint[10] = array;
+    numbers : uint[10];
     i : uint = 5;
     x : uint = 0;
 begin

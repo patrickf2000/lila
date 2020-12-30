@@ -8,7 +8,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : byte[10] = array;
+    numbers : byte[10];
     x : byte = 0;
 begin
     

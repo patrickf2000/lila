@@ -12,7 +12,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : int64[10] = array;
+    numbers : int64[10];
     base : int64 = 2;
     x1 : int64 = 0;
     x2 : int64 = 0;

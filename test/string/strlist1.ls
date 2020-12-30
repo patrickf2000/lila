@@ -10,7 +10,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    strlist : str[3] = array;
+    strlist : str[3];
     line : str = "";
     index : int = 0;
 begin

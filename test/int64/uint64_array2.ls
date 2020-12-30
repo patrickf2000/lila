@@ -11,7 +11,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : uint64[10] = array;
+    numbers : uint64[10];
     base : uint64 = 2;
     x1 : uint64 = 0;
     x2 : uint64 = 0;

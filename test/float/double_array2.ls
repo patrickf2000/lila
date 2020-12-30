@@ -18,7 +18,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : double[10] = array;
+    numbers : double[10];
     i : int = 0;
     x : double = 1.0;
 begin

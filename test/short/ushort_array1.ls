@@ -8,7 +8,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : ushort[10] = array;
+    numbers : ushort[10];
     x : ushort = 0;
 begin
     numbers[3] = 0xA1B1;

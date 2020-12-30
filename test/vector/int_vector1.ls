@@ -39,9 +39,9 @@ begin
 end
 
 func main -> int
-    numbers1 : int[8] = array;
-    numbers2 : int[8] = array;
-    numbers_sum : int[8] = array;
+    numbers1 : int[8];
+    numbers2 : int[8];
+    numbers_sum : int[8];
 begin
     init_numbers(numbers1, 8, 2);
     init_numbers(numbers2, 8, 31);

@@ -11,7 +11,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : float[10] = array;
+    numbers : float[10];
     base : float = 2.15;
     x1, x2, x3, x4 : float = 0.0;
 begin

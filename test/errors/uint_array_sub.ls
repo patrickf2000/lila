@@ -10,7 +10,7 @@
 extern func printf(s:str, ...)
 
 func main -> int
-    numbers : uint[10] = array;
+    numbers : uint[10];
     base : uint = 2;
     x1, x2, x3, x4 : uint = 0;
 begin

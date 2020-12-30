@@ -6,7 +6,7 @@
 #RET 0
 
 func _start
-    numbers : int[10] = array;
+    numbers : int[10];
     x : int = 0;
 begin
     numbers[3] = 22;

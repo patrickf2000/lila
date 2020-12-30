@@ -37,8 +37,8 @@ begin
 end
 
 func main -> int
-    numbers : int[16] = array;
-    numbers_sum : int[8] = array;
+    numbers : int[16];
+    numbers_sum : int[8];
     x : int = 8;
 begin
     init_numbers(numbers, 16, 2);
