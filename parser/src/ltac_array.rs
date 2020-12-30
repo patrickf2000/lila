@@ -56,6 +56,10 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
     let sub_args = &line.sub_args;
     let mut code = true;
     
+    // Setup the store instruction, which holds the array size
+    let mut size_instr = ltac::create_instr(LtacType::Mov);
+    size_instr.arg1 = LtacArg::Mem(var.pos - 8);
+    
     // Create the array
     if sub_args.len() == 1 && sub_args.last().unwrap().arg_type == AstArgType::IntL {
         let arg = sub_args.last().unwrap();
@@ -84,6 +88,10 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         instr.arg1 = LtacArg::Mem(var.pos);
         instr.arg2 = LtacArg::RetRegI64;
         builder.file.code.push(instr);
+        
+        // Store the size
+        size_instr.arg2 = LtacArg::I32(arg.u64_val as i32);
+        builder.file.code.push(size_instr);
         
     // An array with a variable as the size
     } else if sub_args.len() == 1 && sub_args.last().unwrap().arg_type == AstArgType::Id {
@@ -128,11 +136,26 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
             instr.arg2 = LtacArg::U32(size);
             builder.file.code.push(instr.clone());
             
+            // Store the size
+            size_instr.arg2 = LtacArg::Reg32(0);
+            builder.file.code.push(size_instr);
+            
+            // Prepare for the call
             instr = ltac::create_instr(LtacType::PushArg);
             instr.arg1 = LtacArg::Reg32(0);
             instr.arg2_val = 1;
             builder.file.code.push(instr.clone());
         } else {
+            // Store the size
+            let mut instr2 = ltac::create_instr(LtacType::Mov);
+            instr2.arg1 = LtacArg::Reg32(0);
+            instr2.arg2 = LtacArg::Mem(pos);
+            builder.file.code.push(instr2);
+            
+            size_instr.arg2 = LtacArg::Reg32(0);
+            builder.file.code.push(size_instr);
+        
+            // Prepare for the call
             instr = ltac::create_instr(LtacType::PushArg);
             instr.arg1 = LtacArg::Mem(pos);
             instr.arg2 = LtacArg::Reg32(0);

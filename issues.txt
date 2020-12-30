@@ -17,3 +17,5 @@ Octal type and literals
 
 Better array syntax; some sort of reference operator
 
+Array math for size- It doesn't seem to be working
+

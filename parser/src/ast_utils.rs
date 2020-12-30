@@ -18,6 +18,7 @@
 use crate::ast;
 use crate::ast::*;
 use crate::ast_func::*;
+use crate::ast_var::*;
 use crate::lex::{Token, Lex};
 use crate::syntax::*;
 
@@ -134,6 +135,20 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             
             Token::LdArg => {
                 let arg = build_ldarg(scanner, syntax);
+                
+                if arg.arg_type == AstArgType::None {
+                    return false;
+                }
+                
+                if in_array {
+                    current_arg.sub_args.push(arg);
+                } else {
+                    args.push(arg);
+                }
+            },
+            
+            Token::Sizeof => {
+                let arg = build_sizeof(scanner, syntax);
                 
                 if arg.arg_type == AstArgType::None {
                     return false;

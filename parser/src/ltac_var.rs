@@ -28,6 +28,10 @@ use crate::ltac_func::*;
 use crate::ltac_utils::*;
 
 // Builds an LTAC variable declaration
+// Note for array sizes:
+//    Array sizes are 12 bytes long.
+//    The first 8 bytes hold the pointer, and the second 4 hold the size
+//
 pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32, flt_arg_no_o : i32) -> (bool, i32, i32) {
     let mut arg_no = arg_no_o;
     let mut flt_arg_no = flt_arg_no_o;
@@ -53,13 +57,13 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         AstModType::ByteDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Byte;
-            builder.stack_pos += 8
+            builder.stack_pos += 12;
         },
         
         AstModType::UByteDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::UByte;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::Short => {
@@ -77,13 +81,13 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         AstModType::ShortDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Short;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::UShortDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::UShort;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
     
         AstModType::Int => {
@@ -101,13 +105,13 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         AstModType::IntDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Int;
-            builder.stack_pos += 8
+            builder.stack_pos += 12;
         },
         
         AstModType::UIntDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::UInt;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::Int64 => {
@@ -125,13 +129,13 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         AstModType::I64DynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Int64;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::U64DynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::UInt64;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::Float => {
@@ -149,13 +153,13 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         AstModType::FloatDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Float;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::DoubleDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Double;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         AstModType::Char => {
@@ -173,7 +177,7 @@ pub fn build_var_dec(builder : &mut LtacBuilder, line : &AstStmt, arg_no_o : i32
         AstModType::StrDynArray => {
             data_type = DataType::Ptr;
             sub_type = DataType::Str;
-            builder.stack_pos += 8;
+            builder.stack_pos += 12;
         },
         
         // TODO: We will need better type detection

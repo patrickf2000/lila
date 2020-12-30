@@ -66,6 +66,7 @@ pub enum Token {
     Semicolon,
     Arrow,
     Any,
+    Sizeof,
     OpAdd,
     OpSub,
     OpMul,
@@ -396,6 +397,7 @@ impl Lex {
             "while" => token = Token::While,
             "break" => token = Token::Break,
             "continue" => token = Token::Continue,
+            "sizeof" => token = Token::Sizeof,
             _ => token = Token::Id(current.clone()),
         };
         

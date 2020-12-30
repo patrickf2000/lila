@@ -194,3 +194,32 @@ pub fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : Stri
     true
 }
 
+// Builds a sizeof operation
+pub fn build_sizeof(scanner : &mut Lex, syntax : &mut ErrorManager) -> AstArg {
+    let mut sizeof = ast::create_arg(AstArgType::Sizeof);
+    
+    let token1 = scanner.get_token();   // '('
+    let token2 = scanner.get_token();   // ID
+    let token3 = scanner.get_token();   // ')'
+    
+    if token1 != Token::LParen || token3 != Token::RParen {
+        syntax.syntax_error(scanner, "Sizeof begins with \'(\' and ends with \')\'".to_string());
+        return ast::create_arg(AstArgType::None);
+    }
+    
+    match token2 {
+        Token::Id(ref val) => {
+            let mut arg = ast::create_arg(AstArgType::Id);
+            arg.str_val = val.to_string();
+            sizeof.sub_args.push(arg);
+        },
+        
+        _ => {
+            syntax.syntax_error(scanner, "Expected variable name.".to_string());
+            return ast::create_arg(AstArgType::None);
+        },
+    }
+    
+    sizeof
+}
+

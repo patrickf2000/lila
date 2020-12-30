@@ -463,6 +463,37 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 builder.file.code.push(instr.clone());
             },
             
+            // Sizeof statement
+            // To get the size, get the array variable, and the size is stored in the upper 4 bytes
+            
+            AstArgType::Sizeof => {
+                let name_arg = arg.sub_args.first().unwrap();
+                let array_var = match builder.get_var(&name_arg.str_val) {
+                    Ok(v) if v.data_type == DataType::Ptr => v,
+                    
+                    Ok(_v) => {
+                        builder.syntax.ltac_error2("Sizeof can only be used with arrays and strings.".to_string());
+                        return false;
+                    },
+                    
+                    Err(_e) => {
+                        builder.syntax.ltac_error2("Unknown array or string.".to_string());
+                        return false;
+                    },
+                };
+                
+                let pos = array_var.pos - 8;
+                let reg = reg_for_type(&var.data_type, &DataType::None, reg_no);
+                
+                let mut instr2 = mov_for_type(&var.data_type, &DataType::None);
+                instr2.arg1 = reg.clone();
+                instr2.arg2 = LtacArg::Mem(pos);
+                builder.file.code.push(instr2);
+                
+                instr.arg2 = reg;
+                builder.file.code.push(instr.clone());
+            },
+            
             // Negate operator
             // Basically, we set a control variable. That way, if the next AST node is a literal, we simply
             // negate it here. If its a variable, we can create a subtraction operations
