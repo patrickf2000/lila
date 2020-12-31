@@ -8,6 +8,7 @@ sudo cp target/release/lilac /usr/bin
 
 sudo cp share/lila.lang /usr/share/gtksourceview-2.0/language-specs/
 sudo cp share/lila.lang /usr/share/gtksourceview-3.0/language-specs/
+sudo cp share/lila4.lang /usr/share/gtksourceview-4/language-specs/lila.lang
 
 if [[ -d /usr/lib/lila ]] ; then
     sudo rm -r /usr/lib/lila
