@@ -270,6 +270,11 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
                 args.push(arg);
             },
             
+            Token::Range => {
+                let arg = ast::create_arg(AstArgType::Range);
+                args.push(arg);
+            },
+            
             Token::LBracket | Token::LParen => {
                 in_array = true;
                 

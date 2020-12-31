@@ -227,6 +227,11 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
             new_layer += 1;
         },
         
+        Token::For if in_code => {
+            code = build_for_loop(scanner, tree, syntax);
+            new_layer += 1;
+        },
+        
         // TODO: For break and continue
         // Create a common function for the lack of semicolons
         Token::Break if in_code => {
@@ -472,6 +477,40 @@ fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token, syntax
     }
     
     ast::add_stmt(tree, cond);
+    
+    true
+}
+
+// Builds a for loop
+// Syntax: for <index> in <var> | <start> .. <end>
+fn build_for_loop(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+    let mut for_loop = ast::create_stmt(AstStmtType::For, scanner);
+    let token = scanner.get_token();
+    
+    match token {
+        Token::Id(ref val) => {
+            let mut id = ast::create_arg(AstArgType::Id);
+            id.str_val = val.to_string();
+            for_loop.args.push(id);
+        },
+        
+        _ => {
+            syntax.syntax_error(scanner, "Expected variable name.".to_string());
+            return false;
+        },
+    }
+    
+    if scanner.get_token() != Token::In {
+        syntax.syntax_error(scanner, "Expected \"in\".".to_string());
+        return false;
+    }
+    
+    // Build the rest of the arguments
+    if !build_args(scanner, &mut for_loop, Token::Eof, syntax) {
+        return false;
+    }
+    
+    ast::add_stmt(tree, for_loop);
     
     true
 }

@@ -326,6 +326,7 @@ impl LtacBuilder {
                 AstStmtType::Elif => build_cond(self, &line),
                 AstStmtType::Else => build_cond(self, &line),
                 AstStmtType::While => build_while(self, &line),
+                AstStmtType::For => {},
                 AstStmtType::Break => build_break(self),
                 AstStmtType::Continue => build_continue(self),
                 AstStmtType::FuncCall => code = build_func_call(self, &line),

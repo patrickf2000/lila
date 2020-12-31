@@ -30,6 +30,7 @@ pub enum AstStmtType {
     Elif,
     Else,
     While,
+    For,
     Break,
     Continue,
     FuncCall,
@@ -71,6 +72,7 @@ pub enum AstArgType {
     OpXor,
     OpLeftShift,
     OpRightShift,
+    Range,
 }
 
 // Represents modifiers
@@ -293,6 +295,7 @@ impl AstStmt {
             AstStmtType::Elif => println!("ELIF"),
             AstStmtType::Else => println!("ELSE"),
             AstStmtType::While => println!("WHILE"),
+            AstStmtType::For => println!("FOR "),
             AstStmtType::Break => println!("BREAK"),
             AstStmtType::Continue => println!("CONTINUE"),
             AstStmtType::FuncCall => println!("FUNC CALL {}", self.name),
@@ -361,6 +364,7 @@ impl AstArg {
             AstArgType::OpXor => print!("^ "),
             AstArgType::OpLeftShift => print!("<< "),
             AstArgType::OpRightShift => print!(">> "),
+            AstArgType::Range => print!("RANGE "),
         }
         
         if self.sub_args.len() > 0 {

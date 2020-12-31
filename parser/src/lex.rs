@@ -38,6 +38,7 @@ pub enum Token {
     Elif,
     Else,
     While,
+    For,
     Break,
     Continue,
     
@@ -71,6 +72,8 @@ pub enum Token {
     Comma,
     Semicolon,
     Arrow,
+    Range,
+    In,
     Any,
     Sizeof,
     AddrOf,
@@ -421,6 +424,7 @@ impl Lex {
         let token : Token;
         
         match current.as_ref() {
+            ".." => token = Token::Range,
             "..." => token = Token::Any,
             "module" => token = Token::Module,
             "use" => token = Token::Use,
@@ -448,6 +452,8 @@ impl Lex {
             "elif" => token = Token::Elif,
             "else" => token = Token::Else,
             "while" => token = Token::While,
+            "for" => token = Token::For,
+            "in" => token = Token::In,
             "break" => token = Token::Break,
             "continue" => token = Token::Continue,
             "sizeof" => token = Token::Sizeof,
