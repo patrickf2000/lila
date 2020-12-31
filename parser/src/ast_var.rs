@@ -162,6 +162,10 @@ fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : S
     match assign_op {
         Token::OpInc | Token::OpDec => {
             let mut id_arg = ast::create_arg(AstArgType::Id);
+            if var_assign.stmt_type == AstStmtType::ArrayAssign {
+                id_arg.sub_args = var_assign.sub_args.clone();
+            }
+            
             id_arg.str_val = name;
             var_assign.args.push(id_arg);
             
@@ -183,6 +187,10 @@ fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : S
         | Token::MulAssign | Token::DivAssign 
         | Token::ModAssign => {
             let mut id_arg = ast::create_arg(AstArgType::Id);
+            if var_assign.stmt_type == AstStmtType::ArrayAssign {
+                id_arg.sub_args = var_assign.sub_args.clone();
+            }
+            
             id_arg.str_val = name;
             var_assign.args.push(id_arg);
             
