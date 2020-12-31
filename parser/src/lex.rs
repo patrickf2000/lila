@@ -85,6 +85,7 @@ pub enum Token {
     OpLeftShift,
     OpRightShift,
     OpInc,
+    OpDec,
     
     Id(String),
     ByteL(u8),
@@ -317,6 +318,9 @@ impl Lex {
                 if c2 == '>' {
                     self.index += 1;
                     return Token::Arrow;
+                } else if c2 == '-' {
+                    self.index += 1;
+                    return Token::OpDec;
                 }
                 
                 return Token::OpSub;

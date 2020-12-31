@@ -163,13 +163,18 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
     let mut check_end = false;
     
     match assign_op {
-        Token::OpInc => {
+        Token::OpInc | Token::OpDec => {
             let mut id_arg = ast::create_arg(AstArgType::Id);
             id_arg.str_val = name;
             var_assign.args.push(id_arg);
             
-            let op_arg = ast::create_arg(AstArgType::OpAdd);
-            var_assign.args.push(op_arg);
+            if assign_op == Token::OpInc {
+                let op_arg = ast::create_arg(AstArgType::OpAdd);
+                var_assign.args.push(op_arg);
+            } else {
+                let op_arg = ast::create_arg(AstArgType::OpSub);
+                var_assign.args.push(op_arg);
+            }
             
             let num_arg = ast::create_int(1);
             var_assign.args.push(num_arg);
