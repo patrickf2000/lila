@@ -63,6 +63,9 @@ pub enum Token {
     Assign,
     AddAssign,
     SubAssign,
+    MulAssign,
+    DivAssign,
+    ModAssign,
     
     Colon,
     Comma,
@@ -346,12 +349,36 @@ impl Lex {
                 return Token::OpAdd;
             },
             
+            '*' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::MulAssign;
+                }
+                
+                return Token::OpMul;
+            },
+            
+            '/' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::DivAssign;
+                }
+                
+                return Token::OpDiv;
+            },
+            
+            '%' => {
+                if c2 == '=' {
+                    self.index += 1;
+                    return Token::ModAssign;
+                }
+                
+                return Token::OpMod;
+            },
+            
             ':' => return Token::Colon,
             ',' => return Token::Comma,
             ';' => return Token::Semicolon,
-            '*' => return Token::OpMul,
-            '/' => return Token::OpDiv,
-            '%' => return Token::OpMod,
             
             '&' => return Token::OpAnd,
             '|' => return Token::OpOr,

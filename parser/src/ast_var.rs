@@ -182,7 +182,9 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
             check_end = true;
         },
         
-        Token::AddAssign | Token::SubAssign => {
+        Token::AddAssign | Token::SubAssign 
+        | Token::MulAssign | Token::DivAssign 
+        | Token::ModAssign => {
             let mut id_arg = ast::create_arg(AstArgType::Id);
             id_arg.str_val = name;
             var_assign.args.push(id_arg);
@@ -192,6 +194,15 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
                 var_assign.args.push(op_arg);
             } else if assign_op == Token::SubAssign {
                 let op_arg = ast::create_arg(AstArgType::OpSub);
+                var_assign.args.push(op_arg);
+            } else if assign_op == Token::MulAssign {
+                let op_arg = ast::create_arg(AstArgType::OpMul);
+                var_assign.args.push(op_arg);
+            } else if assign_op == Token::DivAssign {
+                let op_arg = ast::create_arg(AstArgType::OpDiv);
+                var_assign.args.push(op_arg);
+            } else if assign_op == Token::ModAssign {
+                let op_arg = ast::create_arg(AstArgType::OpMod);
                 var_assign.args.push(op_arg);
             }
             
