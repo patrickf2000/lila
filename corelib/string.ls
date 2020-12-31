@@ -9,17 +9,17 @@ begin
     c = s[i];
     
     while c != 0
-        length = length + 1;
+        length++;
         c = s[i];
         
         if c == '\'
-            i = i + 1;
+            i++;
         end
-        i = i + 1;
+        i++;
     end
     
     if length > 0
-        length = length - 1;
+        length -= 1;
     end
     return length;
 end
@@ -45,7 +45,7 @@ begin
             return 0;
         end
         
-        len1 = len1 + 1;
+        len1++;
     end
     
     return 1;

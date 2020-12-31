@@ -36,7 +36,7 @@ begin
         end
         
         line[i] = c;
-        i = i + 1;
+        i++;
     end
     
     if i == 0

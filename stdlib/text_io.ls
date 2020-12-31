@@ -33,7 +33,7 @@ begin
         c = fmt[i];
         
         if c == '%'
-            i = i + 1;
+            i++;
             c = fmt[i];
             
             i64_arg = args[arg_index];
@@ -53,24 +53,24 @@ begin
                 syscall(linux_write, STDOUT, "%", 1);
                 syscall(linux_write, STDOUT, @c, 1);
                 
-                i = i + 1;
+                i++;
                 continue;
             end
             
-            arg_index = arg_index + 1;
-            i = i + 1;
+            arg_index++;
+            i++;
         elif c == '\'
             if c == 'n'
                 syscall(linux_write, STDOUT, "\n", 1);
             
-                i = i + 1;
+                i++;
             end
             
-            i = i + 1;
+            i++;
         else
             syscall(linux_write, STDOUT, @c, 1);
             
-            i = i + 1;
+            i++;
         end
     end
 end
@@ -94,11 +94,11 @@ begin
     else
         while num > 15
             digit = num % 16;
-            num = num / 16;
+            num /= 16;
             
             b_digit = getHexDigit(digit);
             number[x] = b_digit;
-            x = x - 1;
+            x--;
         end
         
         b_digit = getHexDigit(num);
@@ -126,10 +126,10 @@ begin
         
         while num != 0
             digit = num % 10;
-            num = num / 10;
+            num /= 10;
             b_digit = digit + '0';
             number[x] = b_digit;
-            x = x - 1;
+            x--;
         end
         
         syscall(linux_write, STDOUT, number, length);
@@ -152,7 +152,7 @@ begin
         end
         
         line[index] = c;
-        index = index + 1;
+        index++;
     end
     
     return line;
@@ -170,9 +170,9 @@ begin
            break;
        end
        
-       b = b - 48;
-       result = result * 10;
-       result = result + b;
+       b -= 48;
+       result *= 10;
+       result += b;
     end
     
     return result;

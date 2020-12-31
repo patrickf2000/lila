@@ -21,11 +21,11 @@ begin
     
     while i < length
         b = s[i];
-        i = i + 1;
+        i++;
        
-        b = b - 48;
-        result = result * 10;
-        result = result + b;
+        b -= 48;
+        result *= 10;
+        result += b;
     end
     
     return result;
@@ -42,13 +42,13 @@ func strcat(s1:str, s2:str) -> str
 begin
     while index < len1
         new_str[index] = s1[index];
-        index = index + 1;
+        index++;
     end
     
     while i2 < len2
         new_str[index] = s2[i2];
-        index = index + 1;
-        i2 = i2 + 1;
+        index++;
+        i2++;
     end
     
     return new_str;
@@ -63,7 +63,7 @@ func str_append(s1:str, c:char) -> str
 begin
     while index < len1
         new_str[index] = s1[index];
-        index = index + 1;
+        index++;
     end
     
     new_str[index] = c;

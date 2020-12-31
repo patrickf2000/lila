@@ -13,8 +13,8 @@ begin
     end
     
     while num != 0
-        num = num / 10;
-        len = len + 1;
+        num /= 10;
+        len += 1;
     end
     
     return len;
@@ -24,7 +24,7 @@ end
 func check_neg(num:int) -> int
 begin
     if num < 0
-        num = num * -1;
+        num *= -1;
     end
     
     return num;
@@ -35,11 +35,11 @@ func getHexLength(num:int) -> int
     len : int = 0;
 begin
     while num > 15
-        len = len + 1;
-        num = num / 16;
+        len += 1;
+        num /= 16;
     end
     
-    len = len + 1;
+    len++;
     
     return len;
 end

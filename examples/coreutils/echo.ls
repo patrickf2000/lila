@@ -41,7 +41,7 @@ begin
     # For right now, we only have "-h, --help" and "-v, --version"
     while i < size
         current = args[i];
-        i = i + 1;
+        i++;
         
         if current == "-h"
             help();
@@ -59,7 +59,7 @@ begin
     
     while i < size
         current = args[i];
-        i = i + 1;
+        i++;
         
         print(current);
         z = i + 1;
