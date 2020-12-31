@@ -25,21 +25,22 @@ begin
 end
 
 # The main function
-func main(argc:int, argv:str[]) -> int
+func main(args:str[]) -> int
+    size : int = sizeof(args);
     i, z : int = 1;
     current : str = "";
     c : char = 0;
 begin
     # Check to make sure we have arguments
-    if argc == 1
+    if size == 1
         println("");
         return 0;
     end
     
     # Next, check for any command line arguments
     # For right now, we only have "-h, --help" and "-v, --version"
-    while i < argc
-        current = argv[i];
+    while i < size
+        current = args[i];
         i = i + 1;
         
         if current == "-h"
@@ -56,13 +57,13 @@ begin
     # If we make it to this point, echo everything out
     i = 1;
     
-    while i < argc
-        current = argv[i];
+    while i < size
+        current = args[i];
         i = i + 1;
         
         print(current);
         z = i + 1;
-        if z <= argc
+        if z <= size
             print(" ");
         end
     end

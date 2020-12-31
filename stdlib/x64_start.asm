@@ -8,8 +8,8 @@
 
 _start:
     xor ebp, ebp
-    mov edi, DWORD PTR [rsp+0]
-    lea rsi, 8[rsp]
+    mov esi, DWORD PTR [rsp+0]
+    lea rdi, 8[rsp]
     call main
     
     mov rdi, rax
