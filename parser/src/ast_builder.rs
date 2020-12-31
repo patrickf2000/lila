@@ -254,7 +254,7 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
         
         _ => {
             if in_code {
-                syntax.syntax_error(scanner, "Invalid token or context.".to_string());
+                syntax.syntax_error(scanner, "Invalid token in context.".to_string());
             } else {
                 syntax.syntax_error(scanner, "Invalid context- Expecting \"begin\" before code.".to_string());
             }
@@ -434,7 +434,8 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &
     let code : bool;
     
     match token {
-        Token::Assign => code = build_var_assign(scanner, tree, id_val, syntax),
+        Token::Assign |
+        Token::OpInc => code = build_var_assign(scanner, tree, id_val, token, syntax),
         Token::LParen => code = build_func_call(scanner, tree, id_val, syntax),
         Token::LBracket => code = build_array_assign(scanner, tree, id_val, syntax),
         _ => {

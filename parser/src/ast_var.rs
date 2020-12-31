@@ -156,12 +156,39 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
 }
 
 // Builds a variable assignment
-pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax : &mut ErrorManager) -> bool {
+pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, assign_op : Token, syntax : &mut ErrorManager) -> bool {
     let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
-    var_assign.name = name;
+    var_assign.name = name.clone();
     
-    if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
-        return false;
+    let mut check_end = false;
+    
+    match assign_op {
+        Token::OpInc => {
+            let mut id_arg = ast::create_arg(AstArgType::Id);
+            id_arg.str_val = name;
+            var_assign.args.push(id_arg);
+            
+            let op_arg = ast::create_arg(AstArgType::OpAdd);
+            var_assign.args.push(op_arg);
+            
+            let num_arg = ast::create_int(1);
+            var_assign.args.push(num_arg);
+            
+            check_end = true;
+        },
+        
+        _ => {
+            if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
+                return false;
+            }
+        },
+    }
+    
+    if check_end {
+        if scanner.get_token() != Token::Semicolon {
+            syntax.syntax_error(scanner, "Expected terminator.".to_string());
+            return false;
+        }
     }
     
     ast::add_stmt(tree, var_assign);

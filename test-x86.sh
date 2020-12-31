@@ -65,6 +65,7 @@ run_test 'test/float/*.ls' 'clib' $flags
 run_test 'test/char/*.ls' 'clib' $flags
 run_test 'test/string/*.ls' 'clib' $flags
 
+run_test 'test/assign/*.ls' 'sys' $flags
 run_test 'test/ooop/*.ls' 'clib' $flags
 run_test 'test/loop/*.ls' 'clib' $flags
 run_test 'test/mem/*.ls' 'sys' $flags

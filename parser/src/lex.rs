@@ -84,6 +84,7 @@ pub enum Token {
     OpXor,
     OpLeftShift,
     OpRightShift,
+    OpInc,
     
     Id(String),
     ByteL(u8),
@@ -321,10 +322,18 @@ impl Lex {
                 return Token::OpSub;
             },
             
+            '+' => {
+                if c2 == '+' {
+                    self.index += 1;
+                    return Token::OpInc;
+                }
+                
+                return Token::OpAdd;
+            },
+            
             ':' => return Token::Colon,
             ',' => return Token::Comma,
             ';' => return Token::Semicolon,
-            '+' => return Token::OpAdd,
             '*' => return Token::OpMul,
             '/' => return Token::OpDiv,
             '%' => return Token::OpMod,
