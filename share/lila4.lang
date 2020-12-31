@@ -117,6 +117,8 @@
 		<keyword>elif</keyword>
 		<keyword>else</keyword>
 		<keyword>while</keyword>
+		<keyword>for</keyword>
+		<keyword>in</keyword>
 		<keyword>break</keyword>
 		<keyword>continue</keyword>
 		<keyword>syscall</keyword>
