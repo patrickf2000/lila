@@ -241,63 +241,6 @@ pub fn build_end(scanner: &mut Lex, tree : &mut AstTree) {
     ast::add_stmt(tree, stmt);
 }
 
-// Builds the ldarg statement
-pub fn build_ldarg(scanner : &mut Lex, syntax : &mut ErrorManager) -> AstArg {
-    let mut ldarg = ast::create_arg(AstArgType::LdArg);
-    let mut token = scanner.get_token();
-    
-    if token != Token::LParen {
-        syntax.syntax_error(scanner, "Expected \'(\'".to_string());
-        return ast::create_arg(AstArgType::None);
-    }
-    
-    token = scanner.get_token();
-    
-    match token {
-        Token::Id(ref val) => {
-            let mut arg = ast::create_arg(AstArgType::Id);
-            arg.str_val = val.to_string();
-            ldarg.sub_args.push(arg);
-        },
-        
-        Token::IntL(val) => {
-            let mut arg = ast::create_arg(AstArgType::IntL);
-            arg.u64_val = val;
-            ldarg.sub_args.push(arg);
-        },
-        
-        _ => {
-            syntax.syntax_error(scanner, "Invalid token. Positions must be specified by integer or variable.".to_string());
-            return ast::create_arg(AstArgType::None);
-        },
-    }
-    
-    token = scanner.get_token();
-    
-    if token != Token::Comma {
-        syntax.syntax_error(scanner, "Expected \',\'".to_string());
-        return ast::create_arg(AstArgType::None);
-    }
-    
-    token = scanner.get_token();
-    let arg_type = token_to_mod(&token, false);
-    
-    if arg_type.mod_type == AstModType::None {
-        syntax.syntax_error(scanner, "Invalid type".to_string());
-        return ast::create_arg(AstArgType::None);
-    }
-    
-    ldarg.sub_modifiers.push(arg_type);
-    token = scanner.get_token();
-    
-    if token != Token::RParen {
-        syntax.syntax_error(scanner, "Expected \')\'".to_string());
-        return ast::create_arg(AstArgType::None);
-    }
-    
-    ldarg
-}
-
 // Builds function calls
 pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
     let mut fc = ast::create_stmt(AstStmtType::FuncCall, scanner);

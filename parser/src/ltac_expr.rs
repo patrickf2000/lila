@@ -445,24 +445,6 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 return false;
             },
             
-            // Ldarg statement
-            // Format position (sub_arg[0]), data_type (sub_modifiers[0])
-            
-            AstArgType::LdArg => {
-                let position_arg = arg.sub_args.first().unwrap();
-                let position = position_arg.u64_val as i32;
-                
-                let ast_data_type = arg.sub_modifiers.first().unwrap();
-                let (data_type, sub_type) = ast_to_datatype(&ast_data_type);
-                let reg = reg_for_type(&data_type, &sub_type, reg_no+1);
-                
-                let ld_instr = ldarg_for_type(&data_type, reg.clone(), position);
-                builder.file.code.push(ld_instr);
-                
-                instr.arg2 = reg;
-                builder.file.code.push(instr.clone());
-            },
-            
             // Sizeof statement
             // To get the size, get the array variable, and the size is stored in the upper 4 bytes
             

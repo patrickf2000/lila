@@ -29,7 +29,6 @@ pub enum Token {
     
     Extern,
     Func,
-    LdArg,
     Begin,
     Return,
     Exit,
@@ -377,7 +376,6 @@ impl Lex {
             "enum" => token = Token::Enum,
             "extern" => token = Token::Extern,
             "func" => token = Token::Func,
-            "ldarg" => token = Token::LdArg,
             "begin" => token = Token::Begin,
             "return" => token = Token::Return,
             "exit" => token = Token::Exit,
