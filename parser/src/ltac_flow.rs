@@ -18,7 +18,7 @@
 
 use crate::ltac_builder::*;
 
-use crate::ast::{AstStmt, AstStmtType, AstArgType};
+use crate::ast::{AstStmt, AstStmtType, AstArg, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacInstr, LtacArg};
 
@@ -654,5 +654,118 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     cmp_block.push(end_lbl);
     
     builder.code_stack.push(cmp_block);
+}
+
+// Builds a for loop block
+// The syntax is very similar to to a while loop
+pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
+    builder.block_layer += 1;
+    builder.loop_layer += 1;
+    
+    create_label(builder, false);    // Goes at the very end
+    create_label(builder, false);    // Add a comparison label
+    create_label(builder, false);   // Add a loop label
+    
+    let end_label = builder.label_stack.pop().unwrap();
+    let loop_label = builder.label_stack.pop().unwrap();
+    let cmp_label = builder.label_stack.pop().unwrap();
+    
+    builder.loop_labels.push(cmp_label.clone());
+    builder.end_labels.push(end_label.clone());
+    
+    // Create the variable
+    let index_var = line.args.first().unwrap();
+    let name = index_var.str_val.clone();
+    
+    builder.stack_pos += 4;
+    let pos = builder.stack_pos;
+    
+    let index = Var {
+        pos : pos,
+        data_type : DataType::Int,
+        sub_type : DataType::None,
+        is_param : false,
+    };
+    
+    builder.vars.insert(name, index);
+    
+    // Determine the type of loop
+    // TODO: We need a more sophisticated analyzer
+    let end_arg : &AstArg;
+    
+    if line.args.len() == 4 {
+        let start_pos = line.args.iter().nth(1).unwrap();
+        end_arg = line.args.iter().nth(3).unwrap();
+        
+        // Set the variable equal to the start
+        // TODO: Other types
+        match start_pos.arg_type {
+            AstArgType::IntL => {
+                let mut instr = ltac::create_instr(LtacType::Mov);
+                instr.arg1 = LtacArg::Mem(pos);
+                instr.arg2 = LtacArg::I32(start_pos.u64_val as i32);
+                builder.file.code.push(instr);
+            },
+            
+            _ => {},
+        }
+    } else {
+        // TODO: Some other loop
+        return;
+    }
+    
+    // Start the loop
+    let mut lbl = ltac::create_instr(LtacType::Label);
+    lbl.name = loop_label.clone();
+    builder.file.code.push(lbl);
+    
+    // Now build the comparison
+    // We create a separate block since this will go at the end of the loop
+    let mut cmp_block : Vec<LtacInstr> = Vec::new();
+    
+    // Increment the counter variable
+    let mut lbl2 = ltac::create_instr(LtacType::Label);
+    lbl2.name = cmp_label.clone();
+    cmp_block.push(lbl2);
+    
+    let mut mov2 = ltac::create_instr(LtacType::Mov);
+    mov2.arg1 = LtacArg::Reg32(0);
+    mov2.arg2 = LtacArg::Mem(pos);
+    cmp_block.push(mov2);
+    
+    let mut inc_counter = ltac::create_instr(LtacType::I32Add);
+    inc_counter.arg1 = LtacArg::Reg32(0);
+    inc_counter.arg2 = LtacArg::I32(1);
+    cmp_block.push(inc_counter);
+    
+    let mut mov3 = ltac::create_instr(LtacType::Mov);
+    mov3.arg1 = LtacArg::Mem(pos);
+    mov3.arg2 = LtacArg::Reg32(0);
+    cmp_block.push(mov3);
+    
+    // Build the conditional statement
+    // TODO: Other types
+    let mut cmp_instr = ltac::create_instr(LtacType::I32Cmp);
+    cmp_instr.arg1 = LtacArg::Reg32(0);
+    
+    match end_arg.arg_type {
+        AstArgType::IntL => cmp_instr.arg2 = LtacArg::I32(end_arg.u64_val as i32),
+        _ => {},
+    }
+    
+    cmp_block.push(cmp_instr);
+    
+    // Now the operator
+    let mut br = ltac::create_instr(LtacType::Bl);
+    br.name = loop_label.clone();
+    cmp_block.push(br);
+    
+    // The end label
+    let mut end_lbl = ltac::create_instr(LtacType::Label);
+    end_lbl.name = end_label.clone();
+    cmp_block.push(end_lbl);
+    
+    builder.code_stack.push(cmp_block);
+    
 }
 
