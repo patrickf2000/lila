@@ -50,7 +50,6 @@ pub enum AstArgType {
     StringL,
     Id,
     LdArg,
-    Array,      // TODO: Remove this
     Sizeof,
     AddrOf,
     OpRParen,
@@ -342,7 +341,6 @@ impl AstArg {
             AstArgType::StringL => print!("\"{}\" ", self.str_val),
             AstArgType::Id => print!("{} ", self.str_val),
             AstArgType::LdArg => print!("LDARG "),
-            AstArgType::Array => print!("ARRAY "),
             AstArgType::Sizeof => print!("SIZEOF "),
             AstArgType::AddrOf => print!("ADDR_OF "),
             AstArgType::OpLParen => print!("("),
