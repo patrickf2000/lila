@@ -59,7 +59,11 @@ pub enum Token {
     RParen,
     LBracket,
     RBracket,
+    
     Assign,
+    AddAssign,
+    SubAssign,
+    
     Colon,
     Comma,
     Semicolon,
@@ -67,6 +71,7 @@ pub enum Token {
     Any,
     Sizeof,
     AddrOf,
+    
     OpAdd,
     OpSub,
     OpMul,
@@ -321,6 +326,9 @@ impl Lex {
                 } else if c2 == '-' {
                     self.index += 1;
                     return Token::OpDec;
+                } else if c2 == '=' {
+                    self.index += 1;
+                    return Token::SubAssign;
                 }
                 
                 return Token::OpSub;
@@ -330,6 +338,9 @@ impl Lex {
                 if c2 == '+' {
                     self.index += 1;
                     return Token::OpInc;
+                } else if c2 == '=' {
+                    self.index += 1;
+                    return Token::AddAssign;
                 }
                 
                 return Token::OpAdd;

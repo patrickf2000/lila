@@ -434,7 +434,8 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &
     let code : bool;
     
     match token {
-        Token::OpInc | Token::OpDec 
+        Token::AddAssign | Token::SubAssign
+        | Token::OpInc | Token::OpDec
         | Token::Assign => code = build_var_assign(scanner, tree, id_val, token, syntax),
         
         Token::LParen => code = build_func_call(scanner, tree, id_val, syntax),

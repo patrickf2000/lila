@@ -182,6 +182,25 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
             check_end = true;
         },
         
+        Token::AddAssign | Token::SubAssign => {
+            let mut id_arg = ast::create_arg(AstArgType::Id);
+            id_arg.str_val = name;
+            var_assign.args.push(id_arg);
+            
+            if assign_op == Token::AddAssign {
+                let op_arg = ast::create_arg(AstArgType::OpAdd);
+                var_assign.args.push(op_arg);
+            } else if assign_op == Token::SubAssign {
+                let op_arg = ast::create_arg(AstArgType::OpSub);
+                var_assign.args.push(op_arg);
+            }
+            
+            // Build the rest
+            if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
+                return false;
+            }
+        },
+        
         _ => {
             if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
                 return false;
