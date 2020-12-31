@@ -156,10 +156,7 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
 }
 
 // Builds a variable assignment
-pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, assign_op : Token, syntax : &mut ErrorManager) -> bool {
-    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
-    var_assign.name = name.clone();
-    
+fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : String, assign_op : Token, syntax : &mut ErrorManager) -> bool {
     let mut check_end = false;
     
     match assign_op {
@@ -207,15 +204,21 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
             }
             
             // Build the rest
-            if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
+            if !build_args(scanner, var_assign, Token::Semicolon, syntax) {
                 return false;
             }
         },
         
-        _ => {
-            if !build_args(scanner, &mut var_assign, Token::Semicolon, syntax) {
+        Token::Assign => {
+            if !build_args(scanner, var_assign, Token::Semicolon, syntax) {
                 return false;
             }
+        },
+        
+        // TODO: Pls improve this
+        _ => {
+            syntax.syntax_error(scanner, "Expected \'=\' in array assignment.".to_string());
+            return false;
         },
     }
     
@@ -226,28 +229,36 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
         }
     }
     
-    ast::add_stmt(tree, var_assign);
+    true
+}
+
+// Builds a variable assignment
+pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, assign_op : Token, syntax : &mut ErrorManager) -> bool {
+    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
+    var_assign.name = name.clone();
     
+    if !build_var_assign_stmt(scanner, &mut var_assign, name, assign_op, syntax) {
+        return false;
+    }
+    
+    ast::add_stmt(tree, var_assign);
     true
 }
 
 // Builds an array assignment
 pub fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
     let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign, scanner);
-    array_assign.name = id_val;
+    array_assign.name = id_val.clone();
     
     // For the array index
     if !build_args(scanner, &mut array_assign, Token::RBracket, syntax) {
         return false;
     }
     
-    if scanner.get_token() != Token::Assign {
-        syntax.syntax_error(scanner, "Expected \'=\' in array assignment.".to_string());
-        return false;
-    }
+    // Build the assignment
+    let assign_op = scanner.get_token();
     
-    // Tokens being assigned to the array
-    if !build_args(scanner, &mut array_assign, Token::Semicolon, syntax) {
+    if !build_var_assign_stmt(scanner, &mut array_assign, id_val, assign_op, syntax) {
         return false;
     }
     
