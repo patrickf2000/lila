@@ -861,17 +861,28 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     // mov r0, array[size_pos]
     // mov index, r0
     //
-    let reg = reg_for_type(&data_type, &DataType::None, 0);
-    
-    instr = mov_for_type(&data_type, &DataType::None);
-    instr.arg1 = reg.clone();
-    instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 4);     // TODO: Size should not be hard-coded
-    builder.file.code.push(instr.clone());
-    
-    instr = mov_for_type(&data_type, &DataType::None);
-    instr.arg1 = LtacArg::Mem(index_pos);
-    instr.arg2 = reg.clone();
-    builder.file.code.push(instr.clone());
+    if data_type == DataType::Str {
+        instr = ltac::create_instr(LtacType::MovQ);
+        instr.arg1 = LtacArg::Reg64(0);
+        instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 8);
+        builder.file.code.push(instr.clone());
+        
+        instr.arg1 = LtacArg::Mem(index_pos);
+        instr.arg2 = LtacArg::Reg64(0);
+        builder.file.code.push(instr.clone());
+    } else {
+        let reg = reg_for_type(&data_type, &DataType::None, 0);
+        
+        instr = mov_for_type(&data_type, &DataType::None);
+        instr.arg1 = reg.clone();
+        instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 4);     // TODO: Size should not be hard-coded
+        builder.file.code.push(instr.clone());
+        
+        instr = mov_for_type(&data_type, &DataType::None);
+        instr.arg1 = LtacArg::Mem(index_pos);
+        instr.arg2 = reg.clone();
+        builder.file.code.push(instr.clone());
+    }
     
     ///////////////////////////////////////
     // Build the bottom of the loop block
