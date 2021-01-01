@@ -20,6 +20,21 @@ use crate::ltac;
 use crate::ast::*;
 use crate::ltac::*;
 
+// Returns the size for a given type
+pub fn size_for_type(data_type : &DataType) -> i32 {
+    match data_type {
+        DataType::Byte | DataType::UByte => 1,
+        DataType::Char => 1,
+        DataType::Short | DataType::UShort => 2,
+        DataType::Int | DataType::UInt => 4,
+        DataType::Int64 | DataType::UInt64 => 8,
+        DataType::Str | DataType::Ptr => 8,
+        DataType::Float => 4,
+        DataType::Double => 8,
+        _ => 0,
+    }
+}
+
 // Return: Base Type, Sub Type
 pub fn ast_to_datatype(ast_mod : &AstMod) -> (DataType, DataType) {
     match &ast_mod.mod_type {

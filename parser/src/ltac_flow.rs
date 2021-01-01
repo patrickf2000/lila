@@ -809,24 +809,12 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     };
     
     let data_type = array.sub_type.clone();
+    let data_type_size : i32 = size_for_type(&data_type);
+    
     let array_pos = array.pos;
     let array_size_pos = array_pos - 8;
     
-    match data_type {
-        DataType::Byte | DataType::UByte => builder.stack_pos += 1,
-        DataType::Short | DataType::UShort => builder.stack_pos += 2,
-        DataType::Int | DataType::UInt => builder.stack_pos += 4,
-        DataType::Int64 | DataType::UInt64 => builder.stack_pos += 8,
-        DataType::Char => builder.stack_pos += 1,
-        DataType::Str => builder.stack_pos += 8,
-        
-        _ => {
-            // TODO: Syntax error
-            return;
-        },
-    }
-    
-    builder.stack_pos += 4;
+    builder.stack_pos += 4 + data_type_size;
     let index_pos = builder.stack_pos;
     
     let index = Var {
@@ -875,7 +863,7 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
         
         instr = mov_for_type(&data_type, &DataType::None);
         instr.arg1 = reg.clone();
-        instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 4);     // TODO: Size should not be hard-coded
+        instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, data_type_size);
         builder.file.code.push(instr.clone());
         
         instr = mov_for_type(&data_type, &DataType::None);
