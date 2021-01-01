@@ -769,6 +769,22 @@ fn build_range_for_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
 }
 
 // Builds a foreach loop
+// Overall logic behind a for each loop
+// Two extra variables need
+//      -> Index is the user-specified one to hold the current element
+//      -> Pos is an internal one used to check the current index against the loop size
+//
+// mov pos, 0
+// jmp CMP
+// LOOP
+// mov index, array[pos]
+// ~~~~
+// ~~~~
+// add pos, 1
+// CMP
+// cmp pos, array_size
+// jl LOOP
+//
 fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     let end_label = builder.label_stack.pop().unwrap();
     let loop_label = builder.label_stack.pop().unwrap();
@@ -781,8 +797,8 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     let index_var = line.args.first().unwrap();
     let array_var = line.args.last().unwrap();
     
-    let index_name = index_var.str_val.clone();
-    let array_name = array_var.str_val.clone();
+    let index_name = index_var.str_val.clone();     // The name of the user's index variable
+    let array_name = array_var.str_val.clone();     // The name of the array we are searching
     
     let array = match builder.get_var(&array_name) {
         Ok(v) => v,
@@ -792,14 +808,11 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
         },
     };
     
-    let d_type = array.sub_type.clone();
+    let data_type = array.sub_type.clone();
     let array_pos = array.pos;
     let array_size_pos = array_pos - 8;
     
-    let mut mov_instr = mov_for_type(&d_type, &DataType::None);
-    let reg = reg_for_type(&d_type, &DataType::None, 0);
-    
-    match d_type {
+    match data_type {
         DataType::Byte | DataType::UByte => builder.stack_pos += 1,
         DataType::Short | DataType::UShort => builder.stack_pos += 2,
         DataType::Int | DataType::UInt => builder.stack_pos += 4,
@@ -818,7 +831,7 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     
     let index = Var {
         pos : index_pos,
-        data_type : d_type,
+        data_type : data_type.clone(),
         sub_type : DataType::None,
         is_param : false,
     };
@@ -843,19 +856,32 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     lbl.name = loop_label.clone();
     builder.file.code.push(lbl);
     
+    ///////////////////////////////////////
     // Load the index variable
-    mov_instr.arg1 = reg.clone();
-    mov_instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 4);
-    builder.file.code.push(mov_instr.clone());
+    // mov r0, array[size_pos]
+    // mov index, r0
+    //
+    let reg = reg_for_type(&data_type, &DataType::None, 0);
     
-    mov_instr.arg1 = LtacArg::Mem(index_pos);
-    mov_instr.arg2 = reg.clone();
-    builder.file.code.push(mov_instr.clone());
+    instr = mov_for_type(&data_type, &DataType::None);
+    instr.arg1 = reg.clone();
+    instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 4);     // TODO: Size should not be hard-coded
+    builder.file.code.push(instr.clone());
     
-    // Build the conditional statement
+    instr = mov_for_type(&data_type, &DataType::None);
+    instr.arg1 = LtacArg::Mem(index_pos);
+    instr.arg2 = reg.clone();
+    builder.file.code.push(instr.clone());
+    
+    ///////////////////////////////////////
+    // Build the bottom of the loop block
     let mut cmp_block : Vec<LtacInstr> = Vec::new();
     
     // Increment the counter
+    // mov r0, [size_pos]
+    // add r0, 1
+    // mov [size_pos], r0
+    //
     instr = ltac::create_instr(LtacType::Mov);
     instr.arg1 = LtacArg::Reg32(0);
     instr.arg2 = LtacArg::Mem(size_pos);
@@ -877,6 +903,9 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     cmp_block.push(lbl2);
     
     // Load the counter variable and the array size variables and compare    
+    // mov r0, [size_pos]
+    // cmp r0, [array_size_pos]
+    //
     instr = ltac::create_instr(LtacType::Mov);
     instr.arg1 = LtacArg::Reg32(0);
     instr.arg2 = LtacArg::Mem(size_pos);
@@ -887,7 +916,7 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     cmp_instr.arg2 = LtacArg::Mem(array_size_pos);
     cmp_block.push(cmp_instr);
     
-    // Now the operator
+    // Now the branch instruction
     let mut br = ltac::create_instr(LtacType::Bl);
     br.name = loop_label.clone();
     cmp_block.push(br);
