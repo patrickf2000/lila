@@ -18,7 +18,7 @@
 
 use crate::ltac_builder::*;
 
-use crate::ast::{AstStmt, AstStmtType, AstArg, AstArgType};
+use crate::ast::{AstStmt, AstStmtType, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacInstr, LtacArg};
 
@@ -657,7 +657,6 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
 }
 
 // Builds a for loop block
-// The syntax is very similar to to a while loop
 pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
     builder.block_layer += 1;
     builder.loop_layer += 1;
@@ -666,6 +665,15 @@ pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
     create_label(builder, false);    // Add a comparison label
     create_label(builder, false);   // Add a loop label
     
+    if line.args.len() == 4 {
+        build_range_for_loop(builder, line);
+    } else {
+        //build_foreach_loop(builder, line);
+    }
+}
+
+// Builds a range-based for loop
+fn build_range_for_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     let end_label = builder.label_stack.pop().unwrap();
     let loop_label = builder.label_stack.pop().unwrap();
     let cmp_label = builder.label_stack.pop().unwrap();
@@ -690,28 +698,20 @@ pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
     builder.vars.insert(name, index);
     
     // Determine the type of loop
-    // TODO: We need a more sophisticated analyzer
-    let end_arg : &AstArg;
+    let start_pos = line.args.iter().nth(1).unwrap();
+    let end_arg = line.args.iter().nth(3).unwrap();
     
-    if line.args.len() == 4 {
-        let start_pos = line.args.iter().nth(1).unwrap();
-        end_arg = line.args.iter().nth(3).unwrap();
+    // Set the variable equal to the start
+    // TODO: Other types
+    match start_pos.arg_type {
+        AstArgType::IntL => {
+            let mut instr = ltac::create_instr(LtacType::Mov);
+            instr.arg1 = LtacArg::Mem(pos);
+            instr.arg2 = LtacArg::I32(start_pos.u64_val as i32);
+            builder.file.code.push(instr);
+        },
         
-        // Set the variable equal to the start
-        // TODO: Other types
-        match start_pos.arg_type {
-            AstArgType::IntL => {
-                let mut instr = ltac::create_instr(LtacType::Mov);
-                instr.arg1 = LtacArg::Mem(pos);
-                instr.arg2 = LtacArg::I32(start_pos.u64_val as i32);
-                builder.file.code.push(instr);
-            },
-            
-            _ => {},
-        }
-    } else {
-        // TODO: Some other loop
-        return;
+        _ => {},
     }
     
     // Start the loop
@@ -766,6 +766,16 @@ pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
     cmp_block.push(end_lbl);
     
     builder.code_stack.push(cmp_block);
-    
 }
+
+// Builds a foreach loop
+/*fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
+    let end_label = builder.label_stack.pop().unwrap();
+    let loop_label = builder.label_stack.pop().unwrap();
+    let cmp_label = builder.label_stack.pop().unwrap();
+    
+    builder.loop_labels.push(cmp_label.clone());
+    builder.end_labels.push(end_label.clone());
+    
+}*/
 
