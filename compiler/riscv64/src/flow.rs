@@ -1,5 +1,5 @@
 // This file is part of the Lila compiler
-// Copyright (C) 2020 Patrick Flynn
+// Copyright (C) 2020-2021 Patrick Flynn
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
