@@ -15,8 +15,8 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 use crate::ltac_builder::*;
+use crate::ltac_utils::*;
 
 use crate::ast::{AstStmt, AstStmtType, AstArgType};
 use crate::ltac;
@@ -668,7 +668,7 @@ pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
     if line.args.len() == 4 {
         build_range_for_loop(builder, line);
     } else {
-        //build_foreach_loop(builder, line);
+        build_foreach_loop(builder, line);
     }
 }
 
@@ -769,7 +769,7 @@ fn build_range_for_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
 }
 
 // Builds a foreach loop
-/*fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
+fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     let end_label = builder.label_stack.pop().unwrap();
     let loop_label = builder.label_stack.pop().unwrap();
     let cmp_label = builder.label_stack.pop().unwrap();
@@ -777,5 +777,126 @@ fn build_range_for_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     builder.loop_labels.push(cmp_label.clone());
     builder.end_labels.push(end_label.clone());
     
-}*/
+    // First, build the index variable
+    let index_var = line.args.first().unwrap();
+    let array_var = line.args.last().unwrap();
+    
+    let index_name = index_var.str_val.clone();
+    let array_name = array_var.str_val.clone();
+    
+    let array = match builder.get_var(&array_name) {
+        Ok(v) => v,
+        Err(_e) => {
+            //TODO: Syntax error
+            return;
+        },
+    };
+    
+    let d_type = array.sub_type.clone();
+    let array_pos = array.pos;
+    let array_size_pos = array_pos - 8;
+    
+    let mut mov_instr = mov_for_type(&d_type, &DataType::None);
+    let reg = reg_for_type(&d_type, &DataType::None, 0);
+    
+    match d_type {
+        DataType::Byte | DataType::UByte => builder.stack_pos += 1,
+        DataType::Short | DataType::UShort => builder.stack_pos += 2,
+        DataType::Int | DataType::UInt => builder.stack_pos += 4,
+        DataType::Int64 | DataType::UInt64 => builder.stack_pos += 8,
+        DataType::Char => builder.stack_pos += 1,
+        DataType::Str => builder.stack_pos += 8,
+        
+        _ => {
+            // TODO: Syntax error
+            return;
+        },
+    }
+    
+    builder.stack_pos += 4;
+    let index_pos = builder.stack_pos;
+    
+    let index = Var {
+        pos : index_pos,
+        data_type : d_type,
+        sub_type : DataType::None,
+        is_param : false,
+    };
+    
+    builder.vars.insert(index_name, index);
+    
+    // Build another index variable to keep track of the size
+    builder.stack_pos += 4;
+    let size_pos = builder.stack_pos;
+    
+    let mut instr = ltac::create_instr(LtacType::Mov);
+    instr.arg1 = LtacArg::Mem(size_pos);
+    instr.arg2 = LtacArg::I32(0);
+    builder.file.code.push(instr.clone());
+    
+    instr = ltac::create_instr(LtacType::Br);
+    instr.name = cmp_label.clone();
+    builder.file.code.push(instr.clone());
+    
+    // Start the loop
+    let mut lbl = ltac::create_instr(LtacType::Label);
+    lbl.name = loop_label.clone();
+    builder.file.code.push(lbl);
+    
+    // Load the index variable
+    mov_instr.arg1 = reg.clone();
+    mov_instr.arg2 = LtacArg::MemOffsetMem(array_pos, size_pos, 4);
+    builder.file.code.push(mov_instr.clone());
+    
+    mov_instr.arg1 = LtacArg::Mem(index_pos);
+    mov_instr.arg2 = reg.clone();
+    builder.file.code.push(mov_instr.clone());
+    
+    // Build the conditional statement
+    let mut cmp_block : Vec<LtacInstr> = Vec::new();
+    
+    // Increment the counter
+    instr = ltac::create_instr(LtacType::Mov);
+    instr.arg1 = LtacArg::Reg32(0);
+    instr.arg2 = LtacArg::Mem(size_pos);
+    cmp_block.push(instr.clone());
+    
+    instr = ltac::create_instr(LtacType::I32Add);
+    instr.arg1 = LtacArg::Reg32(0);
+    instr.arg2 = LtacArg::I32(1);
+    cmp_block.push(instr.clone());
+    
+    instr = ltac::create_instr(LtacType::Mov);
+    instr.arg1 = LtacArg::Mem(size_pos);
+    instr.arg2 = LtacArg::Reg32(0);
+    cmp_block.push(instr.clone());
+    
+    // Comparison label
+    let mut lbl2 = ltac::create_instr(LtacType::Label);
+    lbl2.name = cmp_label.clone();
+    cmp_block.push(lbl2);
+    
+    // Load the counter variable and the array size variables and compare    
+    instr = ltac::create_instr(LtacType::Mov);
+    instr.arg1 = LtacArg::Reg32(0);
+    instr.arg2 = LtacArg::Mem(size_pos);
+    cmp_block.push(instr.clone());
+    
+    let mut cmp_instr = ltac::create_instr(LtacType::I32Cmp);
+    cmp_instr.arg1 = LtacArg::Reg32(0);
+    cmp_instr.arg2 = LtacArg::Mem(array_size_pos);
+    cmp_block.push(cmp_instr);
+    
+    // Now the operator
+    let mut br = ltac::create_instr(LtacType::Bl);
+    br.name = loop_label.clone();
+    cmp_block.push(br);
+    
+    // The end label
+    let mut end_lbl = ltac::create_instr(LtacType::Label);
+    end_lbl.name = end_label.clone();
+    cmp_block.push(end_lbl);
+    
+    builder.code_stack.push(cmp_block);
+}
 
