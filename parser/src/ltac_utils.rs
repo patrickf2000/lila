@@ -15,10 +15,25 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use crate::ltac_builder::DataType;
+use crate::ltac_builder::*;
 use crate::ltac;
 use crate::ast::*;
 use crate::ltac::*;
+
+// A utility function to create a label
+pub fn create_label(builder : &mut LtacBuilder, is_top : bool) {
+    let lbl_pos = builder.str_pos.to_string();
+    builder.str_pos += 1;
+    
+    let mut name = "L".to_string();
+    name.push_str(&lbl_pos);
+    
+    if is_top {
+        builder.top_label_stack.push(name);
+    } else {
+        builder.label_stack.push(name);
+    }
+}
 
 // Returns the size for a given type
 pub fn size_for_type(data_type : &DataType) -> i32 {

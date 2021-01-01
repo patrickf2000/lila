@@ -28,6 +28,7 @@ mod ltac_builder;
 mod ltac_expr;
 mod ltac_array;
 mod ltac_flow;
+mod ltac_for;
 mod ltac_func;
 mod ltac_utils;
 mod ltac_var;
