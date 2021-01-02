@@ -30,6 +30,8 @@ Compile with `lilac first.ls -o first`
 
 This has been my hobby/learning project of the past three months now. I don't think the syntax will change much anymore, but its still under a lot of development. Its to the point where it can do some non-trivial tasks, but I still have a ways to go.
 
+Also, note that even though Github says 20% of the code is Livescript, there's not a single line of it in here. I didn't realize that Livescript used the ".ls" extension, so that 20% is actually the Lila tests and examples. I may change the file extension later on.
+
 ### Features
 
 All the stuff here is implemented in some way.
