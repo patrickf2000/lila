@@ -505,19 +505,31 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
 
 // Builds an LTAC conditional block (specific for if-else)
 pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
+    /*create_label(builder, false);
+    let end_label = builder.label_stack.pop().unwrap();*/
+    
     if line.stmt_type == AstStmtType::If {
         builder.block_layer += 1;
-        create_label(builder, true);
+        
+        create_top_label(builder);
         
         // A dummy placeholder
         let code_block : Vec<LtacInstr> = Vec::new();
         builder.code_stack.push(code_block);
     } else {
-        let name = builder.top_label_stack.last().unwrap().to_string();
-        builder.marked_labels.push(name.clone());
+        /*let name = builder.top_label_stack.last().unwrap().to_string();
+        builder.marked_labels.push(name.clone());*/
+        
+        let end_label = match &builder.top_labels.get(&builder.block_layer) {
+            Some(lbl) => lbl.to_string(),
+            None => {
+                // TODO: Error?
+                return;
+            },
+        };
         
         let mut jmp = ltac::create_instr(LtacType::Br);
-        jmp.name = name;
+        jmp.name = end_label.clone();
         builder.file.code.push(jmp);
         
         let mut label = ltac::create_instr(LtacType::Label);

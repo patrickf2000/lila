@@ -406,12 +406,24 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if builder.block_layer == 0 {
         let last = builder.file.code.last().unwrap().clone();
         
-        if builder.top_label_stack.len() > 0 {
+        match &builder.top_labels.get(&builder.block_layer) {
+            Some(lbl) => {
+                let mut label = ltac::create_instr(LtacType::Label);
+                label.name = lbl.to_string();
+                builder.file.code.push(label);
+            },
+            
+            None => {},
+        };
+        
+        builder.top_labels.remove(&builder.block_layer);
+        
+        /*if builder.top_label_stack.len() > 0 {
             let mut label = ltac::create_instr(LtacType::Label);
             label.name = builder.top_label_stack.pop().unwrap().to_string();
             builder.file.code.push(label);
         }
-        
+        */
         if last.instr_type != LtacType::Ret && last.instr_type != LtacType::Exit {
             free_arrays(builder, String::new());
             
@@ -429,6 +441,29 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             builder.file.code.push(ret);
         }
     } else {
+        if builder.code_stack.len() > 0 {
+            let sub_block = builder.code_stack.pop().unwrap();
+            
+            for item in sub_block.iter() {
+                builder.file.code.push(item.clone());
+            }
+        }
+        
+        //builder.block_layer -= 1;
+        
+        // Before we decrement the layer, check the end labels
+        match &builder.top_labels.get(&builder.block_layer) {
+            Some(lbl) => {
+                let mut label = ltac::create_instr(LtacType::Label);
+                label.name = lbl.to_string();
+                builder.file.code.push(label);
+            },
+            
+            None => {},
+        };
+        
+        builder.top_labels.remove(&builder.block_layer);
+    
         builder.block_layer -= 1;
         
         if builder.loop_layer > 0 {
@@ -444,7 +479,7 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             builder.file.code.push(label);
         }
         
-        if builder.top_label_stack.len() > 0 {
+        /*if builder.top_label_stack.len() > 0 {
             let name = builder.top_label_stack.last().unwrap().to_string();
             if builder.marked_labels.contains(&name) {
                 builder.top_label_stack.pop();
@@ -453,15 +488,15 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                 label.name = name;
                 builder.file.code.push(label);
             }
-        }
+        }*/
         
-        if builder.code_stack.len() > 0 {
+        /*if builder.code_stack.len() > 0 {
             let sub_block = builder.code_stack.pop().unwrap();
             
             for item in sub_block.iter() {
                 builder.file.code.push(item.clone());
             }
-        }
+        }*/
     }
     
     true

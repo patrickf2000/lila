@@ -29,10 +29,21 @@ pub fn create_label(builder : &mut LtacBuilder, is_top : bool) {
     name.push_str(&lbl_pos);
     
     if is_top {
-        builder.top_label_stack.push(name);
+        //builder.top_label_stack.push(name);
     } else {
         builder.label_stack.push(name);
     }
+}
+
+// A utility function to create a top-level label
+pub fn create_top_label(builder : &mut LtacBuilder) {
+    let lbl_pos = builder.str_pos.to_string();
+    builder.str_pos += 1;
+    
+    let mut name = "L".to_string();
+    name.push_str(&lbl_pos);
+    
+    builder.top_labels.insert(builder.block_layer, name);
 }
 
 // Returns the size for a given type
