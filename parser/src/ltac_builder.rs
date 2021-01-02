@@ -85,6 +85,7 @@ pub struct LtacBuilder {
     pub block_layer : i32,
     pub label_stack : Vec<String>,
     pub top_label_stack : Vec<String>,
+    pub marked_labels : Vec<String>,
     pub code_stack : Vec<Vec<LtacInstr>>,
     
     //For loops
@@ -114,6 +115,7 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         block_layer : 0,
         label_stack : Vec::new(),
         top_label_stack : Vec::new(),
+        marked_labels : Vec::new(),
         code_stack : Vec::new(),
         loop_layer : 0,
         loop_labels : Vec::new(),

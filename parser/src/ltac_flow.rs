@@ -513,8 +513,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         let code_block : Vec<LtacInstr> = Vec::new();
         builder.code_stack.push(code_block);
     } else {
+        let name = builder.top_label_stack.last().unwrap().to_string();
+        builder.marked_labels.push(name.clone());
+        
         let mut jmp = ltac::create_instr(LtacType::Br);
-        jmp.name = builder.top_label_stack.last().unwrap().to_string();
+        jmp.name = name;
         builder.file.code.push(jmp);
         
         let mut label = ltac::create_instr(LtacType::Label);

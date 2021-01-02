@@ -404,7 +404,13 @@ pub fn build_exit(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
 // Builds the end of a block
 pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     if builder.block_layer == 0 {
-        let last = builder.file.code.last().unwrap();
+        let last = builder.file.code.last().unwrap().clone();
+        
+        if builder.top_label_stack.len() > 0 {
+            let mut label = ltac::create_instr(LtacType::Label);
+            label.name = builder.top_label_stack.pop().unwrap().to_string();
+            builder.file.code.push(label);
+        }
         
         if last.instr_type != LtacType::Ret && last.instr_type != LtacType::Exit {
             free_arrays(builder, String::new());
@@ -439,9 +445,14 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         }
         
         if builder.top_label_stack.len() > 0 {
-            let mut label = ltac::create_instr(LtacType::Label);
-            label.name = builder.top_label_stack.pop().unwrap();
-            builder.file.code.push(label);
+            let name = builder.top_label_stack.last().unwrap().to_string();
+            if builder.marked_labels.contains(&name) {
+                builder.top_label_stack.pop();
+            
+                let mut label = ltac::create_instr(LtacType::Label);
+                label.name = name;
+                builder.file.code.push(label);
+            }
         }
         
         if builder.code_stack.len() > 0 {
