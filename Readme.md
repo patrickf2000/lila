@@ -1,33 +1,51 @@
 ## Lila
 
-Welcome to Lila! Lila is a high-level imperative systems programming language inspired in design and purpose by C and syntactically by Pascal (and a few other languages). This repository contains the compiler for Lila, the standard library, the test system, and a few examples.
+Welcome to Lila! Lila is my high-level imperative systems programming language. Although its meant to be suitable for low-level work, its primarily meant for userspace applications. Lila is inspired by the Wirth-family of programming languages, specifically Ada and Pascal.
 
-See the docs folder for more information about the language, the modules, the internals, and why I chose Rust.
+This contains the parser, compiler, libraries, and tests for the language.
 
-### Why Lila?
+Here's a small example:
 
-I started Lila as a descendant to my Quik compilers. The original Quik was when I was learning compiler development, so they weren't designed with any big purpose. I started Lila because I liked the Quik language I came up with, and because I needed a simple compiler so I could experiment with different architectures, learn a little more about compiler transformations, and so forth. I also started the project in hopes I can use this for some benchmarking work I do in one of my jobs.
+```
+use std.text_io;
 
-However, Lila is not solely a personal thing. The first goal with Lila is simplicity- in the language itself and in the implementation. Lila is meant to be like C in that its basically portable assembly. The language should be super easy to port to any platform, whether a CPU or VM architecture (source interpretation should be easy as well). However, I do not wish to re-invent the wheel, so part of Lila is full interpolation with C and the system libraries.
+func main(args:str[]) -> int
+    length : int = sizeof(args);
+begin
+    println("Hello world!");
+    
+    printf("Number of args: %d\n", length);
+    
+    for arg in args
+        println(arg);
+    end
 
-They key difference of Lila from C is the language design and the abstracting of certain concepts. For example, safety is a big goal. There are no pointers and references in C. Any programming construct requiring pointers and references is abstracted away. Lila also aims to provide better support for things like strings and data structures, two things which I think are very lacking in C. On the hardware level, I also have a goal of providing constructs to make newer hardware features easier to use, including threading and SIMD. And finally, since I like living close the hardware and the operating system, I have constructs to make it easy to interface with the underlying OS.
+    return 0;
+end
+```
+
+Compile with `lilac first.ls -o first`
+
+### Status
+
+This has been my hobby/learning project of the past three months now. I don't think the syntax will change much anymore, but its still under a lot of development. Its to the point where it can do some non-trivial tasks, but I still have a ways to go.
 
 ### Features
 
-All the stuff here is either completely implemented
+All the stuff here is implemented in some way.
 
-* Complete compatibility with C objects and libraries
-* Super simple to parse and understand
-* No ambiguous grammar
-* Easy to translate to underlying architectures
-* Default x86-64 (others planned)
-* Optimization layer for RISC architectures
+* Entire compiler is written in Rust
+* Easy to parse and understand
 * Support for all numerical types (signed and unsigned are separate types)
-* Automated test system
-* Syntax checking and reporting
-* Experimental SIMD support- no intrinsics! (not fully implemented however...)
+* Built-in string type and operations
+* Unique approach to arrays
 * Automatic memory allocation and deallocation
 * Module system instead of headers
+* Standard and core libraries written in Lila
+* Experimental SIMD support- no intrinsics! (not fully implemented however...)
+* Optimization layer for RISC architectures
+* Automated test system
+* Compatible with C objects and libraries
 
 ### Architecture Support
 
@@ -47,26 +65,11 @@ If you use only the C library, Lila may work on other Unix-like platforms. Howev
 
 ### The Standard Library
 
-There's currently a small standard library with a few commonly used procedures and functions. This will be expanded in time. In practice, developing this has shown the shortcomings of the language, so I've had to take breaks to work on compiler improvements... Oh well. Its what makes it fun.
+Lila has two libraries: the core library, and the standard library.
 
-### Invoking the Compiler
+The core library is statically linked to whatever your programs and libraries. This contains a few core functions such as malloc, free, println, strlen, and others. These are small, self-contained functions that have no dependencies; they make the appropriate system calls. There is an undocumented compiler flag to disable this, but certain language features will fail if you do so.
 
-The compiler has multiple options to help you build the type of binary you need. You can pass multiple inputs, which can be a ".ls" source file or an object file. Here are all the current compiler options:
-
-* --ast/--ltac: See above
-* --use-c: Link to C start-up files and the C standard library.
-* --lib: Generate a dynamic library
-* --pic: Generate position independent code (x86 only- you need this if you are building a library)
-* --no-link: Only generate an object file
-* -l<lib>: Link to a certain library
-* -o <name>: Specify the output name
-* --risc: Run the RISC optimizer regardless of platform (the x86 code generator can convert RISC instructions)
-
-### Testing
-
-There are a lot of tests (at the time of writing, I think over 180). In order to make sure I don't break things, I use a unit-test approach, which basically is a bunch of very small programs that test a certain construct. The tests are divided among the different data types and features. To run, simply run the "./test.sh" script. If you need to test the RISC layer, run it as "./test.sh --risc".
-
-All tests use the C library for things like output. NEVER use the standard library for testing; there's a separate script to test that. The point of the unit tests is to test only one thing, and to eliminate the potential surface area of other bugs.
+The standard library has all the nice functions, such as printf, file reading, strings, and so forth. This is dynamically linked.
 
 ### Licensing
 

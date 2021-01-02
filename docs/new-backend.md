@@ -8,6 +8,6 @@ First, copy and rename the "example" directory in the compiler folder. Open the 
 
 Next, open the root level "Cargo.toml" and add the backend 1) as a dependency, and 2) in the workspace.
 
-Finally, open the the Dash entry point (at the time of writing, "src/main.rs" and add an option to invoke your new backend). You'll have to add your architecture to the Arch enum, which is in the transform layer. If your architecture needs RISC optimization, update "run" function in "transform/src/lib.rs" accordingly.
+Finally, open the the Dash entry point (at the time of writing, "src/main.rs" and add an option to invoke your new backend). You'll have to add your architecture to the Arch enum, which is in the parser layer. If your architecture needs RISC optimization, update "run" function in "transform/src/lib.rs" accordingly.
 
 
