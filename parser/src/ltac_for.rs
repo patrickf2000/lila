@@ -116,6 +116,19 @@ fn build_range_for_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     
     match end_arg.arg_type {
         AstArgType::IntL => cmp_instr.arg2 = LtacArg::I32(end_arg.u64_val as i32),
+        
+        AstArgType::Id => {
+            let v = match builder.get_var(&end_arg.str_val) {
+                Ok(v) => v,
+                Err(_e) => {
+                    // TODO: Syntax error
+                    return;
+                },
+            };
+            
+            cmp_instr.arg2 = LtacArg::Mem(v.pos);
+        },
+        
         _ => {},
     }
     
