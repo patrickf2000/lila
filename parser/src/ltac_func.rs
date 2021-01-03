@@ -418,12 +418,6 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         
         builder.top_labels.remove(&builder.block_layer);
         
-        /*if builder.top_label_stack.len() > 0 {
-            let mut label = ltac::create_instr(LtacType::Label);
-            label.name = builder.top_label_stack.pop().unwrap().to_string();
-            builder.file.code.push(label);
-        }
-        */
         if last.instr_type != LtacType::Ret && last.instr_type != LtacType::Exit {
             free_arrays(builder, String::new());
             
@@ -441,14 +435,9 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             builder.file.code.push(ret);
         }
     } else {
-        println!("END -> {}", builder.block_layer);
-        
-        //builder.block_layer -= 1;
-        
         // Before we decrement the layer, check the end labels
         match &builder.top_labels.get(&builder.block_layer) {
             Some(lbl) => {
-                println!("\tTOP_Map: {}", lbl.to_string());
                 let mut label = ltac::create_instr(LtacType::Label);
                 label.name = lbl.to_string();
                 builder.file.code.push(label);
@@ -467,7 +456,6 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         
         match &builder.label_map.get(&builder.block_layer) {
             Some(lbl) => {
-                println!("\tLBL_Map: {}", lbl.to_string());
                 let mut label = ltac::create_instr(LtacType::Label);
                 label.name = lbl.to_string();
                 builder.file.code.push(label);
@@ -482,37 +470,11 @@ pub fn build_end(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
         builder.block_layer -= 1;
         
         if builder.loop_layer > 0 {
+            builder.end_labels.remove(&builder.loop_layer);
+            builder.loop_labels.remove(&builder.loop_layer);
+            
             builder.loop_layer -= 1;
-            
-            builder.end_labels.pop();
-            builder.loop_labels.pop();
         }
-        
-        if builder.label_stack.len() > 0 {
-            let mut label = ltac::create_instr(LtacType::Label);
-            label.name = builder.label_stack.pop().unwrap();
-            builder.file.code.push(label);
-        }
-        
-        
-        /*if builder.top_label_stack.len() > 0 {
-            let name = builder.top_label_stack.last().unwrap().to_string();
-            if builder.marked_labels.contains(&name) {
-                builder.top_label_stack.pop();
-            
-                let mut label = ltac::create_instr(LtacType::Label);
-                label.name = name;
-                builder.file.code.push(label);
-            }
-        }*/
-        
-        /*if builder.code_stack.len() > 0 {
-            let sub_block = builder.code_stack.pop().unwrap();
-            
-            for item in sub_block.iter() {
-                builder.file.code.push(item.clone());
-            }
-        }*/
     }
     
     true

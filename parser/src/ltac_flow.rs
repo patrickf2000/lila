@@ -25,15 +25,29 @@ use crate::ltac::{LtacType, LtacInstr, LtacArg};
 // Break out of a current loop
 pub fn build_break(builder : &mut LtacBuilder) {
     let mut br = ltac::create_instr(LtacType::Br);
-    br.name = builder.end_labels.last().unwrap().to_string();
-    builder.file.code.push(br);
+    
+    match &builder.end_labels.get(&builder.loop_layer) {
+        Some(lbl) => {
+            br.name = lbl.to_string();
+            builder.file.code.push(br);
+        },
+        
+        None => {},
+    };
 }
 
 // Continue through the rest of the loop
 pub fn build_continue(builder : &mut LtacBuilder) {
     let mut br = ltac::create_instr(LtacType::Br);
-    br.name = builder.loop_labels.last().unwrap().to_string();
-    builder.file.code.push(br);
+    
+    match &builder.loop_labels.get(&builder.loop_layer) {
+        Some(lbl) => {
+            br.name = lbl.to_string();
+            builder.file.code.push(br);
+        },
+        
+        None => {},
+    };
 }
 
 // Builds a conditional statement
@@ -507,7 +521,6 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
 pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     if line.stmt_type == AstStmtType::If {
         builder.block_layer += 1;
-        println!("IF -> {}", builder.block_layer);
         
         create_top_label(builder);
         
@@ -515,7 +528,6 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         let code_block : Vec<LtacInstr> = Vec::new();
         builder.code_stack.push(code_block);
     } else {
-        println!("ELIF/ELSE -> {}", builder.block_layer);
         let end_label = match &builder.top_labels.get(&builder.block_layer) {
             Some(lbl) => lbl.to_string(),
             None => {
@@ -604,8 +616,8 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     let loop_label = builder.label_stack.pop().unwrap();
     let cmp_label = builder.label_stack.pop().unwrap();
     
-    builder.loop_labels.push(cmp_label.clone());
-    builder.end_labels.push(end_label.clone());
+    builder.loop_labels.insert(builder.loop_layer, cmp_label.clone());
+    builder.end_labels.insert(builder.loop_layer, end_label.clone());
     
     // Jump to the comparsion label, and add the loop label
     let mut br = ltac::create_instr(LtacType::Br);

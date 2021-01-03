@@ -21,6 +21,8 @@ use crate::ast::*;
 use crate::ltac::*;
 
 // A utility function to create a label
+// TODO: It would be nice to eventually remove this
+// All it would entail is replacing the label stack
 pub fn create_label2(builder : &mut LtacBuilder, is_top : bool) {
     let lbl_pos = builder.str_pos.to_string();
     builder.str_pos += 1;

@@ -44,8 +44,8 @@ fn build_range_for_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     let loop_label = builder.label_stack.pop().unwrap();
     let cmp_label = builder.label_stack.pop().unwrap();
     
-    builder.loop_labels.push(cmp_label.clone());
-    builder.end_labels.push(end_label.clone());
+    builder.loop_labels.insert(builder.block_layer, cmp_label.clone());
+    builder.end_labels.insert(builder.block_layer, end_label.clone());
     
     // Create the variable
     let index_var = line.args.first().unwrap();
@@ -169,8 +169,8 @@ fn build_foreach_loop(builder : &mut LtacBuilder, line : &AstStmt)  {
     let loop_label = builder.label_stack.pop().unwrap();
     let cmp_label = builder.label_stack.pop().unwrap();
     
-    builder.loop_labels.push(cmp_label.clone());
-    builder.end_labels.push(end_label.clone());
+    builder.loop_labels.insert(builder.block_layer, cmp_label.clone());
+    builder.end_labels.insert(builder.block_layer, end_label.clone());
     
     // First, build the index variable
     let index_var = line.args.first().unwrap();

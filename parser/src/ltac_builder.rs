@@ -86,14 +86,12 @@ pub struct LtacBuilder {
     pub label_stack : Vec<String>,
     pub label_map : HashMap<i32, String>,
     pub top_labels : HashMap<i32, String>,
-    pub top_label_stack : Vec<String>,
-    pub marked_labels : Vec<String>,
     pub code_stack : Vec<Vec<LtacInstr>>,
     
     //For loops
     pub loop_layer : i32,
-    pub loop_labels : Vec<String>,      // Needed for continue
-    pub end_labels : Vec<String>,       // Needed for break
+    pub loop_labels : HashMap<i32, String>,      // Needed for continue
+    pub end_labels : HashMap<i32, String>,       // Needed for break
 }
 
 pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilder {
@@ -118,12 +116,10 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         label_stack : Vec::new(),
         label_map : HashMap::new(),
         top_labels : HashMap::new(),
-        top_label_stack : Vec::new(),
-        marked_labels : Vec::new(),
         code_stack : Vec::new(),
         loop_layer : 0,
-        loop_labels : Vec::new(),
-        end_labels : Vec::new(),
+        loop_labels : HashMap::new(),
+        end_labels : HashMap::new(),
     }
 }
 
