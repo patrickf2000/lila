@@ -19,7 +19,7 @@ begin
 end
 
 # Run a command
-func exec_process(cmd:str, args:str[]) -> int
+func exec(cmd:str, args:str[]) -> int
     count : int = sizeof(args);
     new_count : int = count + 2;
     all_args : str[new_count];
@@ -36,5 +36,12 @@ begin
     
     syscall(linux_exec, cmd, all_args, 0);
     return 1;
+end
+
+# Wait on a process to finish
+func waitpid(pid:int64)
+    status : int = 0;
+begin
+    syscall(linux_wait, pid, @status, 0, 0);
 end
 

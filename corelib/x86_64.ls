@@ -13,6 +13,7 @@ const int linux_free = 11;
 const int linux_fork = 57;
 const int linux_exec = 59;
 const int linux_exit = 60;
+const int linux_wait = 61;
 const int linux_chdir = 80;
 const int linux_create = 85;
 
