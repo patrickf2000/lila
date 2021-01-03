@@ -32,6 +32,13 @@ Note that most of these are wrappers around Linux system calls
 * lseek -> Move the position in a file (DONE)   
 * close -> Close a file (DONE)   
 
+### os
+
+These are for OS and path-related functions. Again, a lot of these are wrappers around syscalls
+
+* chdir -> Change current working directory for process (DONE)   
+* fchdir -> Change current working directory for an file descriptor   
+
 ### mem
 
 * resize -> Resize an array   

@@ -11,6 +11,7 @@ const int linux_lseek = 8;
 const int linux_mmap = 9;
 const int linux_free = 11;
 const int linux_exit = 60;
+const int linux_chdir = 80;
 const int linux_create = 85;
 
 const int STDOUT = 1;

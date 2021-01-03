@@ -298,6 +298,12 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                     instr.arg2 = LtacArg::U64(arg.u64_val);
                     builder.file.code.push(instr.clone());
                     
+                // String arrays
+                // TODO: I'm not sure how good an idea this is
+                } else if var.data_type == DataType::Ptr && var.sub_type == DataType::Str {
+                    instr.arg2 = LtacArg::I64(0);
+                    builder.file.code.push(instr.clone());
+                    
                 // Invalid
                 } else {
                     builder.syntax.ltac_error2("Invalid use of integer.".to_string());
