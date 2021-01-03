@@ -21,7 +21,7 @@ use crate::ast::*;
 use crate::ltac::*;
 
 // A utility function to create a label
-pub fn create_label(builder : &mut LtacBuilder, is_top : bool) {
+pub fn create_label2(builder : &mut LtacBuilder, is_top : bool) {
     let lbl_pos = builder.str_pos.to_string();
     builder.str_pos += 1;
     
@@ -33,6 +33,18 @@ pub fn create_label(builder : &mut LtacBuilder, is_top : bool) {
     } else {
         builder.label_stack.push(name);
     }
+}
+
+pub fn create_label(builder : &mut LtacBuilder) -> String {
+    let lbl_pos = builder.str_pos.to_string();
+    builder.str_pos += 1;
+    
+    let mut name = "L".to_string();
+    name.push_str(&lbl_pos);
+    
+    builder.label_map.insert(builder.block_layer, name.clone());
+    
+    name
 }
 
 // A utility function to create a top-level label

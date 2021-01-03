@@ -505,11 +505,9 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
 
 // Builds an LTAC conditional block (specific for if-else)
 pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
-    /*create_label(builder, false);
-    let end_label = builder.label_stack.pop().unwrap();*/
-    
     if line.stmt_type == AstStmtType::If {
         builder.block_layer += 1;
+        println!("IF -> {}", builder.block_layer);
         
         create_top_label(builder);
         
@@ -517,9 +515,7 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         let code_block : Vec<LtacInstr> = Vec::new();
         builder.code_stack.push(code_block);
     } else {
-        /*let name = builder.top_label_stack.last().unwrap().to_string();
-        builder.marked_labels.push(name.clone());*/
-        
+        println!("ELIF/ELSE -> {}", builder.block_layer);
         let end_label = match &builder.top_labels.get(&builder.block_layer) {
             Some(lbl) => lbl.to_string(),
             None => {
@@ -533,25 +529,25 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
         builder.file.code.push(jmp);
         
         let mut label = ltac::create_instr(LtacType::Label);
-        match builder.label_stack.pop() {
-            Some(name) => {
-                label.name = name;
+        match &builder.label_map.get(&builder.block_layer) {
+            Some(lbl) => {
+                label.name = lbl.to_string();
                 builder.file.code.push(label);
             },
             
             None => {},
+        };
+        
+        builder.label_map.remove(&builder.block_layer);
+        
+        if line.stmt_type == AstStmtType::Else {
+            return;
         }
     }
-    
-    create_label(builder, false);
     
     let cmp_block = build_cmp(builder, line);
     for ln in cmp_block.iter() {
         builder.file.code.push(ln.clone());
-    }
-    
-    if line.stmt_type == AstStmtType::Else {
-        return;
     }
     
     // Add the instruction
@@ -559,9 +555,11 @@ pub fn build_cond(builder : &mut LtacBuilder, line : &AstStmt) {
     let cmp_type = cmp.instr_type.clone();
     
     // Now the operator
+    let name = create_label(builder);
+    
     let op = &line.args.iter().nth(1).unwrap();
     let mut br = ltac::create_instr(LtacType::Br);
-    br.name = builder.label_stack.last().unwrap().to_string();
+    br.name = name;
     
     match &op.arg_type {
         AstArgType::OpEq => br.instr_type = LtacType::Bne,
@@ -598,9 +596,9 @@ pub fn build_while(builder : &mut LtacBuilder, line : &AstStmt) {
     builder.block_layer += 1;
     builder.loop_layer += 1;
     
-    create_label(builder, false);    // Goes at the very end
-    create_label(builder, false);    // Add a comparison label
-    create_label(builder, false);   // Add a loop label
+    create_label2(builder, false);    // Goes at the very end
+    create_label2(builder, false);    // Add a comparison label
+    create_label2(builder, false);   // Add a loop label
     
     let end_label = builder.label_stack.pop().unwrap();
     let loop_label = builder.label_stack.pop().unwrap();

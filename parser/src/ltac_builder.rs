@@ -84,6 +84,7 @@ pub struct LtacBuilder {
     // For labels and blocks
     pub block_layer : i32,
     pub label_stack : Vec<String>,
+    pub label_map : HashMap<i32, String>,
     pub top_labels : HashMap<i32, String>,
     pub top_label_stack : Vec<String>,
     pub marked_labels : Vec<String>,
@@ -115,6 +116,7 @@ pub fn new_ltac_builder(name : String, syntax : &mut ErrorManager) -> LtacBuilde
         stack_pos : 0,
         block_layer : 0,
         label_stack : Vec::new(),
+        label_map : HashMap::new(),
         top_labels : HashMap::new(),
         top_label_stack : Vec::new(),
         marked_labels : Vec::new(),

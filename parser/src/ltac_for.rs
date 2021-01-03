@@ -27,9 +27,9 @@ pub fn build_for_loop(builder : &mut LtacBuilder, line : &AstStmt) {
     builder.block_layer += 1;
     builder.loop_layer += 1;
     
-    create_label(builder, false);    // Goes at the very end
-    create_label(builder, false);    // Add a comparison label
-    create_label(builder, false);   // Add a loop label
+    create_label2(builder, false);    // Goes at the very end
+    create_label2(builder, false);    // Add a comparison label
+    create_label2(builder, false);   // Add a loop label
     
     if line.args.len() == 4 {
         build_range_for_loop(builder, line);
