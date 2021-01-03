@@ -6,7 +6,7 @@ module std;
 use std.string;
 use std.io;
 
-func getChar(file:int) -> char
+func getByte(file:int) -> char
     buf : byte[1];
     c : char = 0;
     code : int = 0;
@@ -27,7 +27,7 @@ func getLine(file:int) -> str
     c : char = 1;
 begin
     while c != 0x0
-        c = getChar(file);
+        c = getByte(file);
         
         if c == 0x0
             break;

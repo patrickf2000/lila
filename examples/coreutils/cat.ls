@@ -3,7 +3,7 @@
 # A simple example of the UNIX cat program
 
 use std.text_io;
-use std.fs;
+use std.file_io;
 use std.io;
 
 func main(args:str[]) -> int

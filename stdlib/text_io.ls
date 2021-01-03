@@ -6,7 +6,7 @@ use std.arch.riscv64 if "riscv64";
 
 use std.string;
 use std.text_utils;
-use std.fs;
+use std.file_io;
 
 # The printf function
 func printf(fmt:str, arg1:int64, arg2:int64, arg3:int64, arg4:int64, arg5:int64)
@@ -143,7 +143,7 @@ func readLn() -> str
     index : int = 0;
 begin
     while c != 0xA
-        c = getChar(0);
+        c = getByte(0);
         
         if c == 0xA
             break;
@@ -164,7 +164,7 @@ func readInt() -> int
     b : byte = 0x0;
 begin
     while b != 0x0
-       b = getChar(0);
+       b = getByte(0);
        
        if b == 0x0
            break;

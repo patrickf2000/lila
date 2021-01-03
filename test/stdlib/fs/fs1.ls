@@ -10,7 +10,7 @@
 
 use std.string;
 use std.io;
-use std.fs;
+use std.file_io;
 use std.text_io;
 
 func main

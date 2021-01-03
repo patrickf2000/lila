@@ -16,8 +16,8 @@ The Lila standard library is not essential, but highly recommended. Please see t
 
 ### file_io
 
-* getByte -> Read a byte from a file   
-* getLine -> Read a line of text from a file   
+* getByte -> Read a byte from a file (DONE)   
+* getLine -> Read a line of text from a file (DONE)   
 * writeByte -> Write a byte value to a file   
 * writeLine -> Write a line of text to a file   
 
