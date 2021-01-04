@@ -22,17 +22,26 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, /*LtacType,*/ LtacInstr, /*LtacArg*/};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
+// Import and use local modules
 mod asm;
+mod func;
+
+use asm::*;
+use func::*;
 
 // The entry point
 pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
+    // First, translate
+    let mut x86_code : Vec<X86Instr> = Vec::new();
+    translate_code(&mut x86_code, &ltac_file.code, pic);
+    
+    // Write it out
     let mut name = "/tmp/".to_string();
     name.push_str(&ltac_file.name);
     name.push_str(".asm");
     
-    // Write it out
     let file = File::create(&name)?;
     let mut writer = BufWriter::new(file);
     
@@ -41,7 +50,7 @@ pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
         .expect("[AMD64_setup] Write failed.");
     
     write_data(&mut writer, &ltac_file.data, pic);
-    write_code(&mut writer, &ltac_file.code, pic);
+    write_code(&mut writer, &x86_code);
     
     Ok(())
 }
@@ -85,17 +94,40 @@ fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>, pic : bool) 
         .expect("[AMD64_data] Write failed in .data");
 }
 
+// Translates the LTAC code section to x86 code
+fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic : bool) {
+    for code in code.iter() {
+        match &code.instr_type {
+            LtacType::Extern => amd64_build_extern(x86_code, &code),
+            LtacType::Label => amd64_build_label(x86_code, &code),
+            LtacType::Func => amd64_build_func(x86_code, &code, is_pic),
+            
+            _ => {},
+        }
+    }
+}
+
 // Writes the .text section
-fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, _is_pic : bool) {
+fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
     let line = ".text\n".to_string();
     writer.write(&line.into_bytes())
         .expect("[AMD64_code] Write failed");
 
-    for _code in code.iter() {
+    for code in code.iter() {
+        match &code.instr_type {
+            X86Type::Extern | X86Type::Global
+            | X86Type::Type | X86Type::Label
+            | X86Type::Call => amd64_write_named(writer, &code),
+            
+            X86Type::Push => amd64_write_instr(writer, &code, 1),
+            
+            X86Type::Mov
+            | X86Type::Sub => amd64_write_instr(writer, &code, 2),
+            
+            _ => {},
+        }
+    
         /*match &code.instr_type {
-            LtacType::Extern => amd64_build_extern(writer, &code),
-            LtacType::Label => amd64_build_label(writer, &code),
-            LtacType::Func => amd64_build_func(writer, &code, is_pic),
             LtacType::Ret => amd64_build_ret(writer),
             
             LtacType::LdArgI8 | LtacType::LdArgU8 => amd64_build_ldarg(writer, &code, is_pic),
@@ -167,5 +199,83 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>, _is_pic : b
             _ => amd64_build_instr(writer, &code, is_pic, is_risc),
         }*/
     }
+}
+
+// Writes a named directive
+// These would be externs, globals, labels, and calls
+fn amd64_write_named(writer : &mut BufWriter<File>, code : &X86Instr) {
+    let mut line = String::new();
+    
+    match code.instr_type {
+        X86Type::Extern => line.push_str(".extern "),
+        X86Type::Global => line.push_str("\n.global "),
+        X86Type::Type => line.push_str(".type "),
+        X86Type::Call => line.push_str("  call "),
+        _ => {},
+    }
+    
+    line.push_str(&code.name);
+    
+    if code.instr_type == X86Type::Label {
+        line.push_str(":");
+    } else if code.instr_type == X86Type::Type {
+        line.push_str(", @function");
+    }
+    
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_build_extern] Write failed.");
+}
+
+// Writes an x86-instruction
+fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count : i32) {
+    let mut line = "  ".to_string();
+    
+    match code.instr_type {
+        X86Type::Push => line.push_str("push"),
+        X86Type::Mov => line.push_str("mov"),
+        
+        X86Type::Add => line.push_str("add"),
+        X86Type::Sub => line.push_str("sub"),
+        _ => {},
+    }
+    
+    if op_count == 1 {
+        line.push_str(" ");
+        let op = amd64_write_operand(&code.arg1);
+        line.push_str(&op);
+    } else if op_count == 2 {
+        let op1 = amd64_write_operand(&code.arg1);
+        let op2 = amd64_write_operand(&code.arg2);
+        
+        line.push_str(" ");
+        line.push_str(&op1);
+        line.push_str(", ");
+        line.push_str(&op2);
+    }
+    
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AMD64_write_instr] Write failed.");
+}
+
+// Writes an x86 operand
+fn amd64_write_operand(arg : &X86Arg) -> String {
+    let mut line = String::new();
+    
+    match &arg {
+        X86Arg::Reg64(reg) => {
+             let reg_str = reg2str(&reg, 64);
+             line.push_str(&reg_str);
+        },
+        
+        X86Arg::Imm32(val) => line.push_str(&val.to_string()),
+        
+        _ => {},
+    }
+    
+    line
 }
 
