@@ -578,3 +578,126 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
    x86_code.push(instr);
 }
 
+// Builds the integer and modulus instructions
+// On x86 these are a little weird...
+pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
+    //Clear the RDX register
+    let mut xor = create_x86instr(X86Type::Xor);
+    xor.arg1 = X86Arg::Reg64(X86Reg::RDX);
+    xor.arg2 = X86Arg::Reg64(X86Reg::RDX);
+    x86_code.push(xor);
+
+    // Create and build the instruction
+    let mut instr = create_x86instr(X86Type::IDiv);
+    let mut dest_instr = create_x86instr(X86Type::Mov);
+    
+    if code.instr_type == LtacType::U32Div || code.instr_type == LtacType::U32Mod
+        || code.instr_type == LtacType::U64Div || code.instr_type == LtacType::U64Mod {
+        let mut instr = create_x86instr(X86Type::Div);
+    }
+    
+    match &code.arg1 {
+        LtacArg::Reg32(pos) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+            instr2.arg2 = amd64_op_reg32(*pos);
+            x86_code.push(instr2);
+            
+            dest_instr.arg1 = amd64_op_reg32(*pos);
+        },
+        
+        LtacArg::Reg64(pos) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::RAX);
+            instr2.arg2 = amd64_op_reg64(*pos);
+            x86_code.push(instr2);
+            
+            dest_instr.arg1 = amd64_op_reg64(*pos);
+        },
+        
+        LtacArg::Mem(pos) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+        
+            if code.instr_type == LtacType::I64Div || code.instr_type == LtacType::I64Mod {
+                instr2.arg1 = X86Arg::Reg64(X86Reg::RAX);
+                instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+                x86_code.push(instr2);
+                
+                dest_instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            } else {
+                instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+                instr2.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos);
+                x86_code.push(instr2);
+                
+                dest_instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos);
+            }
+        },
+        
+        _ => {},
+    }
+    
+    match &code.arg2 {
+        LtacArg::Reg32(pos) => instr.arg1 = amd64_op_reg32(*pos),
+        LtacArg::Reg64(pos) => instr.arg1 = amd64_op_reg64(*pos),
+        
+        LtacArg::Mem(pos) => {
+            if code.instr_type == LtacType::I64Div || code.instr_type == LtacType::I64Mod {
+                instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            } else {
+                instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos);
+            }
+        },
+        
+        LtacArg::I32(val) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*val);
+            x86_code.push(instr2);
+            
+            instr.arg1 = X86Arg::Reg32(X86Reg::R15);
+        },
+        
+        LtacArg::U32(val) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*val as i32);
+            x86_code.push(instr2);
+            
+            instr.arg1 = X86Arg::Reg32(X86Reg::R15);
+        },
+        
+        LtacArg::I64(val) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*val as i32);
+            x86_code.push(instr2);
+            
+            instr.arg1 = X86Arg::Reg64(X86Reg::R15);
+        },
+        
+        LtacArg::U64(val) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*val as i32);
+            x86_code.push(instr2);
+            
+            instr.arg1 = X86Arg::Reg64(X86Reg::R15);
+        },
+        
+        _ => {},
+    }
+    
+    match &code.instr_type {
+        LtacType::I32Div | LtacType::U32Div => dest_instr.arg2 = X86Arg::Reg32(X86Reg::RAX),
+        LtacType::I64Div | LtacType::U64Div => dest_instr.arg2 = X86Arg::Reg64(X86Reg::RAX),
+        
+        LtacType::I32Mod | LtacType::U32Mod => dest_instr.arg2 = X86Arg::Reg32(X86Reg::RDX),
+        LtacType::I64Mod | LtacType::U64Mod => dest_instr.arg2 = X86Arg::Reg64(X86Reg::RDX),
+        
+        _ => {},
+    }
+    
+    x86_code.push(instr);
+    x86_code.push(dest_instr);
+}
+

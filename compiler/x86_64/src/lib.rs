@@ -112,6 +112,9 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::Call => amd64_build_call(x86_code, &code),
             LtacType::Syscall => amd64_build_syscall(x86_code),
             
+            LtacType::I32Div | LtacType::U32Div => amd64_build_div(x86_code, &code),
+            LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(x86_code, &code),
+            
             // Everything else uses the common build instruction function
             _ => amd64_build_instr(x86_code, &code, is_pic),
             
@@ -135,7 +138,8 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             X86Type::Leave | X86Type::Ret 
             | X86Type::Syscall => amd64_write_instr(writer, &code, 0),
             
-            X86Type::Push => amd64_write_instr(writer, &code, 1),
+            X86Type::Push
+            | X86Type::IDiv | X86Type::Div => amd64_write_instr(writer, &code, 1),
             
             _ => amd64_write_instr(writer, &code, 2),
         }
@@ -174,9 +178,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             
             LtacType::I16Div | LtacType::I16Mod |
             LtacType::U16Div | LtacType::U16Mod => amd64_build_short_div(writer, &code),
-            
-            LtacType::I32Div | LtacType::U32Div => amd64_build_div(writer, &code),
-            LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(writer, &code),
             
             LtacType::I64Div | LtacType::U64Div => amd64_build_div(writer, &code),
             LtacType::I64Mod | LtacType::U64Mod => amd64_build_div(writer, &code),
@@ -250,6 +251,9 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
         X86Type::Add => line.push_str("add"),
         X86Type::Sub => line.push_str("sub"),
         X86Type::IMul => line.push_str("imul"),
+        X86Type::Mul => line.push_str("mul"),
+        X86Type::IDiv => line.push_str("idiv"),
+        X86Type::Div => line.push_str("div"),
         
         X86Type::And => line.push_str("and"),
         X86Type::Or => line.push_str("or"),
@@ -311,6 +315,16 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             let reg_str = reg2str(&reg, 64);
             
             line.push_str("DWORD PTR [");
+            line.push_str(&reg_str);
+            line.push_str("-");
+            line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
+        
+        X86Arg::DwordMem(reg, pos) => {
+            let reg_str = reg2str(&reg, 64);
+            
+            line.push_str("QWORD PTR [");
             line.push_str(&reg_str);
             line.push_str("-");
             line.push_str(&pos.to_string());

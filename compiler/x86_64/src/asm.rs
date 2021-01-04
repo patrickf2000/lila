@@ -38,6 +38,8 @@ pub enum X86Type {
     Sub,
     IMul,
     Mul,
+    IDiv,
+    Div,
     
     And,
     Or,
@@ -71,6 +73,7 @@ pub enum X86Arg {
     
     Mem(X86Reg, i32),
     DwordMem(X86Reg, i32),
+    QwordMem(X86Reg, i32),
     LclMem(String),
     
     Imm32(i32),
