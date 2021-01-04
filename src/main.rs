@@ -23,6 +23,8 @@ use parser;
 use parser::Arch;
 use transform;
 
+mod build;
+
 #[cfg(target_arch = "x86_64")]
 fn get_arch() -> Arch {
     Arch::X86_64
@@ -148,7 +150,7 @@ fn run() -> i32 {
         } else if arch == Arch::X86_64 {
             if new_codegen {
                 x86_64::compile(&ltac, pic).expect("Codegen failed with unknown error.");
-                x86_64::build_asm(&ltac.name, no_link);
+                build::assemble(&ltac.name, no_link);
             } else {
                 x86::compile(&ltac, pic, risc_mode, use_c).expect("Codegen failed with unknown error.");
                 x86::build_asm(&ltac.name, no_link);
@@ -168,7 +170,7 @@ fn run() -> i32 {
     if !no_link && !print_ltac {
         if arch == Arch::X86_64 {
             if new_codegen {
-                x86_64::link(&all_names, &output, use_corelib, link_lib, inc_start);
+                build::link(&all_names, &output, use_corelib, link_lib, inc_start);
             } else {
                 x86::link(&all_names, &output, use_c, use_corelib, link_lib, inc_start);
             }
