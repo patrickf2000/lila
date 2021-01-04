@@ -23,8 +23,11 @@ use std::io::BufWriter;
 use std::fs::File;
 use std::process::Command;
 
-use parser::ltac::{LtacFile, LtacData, /*LtacDataType, LtacType,*/ LtacInstr, /*LtacArg*/};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, /*LtacType,*/ LtacInstr, /*LtacArg*/};
 
+mod asm;
+
+// The entry point
 pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
     let mut name = "/tmp/".to_string();
     name.push_str(&ltac_file.name);
@@ -136,8 +139,8 @@ pub fn link(all_names : &Vec<String>, output : &String, use_corelib : bool, is_l
 }
 
 // Writes the .data section
-fn write_data(_writer : &mut BufWriter<File>, _data : &Vec<LtacData>, _pic : bool) {
-    /*let mut line = String::new();
+fn write_data(writer : &mut BufWriter<File>, data : &Vec<LtacData>, pic : bool) {
+    let mut line = String::new();
     
     if !pic {
         line.push_str(".data\n");
@@ -171,7 +174,7 @@ fn write_data(_writer : &mut BufWriter<File>, _data : &Vec<LtacData>, _pic : boo
     line.push_str("\n");
     
     writer.write(&line.into_bytes())
-        .expect("[AMD64_data] Write failed in .data");*/
+        .expect("[AMD64_data] Write failed in .data");
 }
 
 // Writes the .text section
