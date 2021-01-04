@@ -7,24 +7,22 @@
 
 #RET 0
 
-extern func puts(s:str)
-
 func main() -> int
     x : int = 3;
 begin
     
     if x == 5
-        puts("Correct");
+        println("Correct");
     elif x == 3
-        puts("Also correct!");
+        println("Also correct!");
         if x == 3
-            puts("Idk!!");
+            println("Idk!!");
         end
     else
-        puts("Idk");
+        println("Idk");
     end
 
-    puts("Hello!");
+    println("Hello!");
     return 0;
 end
 

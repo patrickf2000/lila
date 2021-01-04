@@ -62,126 +62,132 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
         },
         
         _ => {},
-    }
+    }*/
     
     // Need if any parts represent a memory offset (ie, array access)
     match code.arg2 {
-        LtacArg::MemOffsetImm(pos, offset) if !is_risc => {
-            line.push_str("  mov r15, QWORD PTR [rbp-");
-            line.push_str(&pos.to_string());
-            line.push_str("]\n");
+        LtacArg::MemOffsetImm(pos, offset) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, pos);
+            x86_code.push(instr2.clone());
             
             match code.arg1 {
-                LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15+"),
+                /*LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15+"),
                 LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15+"),
                 LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15+"),
                 LtacArg::FltReg(_p) => line.push_str("  movss xmm9, DWORD PTR [r15+"),
-                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15+"),
-                _ => line.push_str("  mov r15d, DWORD PTR [r15+"),
+                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15+"),*/
+                _ => {
+                    instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+                    instr2.arg2 = X86Arg::DwordMem(X86Reg::R15, offset * -1);
+                }
             }
             
-            line.push_str(&offset.to_string());
-            line.push_str("]\n");
+            x86_code.push(instr2);
         },
         
-        LtacArg::MemOffsetMem(pos, offset, size) if !is_risc => {
+        LtacArg::MemOffsetMem(pos, offset, size) => {
             // Load the variable
-            line.push_str("  mov r15d, DWORD PTR ");
-            
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&offset.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&offset.to_string());
-                line.push_str("]\n");
-            }
+            // TODO: PIC
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+            instr2.arg2 = X86Arg::DwordMem(X86Reg::RBP, offset);
+            x86_code.push(instr2.clone());
             
             // Load the effective address
-            line.push_str("  lea r14, ");
-            
-            if is_pic {
-                line.push_str("0");
-            }
-            
-            line.push_str("[0+r15*");
-            line.push_str(&size.to_string());
-            line.push_str("]\n");
+            //TODO: PIC
+            instr2 = create_x86instr(X86Type::Lea);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R14);
+            instr2.arg2 = X86Arg::ScaleMem(0, X86Reg::R15, size);
+            x86_code.push(instr2.clone());
             
             // Load the array
-            line.push_str("  mov r15, QWORD PTR ");
-            
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("]\n");
-            }
+            // TODO: PIC
+            instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, pos);
+            x86_code.push(instr2.clone());
             
             // Add to get the proper offset
-            line.push_str("  add r15, r14\n");
+            instr2 = create_x86instr(X86Type::Add);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Reg64(X86Reg::R14);
+            x86_code.push(instr2.clone());
             
             // Store
+            instr2 = create_x86instr(X86Type::Mov);
+            
             match &code.arg1 {
-                LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
+                /*LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
                 LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
                 LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15]\n"),
                 LtacArg::FltReg(_p) => line.push_str("  movss xmm9, DWORD PTR [r15]\n"),
-                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15]\n"),
-                _ => line.push_str("  mov r15d, DWORD PTR [r15]\n"),
+                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15]\n"),*/
+                
+                _ => {
+                    instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+                    instr2.arg2 = X86Arg::DwordMem(X86Reg::R15, 0);
+                },
             }
+            
+            x86_code.push(instr2);
         },
         
-        LtacArg::MemOffsetReg(pos, reg, size) if !is_risc => {
+        LtacArg::MemOffsetReg(pos, reg, size) => {
             // Determine the right register
-            let src_reg = amd64_op_reg32(reg);
+            let src_reg : X86Reg;
             
-            // Load the array
-            line.push_str("  mov r15, QWORD PTR ");
-            
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("]\n");
-            }
+                match reg {
+                    0 => src_reg = X86Reg::RBX,
+                    1 => src_reg = X86Reg::RCX,
+                    2 => src_reg = X86Reg::R10,
+                    3 => src_reg = X86Reg::R11,
+                    4 => src_reg = X86Reg::R12,
+                    _ => src_reg = X86Reg::RAX,
+                };
             
             // Load the effective address
-            line.push_str("  lea r14, ");
+            //TODO: PIC
+            let mut instr2 = create_x86instr(X86Type::Lea);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R14);
+            instr2.arg2 = X86Arg::ScaleMem(0, src_reg, size);
+            x86_code.push(instr2.clone());
             
-            if is_pic {
-                line.push_str("0");
-            }
-            
-            line.push_str("[0+");
-            line.push_str(&src_reg);
-            line.push_str("*");
-            line.push_str(&size.to_string());
-            line.push_str("]\n");
+            // Load the array
+            // TODO: PIC
+            instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, pos);
+            x86_code.push(instr2.clone());
             
             // Add to get the proper offset
-            line.push_str("  add r15, r14\n");
+            instr2 = create_x86instr(X86Type::Add);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Reg64(X86Reg::R14);
+            x86_code.push(instr2.clone());
             
             // Store
+            instr2 = create_x86instr(X86Type::Mov);
+            
             match &code.arg1 {
-                LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
+                /*LtacArg::Reg8(_p) => line.push_str("  mov r15b, BYTE PTR [r15]\n"),
                 LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
                 LtacArg::Reg64(_p) => line.push_str("  mov r15, QWORD PTR [r15]\n"),
                 LtacArg::FltReg(_p) => line.push_str("  movss xmm9, DWORD PTR [r15]\n"),
-                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15]\n"),
-                _ => line.push_str("  mov r15d, DWORD PTR [r15]\n"),
+                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15]\n"),*/
+                
+                _ => {
+                    instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+                    instr2.arg2 = X86Arg::DwordMem(X86Reg::R15, 0);
+                },
             }
+            
+            x86_code.push(instr2);
         },
         
         _ => {},
-    }*/
+    }
     
     // The instruction
     // TODO: The unsigned multiplication should use "mul". This may require a separate function
@@ -271,27 +277,12 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
     // The arguments
     match &code.arg1 {
         
-        /*LtacArg::Reg8(pos) => {
-            let reg = amd64_op_reg8(*pos);
-            line.push_str(&reg);
-            line.push_str(", ");
-        },
-        
-        LtacArg::Reg16(pos) => {
-            let reg = amd64_op_reg16(*pos);
-            line.push_str(&reg);
-            line.push_str(", ");
-        },*/
-        
+        LtacArg::Reg8(pos) => instr.arg1 = amd64_op_reg8(*pos),
+        LtacArg::Reg16(pos) => instr.arg1 = amd64_op_reg16(*pos),
         LtacArg::Reg32(pos) => instr.arg1 = amd64_op_reg32(*pos),
+        LtacArg::Reg64(pos) => instr.arg1 = amd64_op_reg64(*pos),
         
-        /*LtacArg::Reg64(pos) => {
-            let reg = amd64_op_reg64(*pos);
-            line.push_str(&reg);
-            line.push_str(", ");
-        },
-        
-        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+        /*LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
             let reg = amd64_op_flt(*pos);
             line.push_str(&reg);
             line.push_str(", ");
@@ -309,15 +300,15 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                 /*LtacArg::Byte(_v) => line.push_str("BYTE PTR "),
                 LtacArg::UByte(_v) => line.push_str("BYTE PTR "),
                 LtacArg::I16(_v) => line.push_str("WORD PTR "),
-                LtacArg::U16(_v) => line.push_str("WORD PTR "),
-                LtacArg::I32(_v) => line.push_str("DWORD PTR "),
-                LtacArg::U32(_v) => line.push_str("DWORD PTR "),
-                LtacArg::I64(_v) => line.push_str("QWORD PTR "),
+                LtacArg::U16(_v) => line.push_str("WORD PTR "),*/
+                LtacArg::I32(_v) => instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos),
+                LtacArg::U32(_v) => instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos),
+                /*LtacArg::I64(_v) => line.push_str("QWORD PTR "),
                 LtacArg::U64(_v) => line.push_str("QWORD PTR "),
                 LtacArg::F32(_v) => line.push_str("DWORD PTR "),
                 LtacArg::F64(_v) | LtacArg::PtrLcl(_v) => line.push_str("QWORD PTR "), 
                 LtacArg::Ptr(_v) => line.push_str("QWORD PTR "),*/
-                _ => instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos),
+                _ => instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos),
             }
             
             /*if is_pic {
@@ -331,85 +322,65 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
             //}
         },
         
-        /*LtacArg::MemOffsetImm(pos, offset) if !is_risc => {
-            line.push_str("r15, QWORD PTR ");
+        LtacArg::MemOffsetImm(pos, offset) => {
+            // Load array
+            // TODO: PIC
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            x86_code.push(instr2.clone());
             
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("]\n");
-            }
-            
-            line.push_str("  add r15, ");
-            line.push_str(&offset.to_string());
-            line.push_str("\n");
+            instr2 = create_x86instr(X86Type::Add);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*offset);
+            x86_code.push(instr2.clone());
             
             match &code.arg2 {
-                LtacArg::Byte(_v) => line.push_str("  mov BYTE PTR "),
+                /*LtacArg::Byte(_v) => line.push_str("  mov BYTE PTR "),
                 LtacArg::UByte(_v) => line.push_str("  mov BYTE PTR "),
                 LtacArg::I16(_v) => line.push_str("  mov WORD PTR "),
                 LtacArg::U16(_v) => line.push_str("  mov WORD PTR "),
-                LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
-                LtacArg::U32(_v) => line.push_str("  mov DWORD PTR "),
                 LtacArg::I64(_v) => line.push_str("  mov QWORD PTR "),
                 LtacArg::U64(_v) => line.push_str("  mov QWORD PTR "),
                 LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
                 LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
                 LtacArg::FltReg(_v) => line.push_str("  movss "),
-                LtacArg::FltReg64(_v) => line.push_str("  movsd "),
-                _ => line.push_str("  mov "),
+                LtacArg::FltReg64(_v) => line.push_str("  movsd "),*/
+                _ => instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0),
             };
-            line.push_str("[r15], ");
         },
         
-        LtacArg::MemOffsetMem(pos, offset, size) if !is_risc => {
+        LtacArg::MemOffsetMem(pos, offset, size) => {
             // Load the variable
-            line.push_str("r15d, DWORD PTR ");
-            
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&offset.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&offset.to_string());
-                line.push_str("]\n");
-            }
+            // TODO: PIC
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
+            instr2.arg2 = X86Arg::DwordMem(X86Reg::RBP, *offset);
+            x86_code.push(instr2.clone());
             
             // Load the effective address
-            line.push_str("  lea r14, ");
-            
-            if is_pic {
-                line.push_str("0");
-            }
-            
-            line.push_str("[0+r15*");
-            line.push_str(&size.to_string());
-            line.push_str("]\n");
+            //TODO: PIC
+            instr2 = create_x86instr(X86Type::Lea);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R14);
+            instr2.arg2 = X86Arg::ScaleMem(0, X86Reg::R15, *size);
+            x86_code.push(instr2.clone());
             
             // Load the array
-            line.push_str("  mov r15, QWORD PTR "); 
-            
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("]\n");
-            }
+            // TODO: PIC
+            instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            x86_code.push(instr2.clone());
             
             // Add to get the proper offset
-            line.push_str("  add r15, r14\n");
+            instr2 = create_x86instr(X86Type::Add);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Reg64(X86Reg::R14);
+            x86_code.push(instr2.clone());
             
             // Now set up for the final move
             match &code.arg2 {
-                LtacArg::Reg8(_v) => line.push_str("  mov BYTE PTR "),
+                /*LtacArg::Reg8(_v) => line.push_str("  mov BYTE PTR "),
                 LtacArg::Reg16(_v) => line.push_str("  mov WORD PTR "),
                 LtacArg::Byte(_v) => line.push_str("  mov BYTE PTR "),
                 LtacArg::UByte(_v) => line.push_str("  mov BYTE PTR "),
@@ -422,95 +393,60 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                 LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
                 LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
                 LtacArg::FltReg(_v) => line.push_str("  movss "),
-                LtacArg::FltReg64(_v) => line.push_str("  movsd "),
-                _ => line.push_str("  mov "),
+                LtacArg::FltReg64(_v) => line.push_str("  movsd "),*/
+                _ => instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0),
             }
-            line.push_str("[r15], ");
         },
         
         // If we can clean this up, especially the first match, that would be nice
-        LtacArg::MemOffsetReg(pos, reg, size) if !is_risc => {
+        LtacArg::MemOffsetReg(pos, reg, size) => {
             // Determine the right register
-            let src_reg = amd64_op_reg32(*reg);
-            let size_mod : String;
-            let mov_instr : String;
+            let src_reg : X86Reg;
             
-            match &code.arg2 {
-                LtacArg::Reg8(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::Reg16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::Byte(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::UByte(_v) => { size_mod = "BYTE PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U16(_v) => { size_mod = "WORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I32(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U32(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::I64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::U64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-                LtacArg::F32(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
-                LtacArg::F64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
-                LtacArg::FltReg(_v) => { size_mod = "DWORD PTR".to_string(); mov_instr = "  movss ".to_string(); },
-                LtacArg::FltReg64(_v) => { size_mod = "QWORD PTR".to_string(); mov_instr = "  movsd ".to_string(); },
-                _ => { size_mod = "DWORD PTR".to_string(); mov_instr = "  mov ".to_string(); },
-            }
-        
-            // Load the array
-            line.push_str("r15, QWORD PTR ");
-            
-            if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]\n");
-            } else {
-                line.push_str("[rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("]\n");
-            }
+                match reg {
+                    0 => src_reg = X86Reg::RBX,
+                    1 => src_reg = X86Reg::RCX,
+                    2 => src_reg = X86Reg::R10,
+                    3 => src_reg = X86Reg::R11,
+                    4 => src_reg = X86Reg::R12,
+                    _ => src_reg = X86Reg::RAX,
+                };
             
             // Load the effective address
-            line.push_str("  lea r14, ");
+            //TODO: PIC
+            let mut instr2 = create_x86instr(X86Type::Lea);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R14);
+            instr2.arg2 = X86Arg::ScaleMem(0, src_reg, *size);
+            x86_code.push(instr2.clone());
             
-            if is_pic {
-                line.push_str("0");
-            }
-            
-            line.push_str("[0+");
-            line.push_str(&src_reg);
-            line.push_str("*");
-            line.push_str(&size.to_string());
-            line.push_str("]\n");
+            // Load the array
+            // TODO: PIC
+            instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            x86_code.push(instr2.clone());
             
             // Add to get the proper offset
-            line.push_str("  add r15, r14\n");
+            instr2 = create_x86instr(X86Type::Add);
+            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
+            instr2.arg2 = X86Arg::Reg64(X86Reg::R14);
+            x86_code.push(instr2.clone());
             
             // Now set up for the final move
-            line.push_str(&mov_instr);
-            line.push_str(&size_mod);
-            line.push_str("[r15], ");
-        },*/
+            instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0);
+        },
         
         _ => {},
     }
     
     // Build the second operand
     match &code.arg2 {
-        /*LtacArg::Reg8(pos) => {
-            let reg = amd64_op_reg8(*pos);
-            line.push_str(&reg);
-        },
-        
-        LtacArg::Reg16(pos) => {
-            let reg = amd64_op_reg16(*pos);
-            line.push_str(&reg);
-        },*/
-        
+        LtacArg::Reg8(pos) => instr.arg2 = amd64_op_reg8(*pos),
+        LtacArg::Reg16(pos) => instr.arg2 = amd64_op_reg16(*pos),
         LtacArg::Reg32(pos) => instr.arg2 = amd64_op_reg32(*pos),
+        LtacArg::Reg64(pos) => instr.arg2 = amd64_op_reg64(*pos),
         
-        /*LtacArg::Reg64(pos) => {
-            let reg = amd64_op_reg64(*pos);
-            line.push_str(&reg);
-        },
-        
-        LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
+        /*LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
             let reg = amd64_op_flt(*pos);
             line.push_str(&reg);
         },*/
@@ -532,27 +468,27 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
             //}
         },
         
-        /*LtacArg::MemOffsetImm(_p, _o) if !is_risc => {
+        LtacArg::MemOffsetImm(_p, _o) => {
             match &code.arg1 {
-                LtacArg::Reg8(_p) => line.push_str("r15b"),
+                /*LtacArg::Reg8(_p) => line.push_str("r15b"),
                 LtacArg::Reg16(_p) => line.push_str("r15w"),
                 LtacArg::Reg64(_p) => line.push_str("r15"),
-                LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm9"),
-                _ => line.push_str("r15d"),
+                LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm9"),*/
+                _ => instr.arg2 = X86Arg::Reg32(X86Reg::R15),
             }
         },
         
-        LtacArg::MemOffsetMem(_p, _o, _s) | LtacArg::MemOffsetReg(_p, _o, _s) if !is_risc => {
+        LtacArg::MemOffsetMem(_p, _o, _s) | LtacArg::MemOffsetReg(_p, _o, _s) => {
             match &code.arg1 {
-                LtacArg::Reg8(_p) => line.push_str("r15b"),
+                /*LtacArg::Reg8(_p) => line.push_str("r15b"),
                 LtacArg::Reg16(_p) => line.push_str("r15w"),
                 LtacArg::Reg64(_p) => line.push_str("r15"),
-                LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm9"),
-                _ => line.push_str("r15d"),
+                LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm9"),*/
+                _ => instr.arg2 = X86Arg::Reg32(X86Reg::R15),
             }
         },
         
-        LtacArg::Byte(val) => line.push_str(&val.to_string()),
+        /*LtacArg::Byte(val) => line.push_str(&val.to_string()),
         LtacArg::UByte(val) => line.push_str(&val.to_string()),
         
         LtacArg::I16(val) => line.push_str(&val.to_string()),

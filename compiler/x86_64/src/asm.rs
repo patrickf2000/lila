@@ -33,6 +33,7 @@ pub enum X86Type {
     MovSX,
     MovSS,
     MovSD,
+    Lea,
     
     Add,
     Sub,
@@ -82,6 +83,7 @@ pub enum X86Arg {
     DwordMem(X86Reg, i32),
     QwordMem(X86Reg, i32),
     LclMem(String),
+    ScaleMem(i32, X86Reg, i32),
     
     Imm32(i32),
     

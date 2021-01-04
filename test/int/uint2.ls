@@ -1,7 +1,7 @@
 
 #OUTPUT
 #11223344
-#aabbccdd
+#aabbccd
 #11118888
 #END
 
@@ -14,7 +14,7 @@ func main -> int
 begin
     
     printf("%x\n", x);
-    printf("%x\n", 0xAABBCCDD);
+    printf("%x\n", 0xAABBCCD);
     
     x = 0x11118888;
     printf("%x\n", x);

@@ -263,6 +263,7 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
         X86Type::Syscall => line.push_str("syscall"),
         
         X86Type::Push => line.push_str("push"),
+        X86Type::Lea => line.push_str("lea"),
         X86Type::Mov => line.push_str("mov"),
         
         X86Type::Add => line.push_str("add"),
@@ -325,8 +326,16 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             
             line.push_str("[");
             line.push_str(&reg_str);
-            line.push_str("-");
-            line.push_str(&pos.to_string());
+            
+            if *pos < 0 {
+                let val = *pos * -1;
+                line.push_str("+");
+                line.push_str(&val.to_string());
+            } else {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+            }
+            
             line.push_str("]");
         },
         
@@ -335,8 +344,16 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             
             line.push_str("DWORD PTR [");
             line.push_str(&reg_str);
-            line.push_str("-");
-            line.push_str(&pos.to_string());
+            
+            if *pos < 0 {
+                let val = *pos * -1;
+                line.push_str("+");
+                line.push_str(&val.to_string());
+            } else {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+            }
+            
             line.push_str("]");
         },
         
@@ -345,14 +362,34 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             
             line.push_str("QWORD PTR [");
             line.push_str(&reg_str);
-            line.push_str("-");
-            line.push_str(&pos.to_string());
+            
+            if *pos < 0 {
+                let val = *pos * -1;
+                line.push_str("+");
+                line.push_str(&val.to_string());
+            } else {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+            }
+            
             line.push_str("]");
         },
         
         X86Arg::LclMem(ref val) => {
             line.push_str("OFFSET FLAT:");
             line.push_str(&val);
+        },
+        
+        X86Arg::ScaleMem(base, reg, scale) => {
+            let reg_str = reg2str(&reg, 64);
+            
+            line.push_str("[");
+            line.push_str(&base.to_string());
+            line.push_str("+");
+            line.push_str(&reg_str);
+            line.push_str("*");
+            line.push_str(&scale.to_string());
+            line.push_str("]");
         },
         
         _ => {},

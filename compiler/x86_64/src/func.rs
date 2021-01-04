@@ -112,7 +112,7 @@ pub fn amd64_build_ldarg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
         LtacType::LdArgI16 | LtacType::LdArgU16 => instr.arg2 = amd64_arg_reg16(code.arg2_val),
         LtacType::LdArgI32 | LtacType::LdArgU32 => instr.arg2 = amd64_arg_reg32(code.arg2_val),
         LtacType::LdArgI64 | LtacType::LdArgU64 
-        | LtacType::LdArgPtr => instr.arg2 = amd64_arg_reg32(code.arg2_val),
+        | LtacType::LdArgPtr => instr.arg2 = amd64_arg_reg64(code.arg2_val),
         
         _ => {},
     }

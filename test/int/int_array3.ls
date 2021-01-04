@@ -8,7 +8,6 @@
 
 #RET 0
 
-extern func puts(s:str)
 extern func printf(s:str, ...)
 
 func print_numbers(list:int[], length:int)
@@ -45,10 +44,10 @@ begin
     init_numbers(numbers1, 8, 2);
     init_numbers(numbers2, 8, 31);
     
-    puts("Numbers1:");
+    println("Numbers1:");
     print_numbers(numbers1, 8);
     
-    puts("Numbers2:");
+    println("Numbers2:");
     print_numbers(numbers2, 8);
     
     return 0;

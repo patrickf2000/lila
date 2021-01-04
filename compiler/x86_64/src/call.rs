@@ -116,19 +116,22 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 LtacArg::U16(_v) => {
                     line.push_str(&reg32);
                     line.push_str(", WORD PTR ");
-                },
+                },*/
                 
                 LtacArg::I64(_v) => {
-                    line.push_str(&reg64);
-                    line.push_str(", QWORD PTR ");
+                    instr.arg1 = reg64;
+                    instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
                 },
                 
                 LtacArg::U64(_v) => {
-                    line.push_str(&reg64);
-                    line.push_str(", QWORD PTR ");
-                },*/
+                    instr.arg1 = reg64;
+                    instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+                },
             
-                _ => instr.arg1 = reg32,
+                _ => {
+                    instr.arg1 = reg32;
+                    instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos);
+                },
             }
             
             /*if is_pic {
@@ -136,7 +139,7 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 line.push_str(&pos.to_string());
                 line.push_str("[rbp]");
             } else {*/
-                instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos);
+                //instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos);
             //}
         },
         
@@ -175,10 +178,13 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
             line.push_str(", QWORD PTR ");
             line.push_str(&val);
             line.push_str("[rip]");
-        },
+        },*/
         
         LtacArg::Ptr(pos) => {
-            line.push_str(&reg64);
+            instr.arg1 = reg64;
+            instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            
+            /*line.push_str(&reg64);
             if is_pic {
                 line.push_str(", -");
                 line.push_str(&pos.to_string());
@@ -187,8 +193,8 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 line.push_str(", [rbp-");
                 line.push_str(&pos.to_string());
                 line.push_str("]");
-            }
-        },*/
+            }*/
+        },
         
         LtacArg::PtrLcl(ref val) => {
             /*if is_pic {
