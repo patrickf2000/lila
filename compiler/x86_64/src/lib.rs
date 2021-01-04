@@ -28,10 +28,12 @@ use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 mod asm;
 mod call;
 mod func;
+mod instr;
 
 use asm::*;
 use call::*;
 use func::*;
+use instr::*;
 
 // The entry point
 pub fn compile(ltac_file : &LtacFile, pic : bool) -> io::Result<()> {
@@ -110,6 +112,9 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::Call => amd64_build_call(x86_code, &code),
             LtacType::Syscall => amd64_build_syscall(x86_code),
             
+            // Everything else uses the common build instruction function
+            _ => amd64_build_instr(x86_code, &code, is_pic),
+            
             _ => {},
         }
     }
@@ -132,10 +137,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             
             X86Type::Push => amd64_write_instr(writer, &code, 1),
             
-            X86Type::Mov
-            | X86Type::Sub => amd64_write_instr(writer, &code, 2),
-            
-            _ => {},
+            _ => amd64_write_instr(writer, &code, 2),
         }
     
         /*match &code.instr_type {
@@ -151,11 +153,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             
             LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),
-            
-            LtacType::PushArg => amd64_build_pusharg(writer, &code, false, is_pic),
-            LtacType::KPushArg => amd64_build_pusharg(writer, &code, true, is_pic),
-            LtacType::Call => amd64_build_call(writer, &code),
-            LtacType::Syscall => amd64_build_syscall(writer),
             
             LtacType::StrCmp => amd64_build_strcmp(writer, use_c),
             
@@ -252,6 +249,14 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
         
         X86Type::Add => line.push_str("add"),
         X86Type::Sub => line.push_str("sub"),
+        X86Type::IMul => line.push_str("imul"),
+        
+        X86Type::And => line.push_str("and"),
+        X86Type::Or => line.push_str("or"),
+        X86Type::Xor => line.push_str("xor"),
+        X86Type::Shl => line.push_str("shl"),
+        X86Type::Shr => line.push_str("shr"),
+        
         _ => {},
     }
     
@@ -291,6 +296,16 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
         },
         
         X86Arg::Imm32(val) => line.push_str(&val.to_string()),
+        
+        X86Arg::Mem(reg, pos) => {
+            let reg_str = reg2str(&reg, 64);
+            
+            line.push_str("[");
+            line.push_str(&reg_str);
+            line.push_str("-");
+            line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
         
         X86Arg::DwordMem(reg, pos) => {
             let reg_str = reg2str(&reg, 64);

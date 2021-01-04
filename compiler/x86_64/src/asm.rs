@@ -36,6 +36,28 @@ pub enum X86Type {
     
     Add,
     Sub,
+    IMul,
+    Mul,
+    
+    And,
+    Or,
+    Xor,
+    Shl,
+    Shr,
+    
+    AddSS,
+    SubSS,
+    MulSS,
+    DivSS,
+    
+    AddSD,
+    SubSD,
+    MulSD,
+    DivSD,
+    
+    Cmp,
+    Ucomiss,
+    Ucomisd,
     
     Call,
     Syscall,
@@ -47,6 +69,7 @@ pub enum X86Type {
 pub enum X86Arg {
     Empty,
     
+    Mem(X86Reg, i32),
     DwordMem(X86Reg, i32),
     LclMem(String),
     
