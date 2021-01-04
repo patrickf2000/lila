@@ -29,6 +29,10 @@ pub enum X86Type {
     Push,
     
     Mov,
+    MovZX,
+    MovSX,
+    MovSS,
+    MovSD,
     
     Add,
     Sub,
@@ -43,7 +47,7 @@ pub enum X86Type {
 pub enum X86Arg {
     Empty,
     
-    DwordMem(i32),
+    DwordMem(X86Reg, i32),
     LclMem(String),
     
     Imm32(i32),
@@ -52,6 +56,9 @@ pub enum X86Arg {
     Reg32(X86Reg),
     Reg16(X86Reg),
     Reg8(X86Reg),
+    
+    Xmm(i32),
+    Ymm(i32),
 }
 
 // These are the 64-bit register names; in reality, we can use them for all types
@@ -100,26 +107,215 @@ pub fn create_x86instr(instr_type : X86Type) -> X86Instr {
 }
 
 pub fn reg2str(reg : &X86Reg, size : i32) -> String {
-    match reg {
-        X86Reg::RAX => "rax".to_string(),
-        X86Reg::RBX => "rbx".to_string(),
-        X86Reg::RCX => "rcx".to_string(),
-        X86Reg::RDX => "rdx".to_string(),
-        
-        X86Reg::RSP => "rsp".to_string(),
-        X86Reg::RBP => "rbp".to_string(),
-        
-        X86Reg::RDI => "rdi".to_string(),
-        X86Reg::RSI => "rsi".to_string(),
-        
-        X86Reg::R8 => "r8".to_string(),
-        X86Reg::R9 => "r9".to_string(),
-        X86Reg::R10 => "r10".to_string(),
-        X86Reg::R11 => "r11".to_string(),
-        X86Reg::R12 => "r12".to_string(),
-        X86Reg::R13 => "r13".to_string(),
-        X86Reg::R14 => "r14".to_string(),
-        X86Reg::R15 => "r15".to_string()
+    if size == 32 {
+        match reg {
+            X86Reg::RAX => "eax".to_string(),
+            X86Reg::RBX => "ebx".to_string(),
+            X86Reg::RCX => "ecx".to_string(),
+            X86Reg::RDX => "edx".to_string(),
+            
+            X86Reg::RSP => "esp".to_string(),
+            X86Reg::RBP => "ebp".to_string(),
+            
+            X86Reg::RDI => "edi".to_string(),
+            X86Reg::RSI => "esi".to_string(),
+            
+            X86Reg::R8 => "r8d".to_string(),
+            X86Reg::R9 => "r9d".to_string(),
+            X86Reg::R10 => "r10d".to_string(),
+            X86Reg::R11 => "r11d".to_string(),
+            X86Reg::R12 => "r12d".to_string(),
+            X86Reg::R13 => "r13d".to_string(),
+            X86Reg::R14 => "r14d".to_string(),
+            X86Reg::R15 => "r15d".to_string()
+        }
+    } else {
+        match reg {
+            X86Reg::RAX => "rax".to_string(),
+            X86Reg::RBX => "rbx".to_string(),
+            X86Reg::RCX => "rcx".to_string(),
+            X86Reg::RDX => "rdx".to_string(),
+            
+            X86Reg::RSP => "rsp".to_string(),
+            X86Reg::RBP => "rbp".to_string(),
+            
+            X86Reg::RDI => "rdi".to_string(),
+            X86Reg::RSI => "rsi".to_string(),
+            
+            X86Reg::R8 => "r8".to_string(),
+            X86Reg::R9 => "r9".to_string(),
+            X86Reg::R10 => "r10".to_string(),
+            X86Reg::R11 => "r11".to_string(),
+            X86Reg::R12 => "r12".to_string(),
+            X86Reg::R13 => "r13".to_string(),
+            X86Reg::R14 => "r14".to_string(),
+            X86Reg::R15 => "r15".to_string()
+        }
     }
 }
+
+// Gets a register based on position
+// Kernel argument registers
+pub fn amd64_karg_reg32(pos : i32) -> X86Arg {
+    match pos {
+        1 => return X86Arg::Reg32(X86Reg::RAX),
+        2 => return X86Arg::Reg32(X86Reg::RDI),
+        3 => return X86Arg::Reg32(X86Reg::RSI),
+        4 => return X86Arg::Reg32(X86Reg::RDX),
+        5 => return X86Arg::Reg32(X86Reg::R10),
+        6 => return X86Arg::Reg32(X86Reg::R8),
+        7 => return X86Arg::Reg32(X86Reg::R9),
+        _ => return X86Arg::Empty,
+    };
+}
+
+pub fn amd64_karg_reg64(pos : i32) -> X86Arg {
+    match pos {
+        1 => return X86Arg::Reg64(X86Reg::RAX),
+        2 => return X86Arg::Reg64(X86Reg::RDI),
+        3 => return X86Arg::Reg64(X86Reg::RSI),
+        4 => return X86Arg::Reg64(X86Reg::RDX),
+        5 => return X86Arg::Reg64(X86Reg::R10),
+        6 => return X86Arg::Reg64(X86Reg::R8),
+        7 => return X86Arg::Reg64(X86Reg::R9),
+        _ => return X86Arg::Empty,
+    };
+}
+
+// Function argument registers
+/*pub fn amd64_arg_reg8(pos : i32) -> String {
+    match pos {
+        1 => return "dil".to_string(),
+        2 => return "sil".to_string(),
+        3 => return "dl".to_string(),
+        4 => return "cl".to_string(),
+        5 => return "r8b".to_string(),
+        6 => return "r9b".to_string(),
+        _ => return String::new(),
+    };
+}*/
+
+/*pub fn amd64_arg_reg16(pos : i32) -> String {
+    match pos {
+        1 => return "di".to_string(),
+        2 => return "si".to_string(),
+        3 => return "dx".to_string(),
+        4 => return "cx".to_string(),
+        5 => return "r8w".to_string(),
+        6 => return "r9w".to_string(),
+        _ => return String::new(),
+    };
+}*/
+
+pub fn amd64_arg_reg32(pos : i32) -> X86Arg {
+    match pos {
+        1 => return X86Arg::Reg32(X86Reg::RDI),
+        2 => return X86Arg::Reg32(X86Reg::RSI),
+        3 => return X86Arg::Reg32(X86Reg::RDX),
+        4 => return X86Arg::Reg32(X86Reg::RCX),
+        5 => return X86Arg::Reg32(X86Reg::R8),
+        6 => return X86Arg::Reg32(X86Reg::R9),
+        _ => return X86Arg::Empty,
+    };
+}
+
+pub fn amd64_arg_reg64(pos : i32) -> X86Arg {
+    match pos {
+        1 => return X86Arg::Reg64(X86Reg::RDI),
+        2 => return X86Arg::Reg64(X86Reg::RSI),
+        3 => return X86Arg::Reg64(X86Reg::RDX),
+        4 => return X86Arg::Reg64(X86Reg::RCX),
+        5 => return X86Arg::Reg64(X86Reg::R8),
+        6 => return X86Arg::Reg64(X86Reg::R9),
+        _ => return X86Arg::Empty,
+    };
+}
+
+pub fn amd64_arg_flt(pos : i32) -> X86Arg {
+    match pos {
+        1 => return X86Arg::Xmm(0),
+        2 => return X86Arg::Xmm(1),
+        3 => return X86Arg::Xmm(2),
+        4 => return X86Arg::Xmm(3),
+        5 => return X86Arg::Xmm(4),
+        6 => return X86Arg::Xmm(5),
+        7 => return X86Arg::Xmm(6),
+        8 => return X86Arg::Xmm(7),
+        _ => return X86Arg::Empty,
+    };
+}
+
+// Operation registers
+// EAX -> Return register
+// R15, R14 -> Operations register
+pub fn amd64_op_reg8(pos : i32) -> X86Arg {
+    match pos {
+        0 => return X86Arg::Reg8(X86Reg::RBX),
+        1 => return X86Arg::Reg8(X86Reg::RCX),
+        2 => return X86Arg::Reg8(X86Reg::R10),
+        3 => return X86Arg::Reg8(X86Reg::R11),
+        4 => return X86Arg::Reg8(X86Reg::R12),
+        _ => return X86Arg::Empty,
+    };
+}
+
+/*pub fn amd64_op_reg16(pos : i32) -> String {
+    match pos {
+        0 => return "bx".to_string(),
+        1 => return "cx".to_string(),
+        2 => return "r10w".to_string(),
+        3 => return "r11w".to_string(),
+        4 => return "r12w".to_string(),
+        _ => return String::new(),
+    };
+}*/
+
+pub fn amd64_op_reg32(pos : i32) -> X86Arg {
+    match pos {
+        0 => return X86Arg::Reg32(X86Reg::RBX),
+        1 => return X86Arg::Reg32(X86Reg::RCX),
+        2 => return X86Arg::Reg32(X86Reg::R10),
+        3 => return X86Arg::Reg32(X86Reg::R11),
+        4 => return X86Arg::Reg32(X86Reg::R12),
+        _ => return X86Arg::Empty,
+    };
+}
+
+pub fn amd64_op_reg64(pos : i32) -> X86Arg {
+    match pos {
+        0 => return X86Arg::Reg64(X86Reg::RBX),
+        1 => return X86Arg::Reg64(X86Reg::RCX),
+        2 => return X86Arg::Reg64(X86Reg::R10),
+        3 => return X86Arg::Reg64(X86Reg::R11),
+        4 => return X86Arg::Reg64(X86Reg::R12),
+        _ => return X86Arg::Empty,
+    };
+}
+
+// xmm0 and xmm1 are reserved for internal operations
+/*pub fn amd64_op_flt(pos : i32) -> String {
+    match pos {
+        0 => return "xmm10".to_string(),
+        1 => return "xmm11".to_string(),
+        2 => return "xmm12".to_string(),
+        3 => return "xmm13".to_string(),
+        4 => return "xmm14".to_string(),
+        5 => return "xmm15".to_string(),
+        _ => return String::new(),
+    }
+}
+
+// Vector registers
+// ymm0 and ymm1 are reserved for internal operations
+pub fn amd64_vector_i32(pos : i32) -> String {
+    match pos {
+        0 => return "ymm3".to_string(),
+        1 => return "ymm4".to_string(),
+        2 => return "ymm5".to_string(),
+        3 => return "ymm6".to_string(),
+        4 => return "ymm7".to_string(),
+        5 => return "ymm8".to_string(),
+        _ => return String::new(),
+    }
+}*/
 

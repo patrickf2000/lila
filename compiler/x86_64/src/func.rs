@@ -15,9 +15,6 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use std::io::{BufWriter, Write};
-use std::fs::File;
-
 use parser::ltac::{LtacInstr};
 use crate::asm::*;
 
@@ -73,6 +70,15 @@ pub fn amd64_build_func(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pic
     instr = create_x86instr(X86Type::Sub);
     instr.arg1 = X86Arg::Reg64(X86Reg::RSP);
     instr.arg2 = X86Arg::Imm32(code.arg1_val);
+    x86_code.push(instr);
+}
+
+// Builds a return statement
+pub fn amd64_build_ret(x86_code : &mut Vec<X86Instr>) {
+    let mut instr = create_x86instr(X86Type::Leave);
+    x86_code.push(instr.clone());
+    
+    instr = create_x86instr(X86Type::Ret);
     x86_code.push(instr);
 }
 

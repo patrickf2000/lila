@@ -26,9 +26,11 @@ use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
 // Import and use local modules
 mod asm;
+mod call;
 mod func;
 
 use asm::*;
+use call::*;
 use func::*;
 
 // The entry point
@@ -101,6 +103,12 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::Extern => amd64_build_extern(x86_code, &code),
             LtacType::Label => amd64_build_label(x86_code, &code),
             LtacType::Func => amd64_build_func(x86_code, &code, is_pic),
+            LtacType::Ret => amd64_build_ret(x86_code),
+            
+            LtacType::PushArg => amd64_build_pusharg(x86_code, &code, false, is_pic),
+            LtacType::KPushArg => amd64_build_pusharg(x86_code, &code, true, is_pic),
+            LtacType::Call => amd64_build_call(x86_code, &code),
+            LtacType::Syscall => amd64_build_syscall(x86_code),
             
             _ => {},
         }
@@ -119,6 +127,9 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             | X86Type::Type | X86Type::Label
             | X86Type::Call => amd64_write_named(writer, &code),
             
+            X86Type::Leave | X86Type::Ret 
+            | X86Type::Syscall => amd64_write_instr(writer, &code, 0),
+            
             X86Type::Push => amd64_write_instr(writer, &code, 1),
             
             X86Type::Mov
@@ -128,7 +139,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
         }
     
         /*match &code.instr_type {
-            LtacType::Ret => amd64_build_ret(writer),
             
             LtacType::LdArgI8 | LtacType::LdArgU8 => amd64_build_ldarg(writer, &code, is_pic),
             LtacType::LdArgI16 | LtacType::LdArgU16 => amd64_build_ldarg(writer, &code, is_pic),
@@ -233,6 +243,10 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
     let mut line = "  ".to_string();
     
     match code.instr_type {
+        X86Type::Leave => line.push_str("leave"),
+        X86Type::Ret => line.push_str("ret\n"),
+        X86Type::Syscall => line.push_str("syscall"),
+        
         X86Type::Push => line.push_str("push"),
         X86Type::Mov => line.push_str("mov"),
         
@@ -266,12 +280,32 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
     let mut line = String::new();
     
     match &arg {
+        X86Arg::Reg32(reg) => {
+             let reg_str = reg2str(&reg, 32);
+             line.push_str(&reg_str);
+        },
+        
         X86Arg::Reg64(reg) => {
              let reg_str = reg2str(&reg, 64);
              line.push_str(&reg_str);
         },
         
         X86Arg::Imm32(val) => line.push_str(&val.to_string()),
+        
+        X86Arg::DwordMem(reg, pos) => {
+            let reg_str = reg2str(&reg, 64);
+            
+            line.push_str("DWORD PTR [");
+            line.push_str(&reg_str);
+            line.push_str("-");
+            line.push_str(&pos.to_string());
+            line.push_str("]");
+        },
+        
+        X86Arg::LclMem(ref val) => {
+            line.push_str("OFFSET FLAT:");
+            line.push_str(&val);
+        },
         
         _ => {},
     }
