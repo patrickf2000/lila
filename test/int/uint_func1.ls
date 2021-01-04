@@ -1,6 +1,6 @@
 
 #OUTPUT
-#X: a4b5c6d7
+#X: a4b5c6d
 #Y: 55aabb
 #END
 
@@ -16,7 +16,7 @@ begin
 end
 
 func main -> int
-    x : uint = 0xA4B5C6D7;
+    x : uint = 0xA4B5C6D;
 begin
     print_two(x, 0x55AABB);
     

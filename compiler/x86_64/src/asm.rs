@@ -18,6 +18,7 @@
 // This represents x86-64 instructions
 
 #[derive(Clone, PartialEq)]
+#[allow(dead_code)]
 pub enum X86Type {
     Extern,
     Global,

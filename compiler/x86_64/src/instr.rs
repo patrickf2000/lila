@@ -241,7 +241,7 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
         LtacType::I16Mul | LtacType::I32Mul |
         LtacType::I64Mul => instr = create_x86instr(X86Type::IMul),
         LtacType::U16Mul | LtacType::U32Mul |
-        LtacType::U64Mul => instr = create_x86instr(X86Type::Mul),
+        LtacType::U64Mul => instr = create_x86instr(X86Type::IMul),     // TODO: Should be "mul"
         
         LtacType::F32Add => instr = create_x86instr(X86Type::AddSS),
         LtacType::F32Sub => instr = create_x86instr(X86Type::SubSS),
