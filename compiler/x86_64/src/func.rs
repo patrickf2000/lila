@@ -15,7 +15,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use parser::ltac::{LtacInstr};
+use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::asm::*;
 
 // Builds an extern declaration
@@ -79,6 +79,44 @@ pub fn amd64_build_ret(x86_code : &mut Vec<X86Instr>) {
     x86_code.push(instr.clone());
     
     instr = create_x86instr(X86Type::Ret);
+    x86_code.push(instr);
+}
+
+// Load a function argument to a variable
+// In the LtacInstr:
+//      -> arg1_val = memory location
+//      -> arg2_val = register position
+pub fn amd64_build_ldarg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_pic : bool) {
+    let mut instr = create_x86instr(X86Type::Mov);
+    
+    match &code.arg1 {
+        LtacArg::Reg8(pos) => instr.arg1 = amd64_op_reg8(*pos),
+        LtacArg::Reg16(pos) => instr.arg1 = amd64_op_reg16(*pos),
+        LtacArg::Reg32(pos) => instr.arg1 = amd64_op_reg32(*pos),
+        LtacArg::Reg64(pos) => instr.arg1 = amd64_op_reg64(*pos),
+        
+        LtacArg::Mem(pos) => {
+            /*if is_pic {
+                line.push_str("  mov -");
+                line.push_str(&pos.to_string());
+                line.push_str("[rbp]");
+            } else {*/
+                instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos);
+            //}
+        },
+        _ => {},
+    }
+    
+    match code.instr_type {
+        LtacType::LdArgI8 | LtacType::LdArgU8 => instr.arg2 = amd64_arg_reg8(code.arg2_val),
+        LtacType::LdArgI16 | LtacType::LdArgU16 => instr.arg2 = amd64_arg_reg16(code.arg2_val),
+        LtacType::LdArgI32 | LtacType::LdArgU32 => instr.arg2 = amd64_arg_reg32(code.arg2_val),
+        LtacType::LdArgI64 | LtacType::LdArgU64 
+        | LtacType::LdArgPtr => instr.arg2 = amd64_arg_reg32(code.arg2_val),
+        
+        _ => {},
+    }
+    
     x86_code.push(instr);
 }
 

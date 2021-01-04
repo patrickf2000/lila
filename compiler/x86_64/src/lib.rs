@@ -107,6 +107,14 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::Func => amd64_build_func(x86_code, &code, is_pic),
             LtacType::Ret => amd64_build_ret(x86_code),
             
+            LtacType::LdArgI8 | LtacType::LdArgU8 => amd64_build_ldarg(x86_code, &code, is_pic),
+            LtacType::LdArgI16 | LtacType::LdArgU16 => amd64_build_ldarg(x86_code, &code, is_pic),
+            LtacType::LdArgI32 | LtacType::LdArgU32 => amd64_build_ldarg(x86_code, &code, is_pic),
+            LtacType::LdArgI64 | LtacType::LdArgU64 => amd64_build_ldarg(x86_code, &code, is_pic),
+            //LtacType::LdArgF32 => amd64_build_ldarg_float(writer, &code),
+            //LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
+            LtacType::LdArgPtr => amd64_build_ldarg(x86_code, &code, is_pic),
+            
             LtacType::PushArg => amd64_build_pusharg(x86_code, &code, false, is_pic),
             LtacType::KPushArg => amd64_build_pusharg(x86_code, &code, true, is_pic),
             LtacType::Call => amd64_build_call(x86_code, &code),
@@ -145,15 +153,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
         }
     
         /*match &code.instr_type {
-            
-            LtacType::LdArgI8 | LtacType::LdArgU8 => amd64_build_ldarg(writer, &code, is_pic),
-            LtacType::LdArgI16 | LtacType::LdArgU16 => amd64_build_ldarg(writer, &code, is_pic),
-            LtacType::LdArgI32 | LtacType::LdArgU32 => amd64_build_ldarg(writer, &code, is_pic),
-            LtacType::LdArgI64 | LtacType::LdArgU64 => amd64_build_ldarg(writer, &code, is_pic),
-            LtacType::LdArgF32 => amd64_build_ldarg_float(writer, &code),
-            LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
-            LtacType::LdArgPtr => amd64_build_ldarg(writer, &code, is_pic),
-            
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             
             LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),

@@ -209,29 +209,29 @@ pub fn amd64_karg_reg64(pos : i32) -> X86Arg {
 }
 
 // Function argument registers
-/*pub fn amd64_arg_reg8(pos : i32) -> String {
+pub fn amd64_arg_reg8(pos : i32) -> X86Arg {
     match pos {
-        1 => return "dil".to_string(),
-        2 => return "sil".to_string(),
-        3 => return "dl".to_string(),
-        4 => return "cl".to_string(),
-        5 => return "r8b".to_string(),
-        6 => return "r9b".to_string(),
-        _ => return String::new(),
+        1 => return X86Arg::Reg8(X86Reg::RDI),
+        2 => return X86Arg::Reg8(X86Reg::RSI),
+        3 => return X86Arg::Reg8(X86Reg::RDX),
+        4 => return X86Arg::Reg8(X86Reg::RCX),
+        5 => return X86Arg::Reg8(X86Reg::R8),
+        6 => return X86Arg::Reg8(X86Reg::R9),
+        _ => return X86Arg::Empty,
     };
-}*/
+}
 
-/*pub fn amd64_arg_reg16(pos : i32) -> String {
+pub fn amd64_arg_reg16(pos : i32) -> X86Arg {
     match pos {
-        1 => return "di".to_string(),
-        2 => return "si".to_string(),
-        3 => return "dx".to_string(),
-        4 => return "cx".to_string(),
-        5 => return "r8w".to_string(),
-        6 => return "r9w".to_string(),
-        _ => return String::new(),
+        1 => return X86Arg::Reg16(X86Reg::RDI),
+        2 => return X86Arg::Reg16(X86Reg::RSI),
+        3 => return X86Arg::Reg16(X86Reg::RDX),
+        4 => return X86Arg::Reg16(X86Reg::RCX),
+        5 => return X86Arg::Reg16(X86Reg::R8),
+        6 => return X86Arg::Reg16(X86Reg::R9),
+        _ => return X86Arg::Empty,
     };
-}*/
+}
 
 pub fn amd64_arg_reg32(pos : i32) -> X86Arg {
     match pos {
@@ -285,16 +285,16 @@ pub fn amd64_op_reg8(pos : i32) -> X86Arg {
     };
 }
 
-/*pub fn amd64_op_reg16(pos : i32) -> String {
+pub fn amd64_op_reg16(pos : i32) -> X86Arg {
     match pos {
-        0 => return "bx".to_string(),
-        1 => return "cx".to_string(),
-        2 => return "r10w".to_string(),
-        3 => return "r11w".to_string(),
-        4 => return "r12w".to_string(),
-        _ => return String::new(),
+        0 => return X86Arg::Reg16(X86Reg::RBX),
+        1 => return X86Arg::Reg16(X86Reg::RCX),
+        2 => return X86Arg::Reg16(X86Reg::R10),
+        3 => return X86Arg::Reg16(X86Reg::R11),
+        4 => return X86Arg::Reg16(X86Reg::R12),
+        _ => return X86Arg::Empty,
     };
-}*/
+}
 
 pub fn amd64_op_reg32(pos : i32) -> X86Arg {
     match pos {
