@@ -62,6 +62,7 @@ fn run() -> i32 {
     let mut inc_start = true;
     let mut pic = false;
     let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
+    let mut new_codegen = false;    // This is a dev flag for my new experimental code generator
     let mut arch = get_arch();
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
@@ -97,6 +98,7 @@ fn run() -> i32 {
             },
             
             "-march=riscv64" => arch = Arch::Riscv64,
+            "--cg2" => new_codegen = true,
             
             "-h" | "--help" => {
                 help();
@@ -144,8 +146,13 @@ fn run() -> i32 {
         if print_ltac {
             ltac_printer::compile(&ltac).expect("LTAC Codegen failed with unknown error."); 
         } else if arch == Arch::X86_64 {
-            x86::compile(&ltac, pic, risc_mode, use_c).expect("Codegen failed with unknown error.");
-            x86::build_asm(&ltac.name, no_link);
+            if new_codegen {
+                x86_64::compile(&ltac, pic).expect("Codegen failed with unknown error.");
+                x86_64::build_asm(&ltac.name, no_link);
+            } else {
+                x86::compile(&ltac, pic, risc_mode, use_c).expect("Codegen failed with unknown error.");
+                x86::build_asm(&ltac.name, no_link);
+            }
         } else if arch == Arch::AArch64 {
             aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
             aarch64::build_asm(&ltac.name, no_link);
@@ -160,7 +167,11 @@ fn run() -> i32 {
     // Link
     if !no_link && !print_ltac {
         if arch == Arch::X86_64 {
-            x86::link(&all_names, &output, use_c, use_corelib, link_lib, inc_start);
+            if new_codegen {
+                x86_64::link(&all_names, &output, use_corelib, link_lib, inc_start);
+            } else {
+                x86::link(&all_names, &output, use_c, use_corelib, link_lib, inc_start);
+            }
         } else if arch == Arch::AArch64 {
             aarch64::link(&all_names, &output, use_c, link_lib);
         } else if arch == Arch::Riscv64 {

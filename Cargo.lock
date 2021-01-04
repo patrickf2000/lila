@@ -25,6 +25,7 @@ dependencies = [
  "riscv64",
  "transform",
  "x86",
+ "x86_64",
 ]
 
 [[package]]
@@ -54,6 +55,13 @@ dependencies = [
 
 [[package]]
 name = "x86"
+version = "0.1.0"
+dependencies = [
+ "parser",
+]
+
+[[package]]
+name = "x86_64"
 version = "0.1.0"
 dependencies = [
  "parser",
