@@ -115,6 +115,19 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             //LtacType::LdArgF64 => amd64_build_ldarg_float(writer, &code),
             LtacType::LdArgPtr => amd64_build_ldarg(x86_code, &code, is_pic),
             
+            // TODO: Combine this to reduce lines
+            LtacType::Br => amd64_build_jump(x86_code, &code),
+            LtacType::Be => amd64_build_jump(x86_code, &code),
+            LtacType::Bne => amd64_build_jump(x86_code, &code),
+            LtacType::Bl => amd64_build_jump(x86_code, &code),
+            LtacType::Ble => amd64_build_jump(x86_code, &code),
+            LtacType::Bfl => amd64_build_jump(x86_code, &code),
+            LtacType::Bfle => amd64_build_jump(x86_code, &code),
+            LtacType::Bg => amd64_build_jump(x86_code, &code),
+            LtacType::Bge => amd64_build_jump(x86_code, &code),
+            LtacType::Bfg => amd64_build_jump(x86_code, &code),
+            LtacType::Bfge => amd64_build_jump(x86_code, &code),
+            
             LtacType::PushArg => amd64_build_pusharg(x86_code, &code, false, is_pic),
             LtacType::KPushArg => amd64_build_pusharg(x86_code, &code, true, is_pic),
             LtacType::Call => amd64_build_call(x86_code, &code),
@@ -125,8 +138,6 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             
             // Everything else uses the common build instruction function
             _ => amd64_build_instr(x86_code, &code, is_pic),
-            
-            _ => {},
         }
     }
 }
@@ -141,6 +152,12 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
         match &code.instr_type {
             X86Type::Extern | X86Type::Global
             | X86Type::Type | X86Type::Label
+            | X86Type::Jmp
+            | X86Type::Je | X86Type::Jne
+            | X86Type::Jl | X86Type::Jle
+            | X86Type::Jg | X86Type::Jge
+            | X86Type::Ja | X86Type::Jae
+            | X86Type::Jb | X86Type::Jbe
             | X86Type::Call => amd64_write_named(writer, &code),
             
             X86Type::Leave | X86Type::Ret 
@@ -158,18 +175,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),
             
             LtacType::StrCmp => amd64_build_strcmp(writer, use_c),
-            
-            LtacType::Br => amd64_build_jump(writer, &code),
-            LtacType::Be => amd64_build_jump(writer, &code),
-            LtacType::Bne => amd64_build_jump(writer, &code),
-            LtacType::Bl => amd64_build_jump(writer, &code),
-            LtacType::Ble => amd64_build_jump(writer, &code),
-            LtacType::Bfl => amd64_build_jump(writer, &code),
-            LtacType::Bfle => amd64_build_jump(writer, &code),
-            LtacType::Bg => amd64_build_jump(writer, &code),
-            LtacType::Bge => amd64_build_jump(writer, &code),
-            LtacType::Bfg => amd64_build_jump(writer, &code),
-            LtacType::Bfge => amd64_build_jump(writer, &code),
             
             LtacType::I8Mul | LtacType::U8Mul => amd64_build_byte_mul(writer, &code),
             LtacType::I8Div | LtacType::I8Mod |
@@ -218,6 +223,19 @@ fn amd64_write_named(writer : &mut BufWriter<File>, code : &X86Instr) {
         X86Type::Global => line.push_str("\n.global "),
         X86Type::Type => line.push_str(".type "),
         X86Type::Call => line.push_str("  call "),
+        
+        X86Type::Jmp => line.push_str("  jmp "),
+        X86Type::Je => line.push_str("  je "),
+        X86Type::Jne => line.push_str("  jne "),
+        X86Type::Jl => line.push_str("  jl "),
+        X86Type::Jle => line.push_str("  jle "),
+        X86Type::Jg => line.push_str("  jg "),
+        X86Type::Jge => line.push_str("  jge "),
+        X86Type::Ja => line.push_str("  ja "),
+        X86Type::Jae => line.push_str("  jae "),
+        X86Type::Jb => line.push_str("  jb "),
+        X86Type::Jbe => line.push_str("  jbe "),
+        
         _ => {},
     }
     
@@ -259,6 +277,8 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
         X86Type::Xor => line.push_str("xor"),
         X86Type::Shl => line.push_str("shl"),
         X86Type::Shr => line.push_str("shr"),
+        
+        X86Type::Cmp => line.push_str("cmp"),
         
         _ => {},
     }
@@ -320,7 +340,7 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             line.push_str("]");
         },
         
-        X86Arg::DwordMem(reg, pos) => {
+        X86Arg::QwordMem(reg, pos) => {
             let reg_str = reg2str(&reg, 64);
             
             line.push_str("QWORD PTR [");

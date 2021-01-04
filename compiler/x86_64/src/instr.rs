@@ -20,8 +20,31 @@
 use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::asm::*;
 
+// Builds a branch (actually kinda called "jumps" in x86...)
+pub fn amd64_build_jump(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
+    let instr_type : X86Type;
+    
+    match &code.instr_type {
+        LtacType::Be => instr_type = X86Type::Je,
+        LtacType::Bne => instr_type = X86Type::Jne,
+        LtacType::Bl => instr_type = X86Type::Jl,
+        LtacType::Ble => instr_type = X86Type::Jle,
+        LtacType::Bfl => instr_type = X86Type::Jb,
+        LtacType::Bfle => instr_type = X86Type::Jbe,
+        LtacType::Bg => instr_type = X86Type::Jg,
+        LtacType::Bge => instr_type = X86Type::Jge,
+        LtacType::Bfg => instr_type = X86Type::Ja,
+        LtacType::Bfge => instr_type = X86Type::Jae,
+        _ => instr_type = X86Type::Jmp,
+    }
+    
+    let mut instr = create_x86instr(instr_type);
+    instr.name = code.name.clone();
+    x86_code.push(instr);
+}
+
 // Many instructions have common syntax
-pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pic : bool) {
+pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_pic : bool) {
     /*let mut line = String::new();
     
     // Specific for float literals
@@ -490,14 +513,14 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
             let reg = amd64_op_flt(*pos);
             line.push_str(&reg);
-        },
+        },*/
         
-        LtacArg::RetRegI8 | LtacArg::RetRegU8 => line.push_str("al"),
-        LtacArg::RetRegI16 | LtacArg::RetRegU16 => line.push_str("ax"),
-        LtacArg::RetRegI32 | LtacArg::RetRegU32 => line.push_str("eax"),
-        LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.push_str("rax"),
+        LtacArg::RetRegI8 | LtacArg::RetRegU8 => instr.arg2 = X86Arg::Reg8(X86Reg::RAX),
+        LtacArg::RetRegI16 | LtacArg::RetRegU16 => instr.arg2 = X86Arg::Reg16(X86Reg::RAX),
+        LtacArg::RetRegI32 | LtacArg::RetRegU32 => instr.arg2 = X86Arg::Reg32(X86Reg::RAX),
+        LtacArg::RetRegI64 | LtacArg::RetRegU64 => instr.arg2 = X86Arg::Reg64(X86Reg::RAX),
         
-        LtacArg::RetRegF32 | LtacArg::RetRegF64 => line.push_str("xmm0"),*/
+        LtacArg::RetRegF32 | LtacArg::RetRegF64 => instr.arg2 = X86Arg::Xmm(0),
         
         LtacArg::Mem(pos) => {
             /*if is_pic {
@@ -593,7 +616,7 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
     
     if code.instr_type == LtacType::U32Div || code.instr_type == LtacType::U32Mod
         || code.instr_type == LtacType::U64Div || code.instr_type == LtacType::U64Mod {
-        let mut instr = create_x86instr(X86Type::Div);
+        instr = create_x86instr(X86Type::Div);
     }
     
     match &code.arg1 {

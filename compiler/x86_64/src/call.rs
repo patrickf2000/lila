@@ -19,11 +19,11 @@ use parser::ltac::{LtacInstr, LtacArg};
 use crate::asm::*;
 
 // Builds a function argument
-pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_karg : bool, is_pic : bool) {
+pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_karg : bool, _is_pic : bool) {
     // Get the argument registers
     let mut reg32 = amd64_arg_reg32(code.arg2_val);
     let mut reg64 = amd64_arg_reg64(code.arg2_val);
-    let mut reg_flt = amd64_arg_flt(code.arg2_val);
+    //let mut reg_flt = amd64_arg_flt(code.arg2_val);
     
     if is_karg {
         reg32 = amd64_karg_reg32(code.arg2_val);
@@ -47,14 +47,14 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         LtacArg::U16(_v) => mov_type = X86Type::MovZX,
         
         // TODO: What do those second lines for the float registers do?
-        LtacArg::FltReg(pos) => {
+        LtacArg::FltReg(_pos) => {
             mov_type = X86Type::MovSS;
-            reg_flt = amd64_arg_flt(pos);
+            //reg_flt = amd64_arg_flt(pos);
         },
         
-        LtacArg::FltReg64(pos) => {
+        LtacArg::FltReg64(_pos) => {
             mov_type = X86Type::MovSD;
-            reg_flt = amd64_arg_flt(pos);
+            //reg_flt = amd64_arg_flt(pos);
         },
         
         _ => {},
@@ -251,7 +251,7 @@ pub fn amd64_build_call(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
 
 // Builds a system call
 pub fn amd64_build_syscall(x86_code : &mut Vec<X86Instr>) {
-    let mut instr = create_x86instr(X86Type::Syscall);
+    let instr = create_x86instr(X86Type::Syscall);
     x86_code.push(instr);
 }
 

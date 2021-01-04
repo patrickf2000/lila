@@ -61,6 +61,13 @@ pub enum X86Type {
     Ucomiss,
     Ucomisd,
     
+    Jmp,
+    Je, Jne,
+    Jl, Jle,
+    Jg, Jge,
+    Ja, Jae,
+    Jb, Jbe,
+    
     Call,
     Syscall,
     Leave,
@@ -84,11 +91,12 @@ pub enum X86Arg {
     Reg8(X86Reg),
     
     Xmm(i32),
-    Ymm(i32),
+    //Ymm(i32),
 }
 
 // These are the 64-bit register names; in reality, we can use them for all types
 #[derive(Clone, PartialEq)]
+#[allow(dead_code)]
 pub enum X86Reg {
     RAX,
     RBX,
@@ -257,7 +265,7 @@ pub fn amd64_arg_reg64(pos : i32) -> X86Arg {
     };
 }
 
-pub fn amd64_arg_flt(pos : i32) -> X86Arg {
+/*pub fn amd64_arg_flt(pos : i32) -> X86Arg {
     match pos {
         1 => return X86Arg::Xmm(0),
         2 => return X86Arg::Xmm(1),
@@ -269,7 +277,7 @@ pub fn amd64_arg_flt(pos : i32) -> X86Arg {
         8 => return X86Arg::Xmm(7),
         _ => return X86Arg::Empty,
     };
-}
+}*/
 
 // Operation registers
 // EAX -> Return register
