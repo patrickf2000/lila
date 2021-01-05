@@ -86,7 +86,7 @@ pub fn amd64_build_ret(x86_code : &mut Vec<X86Instr>) {
 // In the LtacInstr:
 //      -> arg1_val = memory location
 //      -> arg2_val = register position
-pub fn amd64_build_ldarg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_pic : bool) {
+pub fn amd64_build_ldarg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pic : bool) {
     let mut instr = create_x86instr(X86Type::Mov);
     
     match &code.arg1 {
@@ -101,7 +101,7 @@ pub fn amd64_build_ldarg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                 line.push_str(&pos.to_string());
                 line.push_str("[rbp]");
             } else {*/
-                instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos);
+                instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos, is_pic);
             //}
         },
         _ => {},

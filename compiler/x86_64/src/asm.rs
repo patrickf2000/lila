@@ -80,13 +80,13 @@ pub enum X86Type {
 pub enum X86Arg {
     Empty,
     
-    Mem(X86Reg, i32),
-    BwordMem(X86Reg, i32),      // Stands for BYTE
-    DwordMem(X86Reg, i32),
-    WordMem(X86Reg, i32),
-    QwordMem(X86Reg, i32),
-    LclMem(String),
-    ScaleMem(i32, X86Reg, i32),
+    Mem(X86Reg, i32, bool),
+    BwordMem(X86Reg, i32, bool),      // Stands for BYTE
+    DwordMem(X86Reg, i32, bool),
+    WordMem(X86Reg, i32, bool),
+    QwordMem(X86Reg, i32, bool),
+    LclMem(String, bool),
+    ScaleMem(i32, X86Reg, i32, bool),
     
     Imm32(i32),
     Imm64(i64),

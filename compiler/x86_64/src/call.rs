@@ -19,7 +19,7 @@ use parser::ltac::{LtacInstr, LtacArg};
 use crate::asm::*;
 
 // Builds a function argument
-pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_karg : bool, _is_pic : bool) {
+pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_karg : bool, is_pic : bool) {
     // Get the argument registers
     let mut reg32 = amd64_arg_reg32(code.arg2_val);
     let mut reg64 = amd64_arg_reg64(code.arg2_val);
@@ -37,6 +37,7 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         LtacArg::Reg8(_p) => mov_type = X86Type::MovZX,
         LtacArg::F32(_p) => mov_type = X86Type::MovSS,
         LtacArg::F64(_p) => mov_type = X86Type::MovSD,
+        LtacArg::PtrLcl(_p) if is_pic => mov_type = X86Type::Lea,
         _ => {},
     }
     
@@ -95,37 +96,37 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 
                 LtacArg::Byte(_v) => {
                     instr.arg1 = reg32;
-                    instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos, is_pic);
                 },
                 
                 LtacArg::UByte(_v) => {
                     instr.arg1 = reg32;
-                    instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos, is_pic);
                 },
                 
                 LtacArg::I16(_v) => {
                     instr.arg1 = reg32;
-                    instr.arg2 = X86Arg::WordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::WordMem(X86Reg::RBP, *pos, is_pic);
                 },
                 
                 LtacArg::U16(_v) => {
                     instr.arg1 = reg32;
-                    instr.arg2 = X86Arg::WordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::WordMem(X86Reg::RBP, *pos, is_pic);
                 },
                 
                 LtacArg::I64(_v) => {
                     instr.arg1 = reg64;
-                    instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos, is_pic);
                 },
                 
                 LtacArg::U64(_v) => {
                     instr.arg1 = reg64;
-                    instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos, is_pic);
                 },
             
                 _ => {
                     instr.arg1 = reg32;
-                    instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos);
+                    instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos, is_pic);
                 },
             }
             
@@ -175,7 +176,7 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         
         LtacArg::Ptr(pos) => {
             instr.arg1 = reg64;
-            instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos);
+            instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos, is_pic);
             
             /*line.push_str(&reg64);
             if is_pic {
@@ -198,7 +199,7 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 line.push_str("[rip]");
             } else {*/
                 instr.arg1 = reg64;
-                instr.arg2 = X86Arg::LclMem(val.to_string());
+                instr.arg2 = X86Arg::LclMem(val.to_string(), is_pic);
             //}
         },
         
