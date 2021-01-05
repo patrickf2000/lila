@@ -32,6 +32,8 @@ This has been my hobby/learning project of the past three months now. I don't th
 
 Also, note that even though Github says 20% of the code is Livescript, there's not a single line of it in here. I didn't realize that Livescript used the ".ls" extension, so that 20% is actually the Lila tests and examples. I may change the file extension later on.
 
+Please see [the log](https://patrickflynn.co/pages/lila-log.html) for updates.
+
 ### Features
 
 All the stuff here is implemented in some way.
@@ -55,9 +57,11 @@ Currently, only x86-64 is fully supported; other architectures are in progress. 
 
 Current state:   
 
-* x86-64: Fully supported, all tests pass
+* x86-64: Fully supported, all tests pass *
 * RISC-V (64-bit): About 50-60% supported; all integer, byte, short, loop, and several other tests pass
 * Arm64: Hello world and a few basic integer tests pass
+
+Note for x86-64: I recently rewrote the entire x86-64 code generator to cleanup and hopefully make it a little easier to expand and optimize later on. I'm also working on phasing out the C library. As a result, there is very little code generation for floating point and none for vector instructions. The standard library will still build and all the example programs will pass. I do plan on getting this re-implemented at a future point. The original code generator is in the "codegen1" branch.
 
 ### System Requirements
 
