@@ -96,19 +96,19 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 /*LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => {
                     line.push_str(&reg_flt);
                     line.push_str(", ");
-                },
+                },*/
                 
                 LtacArg::Byte(_v) => {
-                    line.push_str(&reg32);
-                    line.push_str(", BYTE PTR ");
+                    instr.arg1 = reg32;
+                    instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos);
                 },
                 
                 LtacArg::UByte(_v) => {
-                    line.push_str(&reg32);
-                    line.push_str(", BYTE PTR ");
-                },
+                    instr.arg1 = reg32;
+                    instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos);
+                }
                 
-                LtacArg::I16(_v) => {
+                /*LtacArg::I16(_v) => {
                     line.push_str(&reg32);
                     line.push_str(", WORD PTR ");
                 },
@@ -144,13 +144,12 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         },
         
         // Literals are always passed as unsigned
-        /*LtacArg::UByte(val) => {
-            line.push_str(&reg32);
-            line.push_str(", ");
-            line.push_str(&val.to_string());
+        LtacArg::UByte(val) => {
+            instr.arg1 = reg32;
+            instr.arg2 = X86Arg::Imm32(*val as i32);
         },
         
-        LtacArg::U16(val) => {
+        /*LtacArg::U16(val) => {
             line.push_str(&reg32);
             line.push_str(", ");
             line.push_str(&val.to_string());

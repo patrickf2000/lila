@@ -1,7 +1,7 @@
 
 #OUTPUT
-#X: ffffffa4
-#Y: 55
+#X: -92
+#Y: 85
 #END
 
 #RET 0
@@ -11,8 +11,8 @@ extern func puts(s:str)
 
 func print_two(x:byte, y:byte)
 begin
-    printf("X: %x\n", x);
-    printf("Y: %x\n", y);
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func main -> int

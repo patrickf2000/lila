@@ -38,8 +38,8 @@ pub enum X86Type {
     
     Add,
     Sub,
-    IMul,
-    Mul,
+    IMul,   IMul8,
+    Mul,    Mul8,
     IDiv,
     Div,
     
@@ -81,6 +81,7 @@ pub enum X86Arg {
     Empty,
     
     Mem(X86Reg, i32),
+    BwordMem(X86Reg, i32),      // Stands for BYTE
     DwordMem(X86Reg, i32),
     QwordMem(X86Reg, i32),
     LclMem(String),
@@ -102,6 +103,9 @@ pub enum X86Arg {
 #[derive(Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum X86Reg {
+    AH,
+    AL,
+    
     RAX,
     RBX,
     RCX,
@@ -145,8 +149,61 @@ pub fn create_x86instr(instr_type : X86Type) -> X86Instr {
 }
 
 pub fn reg2str(reg : &X86Reg, size : i32) -> String {
-    if size == 32 {
+    if size == 8 {
         match reg {
+            X86Reg::AH => "ah".to_string(),
+            X86Reg::AL => "al".to_string(),
+            
+            X86Reg::RAX => "al".to_string(),
+            X86Reg::RBX => "bl".to_string(),
+            X86Reg::RCX => "cl".to_string(),
+            X86Reg::RDX => "dl".to_string(),
+            
+            X86Reg::RSP => "esp".to_string(),
+            X86Reg::RBP => "ebp".to_string(),
+            
+            X86Reg::RDI => "dil".to_string(),
+            X86Reg::RSI => "sil".to_string(),
+            
+            X86Reg::R8 => "r8b".to_string(),
+            X86Reg::R9 => "r9b".to_string(),
+            X86Reg::R10 => "r10b".to_string(),
+            X86Reg::R11 => "r11b".to_string(),
+            X86Reg::R12 => "r12b".to_string(),
+            X86Reg::R13 => "r13b".to_string(),
+            X86Reg::R14 => "r14b".to_string(),
+            X86Reg::R15 => "r15b".to_string()
+        }
+    } else if size == 16 {
+        match reg {
+            X86Reg::AH => "ah".to_string(),
+            X86Reg::AL => "al".to_string(),
+            
+            X86Reg::RAX => "ax".to_string(),
+            X86Reg::RBX => "bx".to_string(),
+            X86Reg::RCX => "cx".to_string(),
+            X86Reg::RDX => "dx".to_string(),
+            
+            X86Reg::RSP => "esp".to_string(),
+            X86Reg::RBP => "ebp".to_string(),
+            
+            X86Reg::RDI => "di".to_string(),
+            X86Reg::RSI => "si".to_string(),
+            
+            X86Reg::R8 => "r8w".to_string(),
+            X86Reg::R9 => "r9w".to_string(),
+            X86Reg::R10 => "r10w".to_string(),
+            X86Reg::R11 => "r11w".to_string(),
+            X86Reg::R12 => "r12w".to_string(),
+            X86Reg::R13 => "r13w".to_string(),
+            X86Reg::R14 => "r14w".to_string(),
+            X86Reg::R15 => "r15w".to_string()
+        }
+    } else if size == 32 {
+        match reg {
+            X86Reg::AH => "ah".to_string(),
+            X86Reg::AL => "al".to_string(),
+            
             X86Reg::RAX => "eax".to_string(),
             X86Reg::RBX => "ebx".to_string(),
             X86Reg::RCX => "ecx".to_string(),
@@ -169,6 +226,9 @@ pub fn reg2str(reg : &X86Reg, size : i32) -> String {
         }
     } else {
         match reg {
+            X86Reg::AH => "ah".to_string(),
+            X86Reg::AL => "al".to_string(),
+            
             X86Reg::RAX => "rax".to_string(),
             X86Reg::RBX => "rbx".to_string(),
             X86Reg::RCX => "rcx".to_string(),

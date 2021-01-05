@@ -1,13 +1,12 @@
 
 #OUTPUT
-#B1: ffffffa1
-#B2: ffffffaf
+#B1: -95
+#B2: -81
 #END
 
 #RET 0
 
 extern func printf(s:str, ...)
-extern func puts(s:str)
 
 func byte1 -> byte
 begin
@@ -26,8 +25,8 @@ begin
     b1 = byte1();
     b2 = byte2();
     
-    printf("B1: %x\n", b1);
-    printf("B2: %x\n", b2);
+    printf("B1: %d\n", b1);
+    printf("B2: %d\n", b2);
     
     return 0;
 end

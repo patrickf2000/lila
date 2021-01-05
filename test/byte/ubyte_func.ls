@@ -1,18 +1,17 @@
 
 #OUTPUT
-#X: a4
-#Y: 55
+#X: 164
+#Y: 85
 #END
 
 #RET 0
 
 extern func printf(s:str, ...)
-extern func puts(s:str)
 
 func print_two(x:ubyte, y:ubyte)
 begin
-    printf("X: %x\n", x);
-    printf("Y: %x\n", y);
+    printf("X: %d\n", x);
+    printf("Y: %d\n", y);
 end
 
 func main -> int

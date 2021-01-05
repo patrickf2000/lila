@@ -133,6 +133,10 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::Call => amd64_build_call(x86_code, &code),
             LtacType::Syscall => amd64_build_syscall(x86_code),
             
+            LtacType::I8Mul | LtacType::U8Mul => amd64_build_byte_mul(x86_code, &code),
+            LtacType::I8Div | LtacType::I8Mod |
+            LtacType::U8Div | LtacType::U8Mod => amd64_build_div(x86_code, &code),
+            
             LtacType::I32Div | LtacType::U32Div => amd64_build_div(x86_code, &code),
             LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(x86_code, &code),
             
@@ -167,6 +171,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             | X86Type::Syscall => amd64_write_instr(writer, &code, 0),
             
             X86Type::Push
+            | X86Type::IMul8 | X86Type::Mul8
             | X86Type::IDiv | X86Type::Div => amd64_write_instr(writer, &code, 1),
             
             _ => amd64_write_instr(writer, &code, 2),
@@ -179,9 +184,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             
             LtacType::StrCmp => amd64_build_strcmp(writer, use_c),
             
-            LtacType::I8Mul | LtacType::U8Mul => amd64_build_byte_mul(writer, &code),
-            LtacType::I8Div | LtacType::I8Mod |
-            LtacType::U8Div | LtacType::U8Mod => amd64_build_byte_div(writer, &code),
             
             LtacType::I16Div | LtacType::I16Mod |
             LtacType::U16Div | LtacType::U16Mod => amd64_build_short_div(writer, &code),
@@ -265,11 +267,13 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
         X86Type::Push => line.push_str("push"),
         X86Type::Lea => line.push_str("lea"),
         X86Type::Mov => line.push_str("mov"),
+        X86Type::MovZX => line.push_str("movzx"),
+        X86Type::MovSX => line.push_str("movsx"),
         
         X86Type::Add => line.push_str("add"),
         X86Type::Sub => line.push_str("sub"),
-        X86Type::IMul => line.push_str("imul"),
-        X86Type::Mul => line.push_str("mul"),
+        X86Type::IMul | X86Type::IMul8 => line.push_str("imul"),
+        X86Type::Mul | X86Type::Mul8 => line.push_str("mul"),
         X86Type::IDiv => line.push_str("idiv"),
         X86Type::Div => line.push_str("div"),
         
@@ -309,6 +313,16 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
     let mut line = String::new();
     
     match &arg {
+        X86Arg::Reg8(reg) => {
+             let reg_str = reg2str(&reg, 8);
+             line.push_str(&reg_str);
+        },
+        
+        X86Arg::Reg16(reg) => {
+             let reg_str = reg2str(&reg, 16);
+             line.push_str(&reg_str);
+        },
+        
         X86Arg::Reg32(reg) => {
              let reg_str = reg2str(&reg, 32);
              line.push_str(&reg_str);
@@ -326,6 +340,24 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             let reg_str = reg2str(&reg, 64);
             
             line.push_str("[");
+            line.push_str(&reg_str);
+            
+            if *pos < 0 {
+                let val = *pos * -1;
+                line.push_str("+");
+                line.push_str(&val.to_string());
+            } else {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+            }
+            
+            line.push_str("]");
+        },
+        
+        X86Arg::BwordMem(reg, pos) => {
+            let reg_str = reg2str(&reg, 64);
+            
+            line.push_str("BYTE PTR [");
             line.push_str(&reg_str);
             
             if *pos < 0 {
