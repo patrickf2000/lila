@@ -95,15 +95,8 @@ pub fn amd64_build_ldarg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         LtacArg::Reg32(pos) => instr.arg1 = amd64_op_reg32(*pos),
         LtacArg::Reg64(pos) => instr.arg1 = amd64_op_reg64(*pos),
         
-        LtacArg::Mem(pos) => {
-            /*if is_pic {
-                line.push_str("  mov -");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]");
-            } else {*/
-                instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos, is_pic);
-            //}
-        },
+        LtacArg::Mem(pos) => instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos, is_pic),
+        
         _ => {},
     }
     

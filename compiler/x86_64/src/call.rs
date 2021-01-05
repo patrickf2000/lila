@@ -89,11 +89,6 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         
         LtacArg::Mem(pos) => {
             match code.arg2 {
-                /*LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => {
-                    line.push_str(&reg_flt);
-                    line.push_str(", ");
-                },*/
-                
                 LtacArg::Byte(_v) => {
                     instr.arg1 = reg32;
                     instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos, is_pic);
@@ -129,14 +124,6 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                     instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos, is_pic);
                 },
             }
-            
-            /*if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]");
-            } else {*/
-                //instr.arg2 = X86Arg::DwordMem(X86Reg::RBP, *pos);
-            //}
         },
         
         // Literals are always passed as unsigned
@@ -160,78 +147,18 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
             instr.arg2 = X86Arg::Imm32(*val as i32);
         },
         
-        /*LtacArg::F32(ref val) => {
-            line.push_str(&reg_flt);
-            line.push_str(", DWORD PTR ");
-            line.push_str(&val);
-            line.push_str("[rip]");
-        },
-        
-        LtacArg::F64(ref val) => {
-            line.push_str(&reg_flt);
-            line.push_str(", QWORD PTR ");
-            line.push_str(&val);
-            line.push_str("[rip]");
-        },*/
-        
         LtacArg::Ptr(pos) => {
             instr.arg1 = reg64;
             instr.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos, is_pic);
-            
-            /*line.push_str(&reg64);
-            if is_pic {
-                line.push_str(", -");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]");
-            } else {
-                line.push_str(", [rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("]");
-            }*/
         },
         
         LtacArg::PtrLcl(ref val) => {
-            /*if is_pic {
-                line = "  lea ".to_string();
-                line.push_str(&reg64);
-                line.push_str(", ");
-                line.push_str(&val);
-                line.push_str("[rip]");
-            } else {*/
-                instr.arg1 = reg64;
-                instr.arg2 = X86Arg::LclMem(val.to_string(), is_pic);
-            //}
+            instr.arg1 = reg64;
+            instr.arg2 = X86Arg::LclMem(val.to_string(), is_pic);
         },
         
         _ => {},
     }
-    
-    /*
-    // If we have a 32-bit float variable, we have to convert it to a double
-    //TODO: combine
-    match code.arg2 {
-        LtacArg::FltReg(_p) => {
-            line.push_str("  cvtss2sd ");
-            line.push_str(&reg_flt);
-            line.push_str(", ");
-            line.push_str(&reg_flt);
-            line.push_str("\n");
-        },
-        
-        _ => {},
-    }
-    
-    match &code.arg1 {
-        LtacArg::F32(_v) => {
-            line.push_str("  cvtss2sd ");
-            line.push_str(&reg_flt);
-            line.push_str(", ");
-            line.push_str(&reg_flt);
-            line.push_str("\n");
-        },
-        
-        _ => {},
-    }*/
         
     x86_code.push(instr);
 }

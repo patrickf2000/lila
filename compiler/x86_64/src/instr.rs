@@ -257,21 +257,10 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                 LtacArg::Ptr(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos, is_pic),
                 _ => instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos, is_pic),
             }
-            
-            /*if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp], ");
-            } else {*/
-                /*line.push_str("[rbp-");
-                line.push_str(&pos.to_string());
-                line.push_str("], ");*/
-            //}
         },
         
         LtacArg::MemOffsetImm(pos, offset) => {
             // Load array
-            // TODO: PIC
             let mut instr2 = create_x86instr(X86Type::Mov);
             instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
             instr2.arg2 = X86Arg::QwordMem(X86Reg::RBP, *pos, is_pic);
@@ -336,15 +325,7 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         
         LtacArg::RetRegF32 | LtacArg::RetRegF64 => instr.arg2 = X86Arg::Xmm(0),
         
-        LtacArg::Mem(pos) => {
-            /*if is_pic {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-                line.push_str("[rbp]");
-            } else {*/
-                instr.arg2 = X86Arg::Mem(X86Reg::RBP, *pos, is_pic);
-            //}
-        },
+        LtacArg::Mem(pos) => instr.arg2 = X86Arg::Mem(X86Reg::RBP, *pos, is_pic),
         
         LtacArg::MemOffsetImm(pos, offset) => {
             let mut instr2 = create_x86instr(X86Type::Mov);
