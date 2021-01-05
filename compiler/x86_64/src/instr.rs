@@ -429,6 +429,26 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         
    x86_code.push(instr);
 }
+    
+// A utility function for build immediate moves    
+pub fn amd64_build_imm(x86_code : &mut Vec<X86Instr>, val : i32, size : i32) -> X86Arg {
+    let arg : X86Arg;
+    
+    match size {
+        8 => arg = X86Arg::Reg8(X86Reg::R15),
+        16 => arg = X86Arg::Reg16(X86Reg::R15),
+        64 => arg = X86Arg::Reg64(X86Reg::R15),
+        
+        _ => arg = X86Arg::Reg32(X86Reg::R15),
+    }
+    
+    let mut instr2 = create_x86instr(X86Type::Mov);
+    instr2.arg1 = arg.clone();
+    instr2.arg2 = X86Arg::Imm32(val);
+    x86_code.push(instr2);
+    
+    arg
+}
 
 // Builds the integer and modulus instructions
 // On x86 these are a little weird...
@@ -510,77 +530,17 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
             }
         },
         
-        LtacArg::Byte(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg8(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg8(X86Reg::R15);
-        },
+        LtacArg::Byte(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 8),
+        LtacArg::UByte(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 8),
         
-        LtacArg::UByte(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg8(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg8(X86Reg::R15);
-        },
+        LtacArg::I16(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 16),
+        LtacArg::U16(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 16),
         
-        LtacArg::I16(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg16(X86Reg::R15);
-        },
+        LtacArg::I32(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 32),
+        LtacArg::U32(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 32),
         
-        LtacArg::U16(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg16(X86Reg::R15);
-        },
-        
-        LtacArg::I32(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg32(X86Reg::R15);
-        },
-        
-        LtacArg::U32(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg32(X86Reg::R15);
-        },
-        
-        LtacArg::I64(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg64(X86Reg::R15);
-        },
-        
-        LtacArg::U64(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg64(X86Reg::R15);
-        },
+        LtacArg::I64(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 64),
+        LtacArg::U64(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 64),
         
         _ => {},
     }
@@ -639,23 +599,8 @@ pub fn amd64_build_byte_mul(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
         LtacArg::Reg8(pos) => instr.arg1 = amd64_op_reg8(*pos),
         LtacArg::Mem(pos) => instr.arg1 = X86Arg::BwordMem(X86Reg::RBP, *pos),
         
-        LtacArg::Byte(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg8(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg8(X86Reg::R15);
-        },
-        
-        LtacArg::UByte(val) => {
-            let mut instr2 = create_x86instr(X86Type::Mov);
-            instr2.arg1 = X86Arg::Reg8(X86Reg::R15);
-            instr2.arg2 = X86Arg::Imm32(*val as i32);
-            x86_code.push(instr2);
-            
-            instr.arg1 = X86Arg::Reg8(X86Reg::R15);
-        },
+        LtacArg::Byte(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 8),
+        LtacArg::UByte(val) => instr.arg1 = amd64_build_imm(x86_code, *val as i32, 8),
         
         _ => {},
     }
