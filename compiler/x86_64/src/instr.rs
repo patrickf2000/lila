@@ -55,24 +55,6 @@ pub fn amd64_build_strcmp(x86_code : &mut Vec<X86Instr>) {
 
 // Many instructions have common syntax
 pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pic : bool) {
-    /*let mut line = String::new();
-    
-    // Specific for float literals
-    match code.arg2 {
-        LtacArg::F32(ref val) => {
-            line.push_str("  movss xmm8, DWORD PTR ");
-            line.push_str(&val);
-            line.push_str("[rip]\n");
-        },
-        
-        LtacArg::F64(ref val) => {
-            line.push_str("  movsd xmm8, QWORD PTR ");
-            line.push_str(&val);
-            line.push_str("[rip]\n");
-        },
-        
-        _ => {},
-    }*/
     
     // Need if any parts represent a memory offset (ie, array access)
     match code.arg2 {
@@ -97,9 +79,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                     instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
                     instr2.arg2 = X86Arg::QwordMem(X86Reg::R15, offset * -1);
                 },
-                
-                /*LtacArg::FltReg(_p) => line.push_str("  movss xmm9, DWORD PTR [r15+"),
-                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15+"),*/
                 
                 _ => {
                     instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
@@ -156,9 +135,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                     instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
                     instr2.arg2 = X86Arg::QwordMem(X86Reg::R15, 0);
                 },
-                
-                /*LtacArg::FltReg(_p) => line.push_str("  movss xmm9, DWORD PTR [r15]\n"),
-                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15]\n"),*/
                 
                 _ => {
                     instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
@@ -220,9 +196,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                     instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
                     instr2.arg2 = X86Arg::QwordMem(X86Reg::R15, 0);
                 },
-                
-                /*LtacArg::FltReg(_p) => line.push_str("  movss xmm9, DWORD PTR [r15]\n"),
-                LtacArg::FltReg64(_p) => line.push_str("  movsd xmm9, QWORD PTR [r15]\n"),*/
                 
                 _ => {
                     instr2.arg1 = X86Arg::Reg32(X86Reg::R15);
@@ -329,12 +302,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         LtacArg::Reg32(pos) => instr.arg1 = amd64_op_reg32(*pos),
         LtacArg::Reg64(pos) => instr.arg1 = amd64_op_reg64(*pos),
         
-        /*LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
-            let reg = amd64_op_flt(*pos);
-            line.push_str(&reg);
-            line.push_str(", ");
-        },
-        */
         LtacArg::RetRegI8 | LtacArg::RetRegU8 => instr.arg1 = X86Arg::Reg8(X86Reg::RAX),
         LtacArg::RetRegI16 | LtacArg::RetRegU16 => instr.arg1 = X86Arg::Reg16(X86Reg::RAX),
         LtacArg::RetRegI32 | LtacArg::RetRegU32 => instr.arg1 = X86Arg::Reg32(X86Reg::RAX),
@@ -352,8 +319,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                 LtacArg::U32(_v) => instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos),
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
-                /*LtacArg::F32(_v) => line.push_str("DWORD PTR "),
-                LtacArg::F64(_v)*/
                 LtacArg::PtrLcl(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 LtacArg::Ptr(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 _ => instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos),
@@ -391,10 +356,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::Reg64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
-                /*LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
-                LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
-                LtacArg::FltReg(_v) => line.push_str("  movss "),
-                LtacArg::FltReg64(_v) => line.push_str("  movsd "),*/
                 _ => instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0),
             };
         },
@@ -438,10 +399,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::Reg64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
-                /*LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
-                LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
-                LtacArg::FltReg(_v) => line.push_str("  movss "),
-                LtacArg::FltReg64(_v) => line.push_str("  movsd "),*/
                 _ => instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0),
             }
         },
@@ -494,11 +451,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         LtacArg::Reg32(pos) => instr.arg2 = amd64_op_reg32(*pos),
         LtacArg::Reg64(pos) => instr.arg2 = amd64_op_reg64(*pos),
         
-        /*LtacArg::FltReg(pos) | LtacArg::FltReg64(pos) => {
-            let reg = amd64_op_flt(*pos);
-            line.push_str(&reg);
-        },*/
-        
         LtacArg::RetRegI8 | LtacArg::RetRegU8 => instr.arg2 = X86Arg::Reg8(X86Reg::RAX),
         LtacArg::RetRegI16 | LtacArg::RetRegU16 => instr.arg2 = X86Arg::Reg16(X86Reg::RAX),
         LtacArg::RetRegI32 | LtacArg::RetRegU32 => instr.arg2 = X86Arg::Reg32(X86Reg::RAX),
@@ -521,7 +473,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                 LtacArg::Reg8(_p) => instr.arg2 = X86Arg::Reg8(X86Reg::R15),
                 LtacArg::Reg16(_p) => instr.arg2 = X86Arg::Reg16(X86Reg::R15),
                 LtacArg::Reg64(_p) => instr.arg2 = X86Arg::Reg64(X86Reg::R15),
-                //LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm9"),
                 _ => instr.arg2 = X86Arg::Reg32(X86Reg::R15),
             }
         },
@@ -531,7 +482,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
                 LtacArg::Reg8(_p) => instr.arg2 = X86Arg::Reg8(X86Reg::R15),
                 LtacArg::Reg16(_p) => instr.arg2 = X86Arg::Reg16(X86Reg::R15),
                 LtacArg::Reg64(_p) => instr.arg2 = X86Arg::Reg64(X86Reg::R15),
-                //LtacArg::FltReg(_p) | LtacArg::FltReg64(_p) => line.push_str("xmm9"),
                 _ => instr.arg2 = X86Arg::Reg32(X86Reg::R15),
             }
         },
@@ -547,8 +497,6 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         
         LtacArg::I64(val) => instr.arg2 = X86Arg::Imm64(*val),
         LtacArg::U64(val) => instr.arg2 = X86Arg::Imm64(*val as i64),
-        
-        //LtacArg::F32(_v) | LtacArg::F64(_v) => line.push_str("xmm8\n"),
         
         LtacArg::PtrLcl(ref val) => {
             if is_pic {

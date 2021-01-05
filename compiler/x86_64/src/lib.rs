@@ -117,16 +117,11 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             
             // TODO: Combine this to reduce lines
             LtacType::Br => amd64_build_jump(x86_code, &code),
-            LtacType::Be => amd64_build_jump(x86_code, &code),
-            LtacType::Bne => amd64_build_jump(x86_code, &code),
-            LtacType::Bl => amd64_build_jump(x86_code, &code),
-            LtacType::Ble => amd64_build_jump(x86_code, &code),
-            LtacType::Bfl => amd64_build_jump(x86_code, &code),
-            LtacType::Bfle => amd64_build_jump(x86_code, &code),
-            LtacType::Bg => amd64_build_jump(x86_code, &code),
-            LtacType::Bge => amd64_build_jump(x86_code, &code),
-            LtacType::Bfg => amd64_build_jump(x86_code, &code),
-            LtacType::Bfge => amd64_build_jump(x86_code, &code),
+            LtacType::Be | LtacType::Bne => amd64_build_jump(x86_code, &code),
+            LtacType::Bl | LtacType::Ble => amd64_build_jump(x86_code, &code),
+            LtacType::Bfl | LtacType::Bfle => amd64_build_jump(x86_code, &code),
+            LtacType::Bg | LtacType::Bge => amd64_build_jump(x86_code, &code),
+            LtacType::Bfg | LtacType::Bfge => amd64_build_jump(x86_code, &code),
             
             LtacType::PushArg => amd64_build_pusharg(x86_code, &code, false, is_pic),
             LtacType::KPushArg => amd64_build_pusharg(x86_code, &code, true, is_pic),
@@ -181,37 +176,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             
             _ => amd64_write_instr(writer, &code, 2),
         }
-    
-        /*match &code.instr_type {
-            LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
-            
-            LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),
-            
-            
-            LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
-            
-            // We shouldn't generate any assembly for these
-            LtacType::Exit => {},
-            LtacType::Malloc => {},
-            LtacType::Free => {},
-            
-            // These are RISC-specific. At some point, we should generate instructions for them
-            LtacType::LdB | LtacType::LdUB |
-            LtacType::LdW | LtacType::LdUW |
-            LtacType::Ld | LtacType::LdU |
-            LtacType::LdQ | LtacType::LdUQ |
-            LtacType::LdF32 | LtacType::LdF64 => amd64_build_load_store(writer, &code, true),
-            
-            LtacType::StrB | LtacType::StrUB |
-            LtacType::StrW | LtacType::StrUW |
-            LtacType::Str | LtacType::StrU |
-            LtacType::StrQ | LtacType::StrUQ |
-            LtacType::StrF32 | LtacType::StrF64 => amd64_build_load_store(writer, &code, false),
-            LtacType::StrPtr => {},
-            
-            // Everything else uses the common build instruction function
-            _ => amd64_build_instr(writer, &code, is_pic, is_risc),
-        }*/
     }
 }
 
@@ -308,6 +272,28 @@ fn amd64_write_instr(writer : &mut BufWriter<File>, code : &X86Instr, op_count :
         .expect("[AMD64_write_instr] Write failed.");
 }
 
+// A utility function to write a memory operand
+fn amd64_write_mem(prefix : String, reg : &X86Reg, pos : i32, _is_pic : bool) -> String {
+    let mut line = String::new();
+    let reg_str = reg2str(&reg, 64);
+    
+    line.push_str(&prefix); 
+    line.push_str("[");
+    line.push_str(&reg_str);
+    
+    if pos < 0 {
+        let val = pos * -1;
+        line.push_str("+");
+        line.push_str(&val.to_string());
+    } else {
+        line.push_str("-");
+        line.push_str(&pos.to_string());
+    }
+    
+    line.push_str("]");
+    line
+}
+
 // Writes an x86 operand
 fn amd64_write_operand(arg : &X86Arg) -> String {
     let mut line = String::new();
@@ -337,93 +323,28 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
         X86Arg::Imm64(val) => line.push_str(&val.to_string()),
         
         X86Arg::Mem(reg, pos) => {
-            let reg_str = reg2str(&reg, 64);
-            
-            line.push_str("[");
-            line.push_str(&reg_str);
-            
-            if *pos < 0 {
-                let val = *pos * -1;
-                line.push_str("+");
-                line.push_str(&val.to_string());
-            } else {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-            }
-            
-            line.push_str("]");
+            let mem = amd64_write_mem("".to_string(), reg, *pos, false);
+            line.push_str(&mem);
         },
         
         X86Arg::BwordMem(reg, pos) => {
-            let reg_str = reg2str(&reg, 64);
-            
-            line.push_str("BYTE PTR [");
-            line.push_str(&reg_str);
-            
-            if *pos < 0 {
-                let val = *pos * -1;
-                line.push_str("+");
-                line.push_str(&val.to_string());
-            } else {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-            }
-            
-            line.push_str("]");
+            let mem = amd64_write_mem("BYTE PTR".to_string(), reg, *pos, false);
+            line.push_str(&mem);
         },
         
         X86Arg::WordMem(reg, pos) => {
-            let reg_str = reg2str(&reg, 64);
-            
-            line.push_str("WORD PTR [");
-            line.push_str(&reg_str);
-            
-            if *pos < 0 {
-                let val = *pos * -1;
-                line.push_str("+");
-                line.push_str(&val.to_string());
-            } else {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-            }
-            
-            line.push_str("]");
+            let mem = amd64_write_mem("WORD PTR".to_string(), reg, *pos, false);
+            line.push_str(&mem);
         },
         
         X86Arg::DwordMem(reg, pos) => {
-            let reg_str = reg2str(&reg, 64);
-            
-            line.push_str("DWORD PTR [");
-            line.push_str(&reg_str);
-            
-            if *pos < 0 {
-                let val = *pos * -1;
-                line.push_str("+");
-                line.push_str(&val.to_string());
-            } else {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-            }
-            
-            line.push_str("]");
+            let mem = amd64_write_mem("DWORD PTR".to_string(), reg, *pos, false);
+            line.push_str(&mem);
         },
         
         X86Arg::QwordMem(reg, pos) => {
-            let reg_str = reg2str(&reg, 64);
-            
-            line.push_str("QWORD PTR [");
-            line.push_str(&reg_str);
-            
-            if *pos < 0 {
-                let val = *pos * -1;
-                line.push_str("+");
-                line.push_str(&val.to_string());
-            } else {
-                line.push_str("-");
-                line.push_str(&pos.to_string());
-            }
-            
-            line.push_str("]");
+            let mem = amd64_write_mem("QWORD PTR".to_string(), reg, *pos, false);
+            line.push_str(&mem);
         },
         
         X86Arg::LclMem(ref val) => {
