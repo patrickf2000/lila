@@ -24,7 +24,6 @@ dependencies = [
  "parser",
  "riscv64",
  "transform",
- "x86",
  "x86_64",
 ]
 
@@ -48,13 +47,6 @@ dependencies = [
 
 [[package]]
 name = "transform"
-version = "0.1.0"
-dependencies = [
- "parser",
-]
-
-[[package]]
-name = "x86"
 version = "0.1.0"
 dependencies = [
  "parser",

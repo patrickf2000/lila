@@ -10,7 +10,6 @@ edition = "2018"
 members = [
     "parser",
     "transform",
-    "compiler/x86",
     "compiler/x86_64",
     "compiler/aarch64",
     "compiler/riscv64",
@@ -21,7 +20,6 @@ members = [
 parser = { path = "parser" }
 transform = { path = "transform" }
 example = { path = "compiler/example" }
-x86 = { path = "compiler/x86" }
 x86_64 = { path = "compiler/x86_64" }
 aarch64 = { path = "compiler/aarch64" }
 riscv64 = { path = "compiler/riscv64" }
