@@ -41,8 +41,20 @@ pub fn amd64_build_jump(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
     x86_code.push(instr);
 }
 
+// Builds a string comparison
+pub fn amd64_build_strcmp(x86_code : &mut Vec<X86Instr>) {
+    let mut instr2 = create_x86instr(X86Type::Call);
+    instr2.name = "strcmp".to_string();
+    x86_code.push(instr2.clone());
+    
+    instr2 = create_x86instr(X86Type::Cmp);
+    instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+    instr2.arg2 = X86Arg::Imm32(1);
+    x86_code.push(instr2);
+}
+
 // Many instructions have common syntax
-pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_pic : bool) {
+pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pic : bool) {
     /*let mut line = String::new();
     
     // Specific for float literals
@@ -263,7 +275,7 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
             }
         },
         
-        //LtacType::LdAddr => line.push_str("  lea "),
+        LtacType::LdAddr => instr = create_x86instr(X86Type::Lea),
         
         LtacType::I8Add | LtacType::U8Add |
         LtacType::I16Add | LtacType::U16Add |
@@ -341,7 +353,8 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 /*LtacArg::F32(_v) => line.push_str("DWORD PTR "),
-                LtacArg::F64(_v) | LtacArg::PtrLcl(_v) => line.push_str("QWORD PTR "), */
+                LtacArg::F64(_v)*/
+                LtacArg::PtrLcl(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 LtacArg::Ptr(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 _ => instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos),
             }
@@ -424,6 +437,7 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                 LtacArg::U16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0),
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
+                LtacArg::Reg64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 /*LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
                 LtacArg::F64(_v) => line.push_str("  movsd QWORD PTR "),
                 LtacArg::FltReg(_v) => line.push_str("  movss "),
@@ -534,16 +548,15 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
         LtacArg::I64(val) => instr.arg2 = X86Arg::Imm64(*val),
         LtacArg::U64(val) => instr.arg2 = X86Arg::Imm64(*val as i64),
         
-        /*LtacArg::F32(_v) | LtacArg::F64(_v) => line.push_str("xmm8\n"),
+        //LtacArg::F32(_v) | LtacArg::F64(_v) => line.push_str("xmm8\n"),
         
         LtacArg::PtrLcl(ref val) => {
             if is_pic {
-                line.push_str("r15");
+                instr.arg2 = X86Arg::Reg64(X86Reg::R15);
             } else {
-                line.push_str("OFFSET FLAT:");
-                line.push_str(&val);
+                instr.arg2 = X86Arg::LclMem(val.to_string());
             }
-        },*/
+        },
         
         _ => {},
     }

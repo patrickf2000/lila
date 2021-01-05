@@ -133,6 +133,8 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::Call => amd64_build_call(x86_code, &code),
             LtacType::Syscall => amd64_build_syscall(x86_code),
             
+            LtacType::StrCmp => amd64_build_strcmp(x86_code),
+            
             LtacType::I8Mul | LtacType::U8Mul => amd64_build_byte_mul(x86_code, &code),
             LtacType::I8Div | LtacType::I8Mod |
             LtacType::U8Div | LtacType::U8Mod => amd64_build_div(x86_code, &code),
@@ -184,10 +186,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             LtacType::MovI32Vec => amd64_build_vector_instr(writer, &code),
             
             LtacType::Push | LtacType::Pop => amd64_build_stackop(writer, &code),
-            
-            LtacType::StrCmp => amd64_build_strcmp(writer, use_c),
-            
-            
             
             
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),

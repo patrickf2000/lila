@@ -64,7 +64,7 @@ begin
                 break;
             end
         end
-        puts("");
+        println("");
         
         printf("Num: %d\n", x);
         x = x + 1;

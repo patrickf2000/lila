@@ -72,7 +72,7 @@ begin
             
             i = i + 1;
         end
-        puts("");
+        println("");
         
         printf("Num: %d\n", x);
     end

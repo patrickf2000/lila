@@ -7,20 +7,18 @@
 
 #RET 0
 
-extern func puts(s:str)
-
-func println(s:str)
+func print_ln(s:str)
 begin
-    puts(s);
+    println(s);
 end
 
 func main -> int
     s1 : str = "Hi!";
     s2 : str = s1;
 begin
-    println(s1);
-    println(s2);
-    println("How are you?");
+    print_ln(s1);
+    print_ln(s2);
+    print_ln("How are you?");
     
     return 0;
 end

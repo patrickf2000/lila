@@ -25,14 +25,13 @@
 #RET 0
 
 extern func printf(s:str, ...)
-extern func puts(s:str)
 
 func main -> int
     x, i : int = 0;
 begin
     while x < 10 
         if x == 5
-            puts("Halfway!");
+            println("Halfway!");
         end
         
         i = 0;
@@ -40,7 +39,7 @@ begin
             printf("*");
             i = i + 1;
         end
-        puts("");
+        println("");
     
         printf("Num: %d\n", x);
         x = x + 1;

@@ -9,15 +9,13 @@
 
 #RET 0
 
-extern func puts(s:str)
-
 func test1
     s1 : str = "Hi!";
 begin
     if s1 == "Hi!"
-        puts("Equal");
+        println("Equal");
     else
-        puts("Not equal");
+        println("Not equal");
     end
 end
 
@@ -25,27 +23,27 @@ func test2
     s1 : str = "Hi!";
 begin
     if "Hi!" == s1
-        puts("Equal");
+        println("Equal");
     else
-        puts("Not equal");
+        println("Not equal");
     end
 end
 
 func test3
 begin
     if "Hi!" == "Hi!"
-        puts("Equal");
+        println("Equal");
     else
-        puts("Not equal");
+        println("Not equal");
     end
 end
 
 func test4
 begin
     if "Hi!" == "Yo!"
-        puts("Equal");
+        println("Equal");
     else
-        puts("Not equal");
+        println("Not equal");
     end
 end
 
@@ -53,9 +51,9 @@ func test5
     s1 : str = "Hi!";
 begin
     if s1 == "Hi, how are you?"
-        puts("Equal");
+        println("Equal");
     else
-        puts("Not equal");
+        println("Not equal");
     end
 end
 

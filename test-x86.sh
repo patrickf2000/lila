@@ -64,21 +64,21 @@ run_test 'test/int64/*.ls' 'sys' $flags
 run_test 'test/byte/*.ls' 'sys' $flags
 run_test 'test/short/*.ls' 'sys' $flags
 #run_test 'test/float/*.ls' 'clib' $flags
-run_test 'test/char/*.ls' 'clib' $flags
-run_test 'test/string/*.ls' 'clib' $flags
+run_test 'test/char/*.ls' 'sys' $flags
+run_test 'test/string/*.ls' 'sys' $flags
 
 run_test 'test/assign/*.ls' 'sys' $flags
-run_test 'test/ooop/*.ls' 'clib' $flags
-run_test 'test/loop/*.ls' 'clib' $flags
+run_test 'test/ooop/*.ls' 'sys' $flags
+run_test 'test/loop/*.ls' 'sys' $flags
 run_test 'test/mem/*.ls' 'sys' $flags
-run_test 'test/const/*.ls' 'clib' $flags
-run_test 'test/func/*.ls' 'clib' $flags
-run_test 'test/enum/*.ls' 'clib' $flags
+run_test 'test/const/*.ls' 'sys' $flags
+run_test 'test/func/*.ls' 'sys' $flags
+run_test 'test/enum/*.ls' 'sys' $flags
 
-run_test 'test/errors/*.ls' 'clib' "error"
-run_test 'test/errors/ltac/*.ls' "clib" "error"
+run_test 'test/errors/*.ls' 'sys' "error"
+run_test 'test/errors/ltac/*.ls' "sys" "error"
 
-run_test 'test/vector/*.ls' 'clib'
+#run_test 'test/vector/*.ls' 'clib'
 run_test 'test/syscall/x86-64/*.ls' 'sys2'
 
 echo ""
