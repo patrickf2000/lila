@@ -60,7 +60,7 @@ echo ""
 
 run_test 'test/basic/*.ls' 'sys' $flags
 run_test 'test/int/*.ls' 'sys' $flags
-run_test 'test/int64/*.ls' 'clib' $flags
+run_test 'test/int64/*.ls' 'sys' $flags
 run_test 'test/byte/*.ls' 'clib' $flags
 run_test 'test/short/*.ls' 'clib' $flags
 run_test 'test/float/*.ls' 'clib' $flags

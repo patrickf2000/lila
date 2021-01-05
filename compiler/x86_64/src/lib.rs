@@ -136,6 +136,9 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::I32Div | LtacType::U32Div => amd64_build_div(x86_code, &code),
             LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(x86_code, &code),
             
+            LtacType::I64Div | LtacType::U64Div => amd64_build_div(x86_code, &code),
+            LtacType::I64Mod | LtacType::U64Mod => amd64_build_div(x86_code, &code),
+            
             // Everything else uses the common build instruction function
             _ => amd64_build_instr(x86_code, &code, is_pic),
         }
@@ -182,9 +185,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             
             LtacType::I16Div | LtacType::I16Mod |
             LtacType::U16Div | LtacType::U16Mod => amd64_build_short_div(writer, &code),
-            
-            LtacType::I64Div | LtacType::U64Div => amd64_build_div(writer, &code),
-            LtacType::I64Mod | LtacType::U64Mod => amd64_build_div(writer, &code),
             
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
             
@@ -320,6 +320,7 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
         },
         
         X86Arg::Imm32(val) => line.push_str(&val.to_string()),
+        X86Arg::Imm64(val) => line.push_str(&val.to_string()),
         
         X86Arg::Mem(reg, pos) => {
             let reg_str = reg2str(&reg, 64);

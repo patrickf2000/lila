@@ -87,6 +87,7 @@ pub enum X86Arg {
     ScaleMem(i32, X86Reg, i32),
     
     Imm32(i32),
+    Imm64(i64),
     
     Reg64(X86Reg),
     Reg32(X86Reg),
