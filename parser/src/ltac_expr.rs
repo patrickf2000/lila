@@ -371,7 +371,7 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 if !build_expr_var(builder, &arg, &var, reg_no, negate_next, &mut instr) {
                     return false;
                 }
-                  
+                
                 negate_next = false;  
             },
             
@@ -416,7 +416,6 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             
             // Check enumerations, and throw an error if there is no such thing
             AstArgType::Id => {
-                
                 // Check enumerated values
                 // TODO: I don't like this
                 match var.data_type {

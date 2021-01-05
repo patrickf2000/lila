@@ -244,7 +244,10 @@ pub fn build_var_assign(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
     let var : Var;
     match builder.vars.get(&line.name) {
         Some(v) => var = v.clone(),
-        None => return false,
+        None => {
+            builder.syntax.ltac_error(line, "Invalid variable.".to_string());
+            return false;
+        },
     }
     
     let code : bool;
