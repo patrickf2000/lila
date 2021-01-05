@@ -83,6 +83,7 @@ pub enum X86Arg {
     Mem(X86Reg, i32),
     BwordMem(X86Reg, i32),      // Stands for BYTE
     DwordMem(X86Reg, i32),
+    WordMem(X86Reg, i32),
     QwordMem(X86Reg, i32),
     LclMem(String),
     ScaleMem(i32, X86Reg, i32),

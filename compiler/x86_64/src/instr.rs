@@ -15,8 +15,6 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-// TODO: I would like to eventually merge this with another file
-
 use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::asm::*;
 
@@ -78,7 +76,10 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                     instr2.arg2 = X86Arg::BwordMem(X86Reg::R15, offset * -1);
                 }
                 
-                //LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15+"),
+                LtacArg::Reg16(_p) => {
+                    instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
+                    instr2.arg2 = X86Arg::WordMem(X86Reg::R15, offset * -1);
+                }
                 
                 LtacArg::Reg64(_p) => {
                     instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
@@ -134,7 +135,10 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                     instr2.arg2 = X86Arg::BwordMem(X86Reg::R15, 0);
                 }
                 
-                //LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
+                LtacArg::Reg16(_p) => {
+                    instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
+                    instr2.arg2 = X86Arg::WordMem(X86Reg::R15, 0);
+                }
                 
                 LtacArg::Reg64(_p) => {
                     instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
@@ -195,7 +199,10 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
                     instr2.arg2 = X86Arg::BwordMem(X86Reg::R15, 0);
                 }
                 
-                //LtacArg::Reg16(_p) => line.push_str("  mov r15w, WORD PTR [r15]\n"),
+                LtacArg::Reg16(_p) => {
+                    instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
+                    instr2.arg2 = X86Arg::WordMem(X86Reg::R15, 0);
+                }
                 
                 LtacArg::Reg64(_p) => {
                     instr2.arg1 = X86Arg::Reg64(X86Reg::R15);
@@ -327,15 +334,15 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
             match &code.arg2 {
                 LtacArg::Byte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::RBP, *pos),
                 LtacArg::UByte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::RBP, *pos),
-                /*LtacArg::I16(_v) => line.push_str("WORD PTR "),
-                LtacArg::U16(_v) => line.push_str("WORD PTR "),*/
+                LtacArg::I16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::RBP, *pos),
+                LtacArg::U16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::RBP, *pos),
                 LtacArg::I32(_v) => instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos),
                 LtacArg::U32(_v) => instr.arg1 = X86Arg::DwordMem(X86Reg::RBP, *pos),
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 /*LtacArg::F32(_v) => line.push_str("DWORD PTR "),
-                LtacArg::F64(_v) | LtacArg::PtrLcl(_v) => line.push_str("QWORD PTR "), 
-                LtacArg::Ptr(_v) => line.push_str("QWORD PTR "),*/
+                LtacArg::F64(_v) | LtacArg::PtrLcl(_v) => line.push_str("QWORD PTR "), */
+                LtacArg::Ptr(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos),
                 _ => instr.arg1 = X86Arg::Mem(X86Reg::RBP, *pos),
             }
             
@@ -366,8 +373,8 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
             match &code.arg2 {
                 LtacArg::Byte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0),
                 LtacArg::UByte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0),
-                /*LtacArg::I16(_v) => line.push_str("  mov WORD PTR "),
-                LtacArg::U16(_v) => line.push_str("  mov WORD PTR "),*/
+                LtacArg::I16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0),
+                LtacArg::U16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0),
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::Reg64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
@@ -410,13 +417,11 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
             // Now set up for the final move
             match &code.arg2 {
                 LtacArg::Reg8(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0),
-                //LtacArg::Reg16(_v) => line.push_str("  mov WORD PTR "),
+                LtacArg::Reg16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0),
                 LtacArg::Byte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0),
                 LtacArg::UByte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0),
-                /*LtacArg::I16(_v) => line.push_str("  mov WORD PTR "),
-                LtacArg::U16(_v) => line.push_str("  mov WORD PTR "),
-                LtacArg::I32(_v) => line.push_str("  mov DWORD PTR "),
-                LtacArg::U32(_v) => line.push_str("  mov DWORD PTR "),*/
+                LtacArg::I16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0),
+                LtacArg::U16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0),
                 LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0),
                 /*LtacArg::F32(_v) => line.push_str("  movss DWORD PTR "),
@@ -520,8 +525,8 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
         LtacArg::Byte(val) => instr.arg2 = X86Arg::Imm32(*val as i32),
         LtacArg::UByte(val) => instr.arg2 = X86Arg::Imm32(*val as i32),
         
-        /*LtacArg::I16(val) => line.push_str(&val.to_string()),
-        LtacArg::U16(val) => line.push_str(&val.to_string()),*/
+        LtacArg::I16(val) => instr.arg2 = X86Arg::Imm32(*val as i32),
+        LtacArg::U16(val) => instr.arg2 = X86Arg::Imm32(*val as i32),
         
         LtacArg::I32(val) => instr.arg2 = X86Arg::Imm32(*val),
         LtacArg::U32(val) => instr.arg2 = X86Arg::Imm32(*val as i32),
@@ -543,25 +548,31 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, _is_p
         _ => {},
     }
     
-    /*line.push_str("\n");
-    
     // Special cases
     // Bytes
     if code.arg1 == LtacArg::RetRegI8 {
-        line.push_str("  movsx eax, al\n");
+        let mut instr2 = create_x86instr(X86Type::MovSX);
+        instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+        instr2.arg2 = X86Arg::Reg8(X86Reg::RAX);
+        x86_code.push(instr2);
     } else if code.arg1 == LtacArg::RetRegU8 {
-        line.push_str("  movzx eax, al\n");
+        let mut instr2 = create_x86instr(X86Type::MovZX);
+        instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+        instr2.arg2 = X86Arg::Reg8(X86Reg::RAX);
+        x86_code.push(instr2);
         
     // Short
     } else if code.arg1 == LtacArg::RetRegI16 {
-        line.push_str("  movsx eax, ax\n");
+        let mut instr2 = create_x86instr(X86Type::MovSX);
+        instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+        instr2.arg2 = X86Arg::Reg16(X86Reg::RAX);
+        x86_code.push(instr2);
     } else if code.arg1 == LtacArg::RetRegU16 {
-        line.push_str("  movzx eax, ax\n");
+        let mut instr2 = create_x86instr(X86Type::MovZX);
+        instr2.arg1 = X86Arg::Reg32(X86Reg::RAX);
+        instr2.arg2 = X86Arg::Reg16(X86Reg::RAX);
+        x86_code.push(instr2);
     }
-    
-    // Write to the file
-    writer.write(&line.into_bytes())
-        .expect("[AMD64_write_instr] Write failed.");*/
         
    x86_code.push(instr);
 }
@@ -579,9 +590,13 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
     let mut instr = create_x86instr(X86Type::IDiv);
     let mut dest_instr = create_x86instr(X86Type::Mov);
     
-    if code.instr_type == LtacType::U32Div || code.instr_type == LtacType::U32Mod
-        || code.instr_type == LtacType::U64Div || code.instr_type == LtacType::U64Mod {
-        instr = create_x86instr(X86Type::Div);
+    match code.instr_type {
+        LtacType::U8Div | LtacType::U8Mod
+        | LtacType::U16Div | LtacType::U16Mod
+        | LtacType::U32Div | LtacType::U32Mod
+        | LtacType::U64Div | LtacType::U64Mod => instr = create_x86instr(X86Type::Div),
+        
+        _ => {},
     }
     
     match &code.arg1 {
@@ -592,6 +607,15 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
             x86_code.push(instr2);
             
             dest_instr.arg1 = amd64_op_reg8(*pos);
+        },
+        
+        LtacArg::Reg16(pos) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg16(X86Reg::RAX);
+            instr2.arg2 = amd64_op_reg16(*pos);
+            x86_code.push(instr2);
+            
+            dest_instr.arg1 = amd64_op_reg16(*pos);
         },
         
         LtacArg::Reg32(pos) => {
@@ -612,6 +636,7 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
             dest_instr.arg1 = amd64_op_reg64(*pos);
         },
         
+        // TODO: Do we need this?
         LtacArg::Mem(pos) => {
             let mut instr2 = create_x86instr(X86Type::Mov);
         
@@ -635,12 +660,15 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
     
     match &code.arg2 {
         LtacArg::Reg8(pos) => instr.arg1 = amd64_op_reg8(*pos),
+        LtacArg::Reg16(pos) => instr.arg1 = amd64_op_reg16(*pos),
         LtacArg::Reg32(pos) => instr.arg1 = amd64_op_reg32(*pos),
         LtacArg::Reg64(pos) => instr.arg1 = amd64_op_reg64(*pos),
         
         LtacArg::Mem(pos) => {
             if code.instr_type == LtacType::I8Div || code.instr_type == LtacType::I8Mod {
                 instr.arg1 = X86Arg::BwordMem(X86Reg::RBP, *pos);
+            } else if code.instr_type == LtacType::I16Div || code.instr_type == LtacType::I16Mod {
+                instr.arg1 = X86Arg::WordMem(X86Reg::RBP, *pos);
             } else if code.instr_type == LtacType::I64Div || code.instr_type == LtacType::I64Mod {
                 instr.arg1 = X86Arg::QwordMem(X86Reg::RBP, *pos);
             } else {
@@ -664,6 +692,24 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
             x86_code.push(instr2);
             
             instr.arg1 = X86Arg::Reg8(X86Reg::R15);
+        },
+        
+        LtacArg::I16(val) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*val as i32);
+            x86_code.push(instr2);
+            
+            instr.arg1 = X86Arg::Reg16(X86Reg::R15);
+        },
+        
+        LtacArg::U16(val) => {
+            let mut instr2 = create_x86instr(X86Type::Mov);
+            instr2.arg1 = X86Arg::Reg16(X86Reg::R15);
+            instr2.arg2 = X86Arg::Imm32(*val as i32);
+            x86_code.push(instr2);
+            
+            instr.arg1 = X86Arg::Reg16(X86Reg::R15);
         },
         
         LtacArg::I32(val) => {
@@ -707,10 +753,12 @@ pub fn amd64_build_div(x86_code : &mut Vec<X86Instr>, code : &LtacInstr) {
     
     match &code.instr_type {
         LtacType::I8Div | LtacType::U8Div => dest_instr.arg2 = X86Arg::Reg8(X86Reg::AL),
+        LtacType::I16Div | LtacType::U16Div => dest_instr.arg2 = X86Arg::Reg16(X86Reg::RAX),
         LtacType::I32Div | LtacType::U32Div => dest_instr.arg2 = X86Arg::Reg32(X86Reg::RAX),
         LtacType::I64Div | LtacType::U64Div => dest_instr.arg2 = X86Arg::Reg64(X86Reg::RAX),
         
         LtacType::I8Mod | LtacType::U8Mod => dest_instr.arg2 = X86Arg::Reg8(X86Reg::AH),
+        LtacType::I16Mod | LtacType::U16Mod => dest_instr.arg2 = X86Arg::Reg16(X86Reg::RDX),
         LtacType::I32Mod | LtacType::U32Mod => dest_instr.arg2 = X86Arg::Reg32(X86Reg::RDX),
         LtacType::I64Mod | LtacType::U64Mod => dest_instr.arg2 = X86Arg::Reg64(X86Reg::RDX),
         

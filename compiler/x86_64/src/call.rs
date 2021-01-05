@@ -71,7 +71,10 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
             instr.arg2 = amd64_op_reg8(*pos);
         },
         
-        LtacArg::Reg16(_p) => {},
+        LtacArg::Reg16(pos) => {
+            instr.arg1 = reg32;
+            instr.arg2 = amd64_op_reg16(*pos);
+        },
         
         LtacArg::Reg32(pos) => {
             instr.arg1 = reg32;
@@ -82,14 +85,6 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
             instr.arg1 = reg64;
             instr.arg2 = amd64_op_reg64(*pos);
         },
-        
-        LtacArg::FltReg(_p) => {},
-        LtacArg::FltReg64(_p) => {},
-        
-        LtacArg::RetRegI32 => {},
-        LtacArg::RetRegI64 => {},
-        
-        LtacArg::RetRegF32 | LtacArg::RetRegF64 => {},
         
         LtacArg::Mem(pos) => {
             match code.arg2 {
@@ -106,17 +101,17 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
                 LtacArg::UByte(_v) => {
                     instr.arg1 = reg32;
                     instr.arg2 = X86Arg::BwordMem(X86Reg::RBP, *pos);
-                }
+                },
                 
-                /*LtacArg::I16(_v) => {
-                    line.push_str(&reg32);
-                    line.push_str(", WORD PTR ");
+                LtacArg::I16(_v) => {
+                    instr.arg1 = reg32;
+                    instr.arg2 = X86Arg::WordMem(X86Reg::RBP, *pos);
                 },
                 
                 LtacArg::U16(_v) => {
-                    line.push_str(&reg32);
-                    line.push_str(", WORD PTR ");
-                },*/
+                    instr.arg1 = reg32;
+                    instr.arg2 = X86Arg::WordMem(X86Reg::RBP, *pos);
+                },
                 
                 LtacArg::I64(_v) => {
                     instr.arg1 = reg64;
@@ -149,11 +144,10 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
             instr.arg2 = X86Arg::Imm32(*val as i32);
         },
         
-        /*LtacArg::U16(val) => {
-            line.push_str(&reg32);
-            line.push_str(", ");
-            line.push_str(&val.to_string());
-        },*/
+        LtacArg::U16(val) => {
+            instr.arg1 = reg32;
+            instr.arg2 = X86Arg::Imm32(*val as i32);
+        },
         
         LtacArg::I32(val) => {
             instr.arg1 = reg32;
@@ -211,8 +205,7 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         _ => {},
     }
     
-    /*line.push_str("\n");
-    
+    /*
     // If we have a 32-bit float variable, we have to convert it to a double
     //TODO: combine
     match code.arg2 {
@@ -237,10 +230,7 @@ pub fn amd64_build_pusharg(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_
         },
         
         _ => {},
-    }
-    
-    writer.write(&line.into_bytes())
-        .expect("[AMD64_build_pusharg Write failed.");*/
+    }*/
         
     x86_code.push(instr);
 }

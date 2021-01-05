@@ -1,6 +1,6 @@
 
 #OUTPUT
-#X: FFFFA1B1
+#X: -24143
 #END
 
 #RET 0
@@ -15,7 +15,7 @@ begin
     
     x = numbers[3];
     
-    printf("X: %X\n", x);
+    printf("X: %d\n", x);
     
     return 0;
 end

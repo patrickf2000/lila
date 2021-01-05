@@ -137,6 +137,9 @@ fn translate_code(x86_code : &mut Vec<X86Instr>, code : &Vec<LtacInstr>, is_pic 
             LtacType::I8Div | LtacType::I8Mod |
             LtacType::U8Div | LtacType::U8Mod => amd64_build_div(x86_code, &code),
             
+            LtacType::I16Div | LtacType::I16Mod |
+            LtacType::U16Div | LtacType::U16Mod => amd64_build_div(x86_code, &code),
+            
             LtacType::I32Div | LtacType::U32Div => amd64_build_div(x86_code, &code),
             LtacType::I32Mod | LtacType::U32Mod => amd64_build_div(x86_code, &code),
             
@@ -185,8 +188,7 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<X86Instr>) {
             LtacType::StrCmp => amd64_build_strcmp(writer, use_c),
             
             
-            LtacType::I16Div | LtacType::I16Mod |
-            LtacType::U16Div | LtacType::U16Mod => amd64_build_short_div(writer, &code),
+            
             
             LtacType::I32VAdd => amd64_build_vector_instr(writer, &code),
             
@@ -358,6 +360,24 @@ fn amd64_write_operand(arg : &X86Arg) -> String {
             let reg_str = reg2str(&reg, 64);
             
             line.push_str("BYTE PTR [");
+            line.push_str(&reg_str);
+            
+            if *pos < 0 {
+                let val = *pos * -1;
+                line.push_str("+");
+                line.push_str(&val.to_string());
+            } else {
+                line.push_str("-");
+                line.push_str(&pos.to_string());
+            }
+            
+            line.push_str("]");
+        },
+        
+        X86Arg::WordMem(reg, pos) => {
+            let reg_str = reg2str(&reg, 64);
+            
+            line.push_str("WORD PTR [");
             line.push_str(&reg_str);
             
             if *pos < 0 {

@@ -1,23 +1,23 @@
 
 #OUTPUT
-#ffff8234
-#aa
-#88
+#-32204
+#170
+#136
 #END
 
 #RET 0
 
-extern func puts(s:str)
+extern func printf(s:str, ...)
 
 func main -> int
     x : short = 0x8234;
 begin
     
-    printf("%x\n", x);
-    printf("%x\n", 0x00AA);
+    printf("%d\n", x);
+    printf("%d\n", 0x00AA);
     
     x = 0x0088;
-    printf("%x\n", x);
+    printf("%d\n", x);
     
     return 0;
 end

@@ -1,7 +1,7 @@
 
 #OUTPUT
-#S1: ffffa1b1
-#S2: ffffafbf
+#S1: -24143
+#S2: -20545
 #END
 
 #RET 0
@@ -26,8 +26,8 @@ begin
     s1 = short1();
     s2 = short2();
     
-    printf("S1: %x\n", s1);
-    printf("S2: %x\n", s2);
+    printf("S1: %d\n", s1);
+    printf("S2: %d\n", s2);
     
     return 0;
 end

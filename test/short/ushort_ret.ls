@@ -1,13 +1,12 @@
 
 #OUTPUT
-#S1: a1b1
-#S2: afbf
+#S1: 41393
+#S2: 44991
 #END
 
 #RET 0
 
 extern func printf(s:str, ...)
-extern func puts(s:str)
 
 func short1 -> ushort
 begin
@@ -26,8 +25,8 @@ begin
     s1 = short1();
     s2 = short2();
     
-    printf("S1: %x\n", s1);
-    printf("S2: %x\n", s2);
+    printf("S1: %d\n", s1);
+    printf("S2: %d\n", s2);
     
     return 0;
 end
