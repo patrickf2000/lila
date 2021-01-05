@@ -49,12 +49,6 @@ function run_test() {
 
 flags=""
 
-if [[ $1 == "--risc" ]] ; then
-    flags=" --risc "
-elif [[ $1 == "--cg2" ]] ; then
-    flags=" --cg2 "
-fi
-
 echo "Running all tests..."
 echo ""
 

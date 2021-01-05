@@ -6,7 +6,7 @@ echo ""
 cargo build --release
 
 cwd=`pwd`
-export lilac="$cwd/target/release/lilac --cg2"
+export lilac="$cwd/target/release/lilac"
 
 cd target
 
