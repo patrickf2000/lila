@@ -360,14 +360,12 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             suffix = 0 as char;
         },
         
-        LtacType::BOr | LtacType::WOr
-        | LtacType::I32Or | LtacType::I64Or => {
+        LtacType::Or => {
             instr = "or".to_string();
             suffix = 0 as char;
         },
         
-        LtacType::BXor | LtacType::WXor
-        | LtacType::I32Xor | LtacType::I64Xor => {
+        LtacType::Xor => {
             instr = "xor".to_string();
             suffix = 0 as char;
         },

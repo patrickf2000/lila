@@ -143,24 +143,18 @@ pub enum LtacType {
     // I don't think these need to be by signed/unsigned, but
     // if I'm wrong we'll have to change this.
     And,
+    Or,
+    Xor,
     
-    BOr,
-    BXor,
     BLsh,
     BRsh,
     
-    WOr,
-    WXor,
     WLsh,
     WRsh,
     
-    I32Or,
-    I32Xor,
     I32Lsh,
     I32Rsh,
     
-    I64Or,
-    I64Xor,
     I64Lsh,
     I64Rsh,
     

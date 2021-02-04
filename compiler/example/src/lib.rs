@@ -161,16 +161,14 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             
             // Bitwise and logical operations
             LtacType::And => {},
+            LtacType::Or => {},
+            LtacType::Xor => {},
             
             // Byte bitwise operations
-            LtacType::BOr => {},
-            LtacType::BXor => {},
             LtacType::BLsh => {},
             LtacType::BRsh => {},
             
             // Word bitwise operations
-            LtacType::WOr => {},
-            LtacType::WXor => {},
             LtacType::WLsh => {},
             LtacType::WRsh => {},
             
@@ -188,8 +186,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U32Mod => {},
             
             // Signed 32-bit integer bitwise operations
-            LtacType::I32Or => {},
-            LtacType::I32Xor => {},
             LtacType::I32Lsh => {},
             LtacType::I32Rsh => {},
             
@@ -210,8 +206,6 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<LtacInstr>) {
             LtacType::U64Mod => {},
             
             // 64-bit integer bitwise operations
-            LtacType::I64Or => {},
-            LtacType::I64Xor => {},
             LtacType::I64Lsh => {},
             LtacType::I64Rsh => {},
             

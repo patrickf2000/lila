@@ -229,6 +229,8 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         
         // Bitwise and logical instructions
         LtacType::And => line.push_str("  and "),
+        LtacType::Or => line.push_str("  or "),
+        LtacType::Xor => line.push_str("  xor "),
         
         // Byte (i8) operations
         LtacType::I8Add => line.push_str("  i8.add "),
@@ -244,8 +246,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U8Mod => line.push_str("  u8.mod "),
         
         // Byte bitwise operations
-        LtacType::BOr => line.push_str("  b.or "),
-        LtacType::BXor => line.push_str("  b.xor "),
         LtacType::BLsh => line.push_str("  b.lsh "),
         LtacType::BRsh => line.push_str("  b.rsh "),
         
@@ -263,8 +263,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U16Mod => line.push_str("  u16.mod "),
         
         // Short bitwise operations
-        LtacType::WOr => line.push_str("  w.or "),
-        LtacType::WXor => line.push_str("  w.xor "),
         LtacType::WLsh => line.push_str("  w.lsh "),
         LtacType::WRsh => line.push_str("  w.rsh "),
         
@@ -282,8 +280,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U32Mod => line.push_str("  u32.mod "),
         
         // Integer bitwise operations
-        LtacType::I32Or => line.push_str("  i32.or "),
-        LtacType::I32Xor => line.push_str("  i32.xor "),
         LtacType::I32Lsh => line.push_str("  i32.lsh "),
         LtacType::I32Rsh => line.push_str("  i32.rsh "),
         
@@ -304,8 +300,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U64Mod => line.push_str("  u64.mod "),
         
         // 64-bit integer bitwise operations
-        LtacType::I64Or => line.push_str("  i64.or "),
-        LtacType::I64Xor => line.push_str("  i64.xor "),
         LtacType::I64Lsh => line.push_str("  i64.lsh "),
         LtacType::I64Rsh => line.push_str("  i64.rsh "),
         

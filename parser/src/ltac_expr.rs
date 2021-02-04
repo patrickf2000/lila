@@ -693,23 +693,16 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             
             AstArgType::OpOr => {
                 match var.data_type {
-                    DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BOr),
-                    DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WOr),
-                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Or),
-                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Or),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Or),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Or),
-                    
-                    _ => {
+                    DataType::Char | DataType::Str
+                    | DataType::Ptr if var.sub_type == DataType::Char => {
                         builder.syntax.ltac_error2("Invalid use of logical or.".to_string());
                         return false;
                     },
+                    
+                    _ => {},
                 }
                 
+                instr = ltac::create_instr(LtacType::Or);
                 instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
@@ -717,23 +710,16 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             
             AstArgType::OpXor => {
                 match var.data_type {
-                    DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BXor),
-                    DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WXor),
-                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Xor),
-                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Xor),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Xor),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Xor),
-                    
-                    _ => {
+                    DataType::Char | DataType::Str
+                    | DataType::Ptr if var.sub_type == DataType::Char => {
                         builder.syntax.ltac_error2("Invalid use of logical xor.".to_string());
                         return false;
                     },
+                    
+                    _ => {},
                 }
                 
+                instr = ltac::create_instr(LtacType::Xor);
                 instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
