@@ -727,23 +727,16 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             
             AstArgType::OpLeftShift => {
                 match var.data_type {
-                    DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BLsh),
-                    DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WLsh),
-                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Lsh),
-                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Lsh),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Lsh),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Lsh),
-                    
-                    _ => {
+                    DataType::Char | DataType::Str
+                    | DataType::Ptr if var.sub_type == DataType::Char => {
                         builder.syntax.ltac_error2("Invalid use of left shift.".to_string());
                         return false;
                     },
+                    
+                    _ => {},
                 }
                 
+                instr = ltac::create_instr(LtacType::Lsh);
                 instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             
@@ -751,23 +744,16 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
             
             AstArgType::OpRightShift => {
                 match var.data_type {
-                    DataType::Byte | DataType::UByte => instr = ltac::create_instr(LtacType::BRsh),
-                    DataType::Short | DataType::UShort => instr = ltac::create_instr(LtacType::WRsh),
-                    DataType::Int | DataType::UInt => instr = ltac::create_instr(LtacType::I32Rsh),
-                    DataType::Int64 | DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Rsh),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int || var.sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::I32Rsh),
-                    
-                    DataType::Ptr
-                    if var.sub_type == DataType::Int64 || var.sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::I64Rsh),
-                    
-                    _ => {
+                    DataType::Char | DataType::Str
+                    | DataType::Ptr if var.sub_type == DataType::Char => {
                         builder.syntax.ltac_error2("Invalid use of right shift.".to_string());
                         return false;
                     },
+                    
+                    _ => {},
                 }
                 
+                instr = ltac::create_instr(LtacType::Rsh);
                 instr.arg1 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
             },
             

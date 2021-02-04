@@ -210,10 +210,8 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         LtacType::And => instr = create_x86instr(X86Type::And),
         LtacType::Or => instr = create_x86instr(X86Type::Or),
         LtacType::Xor => instr = create_x86instr(X86Type::Xor),
-        LtacType::BLsh | LtacType::WLsh |
-        LtacType::I32Lsh | LtacType::I64Lsh => instr = create_x86instr(X86Type::Shl),
-        LtacType::BRsh | LtacType::WRsh |
-        LtacType::I32Rsh | LtacType::I64Rsh => instr = create_x86instr(X86Type::Shr),
+        LtacType::Lsh => instr = create_x86instr(X86Type::Shl),
+        LtacType::Rsh => instr = create_x86instr(X86Type::Shr),
         
         LtacType::I8Cmp | LtacType::U8Cmp |
         LtacType::I16Cmp | LtacType::U16Cmp |

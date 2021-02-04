@@ -140,23 +140,13 @@ pub enum LtacType {
     F64Div,
     
     // Bitwise instructions
-    // I don't think these need to be by signed/unsigned, but
+    // I don't think these need to be typed, though
     // if I'm wrong we'll have to change this.
     And,
     Or,
     Xor,
-    
-    BLsh,
-    BRsh,
-    
-    WLsh,
-    WRsh,
-    
-    I32Lsh,
-    I32Rsh,
-    
-    I64Lsh,
-    I64Rsh,
+    Lsh,
+    Rsh,
     
     // Vector instructions
     I32VAdd,

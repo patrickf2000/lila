@@ -370,11 +370,8 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             suffix = 0 as char;
         },
         
-        LtacType::BLsh | LtacType::WLsh
-        | LtacType::I32Lsh | LtacType::I64Lsh => instr = "sll".to_string(),
-        
-        LtacType::BRsh | LtacType::WRsh
-        | LtacType::I32Rsh | LtacType::I64Rsh => instr = "srl".to_string(),
+        LtacType::Lsh => instr = "sll".to_string(),
+        LtacType::Rsh => instr = "srl".to_string(),
             
         _ => {},
     }

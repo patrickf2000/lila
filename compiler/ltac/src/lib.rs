@@ -231,6 +231,8 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::And => line.push_str("  and "),
         LtacType::Or => line.push_str("  or "),
         LtacType::Xor => line.push_str("  xor "),
+        LtacType::Lsh => line.push_str("  lsh "),
+        LtacType::Rsh => line.push_str("  rsh "),
         
         // Byte (i8) operations
         LtacType::I8Add => line.push_str("  i8.add "),
@@ -245,10 +247,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U8Div => line.push_str("  u8.div "),
         LtacType::U8Mod => line.push_str("  u8.mod "),
         
-        // Byte bitwise operations
-        LtacType::BLsh => line.push_str("  b.lsh "),
-        LtacType::BRsh => line.push_str("  b.rsh "),
-        
         // Signed short (i16) operations
         LtacType::I16Add => line.push_str("  i16.add "),
         LtacType::I16Sub => line.push_str("  i16.sub "),
@@ -262,10 +260,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U16Div => line.push_str("  u16.div "),
         LtacType::U16Mod => line.push_str("  u16.mod "),
         
-        // Short bitwise operations
-        LtacType::WLsh => line.push_str("  w.lsh "),
-        LtacType::WRsh => line.push_str("  w.rsh "),
-        
         // Integer (i32) operations
         LtacType::I32Add => line.push_str("  i32.add "),
         LtacType::I32Sub => line.push_str("  i32.sub "),
@@ -278,10 +272,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U32Mul => line.push_str("  u32.mul "),
         LtacType::U32Div => line.push_str("  u32.div "),
         LtacType::U32Mod => line.push_str("  u32.mod "),
-        
-        // Integer bitwise operations
-        LtacType::I32Lsh => line.push_str("  i32.lsh "),
-        LtacType::I32Rsh => line.push_str("  i32.rsh "),
         
         // Integer (i32) vector operations
         LtacType::I32VAdd => line.push_str("  i32.vadd "),
@@ -298,10 +288,6 @@ fn ltac_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
         LtacType::U64Mul => line.push_str("  u64.mul "),
         LtacType::U64Div => line.push_str("  u64.div "),
         LtacType::U64Mod => line.push_str("  u64.mod "),
-        
-        // 64-bit integer bitwise operations
-        LtacType::I64Lsh => line.push_str("  i64.lsh "),
-        LtacType::I64Rsh => line.push_str("  i64.rsh "),
         
         // Single-precision float operations
         LtacType::F32Add => line.push_str("  f32.add "),
