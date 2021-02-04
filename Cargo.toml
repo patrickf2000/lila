@@ -13,7 +13,8 @@ members = [
     "compiler/x86_64",
     "compiler/aarch64",
     "compiler/riscv64",
-    "compiler/ltac"
+    "compiler/ltac",
+    "compiler/llvm"
 ]
 
 [dependencies]
@@ -24,4 +25,5 @@ x86_64 = { path = "compiler/x86_64" }
 aarch64 = { path = "compiler/aarch64" }
 riscv64 = { path = "compiler/riscv64" }
 ltac_printer = { path = "compiler/ltac" }
+llvm = { path = "compiler/llvm" }
 

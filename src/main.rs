@@ -64,6 +64,7 @@ fn run() -> i32 {
     let mut inc_start = true;
     let mut pic = false;
     let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
+    let mut use_llvm = false;
     let mut arch = get_arch();
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
@@ -100,6 +101,8 @@ fn run() -> i32 {
             
             "-march=riscv64" => arch = Arch::Riscv64,
             
+            "--llvm" => use_llvm = true,
+            
             "-h" | "--help" => {
                 help();
                 return 0;
@@ -117,6 +120,17 @@ fn run() -> i32 {
         };
         
         ast.print();
+        return 0;
+    }
+    
+    if use_llvm {
+        let input = inputs.last().unwrap();
+        let ast = match parser::get_ast(&input, arch, use_corelib) {
+            Ok(ast) => ast,
+            Err(_e) => return 1,
+        };
+        
+        llvm::compile(&ast).expect("LLVM Codegen failed with unknown error.");
         return 0;
     }
     
