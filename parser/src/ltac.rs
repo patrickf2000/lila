@@ -142,25 +142,23 @@ pub enum LtacType {
     // Bitwise instructions
     // I don't think these need to be by signed/unsigned, but
     // if I'm wrong we'll have to change this.
-    BAnd,
+    And,
+    
     BOr,
     BXor,
     BLsh,
     BRsh,
     
-    WAnd,
     WOr,
     WXor,
     WLsh,
     WRsh,
     
-    I32And,
     I32Or,
     I32Xor,
     I32Lsh,
     I32Rsh,
     
-    I64And,
     I64Or,
     I64Xor,
     I64Lsh,

@@ -355,8 +355,7 @@ fn riscv64_build_instr(writer : &mut BufWriter<File>, code : &LtacInstr) {
             suffix = 0 as char;
         },
 
-        LtacType::BAnd | LtacType::WAnd
-        | LtacType::I32And | LtacType::I64And => {
+        LtacType::And => {
             instr = "and".to_string();
             suffix = 0 as char;
         },
