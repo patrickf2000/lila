@@ -9,7 +9,7 @@
 
 use std.io;
 
-func main -> int;
+func main -> int
 begin
     x = 10;
     printf("%d\n", x);
