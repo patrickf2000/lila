@@ -39,6 +39,7 @@ mod syntax;
 
 mod llir_builder;
 mod llir_func;
+mod llir_var;
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Arch {

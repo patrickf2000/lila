@@ -19,14 +19,14 @@ extern crate llvm_sys as llvm;
 
 use std::io;
 use std::mem::MaybeUninit;
-//use std::ffi::CStr;
+use std::ffi::CString;
 
 use llvm::prelude::*;
 use llvm::core::*;
 use llvm::target::*;
 use llvm::target_machine::*;
 
-use parser::llir::{LLirFile, LLirInstr, LLirType};
+use parser::llir::{LLirFile, LLirInstr, LLirType, LLirArg};
 
 mod func;
 
@@ -123,8 +123,36 @@ pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
             LLirType::Extern => llvm_build_func(builder, ln, true),
             LLirType::Func => llvm_build_func(builder, ln, false),
             LLirType::Ret => llvm_build_return(builder, ln),
+            
+            LLirType::AllocArr
+            | LLirType::AllocB | LLirType::AllocW
+            | LLirType::AllocDW | LLirType::AllocQW
+            | LLirType::AllocF32 | LLirType::AllocF64 => llvm_build_alloc(builder, ln),
+            
             _ => {},
         }
     }
+}
+
+// Konstruas alloc instrukcion
+pub unsafe fn llvm_build_alloc(builder : &mut Builder, line : &LLirInstr) {
+    let var_type : LLVMTypeRef;
+    
+    match &line.instr_type {
+        LLirType::AllocB => var_type = LLVMInt8TypeInContext(builder.context),
+        LLirType::AllocW => var_type = LLVMInt16TypeInContext(builder.context),
+        LLirType::AllocDW => var_type = LLVMInt32TypeInContext(builder.context),
+        LLirType::AllocQW => var_type = LLVMInt64TypeInContext(builder.context),
+        
+        _ => return,
+    }
+    
+    let name = match &line.arg1 {
+        LLirArg::Label(name) => name.clone(),
+        _ => String::new(),
+    };
+    
+    let c_str = CString::new(name).unwrap();
+    LLVMBuildAlloca(builder.builder, var_type, c_str.as_ptr() as *const _);
 }
 

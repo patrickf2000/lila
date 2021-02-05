@@ -20,7 +20,7 @@ use std::collections::HashMap;
 // Represents an instruction type
 #[derive(Debug, Clone, PartialEq)]
 pub enum LLirType {
-    None,
+    Nop,
     
     // Base and system instructions
     Label,
@@ -59,6 +59,7 @@ pub enum LLirType {
     MovSX,      MovZX,
     
     // Stack allocation instructions
+    AllocArr,
     AllocB,
     AllocW,
     AllocDW,
@@ -134,13 +135,16 @@ pub enum LLirArg {
 }
 
 // Represents an LLIR data type
+// Strings and pointers represents two different things
 #[derive(Debug, Clone, PartialEq)]
 pub enum LLirDataType {
     Void,
     Byte,       UByte,
     Word,       UWord,
     Int,        UInt,
-    Int64,      UInt64
+    Int64,      UInt64,
+    Str,
+    Ptr
 }
 
 // Represents an LLIR instruction

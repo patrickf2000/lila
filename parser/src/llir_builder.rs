@@ -23,12 +23,21 @@ use crate::llir::*;
 use crate::syntax::*;
 
 use crate::llir_func::*;
+use crate::llir_var::*;
+
+pub struct Var {
+    pub name : String,
+    pub data_type : LLirDataType,
+    pub sub_type : LLirDataType,
+}
 
 pub struct LLirBuilder {
     pub file : LLirFile,
     pub syntax : ErrorManager,
     
     pub str_pos : i32,
+    
+    pub vars : Vec<Var>,
 }
 
 pub fn new_llir_builder(name : String, syntax : &mut ErrorManager) -> LLirBuilder {
@@ -41,6 +50,8 @@ pub fn new_llir_builder(name : String, syntax : &mut ErrorManager) -> LLirBuilde
         syntax : syntax.clone(),
         
         str_pos : 0,
+        
+        vars : Vec::new(),
     }
 }
 
@@ -95,7 +106,7 @@ impl LLirBuilder {
     
         for line in statements {
             match &line.stmt_type {
-                //AstStmtType::VarDec => code = build_var_dec(self, &line, 0, 0).0,
+                AstStmtType::VarDec => code = build_var_dec(self, &line),
                 //AstStmtType::VarAssign => code = build_var_assign(self, &line),
                 //AstStmtType::ArrayAssign => code = build_array_assign(self, &line),
                 //AstStmtType::If => build_cond(self, &line),
