@@ -133,10 +133,21 @@ pub enum LLirArg {
     ArgReg(i32),
 }
 
+// Represents an LLIR data type
+#[derive(Debug, Clone, PartialEq)]
+pub enum LLirDataType {
+    Void,
+    Byte,       UByte,
+    Word,       UWord,
+    Int,        UInt,
+    Int64,      UInt64
+}
+
 // Represents an LLIR instruction
 #[derive(Debug, Clone, PartialEq)]
 pub struct LLirInstr {
     pub instr_type : LLirType,
+    pub data_type : LLirDataType,
     pub arg1 : LLirArg,
     pub arg2 : LLirArg,
     pub arg3 : LLirArg,
@@ -154,6 +165,7 @@ pub struct LLirFile {
 pub fn create_instr(instr_type : LLirType) -> LLirInstr {
     LLirInstr {
         instr_type : instr_type,
+        data_type : LLirDataType::Void,
         arg1 : LLirArg::None,
         arg2 : LLirArg::None,
         arg3 : LLirArg::None,

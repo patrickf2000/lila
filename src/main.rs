@@ -123,13 +123,10 @@ fn run() -> i32 {
         return 0;
     }
     
+    let mut all_names : Vec<String> = Vec::new();
+    
     if use_llvm {
         let input = inputs.last().unwrap();
-        /*let ast = match parser::get_ast(&input, arch, use_corelib) {
-            Ok(ast) => ast,
-            Err(_e) => return 1,
-        };*/
-        
         let llir = match parser::parse2(input.clone(), arch, use_corelib) {
             Ok(llir) => llir,
             Err(_e) => return 1,
@@ -139,12 +136,15 @@ fn run() -> i32 {
         for ln in llir.code.iter() {
             println!("{:?}", ln);
         }
+        println!("");
         
-        //llvm::compile(&ast).expect("LLVM Codegen failed with unknown error.");
+        llvm::compile(&llir).expect("LLVM Codegen failed with unknown error.");
+        all_names.push(llir.name.clone());
+        
+        build::assemble(&llir.name, no_link);
+        build::link(&all_names, &output, use_corelib, link_lib, inc_start);
         return 0;
     }
-    
-    let mut all_names : Vec<String> = Vec::new();
     
     for input in inputs {
         if input.starts_with("-l") || input.ends_with(".o") {

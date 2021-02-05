@@ -70,6 +70,7 @@ impl LLirBuilder {
                 // TODO: Ekstera
             } else {
                 let mut def = llir::create_instr(LLirType::Func);
+                def.data_type = LLirDataType::Int;
                 def.arg1 = LLirArg::Label(func.name.clone());
                 self.add_code(def);
                 

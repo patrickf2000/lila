@@ -1,38 +1,56 @@
 
+// This file is part of the Lila compiler
+// Copyright (C) 2020-2021 Patrick Flynn
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; version 2.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 extern crate llvm_sys as llvm;
 
 use std::io;
 use std::mem::MaybeUninit;
 //use std::ffi::CStr;
 
-//use llvm::prelude::*;
+use llvm::prelude::*;
 use llvm::core::*;
 use llvm::target::*;
 use llvm::target_machine::*;
 
-use parser::ast::{AstTree};
+use parser::llir::{LLirFile, LLirInstr, LLirType};
 
-/*pub struct Builder {
+mod func;
+
+use crate::func::*;
+
+pub struct Builder {
     context : LLVMContextRef,
     module : LLVMModuleRef,
     builder : LLVMBuilderRef,
-    ret_var : LLVMValueRef,
-}*/
+}
 
-pub fn compile(_ast_tree : &AstTree) -> io::Result<()> {
+pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
     unsafe {
         let context = LLVMContextCreate();
         let module = LLVMModuleCreateWithNameInContext(b"first\0".as_ptr() as *const _, context);
         let builder = LLVMCreateBuilderInContext(context);
         
         // Start generating
-        /*let mut builder_struct = Builder {
+        let mut builder_struct = Builder {
             context : context,
             module : module,
             builder : builder,
-            ret_var : MaybeUninit::uninit().assume_init(),
-        };*/
-        //write_code(&mut builder_struct, &ltac_file.code);
+        };
+        write_code(&mut builder_struct, &llir_file.code);
         
         // Create a function
         /*let i32t = LLVMInt32TypeInContext(context);
@@ -80,7 +98,7 @@ pub fn compile(_ast_tree : &AstTree) -> io::Result<()> {
         let machine = LLVMCreateTargetMachine(target, triple, cpu, features, opt, reloc, code);
         
         // Generate the assembly
-        LLVMTargetMachineEmitToFile(machine, module, b"/tmp/first.s\0".as_ptr() as *mut _, LLVMCodeGenFileType::LLVMAssemblyFile, &mut err);
+        LLVMTargetMachineEmitToFile(machine, module, b"/tmp/first.asm\0".as_ptr() as *mut _, LLVMCodeGenFileType::LLVMAssemblyFile, &mut err);
         
         /*let err_str = CStr::from_ptr(err).to_string_lossy().into_owned();
         println!("{:?}", err_str);*/
@@ -97,5 +115,15 @@ pub fn compile(_ast_tree : &AstTree) -> io::Result<()> {
     }
     
     Ok(())
+}
+
+pub fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
+    for ln in code {
+        match ln.instr_type {
+            LLirType::Func => llvm_build_func(builder, ln),
+            LLirType::Ret => llvm_build_return(builder, ln),
+            _ => {},
+        }
+    }
 }
 
