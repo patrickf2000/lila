@@ -30,6 +30,18 @@ pub fn build_return(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
             // TODO: Ni bezonas tipdetekton.
             AstArgType::IntL => instr.arg1 = LLirArg::Int(arg.u64_val as i64),
             
+            // TODO: Tipdetekton
+            AstArgType::Id => {
+                let mut instr2 = llir::create_instr(LLirType::LdDW);
+                instr2.arg1 = LLirArg::Reg(builder.reg_pos);
+                instr2.arg2 = LLirArg::Mem(arg.str_val.clone());
+                builder.add_code(instr2);
+                
+                instr.arg1 = LLirArg::Reg(builder.reg_pos);
+                
+                builder.reg_pos += 1;
+            },
+            
             _ => {},
         }
     } else {

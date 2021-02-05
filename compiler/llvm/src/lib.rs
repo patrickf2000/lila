@@ -37,7 +37,9 @@ pub struct Builder {
     context : LLVMContextRef,
     module : LLVMModuleRef,
     builder : LLVMBuilderRef,
+    
     vars : HashMap<String, LLVMValueRef>,
+    regs : HashMap<i32, LLVMValueRef>,
 }
 
 pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
@@ -52,6 +54,7 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
             module : module,
             builder : builder,
             vars : HashMap::new(),
+            regs : HashMap::new(),
         };
         write_code(&mut builder_struct, &llir_file.code);
         
@@ -132,6 +135,13 @@ pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
             | LLirType::AllocDW | LLirType::AllocQW
             | LLirType::AllocF32 | LLirType::AllocF64 => llvm_build_alloc(builder, ln),
             
+            LLirType::LdB | LLirType::UldB
+            | LLirType::LdW | LLirType::UldW
+            | LLirType::LdDW | LLirType::UldDW
+            | LLirType::LdQW | LLirType::UldQW
+            | LLirType::LdF32
+            | LLirType::LdF64 => llvm_build_load(builder, ln),
+            
             LLirType::StrB | LLirType::UstrB
             | LLirType::StrW | LLirType::UstrW
             | LLirType::StrDW | LLirType::UstrDW
@@ -166,6 +176,30 @@ pub unsafe fn llvm_build_alloc(builder : &mut Builder, line : &LLirInstr) {
     let var = LLVMBuildAlloca(builder.builder, var_type, c_str.as_ptr() as *const _);
     
     builder.vars.insert(name, var);
+}
+
+// Konstruas ŝarĝo instrukcion
+pub unsafe fn llvm_build_load(builder : &mut Builder, line : &LLirInstr) {
+    let name = match &line.arg2 {
+        LLirArg::Mem(name) => name.clone(),
+        _ => String::new(),
+    };
+    
+    let var = match &builder.vars.get(&name) {
+        Some(v) => *v.clone(),
+        _ => return,
+    };
+    
+    // The register to load to
+    let reg_no = match &line.arg1 {
+        LLirArg::Reg(val) => *val,
+        _ => -1,
+    };
+    
+    let c_str = CString::new(reg_no.to_string()).unwrap();
+    let reg = LLVMBuildLoad(builder.builder, var, c_str.as_ptr() as *const _);
+    
+    builder.regs.insert(reg_no, reg);
 }
 
 // Konstruas vendejo instrukcion

@@ -68,6 +68,15 @@ pub fn llvm_build_return(builder : &mut Builder, line : &LLirInstr) {
                 LLVMBuildRet(builder.builder, i32_val);
             },
             
+            LLirArg::Reg(val) => {
+                let reg = match &builder.regs.get(val) {
+                    Some(v) => *v.clone(),
+                    _ => return,
+                };
+                
+                LLVMBuildRet(builder.builder, reg);
+            },
+            
             _ => {},
         }
     }
