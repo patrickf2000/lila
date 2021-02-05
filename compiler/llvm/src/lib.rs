@@ -20,6 +20,7 @@ extern crate llvm_sys as llvm;
 use std::io;
 use std::mem::MaybeUninit;
 use std::ffi::CString;
+use std::collections::HashMap;
 
 use llvm::prelude::*;
 use llvm::core::*;
@@ -36,6 +37,7 @@ pub struct Builder {
     context : LLVMContextRef,
     module : LLVMModuleRef,
     builder : LLVMBuilderRef,
+    vars : HashMap<String, LLVMValueRef>,
 }
 
 pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
@@ -49,6 +51,7 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
             context : context,
             module : module,
             builder : builder,
+            vars : HashMap::new(),
         };
         write_code(&mut builder_struct, &llir_file.code);
         
@@ -129,6 +132,13 @@ pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
             | LLirType::AllocDW | LLirType::AllocQW
             | LLirType::AllocF32 | LLirType::AllocF64 => llvm_build_alloc(builder, ln),
             
+            LLirType::StrB | LLirType::UstrB
+            | LLirType::StrW | LLirType::UstrW
+            | LLirType::StrDW | LLirType::UstrDW
+            | LLirType::StrQW | LLirType::UstrQW
+            | LLirType::StrF32
+            | LLirType::StrF64 => llvm_build_store(builder, ln),
+            
             _ => {},
         }
     }
@@ -152,7 +162,33 @@ pub unsafe fn llvm_build_alloc(builder : &mut Builder, line : &LLirInstr) {
         _ => String::new(),
     };
     
-    let c_str = CString::new(name).unwrap();
-    LLVMBuildAlloca(builder.builder, var_type, c_str.as_ptr() as *const _);
+    let c_str = CString::new(name.clone()).unwrap();
+    let var = LLVMBuildAlloca(builder.builder, var_type, c_str.as_ptr() as *const _);
+    
+    builder.vars.insert(name, var);
+}
+
+// Konstruas vendejo instrukcion
+pub unsafe fn llvm_build_store(builder : &mut Builder, line : &LLirInstr) {
+    let val = match &line.arg2 {
+        LLirArg::Int(val) if line.instr_type == LLirType::StrDW => {
+            let i32_t = LLVMInt32TypeInContext(builder.context);
+            LLVMConstInt(i32_t, *val as u64, 1)
+        },
+        
+        _ => return,
+    };
+    
+    let name = match &line.arg1 {
+        LLirArg::Mem(name) => name.clone(),
+        _ => String::new(),
+    };
+    
+    let var = match &builder.vars.get(&name) {
+        Some(v) => *v.clone(),
+        _ => return,
+    };
+    
+    LLVMBuildStore(builder.builder, val, var as LLVMValueRef);
 }
 

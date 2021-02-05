@@ -125,7 +125,9 @@ pub enum LLirType {
 pub enum LLirArg {
     None,
     
-    Int(i64), UInt(i64),
+    Int(i64), UInt(u64),
+    
+    Mem(String),
     
     Label(String),
     StrLiteral(String),

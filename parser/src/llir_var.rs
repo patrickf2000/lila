@@ -15,7 +15,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use crate::ast::{AstStmt, AstModType};
+use crate::ast::{AstStmt, AstModType, AstArgType};
 use crate::llir;
 use crate::llir::*;
 use crate::llir_builder::*;
@@ -84,8 +84,42 @@ pub fn build_var_dec(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
         sub_type : sub_type,
     };
     
+    if !build_expr(builder, line, &var) {
+        return false;
+    }
+    
     builder.vars.push(var);
     
+    true
+}
+
+// Konstrui variablon esprimon
+pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bool {
+    let args = &line.args;
+
+    // Se ni havas unu argumento kaj ĝis laŭvorto, ni nur povas stoki.
+    if args.len() == 1 {
+        let first = args.first().unwrap();
+        
+        let mut instr = store_for_type(&var.data_type);
+        instr.data_type = var.data_type.clone();
+        instr.arg1 = LLirArg::Mem(var.name.clone());
+        
+        match &first.arg_type {
+            AstArgType::IntL => {
+                if is_unsigned(&var.data_type) {
+                    instr.arg2 = LLirArg::UInt(first.u64_val);
+                } else {
+                    instr.arg2 = LLirArg::Int(first.u64_val as i64);
+                }
+            },
+            
+            _ => {},
+        }
+        
+        builder.add_code(instr);
+    }
+
     true
 }
 

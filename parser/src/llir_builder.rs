@@ -35,6 +35,7 @@ pub struct LLirBuilder {
     pub file : LLirFile,
     pub syntax : ErrorManager,
     
+    pub reg_pos : i32,
     pub str_pos : i32,
     
     pub vars : Vec<Var>,
@@ -49,6 +50,7 @@ pub fn new_llir_builder(name : String, syntax : &mut ErrorManager) -> LLirBuilde
         },
         syntax : syntax.clone(),
         
+        reg_pos : 0,
         str_pos : 0,
         
         vars : Vec::new(),
@@ -135,6 +137,31 @@ impl LLirBuilder {
     // Aldonas linio de kodo al la vektoro.
     pub fn add_code(&mut self, code : LLirInstr) {
         self.file.code.push(code);
+    }
+}
+
+// Utilaj funkcioj
+pub fn store_for_type(data_type : &LLirDataType) -> LLirInstr {
+    match &data_type {
+        LLirDataType::Byte => llir::create_instr(LLirType::StrB),
+        LLirDataType::UByte => llir::create_instr(LLirType::UstrB),
+        LLirDataType::Word => llir::create_instr(LLirType::StrW),
+        LLirDataType::UWord => llir::create_instr(LLirType::UstrW),
+        LLirDataType::Int => llir::create_instr(LLirType::StrDW),
+        LLirDataType::UInt => llir::create_instr(LLirType::UstrDW),
+        LLirDataType::Int64 => llir::create_instr(LLirType::StrQW),
+        LLirDataType::UInt64 => llir::create_instr(LLirType::UstrQW),
+        LLirDataType::Str => llir::create_instr(LLirType::StrQW),
+        LLirDataType::Ptr => llir::create_instr(LLirType::StrQW),
+        _ => llir::create_instr(LLirType::Nop),
+    }
+}
+
+pub fn is_unsigned(data_type : &LLirDataType) -> bool {
+    match &data_type {
+        LLirDataType::UByte | LLirDataType::UWord
+        | LLirDataType::UInt | LLirDataType::UInt64 => return true,
+        _ => return false,
     }
 }
 
