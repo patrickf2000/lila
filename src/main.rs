@@ -125,12 +125,22 @@ fn run() -> i32 {
     
     if use_llvm {
         let input = inputs.last().unwrap();
-        let ast = match parser::get_ast(&input, arch, use_corelib) {
+        /*let ast = match parser::get_ast(&input, arch, use_corelib) {
             Ok(ast) => ast,
+            Err(_e) => return 1,
+        };*/
+        
+        let llir = match parser::parse2(input.clone(), arch, use_corelib) {
+            Ok(llir) => llir,
             Err(_e) => return 1,
         };
         
-        llvm::compile(&ast).expect("LLVM Codegen failed with unknown error.");
+        println!("Name: {}", llir.name);
+        for ln in llir.code.iter() {
+            println!("{:?}", ln);
+        }
+        
+        //llvm::compile(&ast).expect("LLVM Codegen failed with unknown error.");
         return 0;
     }
     

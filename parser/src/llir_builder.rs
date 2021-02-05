@@ -18,8 +18,11 @@
 use std::collections::HashMap;
 
 use crate::ast::*;
+use crate::llir;
 use crate::llir::*;
 use crate::syntax::*;
+
+use crate::llir_func::*;
 
 pub struct LLirBuilder {
     pub file : LLirFile,
@@ -43,22 +46,78 @@ pub fn new_llir_builder(name : String, syntax : &mut ErrorManager) -> LLirBuilde
 
 impl LLirBuilder {
 
-    // Builds the main LTAC file
-    pub fn build_llir(&mut self, _tree : &AstTree) -> Result<LLirFile, ()> {
+    // Konstruas la ĉefan LLIR dosieron.
+    pub fn build_llir(&mut self, tree : &AstTree) -> Result<LLirFile, ()> {
         // Cache the constants
         /*if !self.build_global_constants(tree) {
             self.syntax.print_errors();
             return Err(());
         }*/
         
-        // Build functions
-        /*if !self.build_functions(tree) {
+        // Konstrui la funkciojn.
+        if !self.build_functions(tree) {
             self.syntax.print_errors();
             return Err(());
-        }*/
+        }
         
         Ok(self.file.clone())
     }
     
+    // Konstrui la funkciojn.
+    fn build_functions(&mut self, tree : &AstTree) -> bool {
+        for func in tree.functions.iter() {
+            if func.is_extern {
+                // TODO: Ekstera
+            } else {
+                let mut def = llir::create_instr(LLirType::Func);
+                def.arg1 = LLirArg::Label(func.name.clone());
+                self.add_code(def);
+                
+                // Konstrui la blokon.
+                if !self.build_block(&func.statements) {
+                    return false;
+                }        
+            }
+        }
+        
+        true
+    }
+    
+    // Konstrui la funkcion korpon.
+    fn build_block(&mut self, statements : &Vec<AstStmt>) -> bool {
+        let mut code = true;
+    
+        for line in statements {
+            match &line.stmt_type {
+                //AstStmtType::VarDec => code = build_var_dec(self, &line, 0, 0).0,
+                //AstStmtType::VarAssign => code = build_var_assign(self, &line),
+                //AstStmtType::ArrayAssign => code = build_array_assign(self, &line),
+                //AstStmtType::If => build_cond(self, &line),
+                //AstStmtType::Elif => build_cond(self, &line),
+                //AstStmtType::Else => build_cond(self, &line),
+                //AstStmtType::While => build_while(self, &line),
+                //AstStmtType::For => build_for_loop(self, &line),
+                //AstStmtType::Break => build_break(self),
+                //AstStmtType::Continue => build_continue(self),
+                //AstStmtType::FuncCall => code = build_func_call(self, &line),
+                AstStmtType::Return => code = build_return(self, &line),
+                //AstStmtType::Exit => code = build_exit(self, &line),
+                
+                // TODO: Forigi post la super faritas.
+                _ => {},
+            }
+            
+            if !code {
+                break;
+            }
+        }
+        
+        code
+    }
+    
+    // Aldonas linio de kodo al la vektoro.
+    pub fn add_code(&mut self, code : LLirInstr) {
+        self.file.code.push(code);
+    }
 }
 

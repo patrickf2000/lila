@@ -136,10 +136,10 @@ pub enum LLirArg {
 // Represents an LLIR instruction
 #[derive(Debug, Clone, PartialEq)]
 pub struct LLirInstr {
-    instr_type : LLirType,
-    arg1 : LLirArg,
-    arg2 : LLirArg,
-    arg3 : LLirArg,
+    pub instr_type : LLirType,
+    pub arg1 : LLirArg,
+    pub arg2 : LLirArg,
+    pub arg3 : LLirArg,
 }
 
 // Represents an LLIR file
