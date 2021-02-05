@@ -67,7 +67,12 @@ impl LLirBuilder {
     fn build_functions(&mut self, tree : &AstTree) -> bool {
         for func in tree.functions.iter() {
             if func.is_extern {
-                // TODO: Ekstera
+                let mut def = llir::create_instr(LLirType::Extern);
+                def.arg1 = LLirArg::Label(func.name.clone());
+                
+                def.data_type = LLirDataType::Void;
+                
+                self.add_code(def);
             } else {
                 let mut def = llir::create_instr(LLirType::Func);
                 def.data_type = LLirDataType::Int;

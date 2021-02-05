@@ -117,10 +117,11 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
     Ok(())
 }
 
-pub fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
+pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
     for ln in code {
         match ln.instr_type {
-            LLirType::Func => llvm_build_func(builder, ln),
+            LLirType::Extern => llvm_build_func(builder, ln, true),
+            LLirType::Func => llvm_build_func(builder, ln, false),
             LLirType::Ret => llvm_build_return(builder, ln),
             _ => {},
         }

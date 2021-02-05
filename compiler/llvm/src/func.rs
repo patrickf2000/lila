@@ -24,8 +24,8 @@ use llvm::core::*;
 use parser::llir::{LLirInstr, LLirArg};
 use crate::*;
 
-// Konstrui LLVM funkion.
-pub fn llvm_build_func(builder : &mut Builder, line : &LLirInstr) {
+// Konstrui LLVM funkiojn kaj eksterjan funkiojn
+pub fn llvm_build_func(builder : &mut Builder, line : &LLirInstr, is_extern : bool) {
     unsafe {
         // Krei la funkcion
         let func_name = match &line.arg1 {
@@ -42,13 +42,15 @@ pub fn llvm_build_func(builder : &mut Builder, line : &LLirInstr) {
         let func = LLVMAddFunction(builder.module, c_str.as_ptr() as *const _, function_type);
         LLVMSetLinkage(func, LLVMLinkage::LLVMExternalLinkage);
         
-        // Agordi la funkcion blokon
-        let mut bb_name = "bb_".to_string();
-        bb_name.push_str(&func_name);
-        let block_name = CString::new(bb_name).unwrap();
-        
-        let func_block = LLVMAppendBasicBlockInContext(builder.context, func, block_name.as_ptr() as *const _);
-        LLVMPositionBuilderAtEnd(builder.builder, func_block);
+        if !is_extern {
+            // Agordi la funkcion blokon
+            let mut bb_name = "bb_".to_string();
+            bb_name.push_str(&func_name);
+            let block_name = CString::new(bb_name).unwrap();
+            
+            let func_block = LLVMAppendBasicBlockInContext(builder.context, func, block_name.as_ptr() as *const _);
+            LLVMPositionBuilderAtEnd(builder.builder, func_block);
+        }
     }
 }
 
