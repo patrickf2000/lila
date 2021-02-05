@@ -34,6 +34,12 @@ Also, note that even though Github says 20% of the code is Livescript, there's n
 
 Please see [the log](https://patrickflynn.co/pages/lila-log.html) for updates.
 
+#### Update (February 2021)
+
+I'm currently working on a new middle-end IR. The main purpose at the moment is to provide an easier transition to LLVM, but I hope to eventually replace the LTAC IR with it. As a result of this, there may be some duplicate code, and the parser will be a little messy probably for the next few months.
+
+Please see the stable branch for the pre-LLIR build.
+
 ### Features
 
 All the stuff here is implemented in some way.

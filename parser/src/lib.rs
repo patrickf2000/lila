@@ -19,6 +19,7 @@
 // Expose the AST and LTAC libraries
 pub mod ast;
 pub mod ltac;
+pub mod llir;
 
 mod ast_builder;
 mod ast_func;
