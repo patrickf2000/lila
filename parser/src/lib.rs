@@ -37,6 +37,8 @@ mod lex;
 mod module;
 mod syntax;
 
+mod llir_builder;
+
 #[derive(PartialEq, Clone, Copy)]
 pub enum Arch {
     X86_64,
@@ -49,6 +51,7 @@ use std::path::Path;
 
 use ast::AstTree;
 use ltac::LtacFile;
+use llir::LLirFile;
 
 // Returns the ast
 pub fn get_ast(path : &String, arch : Arch, include_core : bool) -> Result<AstTree, ()> {
@@ -90,6 +93,36 @@ pub fn parse(path : String, arch : Arch, include_core : bool) -> Result<LtacFile
     };
     
     Ok(ltac)
+}
+
+// The parse function for the LLIR layer
+// This will eventually replace the function above
+pub fn parse2(path : String, arch : Arch, include_core : bool) -> Result<LLirFile, ()> {
+    let tree = match get_ast(&path.to_string(), arch, include_core) {
+        Ok(tree) => tree,
+        Err(_e) => return Err(()),
+    };
+    
+    if tree.module.len() > 0 {
+        match module::generate_module(&tree) {
+            Ok(()) => {},
+            Err(_e) => {
+                println!("Error generating module header");
+                return Err(());
+            },
+        }
+    }
+    
+    let mut syntax = syntax::create_error_manager();
+    let name = get_name(&path);
+    
+    let mut llir_builder = llir_builder::new_llir_builder(name.clone(), &mut syntax);
+    let llir = match llir_builder.build_llir(&tree) {
+        Ok(llir) => llir,
+        Err(_e) => return Err(()),
+    };
+    
+    Ok(llir)
 }
 
 // Returns the file name for a given string
