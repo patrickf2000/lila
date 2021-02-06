@@ -111,6 +111,11 @@ pub unsafe fn llvm_build_call(builder : &mut Builder, line : &LLirInstr) {
                 args.push(str_ref);
             },
             
+            LLirArg::Mem(name) => {
+                let reg = llvm_build_local_load(builder, name.to_string());
+                args.push(reg);
+            },
+            
             _ => {},
         }
     }

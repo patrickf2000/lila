@@ -63,6 +63,10 @@ pub fn build_func_call(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
                 arg_list.push(LLirArg::StrLiteral(arg.str_val.clone()));
             },
             
+            AstArgType::Id => {
+                arg_list.push(LLirArg::Mem(arg.str_val.clone()));
+            },
+            
             _ => {},
         }
     }

@@ -23,7 +23,7 @@ use llvm::core::*;
 use parser::llir::{LLirInstr, LLirArg};
 use crate::*;
 
-unsafe fn llvm_build_load(builder : &mut Builder, var_name : String) -> LLVMValueRef {
+pub unsafe fn llvm_build_local_load(builder : &mut Builder, var_name : String) -> LLVMValueRef {
     let var = match builder.vars.get(&var_name) {
         Some(v) => v.clone(),
         _ => MaybeUninit::uninit().assume_init(),
@@ -44,13 +44,13 @@ pub unsafe fn llvm_build_arith(builder : &mut Builder, line : &LLirInstr) {
     
     let lval = match &line.arg2 {
         LLirArg::Int(val) => LLVMConstInt(op_type, *val as u64, 1),
-        LLirArg::Mem(val) => llvm_build_load(builder, val.to_string()),
+        LLirArg::Mem(val) => llvm_build_local_load(builder, val.to_string()),
         _ => return,
     };
     
     let rval = match &line.arg3 {
         LLirArg::Int(val) => LLVMConstInt(op_type, *val as u64, 1),
-        LLirArg::Mem(val) => llvm_build_load(builder, val.to_string()),
+        LLirArg::Mem(val) => llvm_build_local_load(builder, val.to_string()),
         _ => return,
     };
     
