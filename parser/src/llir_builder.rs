@@ -89,7 +89,15 @@ impl LLirBuilder {
                 self.add_code(def);
             } else {
                 let mut def = llir::create_instr(LLirType::Func);
-                def.data_type = LLirDataType::Int;
+                
+                if func.modifiers.len() > 0 {
+                    let func_mod = func.modifiers.first().unwrap();
+                    let (ft, _) = ast_to_datatype(&func_mod);
+                    def.data_type = ft;
+                } else {
+                    def.data_type = LLirDataType::Void;
+                }
+                
                 def.arg1 = LLirArg::Label(func.name.clone());
                 self.add_code(def);
                 
@@ -122,6 +130,7 @@ impl LLirBuilder {
                 AstStmtType::FuncCall => code = build_func_call(self, &line),
                 AstStmtType::Return => code = build_return(self, &line),
                 //AstStmtType::Exit => code = build_exit(self, &line),
+                AstStmtType::End => code = build_end(self, &line),
                 
                 // TODO: Forigi post la super faritas.
                 _ => {},
@@ -163,6 +172,46 @@ pub fn is_unsigned(data_type : &LLirDataType) -> bool {
         LLirDataType::UByte | LLirDataType::UWord
         | LLirDataType::UInt | LLirDataType::UInt64 => return true,
         _ => return false,
+    }
+}
+
+// Return: Base Type, Sub Type
+pub fn ast_to_datatype(ast_mod : &AstMod) -> (LLirDataType, LLirDataType) {
+    match &ast_mod.mod_type {
+        AstModType::Byte => return (LLirDataType::Byte, LLirDataType::Void),
+        AstModType::UByte => return (LLirDataType::UByte, LLirDataType::Void),
+        AstModType::ByteDynArray => return (LLirDataType::Ptr, LLirDataType::Byte),
+        AstModType::UByteDynArray => return (LLirDataType::Ptr, LLirDataType::UByte),
+        
+        AstModType::Short => return (LLirDataType::Word, LLirDataType::Void),
+        AstModType::UShort => return (LLirDataType::UWord, LLirDataType::Void),
+        AstModType::ShortDynArray => return (LLirDataType::Ptr, LLirDataType::Word),
+        AstModType::UShortDynArray => return (LLirDataType::Ptr, LLirDataType::UWord),
+        
+        AstModType::Int => return (LLirDataType::Int, LLirDataType::Void),
+        AstModType::UInt => return (LLirDataType::UInt, LLirDataType::Void),
+        AstModType::IntDynArray => return (LLirDataType::Ptr, LLirDataType::Int),
+        AstModType::UIntDynArray => return (LLirDataType::Ptr, LLirDataType::UInt),
+        
+        AstModType::Int64 => return (LLirDataType::Int64, LLirDataType::Void),
+        AstModType::UInt64 => return (LLirDataType::UInt64, LLirDataType::Void),
+        AstModType::I64DynArray => return (LLirDataType::Ptr, LLirDataType::Int64),
+        AstModType::U64DynArray => return (LLirDataType::Ptr, LLirDataType::UInt64),
+        
+        /*AstModType::Float => return (LLirDataType::Float, LLirDataType::Void),
+        AstModType::Double => return (LLirDataType::Double, LLirDataType::Void),
+        AstModType::FloatDynArray => return (LLirDataType::Ptr, LLirDataType::Float),
+        AstModType::DoubleDynArray => return (LLirDataType::Ptr, LLirDataType::Double),*/
+        
+        AstModType::Char => return (LLirDataType::Byte, LLirDataType::Void),
+        AstModType::Str => return (LLirDataType::Str, LLirDataType::Void),
+        AstModType::StrDynArray => return (LLirDataType::Ptr, LLirDataType::Str),
+        //AstModType::Enum(_v) => return (LLirDataType::Int,  LLirDataType::Void),       // TODO: We will need better type detection
+        
+        _ => return (LLirDataType::Void, LLirDataType::Void),
+        
+        // Do we need an error here? Really, it should never get to this pointer
+        //AstModType::None => return (LLirDataType::Void, LLirDataType::Void),
     }
 }
 

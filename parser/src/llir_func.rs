@@ -52,6 +52,13 @@ pub fn build_return(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
     true
 }
 
+pub fn build_end(builder : &mut LLirBuilder, _line : &AstStmt) -> bool {
+    let instr = llir::create_instr(LLirType::Ret);
+    builder.add_code(instr);
+    
+    true
+}
+
 // Konstruas funkcion alvokon
 pub fn build_func_call(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
     let args = &line.args;
