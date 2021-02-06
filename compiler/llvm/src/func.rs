@@ -71,13 +71,42 @@ pub unsafe fn llvm_build_call(builder : &mut Builder, line : &LLirInstr) {
     
     for arg in call_args {
         match &arg {
+            // TODO: This should really be in another function
             LLirArg::StrLiteral(val) => {
                 let mut str_name : String = "STR".to_string();
                 str_name.push_str(&builder.str_pos.to_string());
                 builder.str_pos += 1;
                 let c_str_name = CString::new(str_name).unwrap();
                 
-                let c_str = CString::new(val.clone()).unwrap();
+                let mut new_str = String::new();
+                let mut skip_next = false;
+                
+                for i in 0 .. val.len() {
+                    if skip_next {
+                        skip_next = false;
+                        continue;
+                    }
+                    
+                    let c = val.chars().nth(i).unwrap();
+                    
+                    if c == '\\' && i + 1 < val.len() {
+                        let c2 = val.chars().nth(i+1).unwrap();
+                        
+                        match c2 {
+                            'n' => new_str.push('\n'),
+                            _ => {
+                                new_str.push(c);
+                                continue;
+                            },
+                        }
+                        
+                        skip_next = true;
+                    } else {
+                        new_str.push(c);
+                    }
+                }
+                
+                let c_str = CString::new(new_str).unwrap();
                 let str_ref = LLVMBuildGlobalString(builder.builder, c_str.as_ptr() as *const _, c_str_name.as_ptr() as *const _);
                 args.push(str_ref);
             },
