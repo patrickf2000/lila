@@ -30,8 +30,10 @@ use llvm::target_machine::*;
 use parser::llir::{LLirFile, LLirInstr, LLirType, LLirArg};
 
 mod func;
+mod instr;
 
 use crate::func::*;
+use crate::instr::*;
 
 pub struct Builder {
     context : LLVMContextRef,
@@ -136,6 +138,8 @@ pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
             LLirType::Call => llvm_build_call(builder, ln),
             LLirType::Ret => llvm_build_return(builder, ln),
             
+            LLirType::Add => llvm_build_arith(builder, ln),
+            
             LLirType::AllocArr
             | LLirType::AllocB | LLirType::AllocW
             | LLirType::AllocDW | LLirType::AllocQW
@@ -214,6 +218,15 @@ pub unsafe fn llvm_build_store(builder : &mut Builder, line : &LLirInstr) {
         LLirArg::Int(val) if line.instr_type == LLirType::StrDW => {
             let i32_t = LLVMInt32TypeInContext(builder.context);
             LLVMConstInt(i32_t, *val as u64, 1)
+        },
+        
+        LLirArg::Reg(pos) => {
+            let var = match &builder.regs.get(pos) {
+                Some(v) => *v.clone(),
+                _ => return,
+            };
+            
+            var
         },
         
         _ => return,

@@ -107,6 +107,58 @@ pub fn build_var_assign(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
 // Konstrui variablon esprimon
 pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bool {
     let args = &line.args;
+    let mut stack : Vec<LLirArg> = Vec::new();
+    
+    for arg in args.iter() {
+        match arg.arg_type {
+            AstArgType::IntL => {
+                let intl : LLirArg;
+                
+                if is_unsigned(&var.data_type) {
+                    intl = LLirArg::UInt(arg.u64_val);
+                } else {
+                    intl = LLirArg::Int(arg.u64_val as i64);
+                }
+                
+                stack.push(intl);
+            },
+            
+            AstArgType::OpAdd if stack.len() >= 2 => {
+                let arg1 = stack.pop().unwrap();
+                let arg2 = stack.pop().unwrap();
+                
+                let dest = LLirArg::Reg(builder.reg_pos);
+                builder.reg_pos += 1;
+                
+                let mut instr = llir::create_instr(LLirType::Add);
+                instr.arg1 = dest.clone();
+                instr.arg2 = arg1;
+                instr.arg3 = arg2;
+                builder.add_code(instr);
+                
+                stack.push(dest);
+            },
+            
+            _ => return false,
+        }
+    }
+    
+    if stack.len() >= 1 {
+        let dest = stack.pop().unwrap();
+        
+        let mut instr = store_for_type(&var.data_type);
+        instr.data_type = var.data_type.clone();
+        instr.arg1 = LLirArg::Mem(var.name.clone());
+        instr.arg2 = dest;
+        builder.add_code(instr);
+    }
+    
+    true
+}
+
+// Konstrui variablon esprimon
+/*pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bool {
+    let args = &line.args;
 
     // Se ni havas unu argumento kaj ĝis laŭvorto, ni nur povas stoki.
     if args.len() == 1 {
@@ -132,5 +184,5 @@ pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bo
     }
 
     true
-}
+}*/
 
