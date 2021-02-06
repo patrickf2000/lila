@@ -52,3 +52,26 @@ pub fn build_return(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
     true
 }
 
+// Konstruas funkcion alvokon
+pub fn build_func_call(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
+    let args = &line.args;
+    let mut arg_list : Vec<LLirArg> = Vec::new();
+    
+    for arg in args {
+        match &arg.arg_type {
+            AstArgType::StringL => {
+                arg_list.push(LLirArg::StrLiteral(arg.str_val.clone()));
+            },
+            
+            _ => {},
+        }
+    }
+
+    let mut instr = llir::create_instr(LLirType::Call);
+    instr.arg1 = LLirArg::Label(line.name.clone());
+    instr.arg2 = LLirArg::ArgList(arg_list);
+    
+    builder.add_code(instr);
+    true
+}
+

@@ -21,7 +21,7 @@ use std::ffi::CString;
 use llvm::*;
 use llvm::core::*;
 
-use parser::llir::{LLirInstr, LLirArg};
+use parser::llir::{LLirInstr, LLirArg, LLirDataType};
 use crate::*;
 
 // Konstrui LLVM funkiojn kaj eksterjan funkiojn
@@ -33,14 +33,20 @@ pub fn llvm_build_func(builder : &mut Builder, line : &LLirInstr, is_extern : bo
             _ => String::new(),
         };
         
-        // TODO: tipdetekton
-        let i32t = LLVMInt32TypeInContext(builder.context);
+        let func_type : LLVMTypeRef;
+        match &line.data_type {
+            LLirDataType::Int => func_type = LLVMInt32TypeInContext(builder.context),
+            _ => func_type = LLVMVoidTypeInContext(builder.context),
+        }
+        
         let mut args = [];
-        let function_type = LLVMFunctionType(i32t, args.as_mut_ptr(), args.len() as u32, 0);
+        let function_type = LLVMFunctionType(func_type, args.as_mut_ptr(), args.len() as u32, 0);
         
         let c_str = CString::new(func_name.clone()).unwrap();
         let func = LLVMAddFunction(builder.module, c_str.as_ptr() as *const _, function_type);
         LLVMSetLinkage(func, LLVMLinkage::LLVMExternalLinkage);
+        
+        builder.funcs.insert(func_name.clone(), func);
         
         if !is_extern {
             // Agordi la funkcion blokon
@@ -52,6 +58,49 @@ pub fn llvm_build_func(builder : &mut Builder, line : &LLirInstr, is_extern : bo
             LLVMPositionBuilderAtEnd(builder.builder, func_block);
         }
     }
+}
+
+// Konstrui LLVM funkion alvokon
+pub unsafe fn llvm_build_call(builder : &mut Builder, line : &LLirInstr) {
+    let call_args = match &line.arg2 {
+        LLirArg::ArgList(list) => list,
+        _ => return,
+    };
+    
+    let mut args : Vec<LLVMValueRef> = Vec::new();
+    
+    for arg in call_args {
+        match &arg {
+            LLirArg::StrLiteral(val) => {
+                /*let c_str = CString::new(val.clone()).unwrap();
+                let str_ref = LLVMConstString(c_str.as_ptr() as *const _, val.len() as u32, 0);
+                args.push(str_ref);*/
+                
+                let str_name : String = "str1".to_string();
+                let c_str_name = CString::new(str_name).unwrap();
+                
+                let c_str = CString::new(val.clone()).unwrap();
+                let str_ref = LLVMBuildGlobalString(builder.builder, c_str.as_ptr() as *const _, c_str_name.as_ptr() as *const _);
+                args.push(str_ref);
+            },
+            
+            _ => {},
+        }
+    }
+    
+    // La funkio
+    let func_name = match &line.arg1 {
+        LLirArg::Label(val) => val.clone(),
+        _ => String::new(),
+    };
+    
+    let func = match &builder.funcs.get(&func_name) {
+        Some(v) => *v.clone(),
+        _ => return,
+    };
+    
+    // La alvoko
+    LLVMBuildCall(builder.builder, func, args.as_mut_ptr(), args.len() as u32, func_name.as_ptr() as *const _);
 }
 
 // Konstrui LLVM funkion revenon

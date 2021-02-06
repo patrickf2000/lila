@@ -132,6 +132,8 @@ pub enum LLirArg {
     Label(String),
     StrLiteral(String),
     
+    ArgList(Vec<LLirArg>),
+    
     Reg(i32),
     ArgReg(i32),
 }

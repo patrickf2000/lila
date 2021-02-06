@@ -38,6 +38,7 @@ pub struct Builder {
     module : LLVMModuleRef,
     builder : LLVMBuilderRef,
     
+    funcs : HashMap<String, LLVMValueRef>,
     vars : HashMap<String, LLVMValueRef>,
     regs : HashMap<i32, LLVMValueRef>,
 }
@@ -53,6 +54,7 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
             context : context,
             module : module,
             builder : builder,
+            funcs : HashMap::new(),
             vars : HashMap::new(),
             regs : HashMap::new(),
         };
@@ -128,6 +130,7 @@ pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
         match ln.instr_type {
             LLirType::Extern => llvm_build_func(builder, ln, true),
             LLirType::Func => llvm_build_func(builder, ln, false),
+            LLirType::Call => llvm_build_call(builder, ln),
             LLirType::Ret => llvm_build_return(builder, ln),
             
             LLirType::AllocArr
