@@ -110,6 +110,7 @@ pub struct AstTree {
     pub file_name : String,
     pub arch : Arch,
     pub module : String,
+    pub keep_postfix : bool,
     pub functions : Vec<AstFunc>,
     pub constants : Vec<AstConst>,
 }

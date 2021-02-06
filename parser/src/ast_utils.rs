@@ -312,8 +312,8 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
 }
 
 // Checks the order of operations in an expression
-pub fn check_operations(original_args : &Vec<AstArg>) -> Vec<AstArg> {
-    if original_args.len() < 4 {
+pub fn check_operations(original_args : &Vec<AstArg>, keep_postfix : bool) -> Vec<AstArg> {
+    if original_args.len() < 4 && !keep_postfix {
         return original_args.to_vec();
     }
 
@@ -361,6 +361,10 @@ pub fn check_operations(original_args : &Vec<AstArg>) -> Vec<AstArg> {
     while operations.len() > 0 {
         let op = operations.pop().unwrap();
         args.push(op.clone());
+    }
+    
+    if keep_postfix {
+        return args;
     }
     
     // Now, convert back to infix

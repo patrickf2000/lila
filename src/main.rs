@@ -114,7 +114,7 @@ fn run() -> i32 {
     
     if print_ast {
         let input = inputs.last().unwrap();
-        let ast = match parser::get_ast(&input, arch, use_corelib) {
+        let ast = match parser::get_ast(&input, arch, use_corelib, use_llvm) {
             Ok(ast) => ast,
             Err(_e) => return 1,
         };

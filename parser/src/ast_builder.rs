@@ -40,10 +40,11 @@ use crate::module::*;
 // In Quik, each line is a self-contained expression; as a result, we read a line
 // and then lexically analyze and build an AST node from it
 //
-pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
+pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool, keep_postfix : bool, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
     let mut tree = AstTree {
         file_name : name,
         arch : arch,
+        keep_postfix : keep_postfix,
         module : String::new(),
         functions : Vec::new(),
         constants : Vec::new(),

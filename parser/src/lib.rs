@@ -56,11 +56,11 @@ use ltac::LtacFile;
 use llir::LLirFile;
 
 // Returns the ast
-pub fn get_ast(path : &String, arch : Arch, include_core : bool) -> Result<AstTree, ()> {
+pub fn get_ast(path : &String, arch : Arch, include_core : bool, keep_postfix : bool) -> Result<AstTree, ()> {
     let mut syntax = syntax::create_error_manager();
 
     let name = get_name(path);
-    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), include_core, &mut syntax) {
+    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), include_core, keep_postfix, &mut syntax) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };
@@ -70,7 +70,7 @@ pub fn get_ast(path : &String, arch : Arch, include_core : bool) -> Result<AstTr
 
 // The main parse function
 pub fn parse(path : String, arch : Arch, include_core : bool) -> Result<LtacFile, ()> {
-    let tree = match get_ast(&path.to_string(), arch, include_core) {
+    let tree = match get_ast(&path.to_string(), arch, include_core, false) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };
@@ -100,7 +100,7 @@ pub fn parse(path : String, arch : Arch, include_core : bool) -> Result<LtacFile
 // The parse function for the LLIR layer
 // This will eventually replace the function above
 pub fn parse2(path : String, arch : Arch, include_core : bool) -> Result<LLirFile, ()> {
-    let tree = match get_ast(&path.to_string(), arch, include_core) {
+    let tree = match get_ast(&path.to_string(), arch, include_core, true) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };

@@ -141,7 +141,7 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
             return false;
         }
         
-        var_dec.args = check_operations(&var_dec.args);
+        var_dec.args = check_operations(&var_dec.args, tree.keep_postfix);
     }
     
     var_dec.modifiers.push(data_type);
@@ -249,6 +249,8 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
         return false;
     }
     
+    var_assign.args = check_operations(&var_assign.args, tree.keep_postfix);
+    
     ast::add_stmt(tree, var_assign);
     true
 }
@@ -269,6 +271,8 @@ pub fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : Stri
     if !build_var_assign_stmt(scanner, &mut array_assign, id_val, assign_op, syntax) {
         return false;
     }
+    
+    array_assign.args = check_operations(&array_assign.args, tree.keep_postfix);
     
     ast::add_stmt(tree, array_assign);
     
