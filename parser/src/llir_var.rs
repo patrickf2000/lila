@@ -123,9 +123,14 @@ pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bo
                 stack.push(intl);
             },
             
+            AstArgType::Id => {
+                let id = LLirArg::Mem(arg.str_val.clone());
+                stack.push(id);
+            },
+            
             AstArgType::OpAdd if stack.len() >= 2 => {
-                let arg1 = stack.pop().unwrap();
                 let arg2 = stack.pop().unwrap();
+                let arg1 = stack.pop().unwrap();
                 
                 let dest = LLirArg::Reg(builder.reg_pos);
                 builder.reg_pos += 1;

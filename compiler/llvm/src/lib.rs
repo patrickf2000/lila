@@ -44,6 +44,7 @@ pub struct Builder {
     vars : HashMap<String, LLVMValueRef>,
     regs : HashMap<i32, LLVMValueRef>,
     
+    reg_pos : i32,
     str_pos : i32,
 }
 
@@ -61,6 +62,7 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
             funcs : HashMap::new(),
             vars : HashMap::new(),
             regs : HashMap::new(),
+            reg_pos : 0,
             str_pos : 0,
         };
         write_code(&mut builder_struct, &llir_file.code);

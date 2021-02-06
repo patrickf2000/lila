@@ -18,11 +18,25 @@
 extern crate llvm_sys as llvm;
 
 use std::ffi::CString;
-use llvm::*;
 use llvm::core::*;
 
-use parser::llir::{LLirInstr, LLirArg, LLirDataType};
+use parser::llir::{LLirInstr, LLirArg};
 use crate::*;
+
+unsafe fn llvm_build_load(builder : &mut Builder, var_name : String) -> LLVMValueRef {
+    let var = match builder.vars.get(&var_name) {
+        Some(v) => v.clone(),
+        _ => MaybeUninit::uninit().assume_init(),
+    };
+    
+    let mut reg_str = "reg".to_string();
+    reg_str.push_str(&builder.reg_pos.to_string());
+    builder.reg_pos += 1;
+    
+    let reg_name = CString::new(reg_str).unwrap();
+    let reg = LLVMBuildLoad(builder.builder, var, reg_name.as_ptr() as *const _);
+    return reg;
+}
 
 pub unsafe fn llvm_build_arith(builder : &mut Builder, line : &LLirInstr) {
     // TODO: Tipdeketo
@@ -30,11 +44,13 @@ pub unsafe fn llvm_build_arith(builder : &mut Builder, line : &LLirInstr) {
     
     let lval = match &line.arg2 {
         LLirArg::Int(val) => LLVMConstInt(op_type, *val as u64, 1),
+        LLirArg::Mem(val) => llvm_build_load(builder, val.to_string()),
         _ => return,
     };
     
     let rval = match &line.arg3 {
         LLirArg::Int(val) => LLVMConstInt(op_type, *val as u64, 1),
+        LLirArg::Mem(val) => llvm_build_load(builder, val.to_string()),
         _ => return,
     };
     
