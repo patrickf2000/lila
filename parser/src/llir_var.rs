@@ -176,7 +176,10 @@ pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bo
                 stack.push(dest);
             },
             
-            _ => return false,
+            _ => {
+                println!("Syntax error- build_expr");
+                return false;
+            },
         }
     }
     

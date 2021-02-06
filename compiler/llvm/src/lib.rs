@@ -71,12 +71,14 @@ unsafe fn use_intel_syntax() {
     LLVMParseCommandLineOptions(2, p, 0 as *const _);
 }
 
-pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
+pub fn compile(llir_file : &LLirFile, llvm_debug : bool) -> io::Result<()> {
     unsafe {
         use_intel_syntax();
         
+        let c_name = CString::new(llir_file.name.clone()).unwrap();
+        
         let context = LLVMContextCreate();
-        let module = LLVMModuleCreateWithNameInContext(b"first\0".as_ptr() as *const _, context);
+        let module = LLVMModuleCreateWithNameInContext(c_name.as_ptr() as *const _, context);
         let builder = LLVMCreateBuilderInContext(context);
         
         // Start generating
@@ -114,7 +116,9 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
         LLVMBuildRet(builder, sum);*/
         
         // Dump module
-        LLVMDumpModule(module);
+        if llvm_debug {
+            LLVMDumpModule(module);
+        }
         
         // Setup the machine
         LLVM_InitializeAllTargetInfos();
@@ -138,7 +142,13 @@ pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
         let machine = LLVMCreateTargetMachine(target, triple, cpu, features, opt, reloc, code);
         
         // Generate the assembly
-        LLVMTargetMachineEmitToFile(machine, module, b"/tmp/first.asm\0".as_ptr() as *mut _, LLVMCodeGenFileType::LLVMAssemblyFile, &mut err);
+        let mut asm_path = "/tmp/".to_string();
+        asm_path.push_str(&llir_file.name);
+        asm_path.push_str(".asm");
+        
+        let c_asm_path = CString::new(asm_path).unwrap();
+        
+        LLVMTargetMachineEmitToFile(machine, module, c_asm_path.as_ptr() as *mut _, LLVMCodeGenFileType::LLVMAssemblyFile, &mut err);
         
         /*let err_str = CStr::from_ptr(err).to_string_lossy().into_owned();
         println!("{:?}", err_str);*/

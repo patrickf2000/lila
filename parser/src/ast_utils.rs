@@ -326,7 +326,9 @@ pub fn check_operations(original_args : &Vec<AstArg>, keep_postfix : bool) -> Ve
             AstArgType::OpSub |
             AstArgType::OpMul |
             AstArgType::OpDiv |
-            AstArgType::OpMod => {
+            AstArgType::OpMod |
+            AstArgType::OpAnd | AstArgType::OpOr | AstArgType::OpXor |
+            AstArgType::OpLeftShift | AstArgType::OpRightShift => {
                 loop {
                     if operations.len() == 0 {
                         break;
@@ -337,10 +339,19 @@ pub fn check_operations(original_args : &Vec<AstArg>, keep_postfix : bool) -> Ve
                     if arg.arg_type == AstArgType::OpAdd || arg.arg_type == AstArgType::OpSub {
                         let top = operations.pop().unwrap();
                         args.push(top);
+                    } else if arg.arg_type == AstArgType::OpAnd || arg.arg_type == AstArgType::OpOr || arg.arg_type == AstArgType::OpXor ||
+                                arg.arg_type == AstArgType::OpLeftShift || arg.arg_type == AstArgType::OpRightShift {
+                        let top = operations.pop().unwrap();
+                        args.push(top);
                     } else {
                         match top_type {
                             AstArgType::OpAdd | AstArgType::OpSub => {
                                 break;
+                            },
+                            
+                            AstArgType::OpAnd | AstArgType::OpOr | AstArgType::OpXor |
+                            AstArgType::OpLeftShift | AstArgType::OpRightShift => {
+                                break;  
                             },
                             
                             _ => {
