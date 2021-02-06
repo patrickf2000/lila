@@ -21,11 +21,13 @@ use std::io;
 use std::mem::MaybeUninit;
 use std::ffi::CString;
 use std::collections::HashMap;
+use std::os::raw::c_char;
 
 use llvm::prelude::*;
 use llvm::core::*;
 use llvm::target::*;
 use llvm::target_machine::*;
+use llvm::support::*;
 
 use parser::llir::{LLirFile, LLirInstr, LLirType, LLirArg};
 
@@ -48,8 +50,31 @@ pub struct Builder {
     str_pos : i32,
 }
 
+// I HATE HATE HATE the AT&T syntax
+unsafe fn use_intel_syntax() {
+    let mut argv : Vec<String> = Vec::new();
+    argv.push("".to_string());
+    argv.push("--x86-asm-syntax=intel".to_string());
+    
+    let cstr_argv: Vec<_> = argv.iter()
+            .map(|arg| CString::new(arg.as_str()).unwrap())
+            .collect();
+
+    let mut p_argv: Vec<_> = cstr_argv.iter()
+            .map(|arg| arg.as_ptr())
+            .collect();
+
+    p_argv.push(std::ptr::null());
+
+    let p: *const *const c_char = p_argv.as_ptr();
+    
+    LLVMParseCommandLineOptions(2, p, 0 as *const _);
+}
+
 pub fn compile(llir_file : &LLirFile) -> io::Result<()> {
     unsafe {
+        use_intel_syntax();
+        
         let context = LLVMContextCreate();
         let module = LLVMModuleCreateWithNameInContext(b"first\0".as_ptr() as *const _, context);
         let builder = LLVMCreateBuilderInContext(context);
@@ -140,7 +165,12 @@ pub unsafe fn write_code(builder : &mut Builder, code : &Vec<LLirInstr>) {
             LLirType::Call => llvm_build_call(builder, ln),
             LLirType::Ret => llvm_build_return(builder, ln),
             
-            LLirType::Add => llvm_build_arith(builder, ln),
+            LLirType::Add | LLirType::Sub
+            | LLirType::Mul | LLirType::UMul
+            | LLirType::Div | LLirType::UDiv
+            | LLirType::Rem | LLirType::URem
+            | LLirType::And | LLirType::Or | LLirType::Xor
+            | LLirType::Lsh | LLirType::Rsh => llvm_build_arith(builder, ln),
             
             LLirType::AllocArr
             | LLirType::AllocB | LLirType::AllocW

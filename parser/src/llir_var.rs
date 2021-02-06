@@ -110,7 +110,7 @@ pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bo
     let mut stack : Vec<LLirArg> = Vec::new();
     
     for arg in args.iter() {
-        match arg.arg_type {
+        match &arg.arg_type {
             AstArgType::IntL => {
                 let intl : LLirArg;
                 
@@ -128,14 +128,46 @@ pub fn build_expr(builder : &mut LLirBuilder, line : &AstStmt, var : &Var) -> bo
                 stack.push(id);
             },
             
-            AstArgType::OpAdd if stack.len() >= 2 => {
+            AstArgType::OpAdd | AstArgType::OpSub
+            | AstArgType::OpMul | AstArgType::OpDiv | AstArgType::OpMod
+            | AstArgType::OpAnd | AstArgType::OpOr | AstArgType::OpXor
+            | AstArgType::OpLeftShift | AstArgType::OpRightShift
+            if stack.len() >= 2 => {
                 let arg2 = stack.pop().unwrap();
                 let arg1 = stack.pop().unwrap();
                 
                 let dest = LLirArg::Reg(builder.reg_pos);
                 builder.reg_pos += 1;
                 
-                let mut instr = llir::create_instr(LLirType::Add);
+                //let mut instr = llir::create_instr(LLirType::Add);
+                let mut instr : LLirInstr;
+                
+                match &arg.arg_type {
+                    AstArgType::OpAdd => instr = llir::create_instr(LLirType::Add),
+                    AstArgType::OpSub => instr = llir::create_instr(LLirType::Sub),
+                    
+                    AstArgType::OpMul if is_unsigned(&var.data_type)
+                        => instr = llir::create_instr(LLirType::UMul),
+                    AstArgType::OpMul => instr = llir::create_instr(LLirType::Mul),
+                    
+                    AstArgType::OpDiv if is_unsigned(&var.data_type)
+                        => instr = llir::create_instr(LLirType::UDiv),
+                    AstArgType::OpDiv => instr = llir::create_instr(LLirType::Div),
+                    
+                    AstArgType::OpMod if is_unsigned(&var.data_type)
+                        => instr = llir::create_instr(LLirType::URem),
+                    AstArgType::OpMod => instr = llir::create_instr(LLirType::Rem),
+                    
+                    AstArgType::OpAnd => instr = llir::create_instr(LLirType::And),
+                    AstArgType::OpOr => instr = llir::create_instr(LLirType::Or),
+                    AstArgType::OpXor => instr = llir::create_instr(LLirType::Xor),
+                    AstArgType::OpLeftShift => instr = llir::create_instr(LLirType::Lsh),
+                    AstArgType::OpRightShift => instr = llir::create_instr(LLirType::Rsh),
+                    
+                    // We should never get to this point
+                    _ => return false,
+                }
+                
                 instr.arg1 = dest.clone();
                 instr.arg2 = arg1;
                 instr.arg3 = arg2;

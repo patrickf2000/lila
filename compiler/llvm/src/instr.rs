@@ -60,7 +60,29 @@ pub unsafe fn llvm_build_arith(builder : &mut Builder, line : &LLirInstr) {
     };
     
     let c_dest_name = CString::new(dest_pos.to_string()).unwrap();
-    let dest = LLVMBuildAdd(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _);
+    
+    let dest : LLVMValueRef = match &line.instr_type {
+        LLirType::Add => LLVMBuildAdd(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        LLirType::Sub => LLVMBuildSub(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        
+        LLirType::Mul | LLirType::UMul
+            => LLVMBuildMul(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+            
+        LLirType::Div => LLVMBuildSDiv(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        LLirType::UDiv => LLVMBuildUDiv(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        
+        LLirType::Rem => LLVMBuildSRem(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        LLirType::URem => LLVMBuildURem(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        
+        LLirType::And => LLVMBuildAnd(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        LLirType::Or => LLVMBuildOr(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        LLirType::Xor => LLVMBuildXor(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        
+        LLirType::Lsh => LLVMBuildShl(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        LLirType::Rsh => LLVMBuildLShr(builder.builder, lval, rval, c_dest_name.as_ptr() as *const _),
+        
+        _ => MaybeUninit::uninit().assume_init(),
+    };
     
     builder.regs.insert(dest_pos, dest);
 }
