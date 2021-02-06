@@ -74,6 +74,11 @@ pub fn build_func_call(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
                 arg_list.push(LLirArg::Mem(arg.str_val.clone()));
             },
             
+            // TODO: Switch to unsigned
+            AstArgType::IntL => {
+                arg_list.push(LLirArg::UInt(arg.u64_val));
+            },
+            
             _ => {},
         }
     }

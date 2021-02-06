@@ -116,6 +116,12 @@ pub unsafe fn llvm_build_call(builder : &mut Builder, line : &LLirInstr) {
                 args.push(reg);
             },
             
+            LLirArg::UInt(val) => {
+                let const_type = LLVMInt32TypeInContext(builder.context);
+                let val = LLVMConstInt(const_type, *val as u64, 0);
+                args.push(val);
+            },
+            
             _ => {},
         }
     }
