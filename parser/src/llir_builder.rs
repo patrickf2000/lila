@@ -25,6 +25,7 @@ use crate::syntax::*;
 use crate::llir_func::*;
 use crate::llir_var::*;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Var {
     pub name : String,
     pub data_type : LLirDataType,
@@ -109,7 +110,7 @@ impl LLirBuilder {
         for line in statements {
             match &line.stmt_type {
                 AstStmtType::VarDec => code = build_var_dec(self, &line),
-                //AstStmtType::VarAssign => code = build_var_assign(self, &line),
+                AstStmtType::VarAssign => code = build_var_assign(self, &line),
                 //AstStmtType::ArrayAssign => code = build_array_assign(self, &line),
                 //AstStmtType::If => build_cond(self, &line),
                 //AstStmtType::Elif => build_cond(self, &line),

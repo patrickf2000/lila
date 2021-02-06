@@ -79,7 +79,7 @@ pub fn build_var_dec(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
     
     // Puŝi la variablon
     let var = Var {
-        name : name,
+        name : name.clone(),
         data_type : data_type,
         sub_type : sub_type,
     };
@@ -91,6 +91,17 @@ pub fn build_var_dec(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
     builder.vars.push(var);
     
     true
+}
+
+pub fn build_var_assign(builder : &mut LLirBuilder, line : &AstStmt) -> bool {
+    let vars = builder.vars.clone();
+    for v in &vars {
+        if v.name == line.name {
+            return build_expr(builder, line, &v);
+        }
+    }
+    
+    false
 }
 
 // Konstrui variablon esprimon
