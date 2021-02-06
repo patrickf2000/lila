@@ -72,11 +72,9 @@ pub unsafe fn llvm_build_call(builder : &mut Builder, line : &LLirInstr) {
     for arg in call_args {
         match &arg {
             LLirArg::StrLiteral(val) => {
-                /*let c_str = CString::new(val.clone()).unwrap();
-                let str_ref = LLVMConstString(c_str.as_ptr() as *const _, val.len() as u32, 0);
-                args.push(str_ref);*/
-                
-                let str_name : String = "str1".to_string();
+                let mut str_name : String = "STR".to_string();
+                str_name.push_str(&builder.str_pos.to_string());
+                builder.str_pos += 1;
                 let c_str_name = CString::new(str_name).unwrap();
                 
                 let c_str = CString::new(val.clone()).unwrap();
