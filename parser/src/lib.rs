@@ -24,6 +24,7 @@ pub mod module;
 
 mod ast_builder;
 mod ast_func;
+mod ast_flow;
 mod ast_utils;
 mod ast_var;
 mod lex;

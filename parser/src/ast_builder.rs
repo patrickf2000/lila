@@ -27,7 +27,7 @@ use crate::syntax;
 use crate::Arch;
 
 use crate::ast_func::*;
-use crate::ast_utils::*;
+use crate::ast_flow::*;
 use crate::ast_var::*;
 use crate::module;
 use crate::module::*;
@@ -491,64 +491,5 @@ fn build_id(builder : &mut AstBuilder, id_val : String) -> bool {
     }
     
     code
-}
-
-// Builds conditional statements
-fn build_cond(builder : &mut AstBuilder, cond_type : Token) -> bool {
-    let mut ast_cond_type : AstStmtType = AstStmtType::If;
-    match cond_type {
-        Token::If => ast_cond_type = AstStmtType::If,
-        Token::Elif => ast_cond_type = AstStmtType::Elif,
-        Token::Else => ast_cond_type = AstStmtType::Else,
-        Token::While => ast_cond_type = AstStmtType::While,
-        _ => {},
-    }
-    
-    let mut cond = ast::create_stmt(ast_cond_type, &mut builder.scanner);
-    
-    // Build the rest arguments
-    if cond_type != Token::Else {
-        if !build_args(&mut builder.scanner, &mut cond, Token::Eof, &mut builder.syntax) {
-            return false;
-        }
-    }
-    
-    builder.add_stmt(cond);
-    
-    true
-}
-
-// Builds a for loop
-// Syntax: for <index> in <var> | <start> .. <end>
-fn build_for_loop(builder : &mut AstBuilder) -> bool {
-    let mut for_loop = ast::create_stmt(AstStmtType::For, &mut builder.scanner);
-    let token = builder.get_token();
-    
-    match token {
-        Token::Id(ref val) => {
-            let mut id = ast::create_arg(AstArgType::Id);
-            id.str_val = val.to_string();
-            for_loop.args.push(id);
-        },
-        
-        _ => {
-            builder.syntax_error("Expected variable name.".to_string());
-            return false;
-        },
-    }
-    
-    if builder.get_token() != Token::In {
-        builder.syntax_error("Expected \"in\".".to_string());
-        return false;
-    }
-    
-    // Build the rest of the arguments
-    if !build_args(&mut builder.scanner, &mut for_loop, Token::Eof, &mut builder.syntax) {
-        return false;
-    }
-    
-    builder.add_stmt(for_loop);
-    
-    true
 }
 
