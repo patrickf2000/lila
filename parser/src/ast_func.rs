@@ -24,86 +24,45 @@ use crate::ast_utils::*;
 
 // A utility function for returning a type modifier from a token
 // NOTE: I don't know if we need a subtype, but if so, we'll have to go back and make adjustments
-fn token_to_mod(token : &Token, is_array : bool) -> DataType {   
+fn token_to_mod(token : &Token, is_array : bool) -> (DataType, DataType) {   
     match token {
-        Token::Byte if is_array => return DataType::Ptr,
-        Token::Byte => return DataType::Byte,
+        Token::Byte if is_array => return (DataType::Ptr, DataType::Byte),
+        Token::Byte => return (DataType::Byte, DataType::None),
         
-        Token::UByte if is_array => return DataType::Ptr,
-        Token::UByte | Token::Char => return DataType::UByte,
+        Token::UByte if is_array => return (DataType::Ptr, DataType::UByte),
+        Token::UByte | Token::Char => return (DataType::UByte, DataType::None),
         
-        Token::Short if is_array => return DataType::Ptr,
-        Token::Short => return DataType::Short,
+        Token::Short if is_array => return (DataType::Ptr, DataType::Short),
+        Token::Short => return (DataType::Short, DataType::None),
         
-        Token::UShort if is_array => return DataType::Ptr,
-        Token::UShort => return DataType::UShort,
+        Token::UShort if is_array => return (DataType::Ptr, DataType::UShort),
+        Token::UShort => return (DataType::UShort, DataType::None),
     
-        Token::Int if is_array => return DataType::Ptr,
-        Token::Int => return DataType::Int,
+        Token::Int if is_array => return (DataType::Ptr, DataType::Int),
+        Token::Int => return (DataType::Int, DataType::None),
         
-        Token::UInt => return DataType::UInt,
+        Token::UInt => return (DataType::UInt, DataType::None),
         
-        Token::Int64 => return DataType::Int64,
-        Token::UInt64 => return DataType::UInt64,
+        Token::Int64 => return (DataType::Int64, DataType::None),
+        Token::UInt64 => return (DataType::UInt64, DataType::None),
         
-        Token::Float if is_array => return DataType::Ptr,
-        Token::Float => return DataType::Float,
+        Token::Float if is_array => return (DataType::Ptr, DataType::Float),
+        Token::Float => return (DataType::Float, DataType::None),
         
-        Token::Double if is_array => return DataType::Ptr,
-        Token::Double => return DataType::Double,
+        Token::Double if is_array => return (DataType::Ptr, DataType::Double),
+        Token::Double => return (DataType::Double, DataType::None),
         
-        Token::TStr if is_array => return DataType::Ptr,
-        Token::TStr => return DataType::Str,
+        Token::TStr if is_array => return (DataType::Ptr, DataType::Str),
+        Token::TStr => return (DataType::Str, DataType::None),
         
-        _ => return DataType::None,
+        _ => return (DataType::None, DataType::None),
     }
-}
-
-// TODO: Phase this out
-fn token_to_mod2(token : &Token, is_array : bool) -> AstMod {
-    let mod_type : AstModType;
-    
-    match token {
-        Token::Byte if is_array => mod_type = AstModType::ByteDynArray,
-        Token::Byte => mod_type = AstModType::Byte,
-        
-        Token::UByte if is_array => mod_type = AstModType::UByteDynArray,
-        Token::UByte | Token::Char => mod_type = AstModType::UByte,
-        
-        Token::Short if is_array => mod_type = AstModType::ShortDynArray,
-        Token::Short => mod_type = AstModType::Short,
-        
-        Token::UShort if is_array => mod_type = AstModType::UShortDynArray,
-        Token::UShort => mod_type = AstModType::UShort,
-    
-        Token::Int if is_array => mod_type = AstModType::IntDynArray,
-        Token::Int => mod_type = AstModType::Int,
-        
-        Token::UInt => mod_type = AstModType::UInt,
-        
-        Token::Int64 => mod_type = AstModType::Int64,
-        Token::UInt64 => mod_type = AstModType::UInt64,
-        
-        Token::Float if is_array => mod_type = AstModType::FloatDynArray,
-        Token::Float => mod_type = AstModType::Float,
-        
-        Token::Double if is_array => mod_type = AstModType::DoubleDynArray,
-        Token::Double => mod_type = AstModType::Double,
-        
-        Token::TStr if is_array => mod_type = AstModType::StrDynArray,
-        Token::TStr => mod_type = AstModType::Str,
-        
-        _ => mod_type = AstModType::None,
-    }
-
-    let func_type = AstMod { mod_type : mod_type, };
-    return func_type;
 }
 
 // A helper function for the function declaration builder
 fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> bool {
     let token = scanner.get_token();
-    let ret = token_to_mod(&token, false);
+    let (ret, _) = token_to_mod(&token, false);
     
     if ret == DataType::None {
         syntax.syntax_error(scanner, "Invalid function return type.".to_string());
@@ -214,14 +173,15 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
             token = scanner.get_token();
         }
         
-        let val = token_to_mod2(&type_token, is_array);
+        let (val, sub_val) = token_to_mod(&type_token, is_array);
     
-        if val.mod_type == AstModType::None {
+        if val == DataType::None {
             syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
             return false;
         }
         
-        arg.modifiers.push(val);
+        arg.data_type = val;
+        arg.sub_type = sub_val;
         func.args.push(arg);
         
         if token != Token::Comma && token != Token::RParen {

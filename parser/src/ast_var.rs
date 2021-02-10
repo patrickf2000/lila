@@ -57,23 +57,24 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
     
     // Now for the type
     let mut is_array = false;
-    let dtype : AstModType;
+    let mut dtype : DataType;
+    let mut sub_type = DataType::None;
     
     token = scanner.get_token();
     
     match token {
-        Token::Byte => dtype = AstModType::Byte,
-        Token::UByte => dtype = AstModType::UByte,
-        Token::Short => dtype = AstModType::Short,
-        Token::UShort => dtype = AstModType::UShort,
-        Token::Int => dtype = AstModType::Int,
-        Token::UInt => dtype = AstModType::UInt,
-        Token::Int64 => dtype = AstModType::Int64,
-        Token::UInt64 => dtype = AstModType::UInt64,
-        Token::Float => dtype = AstModType::Float,
-        Token::Double => dtype = AstModType::Double,
-        Token::Char => dtype = AstModType::Char,
-        Token::TStr => dtype = AstModType::Str,
+        Token::Byte => dtype = DataType::Byte,
+        Token::UByte => dtype = DataType::UByte,
+        Token::Short => dtype = DataType::Short,
+        Token::UShort => dtype = DataType::UShort,
+        Token::Int => dtype = DataType::Int,
+        Token::UInt => dtype = DataType::UInt,
+        Token::Int64 => dtype = DataType::Int64,
+        Token::UInt64 => dtype = DataType::UInt64,
+        Token::Float => dtype = DataType::Float,
+        Token::Double => dtype = DataType::Double,
+        Token::Char => dtype = DataType::Char,
+        Token::TStr => dtype = DataType::Str,
         
         Token::Id(ref val) => {
             if !ast::enum_exists(tree, val.to_string()) {
@@ -81,7 +82,7 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
                 return false;
             }
             
-            dtype = AstModType::Enum(val.to_string());
+            dtype = DataType::Enum(val.to_string());
         },
         
         _ => {
@@ -89,10 +90,6 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
             return false;
         },
     }
-        
-    let mut data_type = AstMod {
-        mod_type : dtype.clone(),
-    };
     
     // Check for arrays
     token = scanner.get_token();
@@ -116,21 +113,8 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
     // If we have an array, make sure we have the proper syntax and end with the terminator
     // Otherwise, build the assignment
     if is_array {
-        match &dtype {
-            AstModType::Byte | AstModType::Char => data_type.mod_type = AstModType::ByteDynArray,
-            AstModType::UByte => data_type.mod_type = AstModType::UByteDynArray,
-            AstModType::Short => data_type.mod_type = AstModType::ShortDynArray,
-            AstModType::UShort => data_type.mod_type = AstModType::UShortDynArray,
-            AstModType::Int => data_type.mod_type = AstModType::IntDynArray,
-            AstModType::UInt => data_type.mod_type = AstModType::UIntDynArray,
-            AstModType::Int64 => data_type.mod_type = AstModType::I64DynArray,
-            AstModType::UInt64 => data_type.mod_type = AstModType::U64DynArray,
-            AstModType::Float => data_type.mod_type = AstModType::FloatDynArray,
-            AstModType::Double => data_type.mod_type = AstModType::DoubleDynArray,
-            AstModType::Str => data_type.mod_type = AstModType::StrDynArray,
-            
-            _ => {},
-        }
+        sub_type = dtype;
+        dtype = DataType::Ptr;
         
         if scanner.get_token() != Token::Semicolon {
             syntax.syntax_error(scanner, "Expected terminator.".to_string());
@@ -144,7 +128,8 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
         var_dec.args = check_operations(&var_dec.args, tree.keep_postfix);
     }
     
-    var_dec.modifiers.push(data_type);
+    var_dec.data_type = dtype;
+    var_dec.sub_type = sub_type;
     ast::add_stmt(tree, var_dec.clone());
     
     for n in extra_names.iter() {

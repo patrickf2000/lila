@@ -173,7 +173,9 @@ pub struct AstStmt {
     
     pub sub_args : Vec<AstArg>,
     pub args : Vec<AstArg>,
-    pub modifiers : Vec<AstMod>,
+    
+    pub data_type : DataType,
+    pub sub_type : DataType,
     
     pub line : String,
     pub line_no : i32,
@@ -322,9 +324,7 @@ impl AstStmt {
             AstStmtType::End => println!("END"),
         }
         
-        for m in self.modifiers.iter() {
-            m.print(false);
-        }
+        println!(" {:?} {:?} ", &self.data_type, &self.sub_type);
         
         if self.args.len() > 0 {
             print!("        ARG ");
@@ -480,7 +480,9 @@ pub fn create_stmt(stmt_type : AstStmtType, scanner : &mut Lex) -> AstStmt {
         
         sub_args : Vec::new(),
         args : Vec::new(),
-        modifiers : Vec::new(),
+        
+        data_type : DataType::None,
+        sub_type : DataType::None,
         
         line_no : scanner.get_line_no(),
         line : scanner.get_current_line(),
@@ -495,7 +497,9 @@ pub fn create_orphan_stmt(stmt_type : AstStmtType) -> AstStmt {
         
         sub_args : Vec::new(),
         args : Vec::new(),
-        modifiers : Vec::new(),
+        
+        data_type : DataType::None,
+        sub_type : DataType::None,
         
         line_no : 0,
         line : String::new(),
