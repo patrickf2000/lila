@@ -66,6 +66,7 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     let mut line_no = 0;
     let mut layer = 0;
     let mut in_begin = false;
+    let mut current_block : Vec<AstStmt> = Vec::new();
     
     let mut scanner = create_lex();
     
@@ -82,7 +83,7 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     }
     
     loop {
-        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, &mut tree, syntax);
+        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, &mut tree, &mut current_block, syntax);
         layer = new_layer;
         in_begin = begin;
         
@@ -118,6 +119,7 @@ pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorMan
     let mut line_no = 0;
     let mut layer = 0;
     let mut in_begin = false;
+    let mut current_block : Vec<AstStmt> = Vec::new();
     
     let mut scanner = create_lex();
     
@@ -134,7 +136,7 @@ pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorMan
     }
     
     loop {
-        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, tree, syntax);
+        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, tree, &mut current_block, syntax);
         layer = new_layer;
         in_begin = begin;
         
@@ -151,7 +153,8 @@ pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorMan
 }
 
 // Converts a line to an AST node
-fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstTree, syntax : &mut ErrorManager) -> (bool, i32, bool, bool) {    
+// TODO: This is the most ridiculous function signature. We need to change this
+fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstTree, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> (bool, i32, bool, bool) {    
     let mut code = true;
     let mut new_layer = layer;
     let mut in_code = in_begin;
@@ -193,12 +196,20 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
             }
         },
         
-        Token::Return if in_code => code = build_return(scanner, tree, syntax),
-        Token::Exit if in_code => code = build_exit(scanner, tree, syntax),
+        Token::Return if in_code => code = build_return(scanner, current_block, syntax),
+        Token::Exit if in_code => code = build_exit(scanner, current_block, syntax),
         
         Token::End => {
-            build_end(scanner, tree);
+            build_end(scanner, current_block);
             new_layer -= 1;
+            
+            if new_layer == 0 {
+                for stmt in current_block.iter() {
+                    ast::add_stmt(tree, stmt.clone());
+                }
+                
+                current_block.clear();
+            }
         },
         
         Token::Const => code = build_const(scanner, tree, syntax, layer),
@@ -212,24 +223,24 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
             }
         },
         
-        Token::Id(ref val) if in_code => code = build_id(scanner, tree, val.to_string(), syntax),
-        Token::Id(ref val) => code = build_var_dec(scanner, tree, val.to_string(), syntax),
+        Token::Id(ref val) if in_code => code = build_id(scanner, current_block, val.to_string(), tree.keep_postfix, syntax),
+        Token::Id(ref val) => code = build_var_dec(scanner, tree, current_block, val.to_string(), syntax),
         
         Token::If if in_code => {
-            code = build_cond(scanner, tree, Token::If, syntax);
+            code = build_cond(scanner, current_block, Token::If, syntax);
             new_layer += 1;
         },
         
-        Token::Elif if in_code => code = build_cond(scanner, tree, Token::Elif, syntax),
-        Token::Else if in_code => code = build_cond(scanner, tree, Token::Else, syntax),
+        Token::Elif if in_code => code = build_cond(scanner, current_block, Token::Elif, syntax),
+        Token::Else if in_code => code = build_cond(scanner, current_block, Token::Else, syntax),
         
         Token::While if in_code => {
-            code = build_cond(scanner, tree, Token::While, syntax);
+            code = build_cond(scanner, current_block, Token::While, syntax);
             new_layer += 1;
         },
         
         Token::For if in_code => {
-            code = build_for_loop(scanner, tree, syntax);
+            code = build_for_loop(scanner, current_block, syntax);
             new_layer += 1;
         },
         
@@ -237,7 +248,7 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
         // Create a common function for the lack of semicolons
         Token::Break if in_code => {
             let br = ast::create_stmt(AstStmtType::Break, scanner);
-            ast::add_stmt(tree, br);
+            current_block.push(br);
             
             if scanner.get_token() != Token::Semicolon {
                 syntax.syntax_error(scanner, "Expected terminator".to_string());
@@ -247,7 +258,7 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
         
         Token::Continue if in_code => {
             let cont = ast::create_stmt(AstStmtType::Continue, scanner);
-            ast::add_stmt(tree, cont);
+            current_block.push(cont);
             
             if scanner.get_token() != Token::Semicolon {
                 syntax.syntax_error(scanner, "Expected terminator".to_string());
@@ -428,7 +439,7 @@ fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManage
 }
 
 // Handles cases when an identifier is the first token
-fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
+fn build_id(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : String, keep_postfix : bool, syntax : &mut ErrorManager) -> bool {
     // If the next token is an assignment, we have a variable assignment
     // If the next token is a parantheses, we have a function call
     let token = scanner.get_token();
@@ -439,10 +450,10 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &
         | Token::MulAssign | Token::DivAssign
         | Token::ModAssign
         | Token::OpInc | Token::OpDec
-        | Token::Assign => code = build_var_assign(scanner, tree, id_val, token, syntax),
+        | Token::Assign => code = build_var_assign(scanner, current_block, id_val, token, keep_postfix, syntax),
         
-        Token::LParen => code = build_func_call(scanner, tree, id_val, syntax),
-        Token::LBracket => code = build_array_assign(scanner, tree, id_val, syntax),
+        Token::LParen => code = build_func_call(scanner, current_block, id_val, syntax),
+        Token::LBracket => code = build_array_assign(scanner, current_block, id_val, keep_postfix, syntax),
         _ => {
             syntax.syntax_error(scanner, "Invalid assignment or call.".to_string());
             return false;
@@ -453,7 +464,7 @@ fn build_id(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &
 }
 
 // Builds conditional statements
-fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token, syntax : &mut ErrorManager) -> bool {
+fn build_cond(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, cond_type : Token, syntax : &mut ErrorManager) -> bool {
     let mut ast_cond_type : AstStmtType = AstStmtType::If;
     match cond_type {
         Token::If => ast_cond_type = AstStmtType::If,
@@ -472,14 +483,14 @@ fn build_cond(scanner : &mut Lex, tree : &mut AstTree, cond_type : Token, syntax
         }
     }
     
-    ast::add_stmt(tree, cond);
+    current_block.push(cond);
     
     true
 }
 
 // Builds a for loop
 // Syntax: for <index> in <var> | <start> .. <end>
-fn build_for_loop(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+fn build_for_loop(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> bool {
     let mut for_loop = ast::create_stmt(AstStmtType::For, scanner);
     let token = scanner.get_token();
     
@@ -506,7 +517,7 @@ fn build_for_loop(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         return false;
     }
     
-    ast::add_stmt(tree, for_loop);
+    current_block.push(for_loop);
     
     true
 }

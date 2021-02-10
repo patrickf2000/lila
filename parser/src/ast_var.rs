@@ -23,7 +23,7 @@ use crate::syntax::ErrorManager;
 use crate::ast_utils::*;
 
 // Builds a variable declaration
-pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syntax : &mut ErrorManager) -> bool {
+pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &mut Vec<AstStmt>, name : String, syntax : &mut ErrorManager) -> bool {
     let mut var_dec = ast::create_stmt(AstStmtType::VarDec, scanner);
     var_dec.name = name;
     
@@ -130,11 +130,11 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, name : String, syn
     
     var_dec.data_type = dtype;
     var_dec.sub_type = sub_type;
-    ast::add_stmt(tree, var_dec.clone());
+    current_block.push(var_dec.clone());
     
     for n in extra_names.iter() {
         var_dec.name = n.to_string();
-        ast::add_stmt(tree, var_dec.clone());
+        current_block.push(var_dec.clone());
     }
     
     true
@@ -226,7 +226,7 @@ fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : S
 }
 
 // Builds a variable assignment
-pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, assign_op : Token, syntax : &mut ErrorManager) -> bool {
+pub fn build_var_assign(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, name : String, assign_op : Token, keep_postfix : bool, syntax : &mut ErrorManager) -> bool {
     let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
     var_assign.name = name.clone();
     
@@ -234,14 +234,14 @@ pub fn build_var_assign(scanner : &mut Lex, tree : &mut AstTree, name : String, 
         return false;
     }
     
-    var_assign.args = check_operations(&var_assign.args, tree.keep_postfix);
+    var_assign.args = check_operations(&var_assign.args, keep_postfix);
     
-    ast::add_stmt(tree, var_assign);
+    current_block.push(var_assign);
     true
 }
 
 // Builds an array assignment
-pub fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
+pub fn build_array_assign(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : String, keep_postfix : bool, syntax : &mut ErrorManager) -> bool {
     let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign, scanner);
     array_assign.name = id_val.clone();
     
@@ -257,9 +257,9 @@ pub fn build_array_assign(scanner : &mut Lex, tree : &mut AstTree, id_val : Stri
         return false;
     }
     
-    array_assign.args = check_operations(&array_assign.args, tree.keep_postfix);
+    array_assign.args = check_operations(&array_assign.args, keep_postfix);
     
-    ast::add_stmt(tree, array_assign);
+    current_block.push(array_assign);
     
     true
 }

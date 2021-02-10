@@ -206,20 +206,20 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
 }
 
 // Builds a return statement
-pub fn build_return(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+pub fn build_return(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> bool {
     let mut ret = ast::create_stmt(AstStmtType::Return, scanner);
     
     if !build_args(scanner, &mut ret, Token::Semicolon, syntax) {
         return false;
     }
     
-    ast::add_stmt(tree, ret);
+    current_block.push(ret);
     
     true
 }
 
 // Builds the exit statement
-pub fn build_exit(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+pub fn build_exit(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> bool {
     let mut exit = ast::create_stmt(AstStmtType::Exit, scanner);
     
     // Build arguments
@@ -227,19 +227,19 @@ pub fn build_exit(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         return false;
     }
     
-    ast::add_stmt(tree, exit);
+    current_block.push(exit);
     
     true
 }
 
 // Builds the end statement
-pub fn build_end(scanner: &mut Lex, tree : &mut AstTree) {
+pub fn build_end(scanner: &mut Lex, current_block : &mut Vec<AstStmt>) {
     let stmt = ast::create_stmt(AstStmtType::End, scanner);
-    ast::add_stmt(tree, stmt);
+    current_block.push(stmt);
 }
 
 // Builds function calls
-pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String, syntax : &mut ErrorManager) -> bool {
+pub fn build_func_call(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : String, syntax : &mut ErrorManager) -> bool {
     let mut fc = ast::create_stmt(AstStmtType::FuncCall, scanner);
     fc.name = id_val;
     
@@ -256,7 +256,7 @@ pub fn build_func_call(scanner : &mut Lex, tree : &mut AstTree, id_val : String,
     }
     
     // Add the call
-    ast::add_stmt(tree, fc);
+    current_block.push(fc);
     
     true
 }

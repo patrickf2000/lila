@@ -143,6 +143,7 @@ pub struct AstStmt {
     
     pub sub_args : Vec<AstArg>,
     pub args : Vec<AstArg>,
+    pub sub_block : Vec<AstStmt>,
     
     pub data_type : DataType,
     pub sub_type : DataType,
@@ -254,6 +255,10 @@ impl AstStmt {
             print!("FUNC_ARG ");
         }
         
+        if self.data_type != DataType::None {
+            print!(" {:?} {:?} ", &self.data_type, &self.sub_type);
+        }
+        
         match &self.stmt_type {
             AstStmtType::VarDec => println!("VAR DEC {}", self.name),
             AstStmtType::VarAssign => println!("VAR ASSIGN {}", self.name),
@@ -270,8 +275,6 @@ impl AstStmt {
             AstStmtType::Exit => println!("EXIT"),
             AstStmtType::End => println!("END"),
         }
-        
-        println!(" {:?} {:?} ", &self.data_type, &self.sub_type);
         
         if self.args.len() > 0 {
             print!("        ARG ");
@@ -291,6 +294,10 @@ impl AstStmt {
             }
             
             println!("");
+        }
+        
+        for stmt in self.sub_block.iter() {
+            stmt.print(false);
         }
     }
 }
@@ -374,6 +381,7 @@ pub fn create_stmt(stmt_type : AstStmtType, scanner : &mut Lex) -> AstStmt {
         
         sub_args : Vec::new(),
         args : Vec::new(),
+        sub_block : Vec::new(),
         
         data_type : DataType::None,
         sub_type : DataType::None,
@@ -391,6 +399,7 @@ pub fn create_orphan_stmt(stmt_type : AstStmtType) -> AstStmt {
         
         sub_args : Vec::new(),
         args : Vec::new(),
+        sub_block : Vec::new(),
         
         data_type : DataType::None,
         sub_type : DataType::None,
