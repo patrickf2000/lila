@@ -19,7 +19,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacType, LtacInstr, LtacArg};
+use ltac::ltac::{LtacType, LtacInstr, LtacArg};
 
 pub fn ltac_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
     let mut line = "extern ".to_string();

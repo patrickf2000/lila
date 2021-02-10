@@ -18,16 +18,12 @@
 
 use std::collections::HashMap;
 
-use parser::ltac;
-use parser::ltac::{LtacFile, LtacType, LtacArg};
+use crate::ltac;
+use crate::ltac::{LtacFile, LtacType, LtacArg};
 use parser::Arch;
 
-// Import any local modules
-mod risc;
-mod riscv;
-
-use risc::*;
-use riscv::*;
+use crate::risc::*;
+use crate::riscv::*;
 
 // Architectures
 // 1-> x86-64

@@ -9,7 +9,7 @@ edition = "2018"
 [workspace]
 members = [
     "parser",
-    "transform",
+    "ltac",
     "compiler/x86_64",
     "compiler/aarch64",
     "compiler/riscv64",
@@ -19,7 +19,7 @@ members = [
 
 [dependencies]
 parser = { path = "parser" }
-transform = { path = "transform" }
+ltac = { path = "ltac" }
 example = { path = "compiler/example" }
 x86_64 = { path = "compiler/x86_64" }
 aarch64 = { path = "compiler/aarch64" }

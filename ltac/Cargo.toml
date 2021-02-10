@@ -1,5 +1,5 @@
 [package]
-name = "transform"
+name = "ltac"
 version = "0.1.0"
 authors = ["Patrick Flynn <pflynn4664@pm.me>"]
 edition = "2018"

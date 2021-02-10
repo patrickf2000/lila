@@ -18,8 +18,8 @@
 // This is a specialized module for performing RISC-V specific optimizations (basically, to deal
 // with RISC-V quirks...)
 
-use parser::ltac;
-use parser::ltac::{LtacFile, LtacType, LtacArg};
+use crate::ltac;
+use crate::ltac::{LtacFile, LtacType, LtacArg};
 
 // The main RISC-V optimizer loop
 pub fn riscv_optimize(file : &LtacFile) -> Result<LtacFile, ()> {

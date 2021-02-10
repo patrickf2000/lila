@@ -20,7 +20,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
+use ltac::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 mod func;
 

@@ -22,7 +22,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
+use ltac::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
 // Import and use local modules
 mod asm;

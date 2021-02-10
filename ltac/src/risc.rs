@@ -16,8 +16,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-use parser::ltac;
-use parser::ltac::{LtacFile, LtacType, LtacArg};
+use crate::ltac;
+use crate::ltac::{LtacFile, LtacType, LtacArg};
 
 fn is_move(instr : &LtacType) -> bool {
     match instr {

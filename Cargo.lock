@@ -4,6 +4,7 @@
 name = "aarch64"
 version = "0.0.2"
 dependencies = [
+ "ltac",
  "parser",
 ]
 
@@ -26,6 +27,7 @@ checksum = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
 name = "example"
 version = "0.0.2"
 dependencies = [
+ "ltac",
  "parser",
 ]
 
@@ -48,10 +50,10 @@ dependencies = [
  "aarch64",
  "example",
  "llvm",
+ "ltac",
  "ltac_printer",
  "parser",
  "riscv64",
- "transform",
  "x86_64",
 ]
 
@@ -77,9 +79,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ltac"
+version = "0.1.0"
+dependencies = [
+ "parser",
+]
+
+[[package]]
 name = "ltac_printer"
 version = "0.0.2"
 dependencies = [
+ "ltac",
  "parser",
 ]
 
@@ -130,6 +140,7 @@ checksum = "b5eb417147ba9860a96cfe72a0b93bf88fee1744b5636ec99ab20c1aa9376581"
 name = "riscv64"
 version = "0.0.2"
 dependencies = [
+ "ltac",
  "parser",
 ]
 
@@ -161,13 +172,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "transform"
-version = "0.1.0"
-dependencies = [
- "parser",
-]
-
-[[package]]
 name = "ucd-trie"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -177,5 +181,6 @@ checksum = "56dee185309b50d1f11bfedef0fe6d036842e3fb77413abef29f8f8d1c5d4c1c"
 name = "x86_64"
 version = "0.1.0"
 dependencies = [
+ "ltac",
  "parser",
 ]

@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 parser = { path = "../../parser" }
+ltac = { path = "../../ltac" }
 

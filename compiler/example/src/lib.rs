@@ -18,7 +18,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
+use ltac::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "./".to_string();

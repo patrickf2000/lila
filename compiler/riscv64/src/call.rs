@@ -17,7 +17,7 @@
 use std::io::{BufWriter, Write};
 use std::fs::File;
 
-use parser::ltac::{LtacInstr, LtacArg};
+use ltac::ltac::{LtacInstr, LtacArg};
 use crate::utils::*;
 
 // Builds function/sytem call arguments

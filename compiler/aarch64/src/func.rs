@@ -18,7 +18,7 @@
 use std::io::{BufWriter, Write};
 use std::fs::File;
 
-use parser::ltac::{LtacInstr};
+use ltac::ltac::{LtacInstr};
 
 // Builds an extern declaration
 pub fn aarch64_build_extern(writer : &mut BufWriter<File>, code : &LtacInstr) {
