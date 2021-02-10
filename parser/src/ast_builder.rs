@@ -190,11 +190,11 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
     let mut in_code = in_begin;
     
     // Get the first token
-    let mut token = builder.scanner.get_token();
+    let mut token = builder.get_token();
     
     match token {
         
-        Token::Module => code = build_module(&mut builder.scanner, &mut builder.tree, &mut builder.syntax),
+        Token::Module => code = build_module(builder),
         Token::Use => code = build_use(builder),
     
         Token::Extern => {
@@ -202,35 +202,35 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
             match token {
                 Token::Func => {},
                 _ => {
-                    builder.syntax.syntax_error(&mut builder.scanner, "Expected \"func\" keyword.".to_string());
+                    builder.syntax_error("Expected \"func\" keyword.".to_string());
                     return (false, 0, false, false);
                 }
             }
                 
-            code = build_func(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, true)
+            code = build_func(builder, true)
         },
         
         Token::Func => {
             in_code = false;
-            code = build_func(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, false);
+            code = build_func(builder, false);
             new_layer += 1;
         },
         
         // Indicates the end of the variable section and start of the code section
         Token::Begin => {
             if in_code {
-                builder.syntax.syntax_error(&mut builder.scanner, "Unexpected \"begin\"-> Already in code.".to_string());
+                builder.syntax_error("Unexpected \"begin\"-> Already in code.".to_string());
                 return (false, 0, false, false);
             } else {
                 in_code = true;
             }
         },
         
-        Token::Return if in_code => code = build_return(&mut builder.scanner, &mut builder.current_block, &mut builder.syntax),
-        Token::Exit if in_code => code = build_exit(&mut builder.scanner, &mut builder.current_block, &mut builder.syntax),
+        Token::Return if in_code => code = build_return(builder),
+        Token::Exit if in_code => code = build_exit(builder),
         
         Token::End => {
-            build_end(&mut builder.scanner, &mut builder.current_block);
+            build_end(builder);
             new_layer -= 1;
             
             if new_layer == 0 {
@@ -242,35 +242,35 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
             }
         },
         
-        Token::Const => code = build_const(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, layer),
+        Token::Const => code = build_const(builder, layer),
         
         Token::Enum => {
             if in_code {
-                builder.syntax.syntax_error(&mut builder.scanner, "You cannot define an enum in the code body.".to_string());
+                builder.syntax_error("You cannot define an enum in the code body.".to_string());
                 return (false, 0, false, false);
             } else {
-                code = build_enum(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, layer);
+                code = build_enum(builder, layer);
             }
         },
         
-        Token::Id(ref val) if in_code => code = build_id(&mut builder.scanner, &mut builder.current_block, val.to_string(), builder.keep_postfix, &mut builder.syntax),
+        Token::Id(ref val) if in_code => code = build_id(builder, val.to_string()),
         Token::Id(ref val) => code = build_var_dec(builder, val.to_string()),
         
         Token::If if in_code => {
-            code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::If, &mut builder.syntax);
+            code = build_cond(builder, Token::If);
             new_layer += 1;
         },
         
-        Token::Elif if in_code => code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::Elif, &mut builder.syntax),
-        Token::Else if in_code => code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::Else, &mut builder.syntax),
+        Token::Elif if in_code => code = build_cond(builder, Token::Elif),
+        Token::Else if in_code => code = build_cond(builder, Token::Else),
         
         Token::While if in_code => {
-            code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::While, &mut builder.syntax);
+            code = build_cond(builder, Token::While);
             new_layer += 1;
         },
         
         Token::For if in_code => {
-            code = build_for_loop(&mut builder.scanner, &mut builder.current_block, &mut builder.syntax);
+            code = build_for_loop(builder);
             new_layer += 1;
         },
         
@@ -278,20 +278,20 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         // Create a common function for the lack of semicolons
         Token::Break if in_code => {
             let br = ast::create_stmt(AstStmtType::Break, &mut builder.scanner);
-            builder.current_block.push(br);
+            builder.add_stmt(br);
             
-            if builder.scanner.get_token() != Token::Semicolon {
-                builder.syntax.syntax_error(&mut builder.scanner, "Expected terminator".to_string());
+            if builder.get_token() != Token::Semicolon {
+                builder.syntax_error("Expected terminator".to_string());
                 return (false, 0, false, false);
             }
         },
         
         Token::Continue if in_code => {
             let cont = ast::create_stmt(AstStmtType::Continue, &mut builder.scanner);
-            builder.current_block.push(cont);
+            builder.add_stmt(cont);
             
-            if builder.scanner.get_token() != Token::Semicolon {
-                builder.syntax.syntax_error(&mut builder.scanner, "Expected terminator".to_string());
+            if builder.get_token() != Token::Semicolon {
+                builder.syntax_error("Expected terminator".to_string());
                 return (false, 0, false, false);
             }
         },
@@ -301,9 +301,9 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         
         _ => {
             if in_code {
-                builder.syntax.syntax_error(&mut builder.scanner, "Invalid token in context.".to_string());
+                builder.syntax_error("Invalid token in context.".to_string());
             } else {
-                builder.syntax.syntax_error(&mut builder.scanner, "Invalid context- Expecting \"begin\" before code.".to_string());
+                builder.syntax_error("Invalid context- Expecting \"begin\" before code.".to_string());
             }
             
             code = false;
@@ -314,8 +314,8 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
 }
 
 // Builds a constant
-fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, layer : i32) -> bool {
-    let mut token = scanner.get_token();
+fn build_const(builder : &mut AstBuilder, layer : i32) -> bool {
+    let mut token = builder.get_token();
     let data_type : DataType;
     let arg : AstArg;
     let name : String;
@@ -335,30 +335,30 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
         Token::TStr => data_type = DataType::Str,
         
         _ => {
-            syntax.syntax_error(scanner, "Expected data type.".to_string());
+            builder.syntax_error("Expected data type.".to_string());
             return false;
         },
     }
     
-    token = scanner.get_token();
+    token = builder.get_token();
     
     match &token {
         Token::Id(ref val) => name = val.to_string(),
         
         _ => {
-            syntax.syntax_error(scanner, "Missing constant name.".to_string());
+            builder.syntax_error("Missing constant name.".to_string());
             return false;
         },
     }
     
-    token = scanner.get_token();
+    token = builder.get_token();
     
     if token != Token::Assign {
-        syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
+        builder.syntax_error("Expected assignment operator.".to_string());
         return false;
     }
     
-    token = scanner.get_token();
+    token = builder.get_token();
     
     match &token {
         Token::ByteL(val) => arg = ast::create_byte(*val),
@@ -369,7 +369,7 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
         Token::StringL(ref val) => arg = ast::create_string(val.to_string()),
         
         _ => {
-            syntax.syntax_error(scanner, "Constants can only be literal values.".to_string());
+            builder.syntax_error("Constants can only be literal values.".to_string());
             return false;
         },
     }
@@ -379,21 +379,21 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
         data_type : data_type,
         value : arg,
         
-        line_no : scanner.get_line_no(),
-        line : scanner.get_current_line(),
+        line_no : builder.scanner.get_line_no(),
+        line : builder.scanner.get_current_line(),
     };
     
     if layer == 0 {
-        tree.constants.push(constant);
+        builder.tree.constants.push(constant);
     } else {
-        syntax.syntax_error(scanner, "Constants are not yet supported on the local level.".to_string());
+        builder.syntax_error("Constants are not yet supported on the local level.".to_string());
         return false;
     }
     
-    token = scanner.get_token();
+    token = builder.get_token();
     
     if token != Token::Semicolon {
-        syntax.syntax_error(scanner, "Expected terminator.".to_string());
+        builder.syntax_error("Expected terminator.".to_string());
         return false;
     }
     
@@ -401,8 +401,8 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
 }
 
 // Builds an enumeration
-fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, layer : i32) -> bool {
-    let mut token = scanner.get_token();
+fn build_enum(builder : &mut AstBuilder, layer : i32) -> bool {
+    let mut token = builder.get_token();
     let name : String;
     
     // Get the name
@@ -410,14 +410,14 @@ fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManage
         Token::Id(ref val) => name = val.to_string(),
         
         _ => {
-            syntax.syntax_error(scanner, "Expected enum name".to_string());
+            builder.syntax_error("Expected enum name".to_string());
             return false;
         },
     }
     
     // Next token should be assign
-    if scanner.get_token() != Token::Assign {
-        syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
+    if builder.get_token() != Token::Assign {
+        builder.syntax_error("Expected assignment operator.".to_string());
         return false;
     }
     
@@ -429,7 +429,7 @@ fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManage
     };
     
     let mut value = 0;
-    token = scanner.get_token();
+    token = builder.get_token();
     
     loop {
         match token {
@@ -440,20 +440,20 @@ fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManage
             
             _ => {
                 println!("{:?}", token);
-                syntax.syntax_error(scanner, "Invalid enumeration -> Expected name".to_string());
+                builder.syntax_error("Invalid enumeration -> Expected name".to_string());
                 return false;
             },
         }
         
-        token = scanner.get_token();
+        token = builder.get_token();
         
         if token == Token::Comma {
-            token = scanner.get_token();
+            token = builder.get_token();
             continue;
         } else if token == Token::Semicolon {
             break;
         } else {
-            syntax.syntax_error(scanner, "Expected \',\' or \';\'".to_string());
+            builder.syntax_error("Expected \',\' or \';\'".to_string());
             return false;
         }
     }
@@ -462,17 +462,17 @@ fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManage
     if layer == 0 {
         // TODO: Global enums
     } else {
-        ast::add_func_enum(tree, new_enum);
+        ast::add_func_enum(&mut builder.tree, new_enum);
     }
     
     true
 }
 
 // Handles cases when an identifier is the first token
-fn build_id(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : String, keep_postfix : bool, syntax : &mut ErrorManager) -> bool {
+fn build_id(builder : &mut AstBuilder, id_val : String) -> bool {
     // If the next token is an assignment, we have a variable assignment
     // If the next token is a parantheses, we have a function call
-    let token = scanner.get_token();
+    let token = builder.get_token();
     let code : bool;
     
     match token {
@@ -480,12 +480,12 @@ fn build_id(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : Stri
         | Token::MulAssign | Token::DivAssign
         | Token::ModAssign
         | Token::OpInc | Token::OpDec
-        | Token::Assign => code = build_var_assign(scanner, current_block, id_val, token, keep_postfix, syntax),
+        | Token::Assign => code = build_var_assign(&mut builder.scanner, &mut builder.current_block, id_val, token, builder.keep_postfix, &mut builder.syntax),
         
-        Token::LParen => code = build_func_call(scanner, current_block, id_val, syntax),
-        Token::LBracket => code = build_array_assign(scanner, current_block, id_val, keep_postfix, syntax),
+        Token::LParen => code = build_func_call(builder, id_val),
+        Token::LBracket => code = build_array_assign(&mut builder.scanner, &mut builder.current_block, id_val, builder.keep_postfix, &mut builder.syntax),
         _ => {
-            syntax.syntax_error(scanner, "Invalid assignment or call.".to_string());
+            builder.syntax_error("Invalid assignment or call.".to_string());
             return false;
         },
     }
@@ -494,7 +494,7 @@ fn build_id(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : Stri
 }
 
 // Builds conditional statements
-fn build_cond(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, cond_type : Token, syntax : &mut ErrorManager) -> bool {
+fn build_cond(builder : &mut AstBuilder, cond_type : Token) -> bool {
     let mut ast_cond_type : AstStmtType = AstStmtType::If;
     match cond_type {
         Token::If => ast_cond_type = AstStmtType::If,
@@ -504,25 +504,25 @@ fn build_cond(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, cond_type :
         _ => {},
     }
     
-    let mut cond = ast::create_stmt(ast_cond_type, scanner);
+    let mut cond = ast::create_stmt(ast_cond_type, &mut builder.scanner);
     
     // Build the rest arguments
     if cond_type != Token::Else {
-        if !build_args(scanner, &mut cond, Token::Eof, syntax) {
+        if !build_args(&mut builder.scanner, &mut cond, Token::Eof, &mut builder.syntax) {
             return false;
         }
     }
     
-    current_block.push(cond);
+    builder.add_stmt(cond);
     
     true
 }
 
 // Builds a for loop
 // Syntax: for <index> in <var> | <start> .. <end>
-fn build_for_loop(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> bool {
-    let mut for_loop = ast::create_stmt(AstStmtType::For, scanner);
-    let token = scanner.get_token();
+fn build_for_loop(builder : &mut AstBuilder) -> bool {
+    let mut for_loop = ast::create_stmt(AstStmtType::For, &mut builder.scanner);
+    let token = builder.get_token();
     
     match token {
         Token::Id(ref val) => {
@@ -532,22 +532,22 @@ fn build_for_loop(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax 
         },
         
         _ => {
-            syntax.syntax_error(scanner, "Expected variable name.".to_string());
+            builder.syntax_error("Expected variable name.".to_string());
             return false;
         },
     }
     
-    if scanner.get_token() != Token::In {
-        syntax.syntax_error(scanner, "Expected \"in\".".to_string());
+    if builder.get_token() != Token::In {
+        builder.syntax_error("Expected \"in\".".to_string());
         return false;
     }
     
     // Build the rest of the arguments
-    if !build_args(scanner, &mut for_loop, Token::Eof, syntax) {
+    if !build_args(&mut builder.scanner, &mut for_loop, Token::Eof, &mut builder.syntax) {
         return false;
     }
     
-    current_block.push(for_loop);
+    builder.add_stmt(for_loop);
     
     true
 }

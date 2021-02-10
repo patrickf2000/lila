@@ -17,9 +17,9 @@
 
 use crate::ast;
 use crate::ast::*;
-use crate::lex::{Token, Lex};
-use crate::syntax::ErrorManager;
+use crate::lex::Token;
 
+use crate::ast_builder::AstBuilder;
 use crate::ast_utils::*;
 
 // A utility function for returning a type modifier from a token
@@ -60,12 +60,12 @@ fn token_to_mod(token : &Token, is_array : bool) -> (DataType, DataType) {
 }
 
 // A helper function for the function declaration builder
-fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut ErrorManager) -> bool {
-    let token = scanner.get_token();
+fn build_func_return(builder : &mut AstBuilder, func : &mut AstFunc) -> bool {
+    let token = builder.get_token();
     let (ret, _) = token_to_mod(&token, false);
     
     if ret == DataType::None {
-        syntax.syntax_error(scanner, "Invalid function return type.".to_string());
+        builder.syntax_error("Invalid function return type.".to_string());
         return false;
     }
     
@@ -74,15 +74,15 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
 }
 
 // Builds a regular function declaration
-pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, is_extern : bool) -> bool {
+pub fn build_func(builder : &mut AstBuilder, is_extern : bool) -> bool {
     // The first token should be the function name
-    let mut token = scanner.get_token();
+    let mut token = builder.get_token();
     let name : String;
     
     match token {
         Token::Id(ref val) => name = val.to_string(),
         _ => {
-            syntax.syntax_error(scanner, "Expected function name.".to_string());
+            builder.syntax_error("Expected function name.".to_string());
             return false;
         },
     }
@@ -93,49 +93,49 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         func = ast::create_extern_func(name);
     } else {
         func = ast::create_func(name);
-        func.line = scanner.get_current_line();
+        func.line = builder.scanner.get_current_line();
     }
     
     // Check for arguments, and get them if so
-    token = scanner.get_token();
+    token = builder.get_token();
     
     if token != Token::LParen {
         if token == Token::Arrow {
-            let ret = build_func_return(scanner, &mut func, syntax);
+            let ret = build_func_return(builder, &mut func);
             
             if !ret {
                 return false;
             }
         }
         
-        tree.functions.push(func);
+        builder.tree.functions.push(func);
         return true;
     }
     
     let mut last_token = Token::LParen;
     
     while token != Token::RParen && token != Token::Eof {
-        let name_token = scanner.get_token();
+        let name_token = builder.get_token();
         
-        let mut arg = ast::create_stmt(AstStmtType::VarDec, scanner);
+        let mut arg = ast::create_stmt(AstStmtType::VarDec, &mut builder.scanner);
         
         match name_token {
             Token::Id(ref val) => arg.name = val.to_string(),
             
             Token::Any => {
-                token = scanner.get_token();
+                token = builder.get_token();
                 
                 if token == Token::Comma || token == Token::RParen || token == Token::Eof {
                     continue;
                 } else {
-                    syntax.syntax_error(scanner, "The \"..\" token has no type or name.".to_string());
+                    builder.syntax_error("The \"..\" token has no type or name.".to_string());
                     return false;
                 }
             },
             
             Token::RParen => {
                 if last_token != Token::LParen {
-                    syntax.syntax_error(scanner, "Invalid function arguments list.".to_string());
+                    builder.syntax_error("Invalid function arguments list.".to_string());
                     return false;
                 } else {
                     break;
@@ -143,40 +143,40 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
             },
             
             _ => {
-                syntax.syntax_error(scanner, "Expected function argument name.".to_string());
+                builder.syntax_error("Expected function argument name.".to_string());
                 return false;
             },
         }
         
-        let sym_token = scanner.get_token();
-        let type_token = scanner.get_token();
+        let sym_token = builder.get_token();
+        let type_token = builder.get_token();
         let mut is_array = false;
         
         last_token = name_token.clone();
         
         if sym_token != Token::Colon {
-            syntax.syntax_error(scanner, "Arguments should have a colon between name and type.".to_string());
+            builder.syntax_error("Arguments should have a colon between name and type.".to_string());
             return false;
         }
         
-        token = scanner.get_token();
+        token = builder.get_token();
         
         if token == Token::LBracket {
-            token = scanner.get_token();
+            token = builder.get_token();
             is_array = true;
             
             if token != Token::RBracket {
-                syntax.syntax_error(scanner, "Expected closing \']\'.".to_string());
+                builder.syntax_error("Expected closing \']\'.".to_string());
                 return false;
             }
             
-            token = scanner.get_token();
+            token = builder.get_token();
         }
         
         let (val, sub_val) = token_to_mod(&type_token, is_array);
     
         if val == DataType::None {
-            syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
+            builder.syntax_error("Invalid or missing function argument type.".to_string());
             return false;
         }
         
@@ -185,78 +185,78 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
         func.args.push(arg);
         
         if token != Token::Comma && token != Token::RParen {
-            syntax.syntax_error(scanner, "Invalid function arguments list.".to_string());
+            builder.syntax_error("Invalid function arguments list.".to_string());
             return false;
         }
     }
     
-    token = scanner.get_token();
+    token = builder.get_token();
     
     if token == Token::Arrow {
-        let ret = build_func_return(scanner, &mut func, syntax);
+        let ret = build_func_return(builder, &mut func);
         
         if !ret {
             return false;
         }
     }
     
-    tree.functions.push(func);
+    builder.tree.functions.push(func);
     
     true
 }
 
 // Builds a return statement
-pub fn build_return(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> bool {
-    let mut ret = ast::create_stmt(AstStmtType::Return, scanner);
+pub fn build_return(builder : &mut AstBuilder) -> bool {
+    let mut ret = ast::create_stmt(AstStmtType::Return, &mut builder.scanner);
     
-    if !build_args(scanner, &mut ret, Token::Semicolon, syntax) {
+    if !build_args(&mut builder.scanner, &mut ret, Token::Semicolon, &mut builder.syntax) {
         return false;
     }
     
-    current_block.push(ret);
+    builder.add_stmt(ret);
     
     true
 }
 
 // Builds the exit statement
-pub fn build_exit(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> bool {
-    let mut exit = ast::create_stmt(AstStmtType::Exit, scanner);
+pub fn build_exit(builder : &mut AstBuilder) -> bool {
+    let mut exit = ast::create_stmt(AstStmtType::Exit, &mut builder.scanner);
     
     // Build arguments
-    if !build_args(scanner, &mut exit, Token::Semicolon, syntax) {
+    if !build_args(&mut builder.scanner, &mut exit, Token::Semicolon, &mut builder.syntax) {
         return false;
     }
     
-    current_block.push(exit);
+    builder.add_stmt(exit);
     
     true
 }
 
 // Builds the end statement
-pub fn build_end(scanner: &mut Lex, current_block : &mut Vec<AstStmt>) {
-    let stmt = ast::create_stmt(AstStmtType::End, scanner);
-    current_block.push(stmt);
+pub fn build_end(builder : &mut AstBuilder) {
+    let stmt = ast::create_stmt(AstStmtType::End, &mut builder.scanner);
+    builder.add_stmt(stmt);
 }
 
 // Builds function calls
-pub fn build_func_call(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : String, syntax : &mut ErrorManager) -> bool {
-    let mut fc = ast::create_stmt(AstStmtType::FuncCall, scanner);
+pub fn build_func_call(builder : &mut AstBuilder, id_val : String) -> bool {
+    let mut fc = ast::create_stmt(AstStmtType::FuncCall, &mut builder.scanner);
     fc.name = id_val;
     
     // Build arguments
-    if !build_args(scanner, &mut fc, Token::RParen, syntax) {
+    if !build_args(&mut builder.scanner, &mut fc, Token::RParen, &mut builder.syntax) {
         return false;
     }
     
-    let token = scanner.get_token();
+    let token = builder.get_token();
         
     if token != Token::Semicolon {
-        syntax.syntax_error(scanner, "Expected terminator".to_string());
+        builder.syntax_error("Expected terminator".to_string());
         return false;
     }
     
     // Add the call
-    current_block.push(fc);
+    builder.add_stmt(fc);
     
     true
 }

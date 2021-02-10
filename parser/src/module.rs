@@ -26,28 +26,27 @@ use std::path::Path;
 use crate::Arch;
 use crate::ast_builder::{AstBuilder, include_module};
 use crate::ast::*;
-use crate::lex::{Token, Lex};
-use crate::syntax::ErrorManager;
+use crate::lex::Token;
 
 // Builds a "module" declaration
-pub fn build_module(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
-    if tree.module.len() > 0 {
-        syntax.syntax_error(scanner, "Duplicate module declarations.".to_string());
+pub fn build_module(builder : &mut AstBuilder) -> bool {
+    if builder.tree.module.len() > 0 {
+        builder.syntax_error("Duplicate module declarations.".to_string());
         return false;
     }
     
-    let token = scanner.get_token();
+    let token = builder.get_token();
     
     match token {
-        Token::Id(ref val) => tree.module = val.clone(),
+        Token::Id(ref val) => builder.tree.module = val.clone(),
         _ => {
-            syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
+            builder.syntax_error("Module names must be an identifier.".to_string());
             return false;
         },
     }
     
-    if scanner.get_token() != Token::Semicolon {
-        syntax.syntax_error(scanner, "Expecting terminator".to_string());
+    if builder.get_token() != Token::Semicolon {
+        builder.syntax_error("Expecting terminator".to_string());
         return false;
     }
     
