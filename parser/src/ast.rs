@@ -75,6 +75,27 @@ pub enum AstArgType {
     Range,
 }
 
+// Represents our data types
+#[derive(Debug, PartialEq, Clone)]
+pub enum DataType {
+    None,
+    Void,
+    Byte,
+    UByte,
+    Short,
+    UShort,
+    Int,
+    UInt,
+    Int64,
+    UInt64,
+    Float,
+    Double,
+    Char,
+    Str,
+    Ptr,
+    Enum(String),
+}
+
 // Represents modifiers
 #[derive(PartialEq, Clone)]
 pub enum AstModType {
@@ -121,8 +142,8 @@ pub struct AstFunc {
     pub is_extern : bool,
     pub statements : Vec<AstStmt>,
     pub args : Vec<AstStmt>,
-    pub modifiers : Vec<AstMod>,
     pub enums : Vec<AstEnum>,
+    pub data_type : DataType,
     pub line : String,
 }
 
@@ -257,11 +278,7 @@ impl AstFunc {
         }
         
         print!("FUNC {}", self.name);
-        
-        for m in self.modifiers.iter() {
-            m.print(true);
-        }
-        
+        println!("{:?}", self.data_type);
         println!("");
         
         for arg in self.args.iter() {
@@ -438,9 +455,9 @@ pub fn create_extern_func(name : String) -> AstFunc {
         is_extern : true,
         statements : Vec::new(),
         args : Vec::new(),
-        modifiers : Vec::new(),
         enums : Vec::new(),
         line : String::new(),
+        data_type : DataType::None,
     }
 }
 
@@ -450,9 +467,9 @@ pub fn create_func(name : String) -> AstFunc {
         is_extern : false,
         statements : Vec::new(),
         args : Vec::new(),
-        modifiers : Vec::new(),
         enums : Vec::new(),
         line : String::new(),
+        data_type : DataType::None,
     }
 }
 

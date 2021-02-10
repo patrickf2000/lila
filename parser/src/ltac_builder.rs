@@ -31,26 +31,6 @@ use crate::ltac_func::*;
 use crate::ltac_utils::*;
 use crate::ltac_var::*;
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum DataType {
-    None,
-    Void,
-    Byte,
-    UByte,
-    Short,
-    UShort,
-    Int,
-    UInt,
-    Int64,
-    UInt64,
-    Float,
-    Double,
-    Char,
-    Str,
-    Ptr,
-    Enum(String),
-}
-
 #[derive(Clone)]
 pub struct Var {
     pub pos : i32,
@@ -245,10 +225,8 @@ impl LtacBuilder {
             let name = func.name.clone();
             let mut func_type = DataType::Void;
             
-            if func.modifiers.len() > 0 {
-                let func_mod = func.modifiers.first().unwrap();
-                let (ft, _) = ast_to_datatype(&func_mod);
-                func_type = ft;
+            if func.data_type != DataType::None {
+                func_type = func.data_type.clone();
             }
         
             self.functions.insert(name, func_type);

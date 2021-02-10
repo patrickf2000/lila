@@ -21,7 +21,7 @@
 use std::mem;
 
 use crate::ast;
-use crate::ast::{AstStmt, AstArg, AstStmtType, AstArgType};
+use crate::ast::{DataType, AstStmt, AstArg, AstStmtType, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacArg, LtacInstr};
 

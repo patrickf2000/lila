@@ -18,7 +18,7 @@
 use crate::ltac_builder::*;
 use crate::ltac_utils::*;
 
-use crate::ast::{AstStmt, AstArgType};
+use crate::ast::{DataType, AstStmt, AstArgType};
 use crate::ltac;
 use crate::ltac::{LtacType, LtacInstr, LtacArg};
 

@@ -23,7 +23,44 @@ use crate::syntax::ErrorManager;
 use crate::ast_utils::*;
 
 // A utility function for returning a type modifier from a token
-fn token_to_mod(token : &Token, is_array : bool) -> AstMod {
+// NOTE: I don't know if we need a subtype, but if so, we'll have to go back and make adjustments
+fn token_to_mod(token : &Token, is_array : bool) -> DataType {   
+    match token {
+        Token::Byte if is_array => return DataType::Ptr,
+        Token::Byte => return DataType::Byte,
+        
+        Token::UByte if is_array => return DataType::Ptr,
+        Token::UByte | Token::Char => return DataType::UByte,
+        
+        Token::Short if is_array => return DataType::Ptr,
+        Token::Short => return DataType::Short,
+        
+        Token::UShort if is_array => return DataType::Ptr,
+        Token::UShort => return DataType::UShort,
+    
+        Token::Int if is_array => return DataType::Ptr,
+        Token::Int => return DataType::Int,
+        
+        Token::UInt => return DataType::UInt,
+        
+        Token::Int64 => return DataType::Int64,
+        Token::UInt64 => return DataType::UInt64,
+        
+        Token::Float if is_array => return DataType::Ptr,
+        Token::Float => return DataType::Float,
+        
+        Token::Double if is_array => return DataType::Ptr,
+        Token::Double => return DataType::Double,
+        
+        Token::TStr if is_array => return DataType::Ptr,
+        Token::TStr => return DataType::Str,
+        
+        _ => return DataType::None,
+    }
+}
+
+// TODO: Phase this out
+fn token_to_mod2(token : &Token, is_array : bool) -> AstMod {
     let mod_type : AstModType;
     
     match token {
@@ -68,12 +105,12 @@ fn build_func_return(scanner : &mut Lex, func : &mut AstFunc, syntax : &mut Erro
     let token = scanner.get_token();
     let ret = token_to_mod(&token, false);
     
-    if ret.mod_type == AstModType::None {
+    if ret == DataType::None {
         syntax.syntax_error(scanner, "Invalid function return type.".to_string());
         return false;
     }
     
-    func.modifiers.push(ret);
+    func.data_type = ret;
     true
 }
 
@@ -177,7 +214,7 @@ pub fn build_func(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMa
             token = scanner.get_token();
         }
         
-        let val = token_to_mod(&type_token, is_array);
+        let val = token_to_mod2(&type_token, is_array);
     
         if val.mod_type == AstModType::None {
             syntax.syntax_error(scanner, "Invalid or missing function argument type.".to_string());
