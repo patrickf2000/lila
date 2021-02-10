@@ -24,7 +24,7 @@ use std::fs::File;
 use std::path::Path;
 
 use crate::Arch;
-use crate::ast_builder::include_module;
+use crate::ast_builder::{AstBuilder, include_module};
 use crate::ast::*;
 use crate::lex::{Token, Lex};
 use crate::syntax::ErrorManager;
@@ -55,35 +55,35 @@ pub fn build_module(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut Error
 }
 
 // Builds a "use" declaration
-pub fn build_use(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+pub fn build_use(b : &mut AstBuilder) -> bool {
     let module : String;
     let mut do_include = true;
-    let mut token = scanner.get_token();
+    let mut token = b.scanner.get_token();
     
     match token {
         Token::Id(ref val) => module = val.clone(),
         _ => {
-            syntax.syntax_error(scanner, "Module names must be an identifier.".to_string());
+            b.syntax.syntax_error(&mut b.scanner, "Module names must be an identifier.".to_string());
             return false;
         },
     }
     
-    token = scanner.get_token();
+    token = b.scanner.get_token();
     
     if token == Token::If {
-        token = scanner.get_token();
+        token = b.scanner.get_token();
         
         let arch_str = match token {
             Token::StringL(ref val) => val.clone(),
             _ => {
-                syntax.syntax_error(scanner, "Expected string with architecture type.".to_string());
+                b.syntax.syntax_error(&mut b.scanner, "Expected string with architecture type.".to_string());
                 return false;
             },
         };
         
-        token = scanner.get_token();
+        token = b.scanner.get_token();
         if token != Token::Semicolon {
-            syntax.syntax_error(scanner, "Expecting terminator".to_string());
+            b.syntax.syntax_error(&mut b.scanner, "Expecting terminator".to_string());
             return false;
         }
         
@@ -93,21 +93,21 @@ pub fn build_use(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorMan
             "riscv64" => Arch::Riscv64,
             
             _ => {
-                syntax.syntax_error(scanner, "Invalid architecture".to_string());
+                b.syntax.syntax_error(&mut b.scanner, "Invalid architecture".to_string());
                 return false;
             },
         };
         
-        if arch2 != tree.arch {
+        if arch2 != b.tree.arch {
             do_include = false;
         }
     } else if token != Token::Semicolon {
-        syntax.syntax_error(scanner, "Expecting terminator".to_string());
+        b.syntax.syntax_error(&mut b.scanner, "Expecting terminator".to_string());
         return false;
     }
     
     if do_include {
-        return include_module(module, tree, syntax);
+        return include_module(module, b);
     }
     
     true

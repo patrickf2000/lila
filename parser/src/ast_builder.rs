@@ -23,7 +23,7 @@ use std::collections::HashMap;
 use crate::ast;
 use crate::ast::*;
 use crate::lex::{Token, Lex, create_lex};
-use crate::syntax::ErrorManager;
+use crate::syntax;
 use crate::Arch;
 
 use crate::ast_func::*;
@@ -31,6 +31,30 @@ use crate::ast_utils::*;
 use crate::ast_var::*;
 use crate::module;
 use crate::module::*;
+use crate::syntax::ErrorManager;
+
+pub struct AstBuilder {
+    pub scanner : Lex,
+    pub tree : AstTree,
+    pub current_block : Vec<AstStmt>,
+    pub keep_postfix : bool,
+    pub syntax : ErrorManager,
+}
+
+impl AstBuilder {
+
+    pub fn get_token(&mut self) -> Token {
+        return self.scanner.get_token();
+    }
+    
+    pub fn syntax_error(&mut self, msg : String) {
+        self.syntax.syntax_error(&mut self.scanner, msg);
+    }
+    
+    pub fn add_stmt(&mut self, stmt : AstStmt) {
+        self.current_block.push(stmt);
+    }
+}
 
 // The AST building function
 // This function opens the file and reads a line; 
@@ -40,14 +64,21 @@ use crate::module::*;
 // In Quik, each line is a self-contained expression; as a result, we read a line
 // and then lexically analyze and build an AST node from it
 //
-pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool, keep_postfix : bool, syntax : &mut ErrorManager) -> Result<AstTree, ()> {   
-    let mut tree = AstTree {
+pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool, keep_postfix : bool) -> Result<AstTree, ()> {   
+    let tree = AstTree {
         file_name : name,
         arch : arch,
-        keep_postfix : keep_postfix,
         module : String::new(),
         functions : Vec::new(),
         constants : Vec::new(),
+    };
+    
+    let mut builder = AstBuilder {
+        scanner : create_lex(),
+        tree : tree,
+        current_block : Vec::new(),
+        keep_postfix : keep_postfix,
+        syntax : syntax::create_error_manager(),
     };
     
     // Open the file
@@ -57,18 +88,15 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     
     // Include the core modules
     if include_core {
-        include_module("core.mem".to_string(), &mut tree, syntax);
-        include_module("core.string".to_string(), &mut tree, syntax);
-        include_module("core.io".to_string(), &mut tree, syntax);
+        include_module("core.mem".to_string(), &mut builder);
+        include_module("core.string".to_string(), &mut builder);
+        include_module("core.io".to_string(), &mut builder);
     }
     
     // Read the thing line by line
     let mut line_no = 0;
     let mut layer = 0;
     let mut in_begin = false;
-    let mut current_block : Vec<AstStmt> = Vec::new();
-    
-    let mut scanner = create_lex();
     
     for line in reader.lines() {
         let mut current = line.unwrap();
@@ -79,11 +107,11 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
             continue;
         }
         
-        scanner.tokenize(current, line_no);
+        builder.scanner.tokenize(current, line_no);
     }
     
     loop {
-        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, &mut tree, &mut current_block, syntax);
+        let (ret, new_layer, begin, done) = build_line(layer, in_begin, &mut builder);
         layer = new_layer;
         in_begin = begin;
         
@@ -92,16 +120,16 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
         }
         
         if !ret {
-            syntax.print_errors();
+            builder.syntax.print_errors();
             return Err(());
         }
     }
     
-    Ok(tree)
+    Ok(builder.tree)
 }
 
 // Loads a module into the current tree
-pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorManager) -> bool {
+pub fn include_module(name : String, builder : &mut AstBuilder) -> bool {
     let path = module::get_module_path(&name);
     
     // Open the file
@@ -119,9 +147,9 @@ pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorMan
     let mut line_no = 0;
     let mut layer = 0;
     let mut in_begin = false;
-    let mut current_block : Vec<AstStmt> = Vec::new();
     
-    let mut scanner = create_lex();
+    let old_scanner = builder.scanner.clone();
+    builder.scanner = create_lex();
     
     for line in reader.lines() {
         let mut current = line.unwrap();
@@ -132,11 +160,11 @@ pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorMan
             continue;
         }
         
-        scanner.tokenize(current, line_no);
+        builder.scanner.tokenize(current, line_no);
     }
     
     loop {
-        let (ret, new_layer, begin, done) = build_line(&mut scanner, layer, in_begin, tree, &mut current_block, syntax);
+        let (ret, new_layer, begin, done) = build_line(layer, in_begin, builder);
         layer = new_layer;
         in_begin = begin;
         
@@ -149,119 +177,121 @@ pub fn include_module(name : String, tree : &mut AstTree, syntax : &mut ErrorMan
         }
     }
     
+    builder.scanner = old_scanner;
+    
     true
 }
 
 // Converts a line to an AST node
 // TODO: This is the most ridiculous function signature. We need to change this
-fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstTree, current_block : &mut Vec<AstStmt>, syntax : &mut ErrorManager) -> (bool, i32, bool, bool) {    
+fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool, i32, bool, bool) {    
     let mut code = true;
     let mut new_layer = layer;
     let mut in_code = in_begin;
     
     // Get the first token
-    let mut token = scanner.get_token();
+    let mut token = builder.scanner.get_token();
     
     match token {
         
-        Token::Module => code = build_module(scanner, tree, syntax),
-        Token::Use => code = build_use(scanner, tree, syntax),
+        Token::Module => code = build_module(&mut builder.scanner, &mut builder.tree, &mut builder.syntax),
+        Token::Use => code = build_use(builder),
     
         Token::Extern => {
-            token = scanner.get_token();
+            token = builder.scanner.get_token();
             match token {
                 Token::Func => {},
                 _ => {
-                    syntax.syntax_error(scanner, "Expected \"func\" keyword.".to_string());
+                    builder.syntax.syntax_error(&mut builder.scanner, "Expected \"func\" keyword.".to_string());
                     return (false, 0, false, false);
                 }
             }
                 
-            code = build_func(scanner, tree, syntax, true)
+            code = build_func(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, true)
         },
         
         Token::Func => {
             in_code = false;
-            code = build_func(scanner, tree, syntax, false);
+            code = build_func(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, false);
             new_layer += 1;
         },
         
         // Indicates the end of the variable section and start of the code section
         Token::Begin => {
             if in_code {
-                syntax.syntax_error(scanner, "Unexpected \"begin\"-> Already in code.".to_string());
+                builder.syntax.syntax_error(&mut builder.scanner, "Unexpected \"begin\"-> Already in code.".to_string());
                 return (false, 0, false, false);
             } else {
                 in_code = true;
             }
         },
         
-        Token::Return if in_code => code = build_return(scanner, current_block, syntax),
-        Token::Exit if in_code => code = build_exit(scanner, current_block, syntax),
+        Token::Return if in_code => code = build_return(&mut builder.scanner, &mut builder.current_block, &mut builder.syntax),
+        Token::Exit if in_code => code = build_exit(&mut builder.scanner, &mut builder.current_block, &mut builder.syntax),
         
         Token::End => {
-            build_end(scanner, current_block);
+            build_end(&mut builder.scanner, &mut builder.current_block);
             new_layer -= 1;
             
             if new_layer == 0 {
-                for stmt in current_block.iter() {
-                    ast::add_stmt(tree, stmt.clone());
+                for stmt in builder.current_block.iter() {
+                    ast::add_stmt(&mut builder.tree, stmt.clone());
                 }
                 
-                current_block.clear();
+                builder.current_block.clear();
             }
         },
         
-        Token::Const => code = build_const(scanner, tree, syntax, layer),
+        Token::Const => code = build_const(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, layer),
         
         Token::Enum => {
             if in_code {
-                syntax.syntax_error(scanner, "You cannot define an enum in the code body.".to_string());
+                builder.syntax.syntax_error(&mut builder.scanner, "You cannot define an enum in the code body.".to_string());
                 return (false, 0, false, false);
             } else {
-                code = build_enum(scanner, tree, syntax, layer);
+                code = build_enum(&mut builder.scanner, &mut builder.tree, &mut builder.syntax, layer);
             }
         },
         
-        Token::Id(ref val) if in_code => code = build_id(scanner, current_block, val.to_string(), tree.keep_postfix, syntax),
-        Token::Id(ref val) => code = build_var_dec(scanner, tree, current_block, val.to_string(), syntax),
+        Token::Id(ref val) if in_code => code = build_id(&mut builder.scanner, &mut builder.current_block, val.to_string(), builder.keep_postfix, &mut builder.syntax),
+        Token::Id(ref val) => code = build_var_dec(builder, val.to_string()),
         
         Token::If if in_code => {
-            code = build_cond(scanner, current_block, Token::If, syntax);
+            code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::If, &mut builder.syntax);
             new_layer += 1;
         },
         
-        Token::Elif if in_code => code = build_cond(scanner, current_block, Token::Elif, syntax),
-        Token::Else if in_code => code = build_cond(scanner, current_block, Token::Else, syntax),
+        Token::Elif if in_code => code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::Elif, &mut builder.syntax),
+        Token::Else if in_code => code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::Else, &mut builder.syntax),
         
         Token::While if in_code => {
-            code = build_cond(scanner, current_block, Token::While, syntax);
+            code = build_cond(&mut builder.scanner, &mut builder.current_block, Token::While, &mut builder.syntax);
             new_layer += 1;
         },
         
         Token::For if in_code => {
-            code = build_for_loop(scanner, current_block, syntax);
+            code = build_for_loop(&mut builder.scanner, &mut builder.current_block, &mut builder.syntax);
             new_layer += 1;
         },
         
         // TODO: For break and continue
         // Create a common function for the lack of semicolons
         Token::Break if in_code => {
-            let br = ast::create_stmt(AstStmtType::Break, scanner);
-            current_block.push(br);
+            let br = ast::create_stmt(AstStmtType::Break, &mut builder.scanner);
+            builder.current_block.push(br);
             
-            if scanner.get_token() != Token::Semicolon {
-                syntax.syntax_error(scanner, "Expected terminator".to_string());
+            if builder.scanner.get_token() != Token::Semicolon {
+                builder.syntax.syntax_error(&mut builder.scanner, "Expected terminator".to_string());
                 return (false, 0, false, false);
             }
         },
         
         Token::Continue if in_code => {
-            let cont = ast::create_stmt(AstStmtType::Continue, scanner);
-            current_block.push(cont);
+            let cont = ast::create_stmt(AstStmtType::Continue, &mut builder.scanner);
+            builder.current_block.push(cont);
             
-            if scanner.get_token() != Token::Semicolon {
-                syntax.syntax_error(scanner, "Expected terminator".to_string());
+            if builder.scanner.get_token() != Token::Semicolon {
+                builder.syntax.syntax_error(&mut builder.scanner, "Expected terminator".to_string());
                 return (false, 0, false, false);
             }
         },
@@ -271,9 +301,9 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
         
         _ => {
             if in_code {
-                syntax.syntax_error(scanner, "Invalid token in context.".to_string());
+                builder.syntax.syntax_error(&mut builder.scanner, "Invalid token in context.".to_string());
             } else {
-                syntax.syntax_error(scanner, "Invalid context- Expecting \"begin\" before code.".to_string());
+                builder.syntax.syntax_error(&mut builder.scanner, "Invalid context- Expecting \"begin\" before code.".to_string());
             }
             
             code = false;

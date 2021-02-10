@@ -20,11 +20,12 @@ use crate::ast::*;
 use crate::lex::{Token, Lex};
 use crate::syntax::ErrorManager;
 
+use crate::ast_builder::AstBuilder;
 use crate::ast_utils::*;
 
 // Builds a variable declaration
-pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &mut Vec<AstStmt>, name : String, syntax : &mut ErrorManager) -> bool {
-    let mut var_dec = ast::create_stmt(AstStmtType::VarDec, scanner);
+pub fn build_var_dec(builder : &mut AstBuilder, name : String) -> bool {
+    let mut var_dec = ast::create_stmt(AstStmtType::VarDec, &mut builder.scanner);
     var_dec.name = name;
     
     // This will hold any additional names (for multi-variable declarations)
@@ -33,25 +34,25 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &m
     
     // Gather information
     // The first token should be the colon, followed by the type and optionally array arguments
-    let mut token = scanner.get_token();
+    let mut token = builder.get_token();
     
     while token == Token::Comma {
-        token = scanner.get_token();
+        token = builder.get_token();
         
         match token {
             Token::Id(ref val) => extra_names.push(val.to_string()),
             
             _ => {
-                syntax.syntax_error(scanner, "Expected variable name.".to_string());
+                builder.syntax_error("Expected variable name.".to_string());
                 return false;
             },
         }
         
-        token = scanner.get_token();
+        token = builder.get_token();
     }
     
     if token != Token::Colon {
-        syntax.syntax_error(scanner, "Expected \':\' after variable name.".to_string());
+        builder.syntax_error("Expected \':\' after variable name.".to_string());
         return false;
     }
     
@@ -60,7 +61,7 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &m
     let mut dtype : DataType;
     let mut sub_type = DataType::None;
     
-    token = scanner.get_token();
+    token = builder.get_token();
     
     match token {
         Token::Byte => dtype = DataType::Byte,
@@ -77,8 +78,8 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &m
         Token::TStr => dtype = DataType::Str,
         
         Token::Id(ref val) => {
-            if !ast::enum_exists(tree, val.to_string()) {
-                syntax.syntax_error(scanner, "Invalid enumeration.".to_string());
+            if !ast::enum_exists(&mut builder.tree, val.to_string()) {
+                builder.syntax_error("Invalid enumeration.".to_string());
                 return false;
             }
             
@@ -86,26 +87,26 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &m
         },
         
         _ => {
-            syntax.syntax_error(scanner, "Invalid type.".to_string());
+            builder.syntax_error("Invalid type.".to_string());
             return false;
         },
     }
     
     // Check for arrays
-    token = scanner.get_token();
+    token = builder.get_token();
     
     match token {
         Token::Assign => {},
         
         Token::LBracket => {
             is_array = true;
-            if !build_args(scanner, &mut var_dec, Token::RBracket, syntax) {
+            if !build_args(&mut builder.scanner, &mut var_dec, Token::RBracket, &mut builder.syntax) {
                 return false;
             }
         },
         
         _ => {
-            syntax.syntax_error(scanner, "Expected assignment operator.".to_string());
+            builder.syntax_error("Expected assignment operator.".to_string());
             return false;
         },
     }
@@ -116,25 +117,25 @@ pub fn build_var_dec(scanner : &mut Lex, tree : &mut AstTree, current_block : &m
         sub_type = dtype;
         dtype = DataType::Ptr;
         
-        if scanner.get_token() != Token::Semicolon {
-            syntax.syntax_error(scanner, "Expected terminator.".to_string());
+        if builder.get_token() != Token::Semicolon {
+            builder.syntax_error("Expected terminator.".to_string());
             return false;
         }
     } else {
-        if !build_args(scanner, &mut var_dec, Token::Semicolon, syntax) {
+        if !build_args(&mut builder.scanner, &mut var_dec, Token::Semicolon, &mut builder.syntax) {
             return false;
         }
         
-        var_dec.args = check_operations(&var_dec.args, tree.keep_postfix);
+        var_dec.args = check_operations(&var_dec.args, builder.keep_postfix);
     }
     
     var_dec.data_type = dtype;
     var_dec.sub_type = sub_type;
-    current_block.push(var_dec.clone());
+    builder.add_stmt(var_dec.clone());
     
     for n in extra_names.iter() {
         var_dec.name = n.to_string();
-        current_block.push(var_dec.clone());
+        builder.add_stmt(var_dec.clone());
     }
     
     true

@@ -47,10 +47,8 @@ use llir::LLirFile;
 
 // Returns the ast
 pub fn get_ast(path : &String, arch : Arch, include_core : bool, keep_postfix : bool) -> Result<AstTree, ()> {
-    let mut syntax = syntax::create_error_manager();
-
     let name = get_name(path);
-    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), include_core, keep_postfix, &mut syntax) {
+    let tree = match ast_builder::build_ast(path.to_string(), arch, name.clone(), include_core, keep_postfix) {
         Ok(tree) => tree,
         Err(_e) => return Err(()),
     };

@@ -107,12 +107,14 @@ pub enum Token {
     StringL(String),
 }
 
+#[derive(Clone)]
 pub struct Line {
     input : String,
     line_no : i32,
     all_tokens : Vec<Token>,
 }
 
+#[derive(Clone)]
 pub struct Lex {
     current_input : String,
     current_line_no : i32,
