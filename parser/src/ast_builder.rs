@@ -381,13 +381,9 @@ fn build_enum(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManage
     }
     
     // Now create the AST enumeration and read the definition
-    let d_type = AstMod {
-        mod_type : AstModType::Int,
-    };
-    
     let mut new_enum = AstEnum {
         name : name,
-        data_type : d_type,
+        data_type : DataType::Int,      // TODO: We need type detection
         values : HashMap::new(),
     };
     

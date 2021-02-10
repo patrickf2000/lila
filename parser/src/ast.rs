@@ -96,36 +96,6 @@ pub enum DataType {
     Enum(String),
 }
 
-// Represents modifiers
-#[derive(PartialEq, Clone)]
-pub enum AstModType {
-    None,
-    Byte,
-    ByteDynArray,
-    UByte,
-    UByteDynArray,
-    Short,
-    UShort,
-    ShortDynArray,
-    UShortDynArray,
-    Int,
-    UInt,
-    IntDynArray,
-    UIntDynArray,
-    Int64,
-    UInt64,
-    I64DynArray,
-    U64DynArray,
-    Float,
-    Double,
-    FloatDynArray,
-    DoubleDynArray,
-    Char,
-    Str,
-    StrDynArray,
-    Enum(String),
-}
-
 // Represents the top of an AST tree
 pub struct AstTree {
     pub file_name : String,
@@ -161,7 +131,7 @@ pub struct AstConst {
 #[derive(Clone)]
 pub struct AstEnum {
     pub name : String,
-    pub data_type : AstMod,
+    pub data_type : DataType,
     pub values : HashMap<String, i32>,
 }
 
@@ -194,13 +164,6 @@ pub struct AstArg {
     pub f64_val : f64,
     
     pub sub_args : Vec<AstArg>,
-    pub sub_modifiers : Vec<AstMod>,
-}
-
-// Represents an statement modifier
-#[derive(Clone)]
-pub struct AstMod {
-    pub mod_type : AstModType,
 }
 
 // Tree implementation
@@ -376,59 +339,6 @@ impl AstArg {
             }
             print!(") ");
         }
-        
-        if self.sub_modifiers.len() > 0 {
-            print!("[MOD ");
-            for arg in self.sub_modifiers.iter() {
-                arg.print(true);
-            }
-            print!("] ");
-        }
-    }
-}
-
-// Modifier implementation
-impl AstMod {
-    pub fn print(&self, is_func : bool) {
-        if is_func {
-            print!(" (");
-        } else {
-            print!("        MOD ");
-        }
-        
-        match &self.mod_type {
-            AstModType::None => print!("NONE"),
-            AstModType::Byte => print!("Byte"),
-            AstModType::ByteDynArray => print!("ByteDynArr"),
-            AstModType::UByte => print!("UByte"),
-            AstModType::UByteDynArray => print!("UByteDynArr"),
-            AstModType::Short => print!("Short"),
-            AstModType::UShort => print!("UShort"),
-            AstModType::ShortDynArray => print!("ShortDynArr"),
-            AstModType::UShortDynArray => print!("UShortDynArr"),
-            AstModType::Int => print!("Int"),
-            AstModType::UInt => print!("UInt"),
-            AstModType::IntDynArray => print!("IntDynArr"),
-            AstModType::UIntDynArray => print!("UIntDynArr"),
-            AstModType::Int64 => print!("Int64"),
-            AstModType::UInt64 => print!("UInt64"),
-            AstModType::I64DynArray => print!("I64DynArray"),
-            AstModType::U64DynArray => print!("U64DynArray"),
-            AstModType::Float => print!("Float"),
-            AstModType::Double => print!("Double"),
-            AstModType::FloatDynArray => print!("FloatDynArray"),
-            AstModType::DoubleDynArray => print!("DoubleDynArray"),
-            AstModType::Char => print!("Char"),
-            AstModType::Str => print!("Str"),
-            AstModType::StrDynArray => print!("StrDynArray "),
-            AstModType::Enum(ref val) => print!("Enum({})", val),
-        }
-        
-        if is_func {
-            print!(")");
-        } else {
-            println!("");
-        }
     }
 }
 
@@ -525,7 +435,6 @@ pub fn create_byte(val : u8) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
@@ -539,7 +448,6 @@ pub fn create_short(val : u16) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
@@ -553,7 +461,6 @@ pub fn create_int(val : u64) -> AstArg {
         u64_val : val,
         f64_val : 0.0,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
@@ -567,7 +474,6 @@ pub fn create_float(val : f64) -> AstArg {
         u64_val : 0,
         f64_val : val,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
@@ -581,7 +487,6 @@ pub fn create_char(val : char) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
@@ -595,7 +500,6 @@ pub fn create_string(val : String) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
@@ -609,7 +513,6 @@ pub fn create_arg(arg_type : AstArgType) -> AstArg {
         u64_val : 0,
         f64_val : 0.0,
         sub_args : Vec::new(),
-        sub_modifiers : Vec::new(),
     }
 }
 
