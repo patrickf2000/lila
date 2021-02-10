@@ -275,23 +275,23 @@ fn build_line(scanner : &mut Lex, layer : i32, in_begin : bool, tree : &mut AstT
 // Builds a constant
 fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManager, layer : i32) -> bool {
     let mut token = scanner.get_token();
-    let data_type : AstModType;
+    let data_type : DataType;
     let arg : AstArg;
     let name : String;
     
     match &token {
-        Token::Byte => data_type = AstModType::Byte,
-        Token::UByte => data_type = AstModType::UByte,
-        Token::Short => data_type = AstModType::Short,
-        Token::UShort => data_type = AstModType::UShort,
-        Token::Int => data_type = AstModType::Int,
-        Token::UInt => data_type = AstModType::UInt,
-        Token::Int64 => data_type = AstModType::Int64,
-        Token::UInt64 => data_type = AstModType::UInt64,
-        Token::Float => data_type = AstModType::Float,
-        Token::Double => data_type = AstModType::Double,
-        Token::Char => data_type = AstModType::Char,
-        Token::TStr => data_type = AstModType::Str,
+        Token::Byte => data_type = DataType::Byte,
+        Token::UByte => data_type = DataType::UByte,
+        Token::Short => data_type = DataType::Short,
+        Token::UShort => data_type = DataType::UShort,
+        Token::Int => data_type = DataType::Int,
+        Token::UInt => data_type = DataType::UInt,
+        Token::Int64 => data_type = DataType::Int64,
+        Token::UInt64 => data_type = DataType::UInt64,
+        Token::Float => data_type = DataType::Float,
+        Token::Double => data_type = DataType::Double,
+        Token::Char => data_type = DataType::Char,
+        Token::TStr => data_type = DataType::Str,
         
         _ => {
             syntax.syntax_error(scanner, "Expected data type.".to_string());
@@ -333,10 +333,9 @@ fn build_const(scanner : &mut Lex, tree : &mut AstTree, syntax : &mut ErrorManag
         },
     }
     
-    let modifier = AstMod { mod_type : data_type, };
     let constant = AstConst {
         name : name,
-        data_type : modifier,
+        data_type : data_type,
         value : arg,
         
         line_no : scanner.get_line_no(),

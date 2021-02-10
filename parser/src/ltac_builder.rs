@@ -28,7 +28,6 @@ use crate::ltac_array::*;
 use crate::ltac_flow::*;
 use crate::ltac_for::*;
 use crate::ltac_func::*;
-use crate::ltac_utils::*;
 use crate::ltac_var::*;
 
 #[derive(Clone)]
@@ -126,11 +125,10 @@ impl LtacBuilder {
     // Builds the constant table
     fn build_global_constants(&mut self, tree : &AstTree) -> bool {
         for c in tree.constants.iter() {
-            let (data_type, _) = ast_to_datatype(&c.data_type);
             let val = &c.value;
             let arg : LtacArg;
             
-            match data_type {
+            match &c.data_type {
                 DataType::Byte => {
                     match &val.arg_type {
                         AstArgType::ByteL => arg = LtacArg::Byte(val.u8_val as i8),

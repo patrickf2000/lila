@@ -150,7 +150,7 @@ pub struct AstFunc {
 // Represents a constant
 pub struct AstConst {
     pub name : String,
-    pub data_type : AstMod,
+    pub data_type : DataType,
     pub value : AstArg,
     
     pub line : String,
@@ -233,23 +233,7 @@ impl AstConst {
         }
         
         print!("{} ", self.name);
-        
-        match &self.data_type.mod_type {
-            AstModType::Byte => print!("Byte "),
-            AstModType::UByte => print!("UByte "),
-            AstModType::Short => print!("Short "),
-            AstModType::UShort => print!("UShort "),
-            AstModType::Int => print!("Int "),
-            AstModType::UInt => print!("UInt "),
-            AstModType::Int64 => print!("Int64 "),
-            AstModType::UInt64 => print!("UInt64 "),
-            AstModType::Float => print!("Float "),
-            AstModType::Double => print!("Double "),
-            AstModType::Char => print!("Char "),
-            AstModType::Str => print!("Str "),
-            
-            _ => print!("NONE"),
-        }
+        print!("{:?} ", self.data_type);
         
         self.value.print();
         
@@ -280,7 +264,7 @@ impl AstFunc {
         }
         
         print!("FUNC {}", self.name);
-        println!("{:?}", self.data_type);
+        print!("{:?}", self.data_type);
         println!("");
         
         for arg in self.args.iter() {

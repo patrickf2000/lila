@@ -75,44 +75,6 @@ pub fn size_for_type(data_type : &DataType) -> i32 {
     }
 }
 
-// Return: Base Type, Sub Type
-pub fn ast_to_datatype(ast_mod : &AstMod) -> (DataType, DataType) {
-    match &ast_mod.mod_type {
-        AstModType::Byte => return (DataType::Byte, DataType::None),
-        AstModType::UByte => return (DataType::UByte, DataType::None),
-        AstModType::ByteDynArray => return (DataType::Ptr, DataType::Byte),
-        AstModType::UByteDynArray => return (DataType::Ptr, DataType::UByte),
-        
-        AstModType::Short => return (DataType::Short, DataType::None),
-        AstModType::UShort => return (DataType::UShort, DataType::None),
-        AstModType::ShortDynArray => return (DataType::Ptr, DataType::Short),
-        AstModType::UShortDynArray => return (DataType::Ptr, DataType::UShort),
-        
-        AstModType::Int => return (DataType::Int, DataType::None),
-        AstModType::UInt => return (DataType::UInt, DataType::None),
-        AstModType::IntDynArray => return (DataType::Ptr, DataType::Int),
-        AstModType::UIntDynArray => return (DataType::Ptr, DataType::UInt),
-        
-        AstModType::Int64 => return (DataType::Int64, DataType::None),
-        AstModType::UInt64 => return (DataType::UInt64, DataType::None),
-        AstModType::I64DynArray => return (DataType::Ptr, DataType::Int64),
-        AstModType::U64DynArray => return (DataType::Ptr, DataType::UInt64),
-        
-        AstModType::Float => return (DataType::Float, DataType::None),
-        AstModType::Double => return (DataType::Double, DataType::None),
-        AstModType::FloatDynArray => return (DataType::Ptr, DataType::Float),
-        AstModType::DoubleDynArray => return (DataType::Ptr, DataType::Double),
-        
-        AstModType::Char => return (DataType::Char, DataType::None),
-        AstModType::Str => return (DataType::Str, DataType::None),
-        AstModType::StrDynArray => return (DataType::Ptr, DataType::Str),
-        AstModType::Enum(_v) => return (DataType::Int,  DataType::None),       // TODO: We will need better type detection
-        
-        // Do we need an error here? Really, it should never get to this pointer
-        AstModType::None => return (DataType::Void, DataType::None),
-    }
-}
-
 // Returns a move statement for a given type
 pub fn mov_for_type(data_type : &DataType, sub_type : &DataType) -> LtacInstr {
     let mut instr = ltac::create_instr(LtacType::Mov);
