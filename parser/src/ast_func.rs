@@ -236,6 +236,12 @@ pub fn build_exit(builder : &mut AstBuilder) -> bool {
 pub fn build_end(builder : &mut AstBuilder) {
     let stmt = ast::create_stmt(AstStmtType::End, &mut builder.scanner);
     builder.add_stmt(stmt);
+    
+    for stmt in builder.current_block.iter() {
+        ast::add_stmt(&mut builder.tree, stmt.clone());
+    }
+    
+    builder.current_block.clear();
 }
 
 // Builds function calls

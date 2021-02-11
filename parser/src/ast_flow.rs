@@ -23,6 +23,7 @@ use crate::ast_builder::*;
 use crate::ast_func::*;
 use crate::ast_utils::*;
 
+// Responsible for building a block in a conditional statement or loop
 fn build_block(builder : &mut AstBuilder, mut cond_stmt : AstStmt) -> bool {
     let old_block = builder.current_block.clone();
     builder.current_block.clear();
@@ -34,17 +35,16 @@ fn build_block(builder : &mut AstBuilder, mut cond_stmt : AstStmt) -> bool {
         match token {
             Token::Return => code = build_return(builder),
             Token::Exit => code = build_exit(builder),
+            Token::Id(ref val) => code = build_id(builder, val.to_string()),
+            Token::If => code = build_cond(builder, Token::If),
+            Token::While => code = build_cond(builder, Token::While),
+            Token::For => code = build_for_loop(builder),
+            Token::Eof => {},
             
             Token::End => {
                 let stmt = ast::create_stmt(AstStmtType::End, &mut builder.scanner);
                 builder.add_stmt(stmt);
                 break;
-            },
-            
-            Token::Id(ref val) => code = build_id(builder, val.to_string()),
-            
-            Token::If => {
-                code = build_cond(builder, Token::If);
             },
             
             Token::Elif => {
@@ -57,23 +57,13 @@ fn build_block(builder : &mut AstBuilder, mut cond_stmt : AstStmt) -> bool {
                 break;
             },
             
-            Token::While => {
-                code = build_cond(builder, Token::While);
-            },
-            
-            Token::For => {
-                code = build_for_loop(builder);
-            },
-            
-            // TODO: For break and continue
-            // Create a common function for the lack of semicolons
             Token::Break => {
                 let br = ast::create_stmt(AstStmtType::Break, &mut builder.scanner);
                 builder.add_stmt(br);
                 
                 if builder.get_token() != Token::Semicolon {
                     builder.syntax_error("Expected terminator".to_string());
-                    //return (false, 0, false, false);
+                    return false;
                 }
             },
             
@@ -83,11 +73,9 @@ fn build_block(builder : &mut AstBuilder, mut cond_stmt : AstStmt) -> bool {
                 
                 if builder.get_token() != Token::Semicolon {
                     builder.syntax_error("Expected terminator".to_string());
-                    //return (false, 0, false, false);
+                    return false;
                 }
             },
-            
-            Token::Eof => {},
             
             _ => {
                 builder.syntax_error("Invalid token in context.".to_string());

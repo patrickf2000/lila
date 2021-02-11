@@ -95,7 +95,6 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     
     // Read the thing line by line
     let mut line_no = 0;
-    let mut layer = 0;
     let mut in_begin = false;
     
     for line in reader.lines() {
@@ -111,8 +110,7 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     }
     
     loop {
-        let (ret, new_layer, begin, done) = build_line(layer, in_begin, &mut builder);
-        layer = new_layer;
+        let (ret, begin, done) = build_line(in_begin, &mut builder);
         in_begin = begin;
         
         if done {
@@ -145,7 +143,6 @@ pub fn include_module(name : String, builder : &mut AstBuilder) -> bool {
     
     // Read the thing line by line
     let mut line_no = 0;
-    let mut layer = 0;
     let mut in_begin = false;
     
     let old_scanner = builder.scanner.clone();
@@ -164,8 +161,7 @@ pub fn include_module(name : String, builder : &mut AstBuilder) -> bool {
     }
     
     loop {
-        let (ret, new_layer, begin, done) = build_line(layer, in_begin, builder);
-        layer = new_layer;
+        let (ret, begin, done) = build_line(in_begin, builder);
         in_begin = begin;
         
         if done {
@@ -184,9 +180,8 @@ pub fn include_module(name : String, builder : &mut AstBuilder) -> bool {
 
 // Converts a line to an AST node
 // TODO: This is the most ridiculous function signature. We need to change this
-fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool, i32, bool, bool) {    
+fn build_line(in_begin : bool, builder : &mut AstBuilder) -> (bool, bool, bool) {    
     let mut code = true;
-    let mut new_layer = layer;
     let mut in_code = in_begin;
     
     // Get the first token
@@ -203,7 +198,7 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
                 Token::Func => {},
                 _ => {
                     builder.syntax_error("Expected \"func\" keyword.".to_string());
-                    return (false, 0, false, false);
+                    return (false, false, false);
                 }
             }
                 
@@ -213,14 +208,13 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         Token::Func => {
             in_code = false;
             code = build_func(builder, false);
-            new_layer += 1;
         },
         
         // Indicates the end of the variable section and start of the code section
         Token::Begin => {
             if in_code {
                 builder.syntax_error("Unexpected \"begin\"-> Already in code.".to_string());
-                return (false, 0, false, false);
+                return (false, false, false);
             } else {
                 in_code = true;
             }
@@ -228,76 +222,27 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         
         Token::Return if in_code => code = build_return(builder),
         Token::Exit if in_code => code = build_exit(builder),
-        
-        Token::End => {
-            build_end(builder);
-            //new_layer -= 1;
-            
-            //if new_layer == 0 {
-                for stmt in builder.current_block.iter() {
-                    ast::add_stmt(&mut builder.tree, stmt.clone());
-                }
-                
-                builder.current_block.clear();
-            //}
-        },
-        
-        Token::Const => code = build_const(builder, layer),
+        Token::End => build_end(builder),
+        Token::Const => code = build_const(builder),
         
         Token::Enum => {
             if in_code {
                 builder.syntax_error("You cannot define an enum in the code body.".to_string());
-                return (false, 0, false, false);
+                return (false, false, false);
             } else {
-                code = build_enum(builder, layer);
+                code = build_enum(builder);
             }
         },
         
         Token::Id(ref val) if in_code => code = build_id(builder, val.to_string()),
         Token::Id(ref val) => code = build_var_dec(builder, val.to_string()),
         
-        Token::If if in_code => {
-            code = build_cond(builder, Token::If);
-            //new_layer += 1;
-        },
-        
-        //Token::Elif if in_code => code = build_cond(builder, Token::Elif),
-        //Token::Else if in_code => code = build_cond(builder, Token::Else),
-        
-        Token::While if in_code => {
-            code = build_cond(builder, Token::While);
-            //new_layer += 1;
-        },
-        
-        Token::For if in_code => {
-            code = build_for_loop(builder);
-            //new_layer += 1;
-        },
-        
-        // TODO: For break and continue
-        // Create a common function for the lack of semicolons
-        Token::Break if in_code => {
-            let br = ast::create_stmt(AstStmtType::Break, &mut builder.scanner);
-            builder.add_stmt(br);
-            
-            if builder.get_token() != Token::Semicolon {
-                builder.syntax_error("Expected terminator".to_string());
-                return (false, 0, false, false);
-            }
-        },
-        
-        Token::Continue if in_code => {
-            let cont = ast::create_stmt(AstStmtType::Continue, &mut builder.scanner);
-            builder.add_stmt(cont);
-            
-            if builder.get_token() != Token::Semicolon {
-                builder.syntax_error("Expected terminator".to_string());
-                return (false, 0, false, false);
-            }
-        },
+        Token::If if in_code => code = build_cond(builder, Token::If),
+        Token::While if in_code => code = build_cond(builder, Token::While),
+        Token::For if in_code => code = build_for_loop(builder),
         
         Token::Eof => {},
-        Token::EoI => return (true, 0, false, true),
+        Token::EoI => return (true, false, true),
         
         _ => {
             if in_code {
@@ -310,11 +255,11 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         }
     }
     
-    (code, new_layer, in_code, false)
+    (code, in_code, false)
 }
 
 // Builds a constant
-fn build_const(builder : &mut AstBuilder, layer : i32) -> bool {
+fn build_const(builder : &mut AstBuilder) -> bool {
     let mut token = builder.get_token();
     let data_type : DataType;
     let arg : AstArg;
@@ -383,12 +328,12 @@ fn build_const(builder : &mut AstBuilder, layer : i32) -> bool {
         line : builder.scanner.get_current_line(),
     };
     
-    if layer == 0 {
+    //if layer == 0 {
         builder.tree.constants.push(constant);
-    } else {
+    /*} else {
         builder.syntax_error("Constants are not yet supported on the local level.".to_string());
         return false;
-    }
+    }*/
     
     token = builder.get_token();
     
@@ -401,7 +346,7 @@ fn build_const(builder : &mut AstBuilder, layer : i32) -> bool {
 }
 
 // Builds an enumeration
-fn build_enum(builder : &mut AstBuilder, layer : i32) -> bool {
+fn build_enum(builder : &mut AstBuilder) -> bool {
     let mut token = builder.get_token();
     let name : String;
     
@@ -459,11 +404,11 @@ fn build_enum(builder : &mut AstBuilder, layer : i32) -> bool {
     }
     
     // Finally, add to the tree
-    if layer == 0 {
+    /*if layer == 0 {
         // TODO: Global enums
-    } else {
+    } else {*/
         ast::add_func_enum(&mut builder.tree, new_enum);
-    }
+    //}
     
     true
 }
