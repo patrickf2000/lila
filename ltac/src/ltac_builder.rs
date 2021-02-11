@@ -317,6 +317,13 @@ impl LtacBuilder {
             if !code {
                 break;
             }
+            
+            if line.sub_block.len() > 0 {
+                code = self.build_block(&line.sub_block);
+                if !code {
+                    break;
+                }
+            }
         }
         
         code

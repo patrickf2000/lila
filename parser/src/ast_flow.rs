@@ -19,8 +19,92 @@ use crate::ast;
 use crate::ast::*;
 use crate::lex::Token;
 
-use crate::ast_builder::AstBuilder;
+use crate::ast_builder::*;
+use crate::ast_func::*;
 use crate::ast_utils::*;
+
+fn build_block(builder : &mut AstBuilder, mut cond_stmt : AstStmt) -> bool {
+    let old_block = builder.current_block.clone();
+    builder.current_block.clear();
+    
+    let mut token = builder.get_token();
+    let mut code = true;
+    
+    loop {
+        match token {
+            Token::Return => code = build_return(builder),
+            Token::Exit => code = build_exit(builder),
+            
+            Token::End => {
+                let stmt = ast::create_stmt(AstStmtType::End, &mut builder.scanner);
+                builder.add_stmt(stmt);
+                break;
+            },
+            
+            Token::Id(ref val) => code = build_id(builder, val.to_string()),
+            
+            Token::If => {
+                code = build_cond(builder, Token::If);
+            },
+            
+            Token::Elif => {
+                code = build_cond(builder, Token::Elif);
+                break;   
+            },
+            
+            Token::Else => {
+                code = build_cond(builder, Token::Else);
+                break;
+            },
+            
+            Token::While => {
+                code = build_cond(builder, Token::While);
+            },
+            
+            Token::For => {
+                code = build_for_loop(builder);
+            },
+            
+            // TODO: For break and continue
+            // Create a common function for the lack of semicolons
+            Token::Break => {
+                let br = ast::create_stmt(AstStmtType::Break, &mut builder.scanner);
+                builder.add_stmt(br);
+                
+                if builder.get_token() != Token::Semicolon {
+                    builder.syntax_error("Expected terminator".to_string());
+                    //return (false, 0, false, false);
+                }
+            },
+            
+            Token::Continue => {
+                let cont = ast::create_stmt(AstStmtType::Continue, &mut builder.scanner);
+                builder.add_stmt(cont);
+                
+                if builder.get_token() != Token::Semicolon {
+                    builder.syntax_error("Expected terminator".to_string());
+                    //return (false, 0, false, false);
+                }
+            },
+            
+            Token::Eof => {},
+            
+            _ => {
+                builder.syntax_error("Invalid token in context.".to_string());
+                return false;
+            }
+        }
+        
+        token = builder.get_token();
+    }
+    
+    cond_stmt.sub_block = builder.current_block.clone();
+    builder.current_block.clear();
+    builder.current_block = old_block;
+    builder.add_stmt(cond_stmt);
+    
+    code
+}
 
 // Builds conditional statements
 pub fn build_cond(builder : &mut AstBuilder, cond_type : Token) -> bool {
@@ -42,7 +126,7 @@ pub fn build_cond(builder : &mut AstBuilder, cond_type : Token) -> bool {
         }
     }
     
-    builder.add_stmt(cond);
+    build_block(builder, cond);
     
     true
 }
@@ -76,7 +160,7 @@ pub fn build_for_loop(builder : &mut AstBuilder) -> bool {
         return false;
     }
     
-    builder.add_stmt(for_loop);
+    build_block(builder, for_loop);
     
     true
 }

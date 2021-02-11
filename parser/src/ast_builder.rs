@@ -231,15 +231,15 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         
         Token::End => {
             build_end(builder);
-            new_layer -= 1;
+            //new_layer -= 1;
             
-            if new_layer == 0 {
+            //if new_layer == 0 {
                 for stmt in builder.current_block.iter() {
                     ast::add_stmt(&mut builder.tree, stmt.clone());
                 }
                 
                 builder.current_block.clear();
-            }
+            //}
         },
         
         Token::Const => code = build_const(builder, layer),
@@ -258,20 +258,20 @@ fn build_line(layer : i32, in_begin : bool, builder : &mut AstBuilder) -> (bool,
         
         Token::If if in_code => {
             code = build_cond(builder, Token::If);
-            new_layer += 1;
+            //new_layer += 1;
         },
         
-        Token::Elif if in_code => code = build_cond(builder, Token::Elif),
-        Token::Else if in_code => code = build_cond(builder, Token::Else),
+        //Token::Elif if in_code => code = build_cond(builder, Token::Elif),
+        //Token::Else if in_code => code = build_cond(builder, Token::Else),
         
         Token::While if in_code => {
             code = build_cond(builder, Token::While);
-            new_layer += 1;
+            //new_layer += 1;
         },
         
         Token::For if in_code => {
             code = build_for_loop(builder);
-            new_layer += 1;
+            //new_layer += 1;
         },
         
         // TODO: For break and continue
@@ -469,7 +469,7 @@ fn build_enum(builder : &mut AstBuilder, layer : i32) -> bool {
 }
 
 // Handles cases when an identifier is the first token
-fn build_id(builder : &mut AstBuilder, id_val : String) -> bool {
+pub fn build_id(builder : &mut AstBuilder, id_val : String) -> bool {
     // If the next token is an assignment, we have a variable assignment
     // If the next token is a parantheses, we have a function call
     let token = builder.get_token();

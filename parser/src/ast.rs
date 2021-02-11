@@ -21,7 +21,7 @@ use crate::lex::*;
 use crate::Arch;
 
 // Represents AST statement types
-#[derive(PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum AstStmtType {
     VarDec,
     VarAssign,
@@ -40,7 +40,7 @@ pub enum AstStmtType {
 }
 
 // Represents AST argument types
-#[derive(PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum AstArgType {
     None,
     ByteL,
@@ -135,7 +135,7 @@ pub struct AstEnum {
 }
 
 // Represents a statement
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct AstStmt {
     pub stmt_type : AstStmtType,
     pub name : String,
@@ -153,7 +153,7 @@ pub struct AstStmt {
 
 // Represents an argument
 // Arguments are constants, variables, operators, etc
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct AstArg {
     pub arg_type : AstArgType,
     pub str_val : String,
@@ -295,8 +295,12 @@ impl AstStmt {
             println!("");
         }
         
-        for stmt in self.sub_block.iter() {
-            stmt.print(false);
+        if self.sub_block.len() > 0 {
+            println!(" --> ");
+            for stmt in self.sub_block.iter() {
+                stmt.print(false);
+            }
+            println!(" <-- ");
         }
     }
 }
