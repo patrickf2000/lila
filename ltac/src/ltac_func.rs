@@ -197,33 +197,11 @@ pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
                     continue;
                 }
                 
-                // Check constants
-                match builder.clone().global_consts.get(&arg.str_val) {
-                    Some(c) => {
-                        match c {
-                            LtacArg::F32(_p) | LtacArg::F64(_p) => {
-                                push.arg2_val = flt_arg_no;
-                                flt_arg_no += 1;
-                            },
-                            
-                            _ => {
-                                push.arg2_val = arg_no;
-                                arg_no += 1;
-                            },
-                        }
-                        
-                        push.arg1 = c.clone();
-                        builder.file.code.push(push);
-                    },
-                    
-                    None => {
-                        let mut msg = "Invalid constant or variable name: ".to_string();
-                        msg.push_str(&arg.str_val);
-                        
-                        builder.syntax.ltac_error(line, msg);
-                        return false;
-                    },
-                }
+                let mut msg = "Invalid constant or variable name: ".to_string();
+                msg.push_str(&arg.str_val);
+                
+                builder.syntax.ltac_error(line, msg);
+                return false;
             },
             
             _ => {},

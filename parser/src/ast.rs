@@ -117,6 +117,7 @@ pub struct AstFunc {
 }
 
 // Represents a constant
+#[derive(Clone)]
 pub struct AstConst {
     pub name : String,
     pub data_type : DataType,

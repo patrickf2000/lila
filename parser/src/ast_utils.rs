@@ -122,8 +122,17 @@ pub fn build_args(builder : &mut AstBuilder, stmt : &mut AstStmt, end : Token) -
             },
             
             Token::Id(ref val) => {
-                let mut arg = ast::create_arg(AstArgType::Id);
-                arg.str_val = val.to_string();
+                /*let mut arg = ast::create_arg(AstArgType::Id);
+                arg.str_val = val.to_string();*/
+                let arg = match &builder.global_consts.get(val) {
+                    Some(v) => v.value.clone(),
+                    
+                    None => {
+                        let mut arg = ast::create_arg(AstArgType::Id);
+                        arg.str_val = val.to_string();
+                        arg
+                    },
+                };
                 
                 if in_array {
                     current_arg.sub_args.push(arg);

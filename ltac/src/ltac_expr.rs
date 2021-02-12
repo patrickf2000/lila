@@ -402,18 +402,6 @@ fn build_var_expr(builder : &mut LtacBuilder, args : &Vec<AstArg>, var : &Var, r
                 }
             },
             
-            // Constants
-            AstArgType::Id if builder.const_exists(&arg.str_val) => {
-                // Check constants
-                let const_arg = match builder.get_const(&arg.str_val) {
-                    Ok(c) => c.clone(),
-                    Err(_e) => return false,             // We shouldn't get here
-                };
-                
-                instr.arg2 = const_arg;
-                builder.file.code.push(instr.clone());
-            }
-            
             // Check enumerations, and throw an error if there is no such thing
             AstArgType::Id => {
                 // Check enumerated values

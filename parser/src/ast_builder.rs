@@ -36,6 +36,7 @@ use crate::syntax::ErrorManager;
 pub struct AstBuilder {
     pub scanner : Lex,
     pub tree : AstTree,
+    pub global_consts : HashMap<String, AstConst>,
     pub current_block : Vec<AstStmt>,
     pub keep_postfix : bool,
     pub syntax : ErrorManager,
@@ -76,6 +77,7 @@ pub fn build_ast(path : String, arch : Arch, name : String, include_core : bool,
     let mut builder = AstBuilder {
         scanner : create_lex(),
         tree : tree,
+        global_consts : HashMap::new(),
         current_block : Vec::new(),
         keep_postfix : keep_postfix,
         syntax : syntax::create_error_manager(),
@@ -320,7 +322,7 @@ fn build_const(builder : &mut AstBuilder) -> bool {
     }
     
     let constant = AstConst {
-        name : name,
+        name : name.clone(),
         data_type : data_type,
         value : arg,
         
@@ -329,7 +331,8 @@ fn build_const(builder : &mut AstBuilder) -> bool {
     };
     
     //if layer == 0 {
-        builder.tree.constants.push(constant);
+        builder.tree.constants.push(constant.clone());
+        builder.global_consts.insert(name, constant);
     /*} else {
         builder.syntax_error("Constants are not yet supported on the local level.".to_string());
         return false;
