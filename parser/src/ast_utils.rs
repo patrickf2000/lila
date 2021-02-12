@@ -17,9 +17,9 @@
 
 use crate::ast;
 use crate::ast::*;
+use crate::ast_builder::*;
 use crate::ast_var::*;
-use crate::lex::{Token, Lex};
-use crate::syntax::*;
+use crate::lex::Token;
 
 // Checks to see if a given token is an operator
 fn is_operator(token : Token) -> bool {
@@ -51,8 +51,8 @@ fn is_operator(token : Token) -> bool {
 
 // A common function for building statement arguments
 // TODO: If there's a way to not make parts of this so repetative, that would be great
-pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax : &mut ErrorManager) -> bool {
-    let mut token = scanner.get_token();
+pub fn build_args(builder : &mut AstBuilder, stmt : &mut AstStmt, end : Token) -> bool {
+    let mut token = builder.get_token();
     let mut args : Vec<AstArg> = Vec::new();
     let mut last = Token::Unknown;
     
@@ -133,7 +133,7 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             },
             
             Token::Sizeof => {
-                let arg = build_sizeof(scanner, syntax);
+                let arg = build_sizeof(&mut builder.scanner, &mut builder.syntax);
                 
                 if arg.arg_type == AstArgType::None {
                     return false;
@@ -147,7 +147,7 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             },
             
             Token::AddrOf => {
-                let arg = build_addrof(scanner, syntax);
+                let arg = build_addrof(&mut builder.scanner, &mut builder.syntax);
                 
                 if arg.arg_type == AstArgType::None {
                     return false;
@@ -291,13 +291,13 @@ pub fn build_args(scanner : &mut Lex, stmt : &mut AstStmt, end : Token, syntax :
             Token::Eof => {},
             
             _ => {
-                syntax.syntax_error(scanner, "Invalid token in expression.".to_string());
+                builder.syntax_error("Invalid token in expression.".to_string());
                 return false;
             },
         }
     
         last = token.clone();
-        token = scanner.get_token();
+        token = builder.get_token();
     }
     
     for arg in args.iter() {

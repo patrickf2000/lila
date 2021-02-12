@@ -100,7 +100,7 @@ pub fn build_var_dec(builder : &mut AstBuilder, name : String) -> bool {
         
         Token::LBracket => {
             is_array = true;
-            if !build_args(&mut builder.scanner, &mut var_dec, Token::RBracket, &mut builder.syntax) {
+            if !build_args(builder, &mut var_dec, Token::RBracket) {
                 return false;
             }
         },
@@ -122,7 +122,7 @@ pub fn build_var_dec(builder : &mut AstBuilder, name : String) -> bool {
             return false;
         }
     } else {
-        if !build_args(&mut builder.scanner, &mut var_dec, Token::Semicolon, &mut builder.syntax) {
+        if !build_args(builder, &mut var_dec, Token::Semicolon) {
             return false;
         }
         
@@ -142,7 +142,7 @@ pub fn build_var_dec(builder : &mut AstBuilder, name : String) -> bool {
 }
 
 // Builds a variable assignment
-fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : String, assign_op : Token, syntax : &mut ErrorManager) -> bool {
+fn build_var_assign_stmt(builder : &mut AstBuilder, var_assign : &mut AstStmt, name : String, assign_op : Token) -> bool {
     let mut check_end = false;
     
     match assign_op {
@@ -198,27 +198,27 @@ fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : S
             }
             
             // Build the rest
-            if !build_args(scanner, var_assign, Token::Semicolon, syntax) {
+            if !build_args(builder, var_assign, Token::Semicolon) {
                 return false;
             }
         },
         
         Token::Assign => {
-            if !build_args(scanner, var_assign, Token::Semicolon, syntax) {
+            if !build_args(builder, var_assign, Token::Semicolon) {
                 return false;
             }
         },
         
         // TODO: Pls improve this
         _ => {
-            syntax.syntax_error(scanner, "Expected \'=\' in array assignment.".to_string());
+            builder.syntax_error("Expected \'=\' in array assignment.".to_string());
             return false;
         },
     }
     
     if check_end {
-        if scanner.get_token() != Token::Semicolon {
-            syntax.syntax_error(scanner, "Expected terminator.".to_string());
+        if builder.get_token() != Token::Semicolon {
+            builder.syntax_error("Expected terminator.".to_string());
             return false;
         }
     }
@@ -227,40 +227,40 @@ fn build_var_assign_stmt(scanner : &mut Lex, var_assign : &mut AstStmt, name : S
 }
 
 // Builds a variable assignment
-pub fn build_var_assign(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, name : String, assign_op : Token, keep_postfix : bool, syntax : &mut ErrorManager) -> bool {
-    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, scanner);
+pub fn build_var_assign(builder : &mut AstBuilder, name : String, assign_op : Token) -> bool {
+    let mut var_assign = ast::create_stmt(AstStmtType::VarAssign, &mut builder.scanner);
     var_assign.name = name.clone();
     
-    if !build_var_assign_stmt(scanner, &mut var_assign, name, assign_op, syntax) {
+    if !build_var_assign_stmt(builder, &mut var_assign, name, assign_op) {
         return false;
     }
     
-    var_assign.args = check_operations(&var_assign.args, keep_postfix);
+    var_assign.args = check_operations(&var_assign.args, builder.keep_postfix);
     
-    current_block.push(var_assign);
+    builder.add_stmt(var_assign);
     true
 }
 
 // Builds an array assignment
-pub fn build_array_assign(scanner : &mut Lex, current_block : &mut Vec<AstStmt>, id_val : String, keep_postfix : bool, syntax : &mut ErrorManager) -> bool {
-    let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign, scanner);
+pub fn build_array_assign(builder : &mut AstBuilder, id_val : String) -> bool {
+    let mut array_assign = ast::create_stmt(AstStmtType::ArrayAssign, &mut builder.scanner);
     array_assign.name = id_val.clone();
     
     // For the array index
-    if !build_args(scanner, &mut array_assign, Token::RBracket, syntax) {
+    if !build_args(builder, &mut array_assign, Token::RBracket) {
         return false;
     }
     
     // Build the assignment
-    let assign_op = scanner.get_token();
+    let assign_op = builder.get_token();
     
-    if !build_var_assign_stmt(scanner, &mut array_assign, id_val, assign_op, syntax) {
+    if !build_var_assign_stmt(builder, &mut array_assign, id_val, assign_op) {
         return false;
     }
     
-    array_assign.args = check_operations(&array_assign.args, keep_postfix);
+    array_assign.args = check_operations(&array_assign.args, builder.keep_postfix);
     
-    current_block.push(array_assign);
+    builder.add_stmt(array_assign);
     
     true
 }

@@ -209,7 +209,7 @@ pub fn build_func(builder : &mut AstBuilder, is_extern : bool) -> bool {
 pub fn build_return(builder : &mut AstBuilder) -> bool {
     let mut ret = ast::create_stmt(AstStmtType::Return, &mut builder.scanner);
     
-    if !build_args(&mut builder.scanner, &mut ret, Token::Semicolon, &mut builder.syntax) {
+    if !build_args(builder, &mut ret, Token::Semicolon) {
         return false;
     }
     
@@ -223,7 +223,7 @@ pub fn build_exit(builder : &mut AstBuilder) -> bool {
     let mut exit = ast::create_stmt(AstStmtType::Exit, &mut builder.scanner);
     
     // Build arguments
-    if !build_args(&mut builder.scanner, &mut exit, Token::Semicolon, &mut builder.syntax) {
+    if !build_args(builder, &mut exit, Token::Semicolon) {
         return false;
     }
     
@@ -250,7 +250,7 @@ pub fn build_func_call(builder : &mut AstBuilder, id_val : String) -> bool {
     fc.name = id_val;
     
     // Build arguments
-    if !build_args(&mut builder.scanner, &mut fc, Token::RParen, &mut builder.syntax) {
+    if !build_args(builder, &mut fc, Token::RParen) {
         return false;
     }
     

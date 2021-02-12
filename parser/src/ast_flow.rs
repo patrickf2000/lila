@@ -109,7 +109,7 @@ pub fn build_cond(builder : &mut AstBuilder, cond_type : Token) -> bool {
     
     // Build the rest arguments
     if cond_type != Token::Else {
-        if !build_args(&mut builder.scanner, &mut cond, Token::Eof, &mut builder.syntax) {
+        if !build_args(builder, &mut cond, Token::Eof) {
             return false;
         }
     }
@@ -144,7 +144,7 @@ pub fn build_for_loop(builder : &mut AstBuilder) -> bool {
     }
     
     // Build the rest of the arguments
-    if !build_args(&mut builder.scanner, &mut for_loop, Token::Eof, &mut builder.syntax) {
+    if !build_args(builder, &mut for_loop, Token::Eof) {
         return false;
     }
     

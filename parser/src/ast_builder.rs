@@ -425,10 +425,10 @@ pub fn build_id(builder : &mut AstBuilder, id_val : String) -> bool {
         | Token::MulAssign | Token::DivAssign
         | Token::ModAssign
         | Token::OpInc | Token::OpDec
-        | Token::Assign => code = build_var_assign(&mut builder.scanner, &mut builder.current_block, id_val, token, builder.keep_postfix, &mut builder.syntax),
+        | Token::Assign => code = build_var_assign(builder, id_val, token),
         
         Token::LParen => code = build_func_call(builder, id_val),
-        Token::LBracket => code = build_array_assign(&mut builder.scanner, &mut builder.current_block, id_val, builder.keep_postfix, &mut builder.syntax),
+        Token::LBracket => code = build_array_assign(builder, id_val),
         _ => {
             builder.syntax_error("Invalid assignment or call.".to_string());
             return false;
