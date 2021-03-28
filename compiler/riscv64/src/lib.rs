@@ -20,7 +20,7 @@ use std::io::BufWriter;
 use std::fs::File;
 use std::process::Command;
 
-use ltac::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 mod call;
 mod flow;

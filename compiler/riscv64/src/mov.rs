@@ -17,7 +17,7 @@
 use std::io::{BufWriter, Write};
 use std::fs::File;
 
-use ltac::ltac::{LtacInstr, LtacType, LtacArg};
+use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::utils::*;
 
 // Builds hardware conversion instructions

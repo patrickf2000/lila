@@ -4,7 +4,6 @@
 name = "aarch64"
 version = "0.0.2"
 dependencies = [
- "ltac",
  "parser",
 ]
 
@@ -12,7 +11,6 @@ dependencies = [
 name = "example"
 version = "0.0.2"
 dependencies = [
- "ltac",
  "parser",
 ]
 
@@ -22,25 +20,17 @@ version = "0.0.2"
 dependencies = [
  "aarch64",
  "example",
- "ltac",
  "ltac_printer",
  "parser",
  "riscv64",
+ "transform",
  "x86_64",
-]
-
-[[package]]
-name = "ltac"
-version = "0.1.0"
-dependencies = [
- "parser",
 ]
 
 [[package]]
 name = "ltac_printer"
 version = "0.0.2"
 dependencies = [
- "ltac",
  "parser",
 ]
 
@@ -52,7 +42,13 @@ version = "0.1.0"
 name = "riscv64"
 version = "0.0.2"
 dependencies = [
- "ltac",
+ "parser",
+]
+
+[[package]]
+name = "transform"
+version = "0.1.0"
+dependencies = [
  "parser",
 ]
 
@@ -60,6 +56,5 @@ dependencies = [
 name = "x86_64"
 version = "0.1.0"
 dependencies = [
- "ltac",
  "parser",
 ]

@@ -1,7 +1,7 @@
 
 /* Backend Example
 
-This is an example fo what a Dash backend could look like. For consistency, I would like all backends to
+This is an example fo what a Ida backend could look like. For consistency, I would like all backends to
 have as similar a structure to this as possible.
 
 By default, this is built with the rest of the program. The reason is so I'm sure it will always be up to
@@ -18,7 +18,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use ltac::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr};
 
 pub fn compile(ltac_file : &LtacFile) -> io::Result<()> {
     let mut name = "./".to_string();

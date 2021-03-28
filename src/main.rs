@@ -21,8 +21,7 @@ use std::process;
 
 use parser;
 use parser::Arch;
-use ltac;
-use ltac::transform;
+use transform;
 
 mod build;
 
@@ -130,7 +129,7 @@ fn run() -> i32 {
         }
     
         // Build the LTAC portion
-        let mut ltac = match ltac::parse(input, arch, use_corelib) {
+        let mut ltac = match parser::parse(input, arch, use_corelib) {
             Ok(ltac) => ltac,
             Err(_e) => return 1,
         };

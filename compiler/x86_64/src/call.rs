@@ -15,7 +15,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use ltac::ltac::{LtacInstr, LtacArg};
+use parser::ltac::{LtacInstr, LtacArg};
 use crate::asm::*;
 
 // Builds a function argument
