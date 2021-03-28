@@ -65,8 +65,6 @@ fn run() -> i32 {
     let mut inc_start = true;
     let mut pic = false;
     let mut risc_mode = false;      // This is a dev feature to allow us to work on the RISC optimizer on x86
-    let mut use_llvm = false;
-    let mut llvm_debug = false;
     let mut arch = get_arch();
     let mut inputs : Vec<String> = Vec::new();
     let mut output : String = "a.out".to_string();
@@ -103,13 +101,6 @@ fn run() -> i32 {
             
             "-march=riscv64" => arch = Arch::Riscv64,
             
-            "--llvm" => use_llvm = true,
-            
-            "--llvm-debug" => {
-                use_llvm = true;
-                llvm_debug = true;
-            },
-            
             "-h" | "--help" => {
                 help();
                 return 0;
@@ -121,7 +112,7 @@ fn run() -> i32 {
     
     if print_ast {
         let input = inputs.last().unwrap();
-        let ast = match parser::get_ast(&input, arch, use_corelib, use_llvm) {
+        let ast = match parser::get_ast(&input, arch, use_corelib, true) {
             Ok(ast) => ast,
             Err(_e) => return 1,
         };
@@ -131,29 +122,6 @@ fn run() -> i32 {
     }
     
     let mut all_names : Vec<String> = Vec::new();
-    
-    if use_llvm {
-        let input = inputs.last().unwrap();
-        let llir = match parser::parse2(input.clone(), arch, use_corelib) {
-            Ok(llir) => llir,
-            Err(_e) => return 1,
-        };
-        
-        if llvm_debug {
-            println!("Name: {}", llir.name);
-            for ln in llir.code.iter() {
-                println!("{:?}", ln);
-            }
-            println!("");
-        }
-        
-        llvm::compile(&llir, llvm_debug).expect("LLVM Codegen failed with unknown error.");
-        all_names.push(llir.name.clone());
-        
-        build::assemble(&llir.name, no_link);
-        build::link(&all_names, &output, use_corelib, link_lib, inc_start);
-        return 0;
-    }
     
     for input in inputs {
         if input.starts_with("-l") || input.ends_with(".o") {
