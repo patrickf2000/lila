@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lilac"
+name = "idac"
 version = "0.0.2"
 dependencies = [
  "aarch64",

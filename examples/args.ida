@@ -1,5 +1,5 @@
 
-# This an example of what parsing command line arguments in Lila could look like
+# This an example of what parsing command line arguments in Ida could look like
 #
 # As you can see, we don't need argc and argv like in C. All we need is a string
 # list. The size can be retrieved with the sizeof() operator

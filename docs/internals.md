@@ -1,6 +1,6 @@
-## Lila Internals
+## Ida Internals
 
-This is meant to give a quick overview of how Lila works internally. Part of the purpose of this project is to have a simple compiler and make it easy to port and hack on. Even if you have a minimal compiler background, it should be easy to understand.
+This is meant to give a quick overview of how Ida works internally. Part of the purpose of this project is to have a simple compiler and make it easy to port and hack on. Even if you have a minimal compiler background, it should be easy to understand.
 
 ### The Parser
 

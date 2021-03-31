@@ -41,7 +41,7 @@ fi
 # Install start files
 if [[ -f target/irt.o ]] ; then
     sudo mkdir -p /usr/lib/ida
-    sudo cp target/lrt.o /usr/lib/ida
+    sudo cp target/irt.o /usr/lib/ida
 fi
 
 echo "Done"

@@ -1,6 +1,6 @@
-## Lila Core Library
+## Ida Core Library
 
-This contains the documentation for the Lila core library. Certain operations in the language require special functions. The most essential ones are here. The corelib should be build and linked as a static library.
+This contains the documentation for the Ida core library. Certain operations in the language require special functions. The most essential ones are here. The corelib should be build and linked as a static library.
 
 ### mem
 

@@ -18,8 +18,8 @@ func version
 begin
     println("echo v0.1");
     println("");
-    println("This is a simple version of the UNIX echo program written in Lila");
-    println("Lila and this program were written by Patrick Flynn");
+    println("This is a simple version of the UNIX echo program written in Ida");
+    println("Ida and this program were written by Patrick Flynn");
     
     exit;
 end

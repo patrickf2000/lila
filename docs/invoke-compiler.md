@@ -1,6 +1,6 @@
 ## Invoking the Compiler
 
-The compiler has multiple options to help you build the type of binary you need. You can pass multiple inputs, which can be a ".ls" source file or an object file. Here are all the current compiler options:
+The compiler has multiple options to help you build the type of binary you need. You can pass multiple inputs, which can be a ".ida" source file or an object file. Here are all the current compiler options:
 
 * --ast/--ltac: See above
 * --use-c: Link to C start-up files and the C standard library.

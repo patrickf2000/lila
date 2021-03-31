@@ -1,8 +1,8 @@
-## Lila Standard Library
+## Ida Standard Library
 
-Contains the functions that should be defined in a Lila runtime system. This is also used to indicated what is currently implemented and what we still need.
+Contains the functions that should be defined in a Ida runtime system. This is also used to indicated what is currently implemented and what we still need.
 
-The Lila standard library is not essential, but highly recommended. Please see the corresponding documentation for the core library.
+The Ida standard library is not essential, but highly recommended. Please see the corresponding documentation for the core library.
 
 ### text_io
 
