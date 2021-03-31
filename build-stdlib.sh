@@ -6,7 +6,7 @@ echo ""
 cargo build --release
 
 cwd=`pwd`
-export lilac="$cwd/target/release/lilac"
+export idac="$cwd/target/release/idac"
 
 cd target
 
@@ -14,18 +14,18 @@ if [[ -d ./std ]] ; then
     rm -r ./std
 fi
 
-if [[ -f liblila.so ]] ; then
-    rm liblila.so
+if [[ -f libida.so ]] ; then
+    rm libida.so
 fi
 
 # Order matters
 # Build the core library
-$lilac ../corelib/x86_64.ls -o x86_64.o --no-link --pic --no-corelib
-$lilac ../corelib/mem.ls -o mem.o --no-link --pic --no-corelib
-$lilac ../corelib/string.ls -o string.o --no-link --pic --no-corelib
-$lilac ../corelib/io.ls -o io.o --no-link --pic --no-corelib
+$idac ../corelib/x86_64.ida -o x86_64.o --no-link --pic --no-corelib
+$idac ../corelib/mem.ida -o mem.o --no-link --pic --no-corelib
+$idac ../corelib/string.ida -o string.o --no-link --pic --no-corelib
+$idac ../corelib/io.ida -o io.o --no-link --pic --no-corelib
 
-ar -rc liblila_core.a \
+ar -rc libida_core.a \
     x86_64.o \
     mem.o \
     string.o \
@@ -34,14 +34,14 @@ ar -rc liblila_core.a \
 rm *.o
 
 # Build the standard library
-$lilac ../stdlib/string.ls -o string.o --no-link --pic
-$lilac ../stdlib/io.ls -o io.o --no-link --pic
-$lilac ../stdlib/os.ls -o os.o --no-link --pic
-$lilac ../stdlib/file_io.ls -o file_io.o --no-link --pic
-$lilac ../stdlib/text_utils.ls -o text_utils.o --no-link --pic
-$lilac ../stdlib/text_io.ls -o text_io.o --no-link --pic
+$idac ../stdlib/string.ida -o string.o --no-link --pic
+$idac ../stdlib/io.ida -o io.o --no-link --pic
+$idac ../stdlib/os.ida -o os.o --no-link --pic
+$idac ../stdlib/file_io.ida -o file_io.o --no-link --pic
+$idac ../stdlib/text_utils.ida -o text_utils.o --no-link --pic
+$idac ../stdlib/text_io.ida -o text_io.o --no-link --pic
 
-$lilac -o liblila.so --lib \
+$idac -o libida.so --lib \
     string.o \
     io.o \
     os.o \
@@ -51,7 +51,7 @@ $lilac -o liblila.so --lib \
     
 rm *.o
 
-as ../stdlib/x64_start.asm -o lrt.o
+as ../stdlib/x64_start.asm -o irt.o
 
 cd ..
 

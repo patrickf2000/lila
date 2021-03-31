@@ -5,7 +5,7 @@ test_count=0
 function run_test() {
     for entry in $1
     do
-    	name=`basename $entry .ls`
+    	name=`basename $entry .ida`
         
         if [[ $3 == "error" ]] ; then
             if [ -f ./ERROR_TEST.sh ] ; then
@@ -52,28 +52,28 @@ flags=""
 echo "Running all tests..."
 echo ""
 
-run_test 'test/basic/*.ls' 'sys' $flags
-run_test 'test/int/*.ls' 'sys' $flags
-run_test 'test/int64/*.ls' 'sys' $flags
-run_test 'test/byte/*.ls' 'sys' $flags
-run_test 'test/short/*.ls' 'sys' $flags
-#run_test 'test/float/*.ls' 'clib' $flags
-run_test 'test/char/*.ls' 'sys' $flags
-run_test 'test/string/*.ls' 'sys' $flags
+run_test 'test/basic/*.ida' 'sys' $flags
+run_test 'test/int/*.ida' 'sys' $flags
+run_test 'test/int64/*.ida' 'sys' $flags
+run_test 'test/byte/*.ida' 'sys' $flags
+run_test 'test/short/*.ida' 'sys' $flags
+#run_test 'test/float/*.ida' 'clib' $flags
+run_test 'test/char/*.ida' 'sys' $flags
+run_test 'test/string/*.ida' 'sys' $flags
 
-run_test 'test/assign/*.ls' 'sys' $flags
-run_test 'test/ooop/*.ls' 'sys' $flags
-run_test 'test/loop/*.ls' 'sys' $flags
-run_test 'test/mem/*.ls' 'sys' $flags
-run_test 'test/const/*.ls' 'sys' $flags
-run_test 'test/func/*.ls' 'sys' $flags
-run_test 'test/enum/*.ls' 'sys' $flags
+run_test 'test/assign/*.ida' 'sys' $flags
+run_test 'test/ooop/*.ida' 'sys' $flags
+run_test 'test/loop/*.ida' 'sys' $flags
+run_test 'test/mem/*.ida' 'sys' $flags
+run_test 'test/const/*.ida' 'sys' $flags
+run_test 'test/func/*.ida' 'sys' $flags
+run_test 'test/enum/*.ida' 'sys' $flags
 
-run_test 'test/errors/*.ls' 'sys' "error"
-run_test 'test/errors/ltac/*.ls' "sys" "error"
+run_test 'test/errors/*.ida' 'sys' "error"
+run_test 'test/errors/ltac/*.ida' "sys" "error"
 
-#run_test 'test/vector/*.ls' 'clib'
-run_test 'test/syscall/x86-64/*.ls' 'sys2'
+#run_test 'test/vector/*.ida' 'clib'
+run_test 'test/syscall/x86-64/*.ida' 'sys2'
 
 echo ""
 echo "$test_count tests passed successfully."

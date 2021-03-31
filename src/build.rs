@@ -61,7 +61,7 @@ pub fn link(all_names : &Vec<String>, output : &String, use_corelib : bool, is_l
     args.push("-L./");
     
     if !is_lib && inc_start {
-        args.push("/usr/lib/lila/lrt.o");
+        args.push("/usr/lib/ida/irt.o");
     }
     
     args.push("-dynamic-linker");
@@ -83,10 +83,10 @@ pub fn link(all_names : &Vec<String>, output : &String, use_corelib : bool, is_l
     args.push(output);
     
     if use_corelib {
-        args.push("-llila");
+        args.push("-lida");
         
         if use_corelib {
-            args.push("-llila_core");
+            args.push("-lida_core");
         }
     }
     

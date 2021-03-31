@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<language id="lila" name="Lila" version="2.0" _section="Source">
+<language id="ida" name="Ida" version="2.0" _section="Source">
   <metadata>
     <!--<property name="mimetypes">text/x-c;text/x-csrc;image/x-xpixmap</property>-->
-    <property name="globs">*.ls;*.lh</property>
+    <property name="globs">*.ida;*.ih</property>
     <property name="line-comment-start">#</property>
   </metadata>
 
@@ -154,7 +154,7 @@
     </context>
 
     <!--Main context-->
-    <context id="lila" class="no-spell-check">
+    <context id="ida" class="no-spell-check">
       <include>
         <context ref="gtk-doc:inline-docs-section"/>
         <context ref="def:shell-like-comment"/>

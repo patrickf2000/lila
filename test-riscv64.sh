@@ -5,7 +5,7 @@ test_count=0
 function run_test() {
     for entry in $1
     do
-    	name=`basename $entry .ls`
+    	name=`basename $entry .ida`
         
         if [[ $3 == "error" ]] ; then
             if [ -f ./ERROR_TEST.sh ] ; then
@@ -50,27 +50,27 @@ flags=""
 echo "Running all tests..."
 echo ""
 
-run_test 'test/basic/*.ls' 'clib' $flags
+run_test 'test/basic/*.ida' 'clib' $flags
 
-run_test 'test/int/*.ls' 'clib' $flags
-run_test 'test/int64/*.ls' 'clib' $flags
-run_test 'test/byte/*.ls' 'clib' $flags
-run_test 'test/short/*.ls' 'clib' $flags
-#run_test 'test/float/*.ls' 'clib' $flags
-#run_test 'test/char/*.ls' 'clib' $flags
-#run_test 'test/string/*.ls' 'clib' $flags
+run_test 'test/int/*.ida' 'clib' $flags
+run_test 'test/int64/*.ida' 'clib' $flags
+run_test 'test/byte/*.ida' 'clib' $flags
+run_test 'test/short/*.ida' 'clib' $flags
+#run_test 'test/float/*.ida' 'clib' $flags
+#run_test 'test/char/*.ida' 'clib' $flags
+#run_test 'test/string/*.ida' 'clib' $flags
 
-run_test 'test/ooop/*.ls' 'clib' $flags
-run_test 'test/loop/*.ls' 'clib' $flags
-#run_test 'test/ldarg/*.ls' 'clib' $flags
-run_test 'test/const/*.ls' 'clib' $flags
-#run_test 'test/func/*.ls' 'clib' $flags
+run_test 'test/ooop/*.ida' 'clib' $flags
+run_test 'test/loop/*.ida' 'clib' $flags
+#run_test 'test/ldarg/*.ida' 'clib' $flags
+run_test 'test/const/*.ida' 'clib' $flags
+#run_test 'test/func/*.ida' 'clib' $flags
 
-run_test 'test/errors/*.ls' 'clib' "error"
-run_test 'test/errors/ltac/*.ls' "clib" "error"
+run_test 'test/errors/*.ida' 'clib' "error"
+run_test 'test/errors/ltac/*.ida' "clib" "error"
 
-#run_test 'test/vector/*.ls' 'clib'
-#run_test 'test/syscall/x86-64/*.ls' 'sys'
+#run_test 'test/vector/*.ida' 'clib'
+#run_test 'test/syscall/x86-64/*.ida' 'sys'
 
 echo ""
 echo "$test_count tests passed successfully."

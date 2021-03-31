@@ -4,16 +4,16 @@ cwd=`pwd`
 export PATH="$cwd/target/release:$PATH"
 export LD_LIBRARY_PATH="$cwd/target:$LD_LIBRARY_PATH"
 
-which lilac
+which idac
 
 test_count=0
 
 function run_test() {
     for entry in $1
     do
-    	name=`basename $entry .ls`
+    	name=`basename $entry .ida`
         
-         lilac $entry -o $name -llila
+         idac $entry -o $name -lida
     
 	    ../test.py $entry ./$name ""
 	    
@@ -34,8 +34,8 @@ echo ""
 
 cd target
 
-run_test '../test/stdlib/io/*.ls'
-run_test '../test/stdlib/text_io/*.ls'
+run_test '../test/stdlib/io/*.ida'
+run_test '../test/stdlib/text_io/*.ida'
 
 # Generate test file
 if [[ -f ./file.txt ]] ; then
@@ -50,8 +50,8 @@ if [[ -f first.txt ]] ; then
     rm first.txt
 fi
 
-run_test '../test/stdlib/fs/*.ls'
-run_test '../test/stdlib/io2/*.ls'
+run_test '../test/stdlib/fs/*.ida'
+run_test '../test/stdlib/io2/*.ida'
 
 cd ..
 

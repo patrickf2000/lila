@@ -104,20 +104,20 @@ pub fn build_use(b : &mut AstBuilder) -> bool {
 pub fn get_module_path(name : &String) -> String {
     let mut path = name.replace("default", "");
     path = path.replace(".", "/");
-    path.push_str(".lh");
+    path.push_str(".ih");
     
     if Path::new(&path).exists() {
         return path;
     }
     
     // The three paths to check, in order of importance
-    let mut path1 = "/usr/lib/lila/".to_string();
+    let mut path1 = "/usr/lib/ida/".to_string();
     path1.push_str(&path);
     
-    let mut path2 = "/usr/local/lib/lila/".to_string();
+    let mut path2 = "/usr/local/lib/ida/".to_string();
     path2.push_str(&path);
     
-    let mut path3 = "/opt/lila/".to_string();
+    let mut path3 = "/opt/ida/".to_string();
     path3.push_str(&path);
     
     if Path::new(&path1).exists() {
@@ -146,7 +146,7 @@ pub fn generate_module(tree : &AstTree) -> io::Result<()> {
     }
     
     path.push_str(&tree.file_name);
-    path.push_str(".lh");
+    path.push_str(".ih");
     
     let file = File::create(&path)?;
     let mut writer = BufWriter::new(file);
