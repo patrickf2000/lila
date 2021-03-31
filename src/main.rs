@@ -88,6 +88,8 @@ fn run() -> i32 {
             
             "-march=riscv64" => arch = Arch::Riscv64,
             
+            "-march=aarch64" => arch = Arch::AArch64,
+            
             "-h" | "--help" => {
                 help();
                 return 0;
@@ -138,7 +140,7 @@ fn run() -> i32 {
             build::assemble(&ltac.name, no_link);
         } else if arch == Arch::AArch64 {
             aarch64::compile(&ltac).expect("Codegen failed with unknown error.");
-            aarch64::build_asm(&ltac.name, no_link);
+            //build::assemble(&ltac.name, no_link);
         } else if arch == Arch::Riscv64 {
             riscv64::compile(&ltac).expect("Codegen failed with unknown error.");
             riscv64::build_asm(&ltac.name, no_link);
@@ -152,7 +154,7 @@ fn run() -> i32 {
         if arch == Arch::X86_64 {
             build::link(&all_names, &output, use_corelib, link_lib, inc_start);
         } else if arch == Arch::AArch64 {
-            aarch64::link(&all_names, &output, use_c, link_lib);
+            //build::link(&all_names, &output, use_corelib, link_lib, inc_start);
         } else if arch == Arch::Riscv64 {
             riscv64::link(&all_names, &output, use_c, link_lib);
         }
