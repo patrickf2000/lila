@@ -22,7 +22,7 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     builder.syntax.set_data(line);
 
     let args = &line.args;
-    let first_type = args.first().unwrap().arg_type.clone();
+    //let first_type = args.first().unwrap().arg_type.clone();
     let reg_no = 1;
     
     if !build_var_expr(builder, args, var, reg_no) {
@@ -32,20 +32,9 @@ pub fn build_var_math(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) -
     let mut instr : LtacInstr;
     
     //Store the result back
-    // If it was a single assign (no math), compact the instructions
-    if line.args.len() == 1 && first_type != AstArgType::Id {
-        let top = builder.file.code.pop().unwrap();
-        
-        instr = ltac::create_instr(top.instr_type);
-        instr.arg1 = LtacArg::Mem(var.pos);
-        instr.arg2 = top.arg2;
-        instr.arg2_val = top.arg2_val;
-        
-    } else {
-        instr = mov_for_type(&var.data_type, &var.sub_type);
-        instr.arg1 = LtacArg::Mem(var.pos);
-        instr.arg2 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
-    }
+    instr = str_for_type(&var.data_type, &var.sub_type);
+    instr.arg1 = LtacArg::Mem(var.pos);
+    instr.arg2 = reg_for_type(&var.data_type, &var.sub_type, reg_no);
     
     // If we have an array, there's additional work
     if line.sub_args.len() > 0 && var.data_type == DataType::Ptr {
@@ -750,7 +739,15 @@ pub fn build_expr_var(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, reg
     let zero = builder.build_float(0.0, false, false);      // I don't love having this here, but it won't work in the match
     let mut pop_float = true;
     
-    instr.arg2 = LtacArg::Mem(v.pos);
+    // Build the load
+    let src_reg = reg_for_type(&var.data_type, &var.sub_type, 0);
+    
+    let mut ld = ld_for_type(&var.data_type, &var.sub_type);
+    ld.arg1 = src_reg.clone();
+    ld.arg2 = LtacArg::Mem(v.pos);
+    builder.file.code.push(ld);
+    
+    instr.arg2 = src_reg.clone();
     
     let mut size = 1;
     if v.sub_type == DataType::Short || v.sub_type == DataType::UShort {
@@ -816,7 +813,7 @@ pub fn build_expr_var(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, reg
         instr.arg2 = reg_for_type(&v.data_type, &v.sub_type, 0);
         
         // The first argument is the same register
-        let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+        let mut instr2 = ld_for_type(&v.data_type, &v.sub_type);
         instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
         
         match v.data_type {

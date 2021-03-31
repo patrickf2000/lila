@@ -115,6 +115,108 @@ pub fn mov_for_type(data_type : &DataType, sub_type : &DataType) -> LtacInstr {
     instr
 }
 
+// Returns a load statement for a given type
+pub fn ld_for_type(data_type : &DataType, sub_type : &DataType) -> LtacInstr {
+    let mut instr = ltac::create_instr(LtacType::Ld);
+    
+    match data_type {
+        // Bytes
+        DataType::Byte => instr = ltac::create_instr(LtacType::LdB),
+        DataType::UByte => instr = ltac::create_instr(LtacType::LdUB),
+        
+        DataType::Ptr if *sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::LdB),
+        DataType::Ptr if *sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::LdUB),
+        
+        // Short
+        DataType::Short => instr = ltac::create_instr(LtacType::LdW),
+        DataType::UShort => instr = ltac::create_instr(LtacType::LdUW),
+        
+        DataType::Ptr if *sub_type == DataType::Short => instr = ltac::create_instr(LtacType::LdW),
+        DataType::Ptr if *sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::LdUW),
+        
+        // Int
+        DataType::Int => instr = ltac::create_instr(LtacType::Ld),
+        DataType::UInt => instr = ltac::create_instr(LtacType::LdU),
+        
+        DataType::Ptr if *sub_type == DataType::Int => instr = ltac::create_instr(LtacType::Ld),
+        DataType::Ptr if *sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::LdU),
+        
+        // Int64
+        DataType::Int64 => instr = ltac::create_instr(LtacType::LdQ),
+        DataType::UInt64 => instr = ltac::create_instr(LtacType::LdUQ),
+        
+        DataType::Ptr if *sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::LdQ),
+        DataType::Ptr if *sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::LdUQ),
+        
+        // Double
+        DataType::Float => instr = ltac::create_instr(LtacType::LdF32),
+        DataType::Double => instr = ltac::create_instr(LtacType::LdF64),
+        
+        DataType::Ptr if *sub_type == DataType::Float => instr = ltac::create_instr(LtacType::LdF32),
+        DataType::Ptr if *sub_type == DataType::Double => instr = ltac::create_instr(LtacType::LdF64),
+        
+        // String
+        DataType::Char | DataType::Str => instr = ltac::create_instr(LtacType::LdB),
+        
+        DataType::Ptr if *sub_type == DataType::Str => instr = ltac::create_instr(LtacType::LdQ),
+        
+        _ => {},
+    }
+    
+    instr
+}
+
+// Returns a store statement for a given type
+pub fn str_for_type(data_type : &DataType, sub_type : &DataType) -> LtacInstr {
+    let mut instr = ltac::create_instr(LtacType::Str);
+    
+    match data_type {
+        // Bytes
+        DataType::Byte => instr = ltac::create_instr(LtacType::StrB),
+        DataType::UByte => instr = ltac::create_instr(LtacType::StrUB),
+        
+        DataType::Ptr if *sub_type == DataType::Byte => instr = ltac::create_instr(LtacType::StrB),
+        DataType::Ptr if *sub_type == DataType::UByte => instr = ltac::create_instr(LtacType::StrUB),
+        
+        // Short
+        DataType::Short => instr = ltac::create_instr(LtacType::StrW),
+        DataType::UShort => instr = ltac::create_instr(LtacType::StrUW),
+        
+        DataType::Ptr if *sub_type == DataType::Short => instr = ltac::create_instr(LtacType::StrW),
+        DataType::Ptr if *sub_type == DataType::UShort => instr = ltac::create_instr(LtacType::StrUW),
+        
+        // Int
+        DataType::Int => instr = ltac::create_instr(LtacType::Str),
+        DataType::UInt => instr = ltac::create_instr(LtacType::StrU),
+        
+        DataType::Ptr if *sub_type == DataType::Int => instr = ltac::create_instr(LtacType::Str),
+        DataType::Ptr if *sub_type == DataType::UInt => instr = ltac::create_instr(LtacType::StrU),
+        
+        // Int64
+        DataType::Int64 => instr = ltac::create_instr(LtacType::StrQ),
+        DataType::UInt64 => instr = ltac::create_instr(LtacType::StrUQ),
+        
+        DataType::Ptr if *sub_type == DataType::Int64 => instr = ltac::create_instr(LtacType::StrQ),
+        DataType::Ptr if *sub_type == DataType::UInt64 => instr = ltac::create_instr(LtacType::StrUQ),
+        
+        // Double
+        DataType::Float => instr = ltac::create_instr(LtacType::StrF32),
+        DataType::Double => instr = ltac::create_instr(LtacType::StrF64),
+        
+        DataType::Ptr if *sub_type == DataType::Float => instr = ltac::create_instr(LtacType::StrF32),
+        DataType::Ptr if *sub_type == DataType::Double => instr = ltac::create_instr(LtacType::StrF64),
+        
+        // String
+        DataType::Char | DataType::Str => instr = ltac::create_instr(LtacType::StrB),
+        
+        DataType::Ptr if *sub_type == DataType::Str => instr = ltac::create_instr(LtacType::StrQ),
+        
+        _ => {},
+    }
+    
+    instr
+}
+
 // Returns a register for a given type
 pub fn reg_for_type(data_type : &DataType, sub_type : &DataType, reg_no : i32) -> LtacArg {
     let mut arg = LtacArg::Reg32(reg_no);

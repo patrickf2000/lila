@@ -1,7 +1,7 @@
 /target
 first
-first.ls
-func.ls
+first.ida
+func.ida
 *.o
 /*.bin
 /*.asm

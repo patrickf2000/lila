@@ -147,6 +147,20 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
     let mut instr : X86Instr;
     
     match &code.instr_type {
+        LtacType::Ld | LtacType::LdU |
+        LtacType::LdB | LtacType::LdUB |
+        LtacType::LdW | LtacType::LdUW |
+        LtacType::LdQ | LtacType::LdUQ => {
+            instr = create_x86instr(X86Type::Mov);
+        },
+        
+        LtacType::Str | LtacType::StrU |
+        LtacType::StrB | LtacType::StrUB |
+        LtacType::StrW | LtacType::StrUW |
+        LtacType::StrQ | LtacType::StrUQ => {
+            instr = create_x86instr(X86Type::Mov);
+        },
+        
         LtacType::Mov | LtacType::MovU |
         LtacType::MovB | LtacType::MovUB |
         LtacType::MovW | LtacType::MovUW |
@@ -289,7 +303,20 @@ pub fn amd64_build_instr(x86_code : &mut Vec<X86Instr>, code : &LtacInstr, is_pi
         
         LtacArg::MemOffsetReg(pos, reg, size) => {
             amd64_build_offset_reg(x86_code, *pos, *reg, *size, is_pic);
-            instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0, is_pic);
+            
+            // Now set up for the final move
+            match &code.arg2 {
+                LtacArg::Reg8(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::Reg16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::Byte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::UByte(_v) => instr.arg1 = X86Arg::BwordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::I16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::U16(_v) => instr.arg1 = X86Arg::WordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::I64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::U64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0, is_pic),
+                LtacArg::Reg64(_v) => instr.arg1 = X86Arg::QwordMem(X86Reg::R15, 0, is_pic),
+                _ => instr.arg1 = X86Arg::DwordMem(X86Reg::R15, 0, is_pic),
+            }
         },
         
         _ => {},
