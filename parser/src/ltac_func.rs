@@ -10,6 +10,7 @@ use crate::ltac::{LtacType, LtacArg};
 use crate::ast::{DataType, AstStmt, AstArgType};
 
 use crate::ltac_array::*;
+use crate::ltac_utils::*;
 
 // Builds an LTAC function call
 pub fn build_func_call(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
@@ -329,7 +330,11 @@ pub fn build_return(builder : &mut LtacBuilder, line : &AstStmt) -> bool {
             
             AstArgType::Id => {
                 match builder.vars.get(&arg1.str_val) {
-                    Some(v) => mov.arg2 = LtacArg::Mem(v.pos),
+                    Some(v) => {
+                        mov.instr_type = ld_for_type(&v.data_type, &v.sub_type).instr_type;
+                        mov.arg2 = LtacArg::Mem(v.pos);
+                    },
+                    
                     None => {/* TODO: Syntax error */},
                 }
             },
