@@ -1,20 +1,8 @@
-
-// This file is part of the Lila compiler
-// Copyright (C) 2020-2021 Patrick Flynn
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; version 2.
+// Copyright 2021 Patrick Flynn
+// This file is part of the Ida compiler.
+// Ida is licensed under the BSD-3 license. See the COPYING file for more information.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License along
-// with this program; if not, write to the Free Software Foundation, Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 
 use std::env;
 use std::process;
@@ -175,7 +163,7 @@ fn run() -> i32 {
 
 // Displays compiler help
 fn help() {
-    println!("lilac version 0.1");
+    println!("idac version 0.1");
     println!("");
     println!("--ast \t\t Print a textual representation of the AST");
     println!("--ltac \t\t Save the LTAC IR to a file.");
