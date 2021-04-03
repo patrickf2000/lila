@@ -11,7 +11,13 @@
 pub enum Arm64Type {
     Extern,
     Global,
-    Label
+    Label,
+    
+    Ldp,
+    Stp,
+    Mov,
+    
+    Ret
 }
 
 #[derive(Clone, PartialEq)]
@@ -24,8 +30,7 @@ pub enum Arm64Arg {
     Imm32(i32),
     Imm64(i64),
     
-    Reg64(Arm64Reg),
-    Reg32(Arm64Reg)
+    Reg(Arm64Reg)
 }
 
 #[derive(Clone, PartialEq)]
@@ -58,6 +63,7 @@ pub struct Arm64Instr {
     pub arg1 : Arm64Arg,
     pub arg2 : Arm64Arg,
     pub arg3 : Arm64Arg,
+    pub arg4 : Arm64Arg,
 }
 
 pub fn create_arm64_instr(instr_type : Arm64Type) -> Arm64Instr{
@@ -67,5 +73,6 @@ pub fn create_arm64_instr(instr_type : Arm64Type) -> Arm64Instr{
         arg1 : Arm64Arg::Empty,
         arg2 : Arm64Arg::Empty,
         arg3 : Arm64Arg::Empty,
+        arg4 : Arm64Arg::Empty,
     }
 }
