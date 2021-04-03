@@ -17,6 +17,9 @@ pub enum Arm64Type {
     Stp,
     Mov,
     
+    Str,
+    Ldr,
+    
     Ret
 }
 

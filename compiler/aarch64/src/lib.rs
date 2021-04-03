@@ -100,6 +100,14 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
             
             LtacType::Ret => arm64_build_ret(code, stack_size),
             
+            LtacType::StrB | LtacType::StrUB | LtacType::StrW | LtacType::StrUW
+            | LtacType::Str | LtacType::StrU | LtacType::StrQ | LtacType::StrUQ
+            | LtacType::StrPtr => arm64_build_ld_str(code, &ln, stack_size),
+            
+            LtacType::LdB | LtacType::LdUB | LtacType::LdW | LtacType::LdUW
+            | LtacType::Ld | LtacType::LdU | LtacType::LdQ | LtacType::LdUQ
+            => arm64_build_ld_str(code, &ln, stack_size),
+            
             LtacType::MovB | LtacType::MovUB | LtacType::MovW | LtacType::MovUW
             | LtacType::Mov | LtacType::MovU | LtacType::MovQ | LtacType::MovUQ
             => arm64_build_mov(code, &ln),
@@ -161,6 +169,8 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
         Arm64Type::Ldp => line.push_str("ldp "),
         Arm64Type::Stp => line.push_str("stp "),
         Arm64Type::Mov => line.push_str("mov "),
+        Arm64Type::Str => line.push_str("str "),
+        Arm64Type::Ldr => line.push_str("ldr "),
         _ => {},
     }
     
@@ -168,7 +178,7 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
     line.push_str(", ");
     line.push_str(&write_operand(&ln.arg2));
     
-    if ln.instr_type != Arm64Type::Mov {
+    if ln.arg3 != Arm64Arg::Empty {
         line.push_str(", ");
         line.push_str(&write_operand(&ln.arg3));
     }
@@ -221,6 +231,16 @@ fn write_register(reg : &Arm64Reg) -> String {
         Arm64Reg::X30 => "x30".to_string(),
         
         Arm64Reg::W0 => "w0".to_string(),
+        
+        Arm64Reg::W9 => "w9".to_string(),
+        Arm64Reg::W10 => "w10".to_string(),
+        Arm64Reg::W11 => "w11".to_string(),
+        Arm64Reg::W12 => "w12".to_string(),
+        Arm64Reg::W13 => "w13".to_string(),
+        Arm64Reg::W14 => "w14".to_string(),
+        Arm64Reg::W15 => "w15".to_string(),
+        Arm64Reg::W16 => "w16".to_string(),
+        Arm64Reg::W17 => "w17".to_string(),
         
         _ => String::new(),
     }

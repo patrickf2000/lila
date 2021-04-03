@@ -21,7 +21,7 @@ pub fn arm64_build_func(code : &mut Vec<Arm64Instr>, instr : &LtacInstr) {
     let mut stp = create_arm64_instr(Arm64Type::Stp);
     stp.arg1 = Arm64Arg::Reg(Arm64Reg::X29);
     stp.arg2 = Arm64Arg::Reg(Arm64Reg::X30);
-    stp.arg3 = Arm64Arg::Mem(Arm64Reg::SP, instr.arg1_val);
+    stp.arg3 = Arm64Arg::Mem(Arm64Reg::SP, instr.arg1_val * -1);
     code.push(stp);
     
     // mov x29, sp
