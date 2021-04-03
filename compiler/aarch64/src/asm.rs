@@ -26,6 +26,7 @@ pub enum Arm64Arg {
     Empty,
     
     Mem(Arm64Reg, i32),
+    RegRef(Arm64Reg),
     
     Imm32(i32),
     Imm64(i64),

@@ -9,7 +9,7 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use std::fs::File;
 
-use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr/*, LtacArg*/};
+use parser::ltac::{LtacFile, LtacData, LtacDataType, LtacType, LtacInstr, LtacArg};
 
 mod asm;
 
@@ -95,6 +95,10 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
             },
             
             LtacType::Ret => arm64_build_ret(code, stack_size),
+            
+            LtacType::MovB | LtacType::MovUB | LtacType::MovW | LtacType::MovUW
+            | LtacType::Mov | LtacType::MovU | LtacType::MovQ | LtacType::MovUQ
+            => arm64_build_mov(code, &ln),
             
             _ => {},
         }
@@ -188,6 +192,13 @@ fn write_operand(arg : &Arm64Arg) -> String {
             return line;
         },
         
+        Arm64Arg::RegRef(reg) => {
+            let mut line = "[".to_string();
+            line.push_str(&write_register(reg));
+            line.push_str("]");
+            return line;
+        },
+        
         Arm64Arg::Imm32(val) => val.to_string(),
         
         Arm64Arg::Reg(reg) => write_register(reg),
@@ -201,8 +212,11 @@ fn write_register(reg : &Arm64Reg) -> String {
     match reg {
         Arm64Reg::SP => "sp".to_string(),
         
+        Arm64Reg::X0 => "x0".to_string(),
         Arm64Reg::X29 => "x29".to_string(),
         Arm64Reg::X30 => "x30".to_string(),
+        
+        Arm64Reg::W0 => "w0".to_string(),
         
         _ => String::new(),
     }
@@ -238,11 +252,51 @@ fn arm64_build_ret(code : &mut Vec<Arm64Instr>, stack_size : i32) {
     let mut ldp = create_arm64_instr(Arm64Type::Ldp);
     ldp.arg1 = Arm64Arg::Reg(Arm64Reg::X29);
     ldp.arg2 = Arm64Arg::Reg(Arm64Reg::X30);
-    ldp.arg3 = Arm64Arg::Mem(Arm64Reg::SP, 0);
+    ldp.arg3 = Arm64Arg::RegRef(Arm64Reg::SP);
     ldp.arg4 = Arm64Arg::Imm32(stack_size);
     code.push(ldp);
 
     // ret
     let ret = create_arm64_instr(Arm64Type::Ret);
     code.push(ret);
+}
+
+// Builds a move instruction
+fn arm64_build_mov(code : &mut Vec<Arm64Instr>, instr : &LtacInstr) {
+    let mut mov = create_arm64_instr(Arm64Type::Mov);
+    
+    match instr.arg1 {
+        /*LtacArg::Reg8(val) | LtacArg::Reg16(val)
+        | LtacArg::Reg32(val) => mov.arg1 = arm64_arg_reg(val),*/
+        
+        LtacArg::RetRegI8 | LtacArg::RetRegU8
+        | LtacArg::RetRegI16 | LtacArg::RetRegU16
+        | LtacArg::RetRegI32 | LtacArg::RetRegU32 => {
+            mov.arg1 = Arm64Arg::Reg(Arm64Reg::W0);
+        },
+        
+        LtacArg::RetRegI64 | LtacArg::RetRegU64 => mov.arg1 = Arm64Arg::Reg(Arm64Reg::X0),
+        
+        _ => {},
+    }
+    
+    match instr.arg2 {
+        /*LtacArg::Reg8(val) | LtacArg::Reg16(val)
+        | LtacArg::Reg32(val) => mov.arg1 = arm64_arg_reg(val),*/
+        
+        LtacArg::RetRegI8 | LtacArg::RetRegU8
+        | LtacArg::RetRegI16 | LtacArg::RetRegU16
+        | LtacArg::RetRegI32 | LtacArg::RetRegU32 => {
+            mov.arg2 = Arm64Arg::Reg(Arm64Reg::W0);
+        },
+        
+        LtacArg::RetRegI64 | LtacArg::RetRegU64 => mov.arg2 = Arm64Arg::Reg(Arm64Reg::X0),
+        
+        LtacArg::I32(val) => mov.arg2 = Arm64Arg::Imm32(val),
+        LtacArg::U32(val) => mov.arg2 = Arm64Arg::Imm32(val as i32),
+        
+        _ => {},
+    }
+    
+    code.push(mov);
 }
