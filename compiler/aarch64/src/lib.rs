@@ -95,7 +95,7 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
             
             LtacType::Func => {
                 arm64_build_func(code, &ln);
-                stack_size = ln.arg1_val;
+                stack_size = ln.arg1_val + 16;
             },
             
             LtacType::Ret => arm64_build_ret(code, stack_size),
@@ -174,18 +174,18 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
         _ => {},
     }
     
-    line.push_str(&write_operand(&ln.arg1));
+    line.push_str(&write_operand(&ln.arg1, false));
     line.push_str(", ");
-    line.push_str(&write_operand(&ln.arg2));
+    line.push_str(&write_operand(&ln.arg2, false));
     
     if ln.arg3 != Arm64Arg::Empty {
         line.push_str(", ");
-        line.push_str(&write_operand(&ln.arg3));
+        line.push_str(&write_operand(&ln.arg3, true));
     }
     
     if ln.instr_type == Arm64Type::Ldp {
         line.push_str(", ");
-        line.push_str(&write_operand(&ln.arg4));
+        line.push_str(&write_operand(&ln.arg4, false));
     }
     
     line.push_str("\n");
@@ -195,7 +195,7 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
 }
 
 // Writes an operand
-fn write_operand(arg : &Arm64Arg) -> String {
+fn write_operand(arg : &Arm64Arg, flag_mem : bool) -> String {
     match arg {
         Arm64Arg::Mem(reg, val) => {
             let mut line = "[".to_string();
@@ -203,6 +203,11 @@ fn write_operand(arg : &Arm64Arg) -> String {
             line.push_str(", ");
             line.push_str(&val.to_string());
             line.push_str("]");
+            
+            if flag_mem {
+                line.push_str("!");
+            }
+            
             return line;
         },
         
