@@ -49,8 +49,29 @@ pub fn arm64_build_ret(code : &mut Vec<Arm64Instr>, stack_size : i32) {
 }
 
 // Builds a function pusharg statement
-pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, _stack_size : i32) {
+pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack_size : i32) {
     match instr.arg1 {
+        LtacArg::Mem(pos) => {
+            let mut ld = create_arm64_instr(Arm64Type::Ldr);
+            ld.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            ld.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
+            code.push(ld);
+        },
+        
+        LtacArg::I32(val) => {
+            let mut mov = create_arm64_instr(Arm64Type::Mov);
+            mov.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            mov.arg2 = Arm64Arg::Imm32(val);
+            code.push(mov);
+        },
+        
+        LtacArg::U32(val) => {
+            let mut mov = create_arm64_instr(Arm64Type::Mov);
+            mov.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            mov.arg2 = Arm64Arg::Imm32(val as i32);
+            code.push(mov);
+        },
+        
         LtacArg::PtrLcl(ref val) => {
             let mut instr1 = create_arm64_instr(Arm64Type::Adrp);
             instr1.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
