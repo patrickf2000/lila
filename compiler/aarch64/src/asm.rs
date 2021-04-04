@@ -22,6 +22,16 @@ pub enum Arm64Type {
     Ldr,
     
     Add,
+    Sub,
+    Mul,
+    SDiv,
+    MSub,
+    
+    And,
+    Orr,
+    Eor,
+    Lsl,
+    Lsr,
     
     Call,
     Ret,

@@ -126,6 +126,12 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
             | LtacType::Mov | LtacType::MovU | LtacType::MovQ | LtacType::MovUQ
             => arm64_build_mov(code, &ln),
             
+            LtacType::I32Add | LtacType::I32Sub | LtacType::I32Mul
+            | LtacType::I32Div | LtacType::I32Mod
+            | LtacType::And | LtacType::Or | LtacType::Xor
+            | LtacType::Lsh | LtacType::Rsh
+            => arm64_build_instr(code, &ln),
+            
             _ => {},
         }
     }
@@ -201,6 +207,15 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
         Arm64Type::Str => line.push_str("str "),
         Arm64Type::Ldr => line.push_str("ldr "),
         Arm64Type::Add => line.push_str("add "),
+        Arm64Type::Sub => line.push_str("sub "),
+        Arm64Type::Mul => line.push_str("mul "),
+        Arm64Type::SDiv => line.push_str("sdiv "),
+        Arm64Type::MSub => line.push_str("msub "),
+        Arm64Type::And => line.push_str("and "),
+        Arm64Type::Orr => line.push_str("orr "),
+        Arm64Type::Eor => line.push_str("eor "),
+        Arm64Type::Lsl => line.push_str("lsl "),
+        Arm64Type::Lsr => line.push_str("lsr "),
         _ => {},
     }
     
@@ -213,7 +228,7 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
         line.push_str(&write_operand(&ln.arg3, true));
     }
     
-    if ln.instr_type == Arm64Type::Ldp {
+    if ln.arg4 != Arm64Arg::Empty {
         line.push_str(", ");
         line.push_str(&write_operand(&ln.arg4, false));
     }
@@ -282,6 +297,7 @@ fn write_register(reg : &Arm64Reg) -> String {
         Arm64Reg::X30 => "x30".to_string(),
         
         Arm64Reg::W0 => "w0".to_string(),
+        Arm64Reg::W1 => "w1".to_string(),
         
         Arm64Reg::W9 => "w9".to_string(),
         Arm64Reg::W10 => "w10".to_string(),
