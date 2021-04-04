@@ -27,7 +27,9 @@ function run_test() {
             if [[ $2 == "sys" ]] ; then
                 cargo run $entry $3 -o $name
             elif [[ $2 == "clib" ]] ; then
-                cargo run $entry --use-c $3 -o $name
+                cargo run $entry -S $3 -o $name
+                mv /tmp/$name.asm /tmp/$name.s
+                gcc /tmp/$name.s -o /tmp/$name
             fi
         
     	    ./test.py $entry ./$name ""
@@ -39,6 +41,7 @@ function run_test() {
         	rm ./$name
         	rm /tmp/$name.o
         	rm /tmp/$name.asm
+        	rm /tmp/$name.s
     	fi
     	
     	test_count=$((test_count+1))
@@ -66,8 +69,8 @@ run_test 'test/basic/*.ida' 'clib' $flags
 #run_test 'test/const/*.ida' 'clib' $flags
 #run_test 'test/func/*.ida' 'clib' $flags
 
-run_test 'test/errors/*.ida' 'clib' "error"
-run_test 'test/errors/ltac/*.ida' "clib" "error"
+#run_test 'test/errors/*.ida' 'clib' "error"
+#run_test 'test/errors/ltac/*.ida' "clib" "error"
 
 #run_test 'test/vector/*.ida' 'clib'
 #run_test 'test/syscall/x86-64/*.ida' 'sys'
