@@ -27,9 +27,9 @@ function run_test() {
             if [[ $2 == "sys" ]] ; then
                 cargo run $entry $3 -o $name
             elif [[ $2 == "clib" ]] ; then
-                cargo run $entry -S $3 -o $name
+                cargo run $entry --no-corelib $3 -o $name
                 mv /tmp/$name.asm /tmp/$name.s
-                gcc /tmp/$name.s -o /tmp/$name
+                gcc /tmp/$name.s -o $name
             fi
         
     	    ./test.py $entry ./$name ""
