@@ -4,7 +4,7 @@
 // Ida is licensed under the BSD-3 license. See the COPYING file for more information.
 //
 
-use parser::ltac::{LtacInstr};
+use parser::ltac::{LtacInstr, LtacArg};
 use crate::asm::*;
 
 // Builds a function declaration
@@ -46,4 +46,37 @@ pub fn arm64_build_ret(code : &mut Vec<Arm64Instr>, stack_size : i32) {
     // ret
     let ret = create_arm64_instr(Arm64Type::Ret);
     code.push(ret);
+}
+
+// Builds a function pusharg statement
+pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, _stack_size : i32) {
+    match instr.arg1 {
+        LtacArg::PtrLcl(ref val) => {
+            let mut instr1 = create_arm64_instr(Arm64Type::Adrp);
+            instr1.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            instr1.arg2 = Arm64Arg::PtrLcl(val.clone());
+            code.push(instr1);
+            
+            let mut instr2 = create_arm64_instr(Arm64Type::Add);
+            instr2.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            instr2.arg2 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            instr2.arg3 = Arm64Arg::PtrLclLow(val.clone());
+            code.push(instr2);
+        },
+        
+        _ => {},
+    }
+}
+
+fn arm64_arg_reg(pos : i32) -> Arm64Reg {
+    match pos {
+        1 => Arm64Reg::X0,
+        2 => Arm64Reg::X1,
+        3 => Arm64Reg::X2,
+        4 => Arm64Reg::X3,
+        5 => Arm64Reg::X4,
+        6 => Arm64Reg::X5,
+        7 => Arm64Reg::X6,
+        _ => Arm64Reg::X7,
+    }
 }

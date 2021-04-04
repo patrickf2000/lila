@@ -98,7 +98,15 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
                 stack_size = ln.arg1_val + 16;
             },
             
+            LtacType::Call => {
+                let mut instr = create_arm64_instr(Arm64Type::Call);
+                instr.name = ln.name.clone();
+                code.push(instr);
+            },
+            
             LtacType::Ret => arm64_build_ret(code, stack_size),
+            
+            LtacType::PushArg => arm64_build_pusharg(code, &ln, stack_size),
             
             LtacType::StrB | LtacType::StrUB | LtacType::StrW | LtacType::StrUW
             | LtacType::Str | LtacType::StrU | LtacType::StrQ | LtacType::StrUQ
@@ -157,6 +165,15 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<Arm64Instr>) {
                     .expect("[AArch64_ret] Write failed.");
             },
             
+            Arm64Type::Call => {
+                let mut line = "  bl ".to_string();
+                line.push_str(&ln.name);
+                line.push_str("\n");
+                
+                writer.write(&line.into_bytes())
+                    .expect("[AArch64_call] Write failed.");
+            },
+            
             _ => write_instr(writer, &ln),
         }
     }
@@ -168,9 +185,11 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
     match ln.instr_type {
         Arm64Type::Ldp => line.push_str("ldp "),
         Arm64Type::Stp => line.push_str("stp "),
+        Arm64Type::Adrp => line.push_str("adrp "),
         Arm64Type::Mov => line.push_str("mov "),
         Arm64Type::Str => line.push_str("str "),
         Arm64Type::Ldr => line.push_str("ldr "),
+        Arm64Type::Add => line.push_str("add "),
         _ => {},
     }
     
@@ -220,6 +239,14 @@ fn write_operand(arg : &Arm64Arg, flag_mem : bool) -> String {
         
         Arm64Arg::Imm32(val) => val.to_string(),
         
+        Arm64Arg::PtrLcl(ref val) => val.to_string(),
+        
+        Arm64Arg::PtrLclLow(ref val) => {
+            let mut line = ":lo12:".to_string();
+            line.push_str(val);
+            return line;
+        },
+        
         Arm64Arg::Reg(reg) => write_register(reg),
         
         _ => String::new(),
@@ -232,6 +259,13 @@ fn write_register(reg : &Arm64Reg) -> String {
         Arm64Reg::SP => "sp".to_string(),
         
         Arm64Reg::X0 => "x0".to_string(),
+        Arm64Reg::X1 => "x1".to_string(),
+        Arm64Reg::X2 => "x2".to_string(),
+        Arm64Reg::X3 => "x3".to_string(),
+        Arm64Reg::X4 => "x4".to_string(),
+        Arm64Reg::X5 => "x5".to_string(),
+        Arm64Reg::X6 => "x6".to_string(),
+        Arm64Reg::X7 => "x7".to_string(),
         Arm64Reg::X29 => "x29".to_string(),
         Arm64Reg::X30 => "x30".to_string(),
         

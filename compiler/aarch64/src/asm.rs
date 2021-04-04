@@ -15,11 +15,15 @@ pub enum Arm64Type {
     
     Ldp,
     Stp,
+    Adrp,
     Mov,
     
     Str,
     Ldr,
     
+    Add,
+    
+    Call,
     Ret
 }
 
@@ -33,6 +37,9 @@ pub enum Arm64Arg {
     
     Imm32(i32),
     Imm64(i64),
+    
+    PtrLcl(String),
+    PtrLclLow(String),
     
     Reg(Arm64Reg)
 }
