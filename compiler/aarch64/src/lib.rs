@@ -106,7 +106,13 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
             
             LtacType::Ret => arm64_build_ret(code, stack_size),
             
-            LtacType::PushArg => arm64_build_pusharg(code, &ln, stack_size),
+            LtacType::PushArg => arm64_build_pusharg(code, &ln, stack_size, false),
+            LtacType::KPushArg => arm64_build_pusharg(code, &ln, stack_size, true),
+            
+            LtacType::Syscall => {
+                let instr = create_arm64_instr(Arm64Type::Svc);
+                code.push(instr);
+            },
             
             LtacType::StrB | LtacType::StrUB | LtacType::StrW | LtacType::StrUW
             | LtacType::Str | LtacType::StrU | LtacType::StrQ | LtacType::StrUQ
@@ -172,6 +178,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<Arm64Instr>) {
                 
                 writer.write(&line.into_bytes())
                     .expect("[AArch64_call] Write failed.");
+            },
+            
+            Arm64Type::Svc => {
+                writer.write(b"  svc 0\n")
+                    .expect("[AArch64_syscall] Write failed.");
             },
             
             _ => write_instr(writer, &ln),
@@ -266,6 +277,7 @@ fn write_register(reg : &Arm64Reg) -> String {
         Arm64Reg::X5 => "x5".to_string(),
         Arm64Reg::X6 => "x6".to_string(),
         Arm64Reg::X7 => "x7".to_string(),
+        Arm64Reg::X8 => "x8".to_string(),
         Arm64Reg::X29 => "x29".to_string(),
         Arm64Reg::X30 => "x30".to_string(),
         

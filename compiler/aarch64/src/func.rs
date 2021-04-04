@@ -49,38 +49,43 @@ pub fn arm64_build_ret(code : &mut Vec<Arm64Instr>, stack_size : i32) {
 }
 
 // Builds a function pusharg statement
-pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack_size : i32) {
+pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack_size : i32, karg : bool) {
+    let mut dest = arm64_arg_reg(instr.arg2_val);
+    if karg {
+        dest = arm64_karg_reg(instr.arg2_val);
+    }
+    
     match instr.arg1 {
         LtacArg::Mem(pos) => {
             let mut ld = create_arm64_instr(Arm64Type::Ldr);
-            ld.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            ld.arg1 = Arm64Arg::Reg(dest);
             ld.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
             code.push(ld);
         },
         
         LtacArg::I32(val) => {
             let mut mov = create_arm64_instr(Arm64Type::Mov);
-            mov.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            mov.arg1 = Arm64Arg::Reg(dest);
             mov.arg2 = Arm64Arg::Imm32(val);
             code.push(mov);
         },
         
         LtacArg::U32(val) => {
             let mut mov = create_arm64_instr(Arm64Type::Mov);
-            mov.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            mov.arg1 = Arm64Arg::Reg(dest);
             mov.arg2 = Arm64Arg::Imm32(val as i32);
             code.push(mov);
         },
         
         LtacArg::PtrLcl(ref val) => {
             let mut instr1 = create_arm64_instr(Arm64Type::Adrp);
-            instr1.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            instr1.arg1 = Arm64Arg::Reg(dest.clone());
             instr1.arg2 = Arm64Arg::PtrLcl(val.clone());
             code.push(instr1);
             
             let mut instr2 = create_arm64_instr(Arm64Type::Add);
-            instr2.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
-            instr2.arg2 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+            instr2.arg1 = Arm64Arg::Reg(dest.clone());
+            instr2.arg2 = Arm64Arg::Reg(dest);
             instr2.arg3 = Arm64Arg::PtrLclLow(val.clone());
             code.push(instr2);
         },
@@ -99,5 +104,17 @@ fn arm64_arg_reg(pos : i32) -> Arm64Reg {
         6 => Arm64Reg::X5,
         7 => Arm64Reg::X6,
         _ => Arm64Reg::X7,
+    }
+}
+
+fn arm64_karg_reg(pos : i32) -> Arm64Reg {
+    match pos {
+        1 => Arm64Reg::X8,
+        2 => Arm64Reg::X0,
+        3 => Arm64Reg::X1,
+        4 => Arm64Reg::X2,
+        5 => Arm64Reg::X3,
+        6 => Arm64Reg::X4,
+        _ => Arm64Reg::X5,
     }
 }

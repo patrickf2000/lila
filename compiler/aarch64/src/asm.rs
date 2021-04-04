@@ -24,7 +24,8 @@ pub enum Arm64Type {
     Add,
     
     Call,
-    Ret
+    Ret,
+    Svc
 }
 
 #[derive(Clone, PartialEq)]
