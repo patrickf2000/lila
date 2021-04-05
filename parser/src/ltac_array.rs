@@ -45,7 +45,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
     let mut code = true;
     
     // Setup the store instruction, which holds the array size
-    let mut size_instr = ltac::create_instr(LtacType::Mov);
+    let mut size_instr = ltac::create_instr(LtacType::Str);
     size_instr.arg1 = LtacArg::Mem(var.pos - 8);
     
     // Create the array
@@ -72,7 +72,7 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         builder.file.code.push(instr);
         
         // Move the return register back to the variable
-        instr = ltac::create_instr(LtacType::MovQ);
+        instr = ltac::create_instr(LtacType::StrQ);
         instr.arg1 = LtacArg::Mem(var.pos);
         instr.arg2 = LtacArg::RetRegI64;
         builder.file.code.push(instr);

@@ -765,10 +765,12 @@ pub fn build_expr_var(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, reg
         
         if arg.sub_args.len() == 1 {
             if first_arg.arg_type == AstArgType::IntL {
+                instr.instr_type = ld_for_type(&v.data_type, &v.sub_type).instr_type;
+                
                 let offset = (first_arg.u64_val as i32) * size;
                 instr.arg2 = LtacArg::MemOffsetImm(v.pos, offset);
             } else if first_arg.arg_type == AstArgType::Id {
-                let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+                let mut instr2 = ld_for_type(&v.data_type, &v.sub_type);
                 
                 match builder.vars.get(&first_arg.str_val) {
                     Some(v2) => instr2.arg2 = LtacArg::MemOffsetMem(v.pos, v2.pos, size),
@@ -795,7 +797,7 @@ pub fn build_expr_var(builder : &mut LtacBuilder, arg : &AstArg, var : &Var, reg
             
             build_var_expr(builder, &arg.sub_args, &var2, 0);
             
-            let mut instr2 = mov_for_type(&v.data_type, &v.sub_type);
+            let mut instr2 = ld_for_type(&v.data_type, &v.sub_type);
             instr2.arg1 = reg_for_type(&v.data_type, &v.sub_type, 0);
             instr2.arg2 = LtacArg::MemOffsetReg(v.pos, 0, size);
             builder.file.code.push(instr2);
