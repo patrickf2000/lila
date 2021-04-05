@@ -13,7 +13,7 @@ pub fn arm64_build_ld_str(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack
     let is_store : bool;
     
     match instr.instr_type {
-        LtacType::Str => {
+        LtacType::Str | LtacType::StrQ => {
             line = create_arm64_instr(Arm64Type::Str);
             is_store = true;
         },
@@ -38,6 +38,10 @@ pub fn arm64_build_ld_str(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack
             LtacArg::Reg8(val) | LtacArg::Reg16(val)
             | LtacArg::Reg32(val) => line.arg1 = Arm64Arg::Reg(arm64_arg_reg32(val)),
             
+            LtacArg::Reg64(val) => line.arg1 = Arm64Arg::Reg(arm64_arg_reg64(val)),
+            
+            LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.arg1 = Arm64Arg::Reg(Arm64Reg::X0),
+            
             _ => return,
         }
     // Build load arguments
@@ -46,11 +50,15 @@ pub fn arm64_build_ld_str(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack
             LtacArg::Reg8(val) | LtacArg::Reg16(val)
             | LtacArg::Reg32(val) => line.arg1 = Arm64Arg::Reg(arm64_arg_reg32(val)),
             
+            LtacArg::Reg64(val) => line.arg1 = Arm64Arg::Reg(arm64_arg_reg64(val)),
+            
             LtacArg::RetRegI8 | LtacArg::RetRegU8
             | LtacArg::RetRegI16 | LtacArg::RetRegU16
             | LtacArg::RetRegI32 | LtacArg::RetRegU32 => {
                 line.arg1 = Arm64Arg::Reg(Arm64Reg::W0);
             },
+            
+            LtacArg::RetRegI64 | LtacArg::RetRegU64 => line.arg1 = Arm64Arg::Reg(Arm64Reg::X0),
             
             _ => return,
         }
@@ -168,6 +176,20 @@ fn arm64_arg_reg32(val : i32) -> Arm64Reg {
         6 => Arm64Reg::W15,
         7 => Arm64Reg::W16,
         _ => Arm64Reg::W17,
+    }
+}
+
+fn arm64_arg_reg64(val : i32) -> Arm64Reg {
+    match val {
+        0 => Arm64Reg::X9,
+        1 => Arm64Reg::X10,
+        2 => Arm64Reg::X11,
+        3 => Arm64Reg::X12,
+        4 => Arm64Reg::X13,
+        5 => Arm64Reg::X14,
+        6 => Arm64Reg::X15,
+        7 => Arm64Reg::X16,
+        _ => Arm64Reg::X17,
     }
 }
 

@@ -78,7 +78,12 @@ pub fn build_dyn_array(builder : &mut LtacBuilder, line : &AstStmt, var : &Var) 
         builder.file.code.push(instr);
         
         // Store the size
-        size_instr.arg2 = LtacArg::I32(arg.u64_val as i32);
+        let mut mov_size = ltac::create_instr(LtacType::Mov);
+        mov_size.arg1 = LtacArg::Reg32(0);
+        mov_size.arg2 = LtacArg::I32(arg.u64_val as i32);
+        builder.file.code.push(mov_size);
+        
+        size_instr.arg2 = LtacArg::Reg32(0); 
         builder.file.code.push(size_instr);
         
     // An array with a variable as the size
