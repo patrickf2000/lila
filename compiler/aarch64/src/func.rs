@@ -58,9 +58,16 @@ pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stac
     }
     
     match instr.arg1 {
-        LtacArg::Mem(pos) | LtacArg::Ptr(pos) => {
+        LtacArg::Mem(pos) => {
             let mut ld = create_arm64_instr(Arm64Type::Ldr);
             ld.arg1 = Arm64Arg::Reg(dest32);
+            ld.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
+            code.push(ld);
+        },
+        
+        LtacArg::Ptr(pos) => {
+            let mut ld = create_arm64_instr(Arm64Type::Ldr);
+            ld.arg1 = Arm64Arg::Reg(dest);
             ld.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
             code.push(ld);
         },
