@@ -349,6 +349,13 @@ fn write_register(reg : &Arm64Reg) -> String {
         
         Arm64Reg::W0 => "w0".to_string(),
         Arm64Reg::W1 => "w1".to_string(),
+        Arm64Reg::W2 => "w2".to_string(),
+        Arm64Reg::W3 => "w3".to_string(),
+        Arm64Reg::W4 => "w4".to_string(),
+        Arm64Reg::W5 => "w5".to_string(),
+        Arm64Reg::W6 => "w6".to_string(),
+        Arm64Reg::W7 => "w7".to_string(),
+        Arm64Reg::W8 => "w8".to_string(),
         
         Arm64Reg::W9 => "w9".to_string(),
         Arm64Reg::W10 => "w10".to_string(),
