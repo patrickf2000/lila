@@ -51,28 +51,30 @@ pub fn arm64_build_ret(code : &mut Vec<Arm64Instr>, stack_size : i32) {
 // Builds a function pusharg statement
 pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack_size : i32, karg : bool) {
     let mut dest = arm64_arg_reg(instr.arg2_val);
+    let mut dest32 = arm64_arg_reg32(instr.arg2_val);
     if karg {
         dest = arm64_karg_reg(instr.arg2_val);
+        dest32 = arm64_karg_reg32(instr.arg2_val);
     }
     
     match instr.arg1 {
         LtacArg::Mem(pos) | LtacArg::Ptr(pos) => {
             let mut ld = create_arm64_instr(Arm64Type::Ldr);
-            ld.arg1 = Arm64Arg::Reg(dest);
+            ld.arg1 = Arm64Arg::Reg(dest32);
             ld.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
             code.push(ld);
         },
         
         LtacArg::I32(val) => {
             let mut mov = create_arm64_instr(Arm64Type::Mov);
-            mov.arg1 = Arm64Arg::Reg(dest);
+            mov.arg1 = Arm64Arg::Reg(dest32);
             mov.arg2 = Arm64Arg::Imm32(val);
             code.push(mov);
         },
         
         LtacArg::U32(val) => {
             let mut mov = create_arm64_instr(Arm64Type::Mov);
-            mov.arg1 = Arm64Arg::Reg(dest);
+            mov.arg1 = Arm64Arg::Reg(dest32);
             mov.arg2 = Arm64Arg::Imm32(val as i32);
             code.push(mov);
         },
@@ -106,7 +108,7 @@ pub fn arm64_build_ldarg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack_
     }
     
     // Register
-    line.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+    line.arg1 = Arm64Arg::Reg(arm64_arg_reg32(instr.arg2_val));
     
     // Memory
     match instr.arg1 {
@@ -131,6 +133,19 @@ fn arm64_arg_reg(pos : i32) -> Arm64Reg {
     }
 }
 
+fn arm64_arg_reg32(pos : i32) -> Arm64Reg {
+    match pos {
+        1 => Arm64Reg::W0,
+        2 => Arm64Reg::W1,
+        3 => Arm64Reg::W2,
+        4 => Arm64Reg::W3,
+        5 => Arm64Reg::W4,
+        6 => Arm64Reg::W5,
+        7 => Arm64Reg::W6,
+        _ => Arm64Reg::W7,
+    }
+}
+
 fn arm64_karg_reg(pos : i32) -> Arm64Reg {
     match pos {
         1 => Arm64Reg::X8,
@@ -140,5 +155,17 @@ fn arm64_karg_reg(pos : i32) -> Arm64Reg {
         5 => Arm64Reg::X3,
         6 => Arm64Reg::X4,
         _ => Arm64Reg::X5,
+    }
+}
+
+fn arm64_karg_reg32(pos : i32) -> Arm64Reg {
+    match pos {
+        1 => Arm64Reg::W8,
+        2 => Arm64Reg::W0,
+        3 => Arm64Reg::W1,
+        4 => Arm64Reg::W2,
+        5 => Arm64Reg::W3,
+        6 => Arm64Reg::W4,
+        _ => Arm64Reg::W5,
     }
 }
