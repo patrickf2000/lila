@@ -77,6 +77,37 @@ pub fn arm64_build_ld_str(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack
                 line.arg2 = Arm64Arg::RegRef(Arm64Reg::X0);
             },
             
+            LtacArg::MemOffsetReg(pos, reg, size) => {
+                //mov x0, reg
+                let mut line1 = create_arm64_instr(Arm64Type::Mov);
+                line1.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
+                line1.arg2 = Arm64Arg::Reg(arm64_arg_reg64(reg));
+                code.push(line1);
+                
+                //lsl x0, x0, sqrt(size)
+                let mut line2 = create_arm64_instr(Arm64Type::Lsl);
+                line2.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
+                line2.arg2 = line2.arg1.clone();
+                line2.arg3 = Arm64Arg::Imm32(size / 2);
+                code.push(line2);
+                
+                //ldr x1, [sp, pos]
+                let mut line3 = create_arm64_instr(Arm64Type::Ldr);
+                line3.arg1 = Arm64Arg::Reg(Arm64Reg::X1);
+                line3.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
+                code.push(line3);
+                
+                // add x0, x0, x1
+                let mut line4 = create_arm64_instr(Arm64Type::Add);
+                line4.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
+                line4.arg2 = line4.arg1.clone();
+                line4.arg3 = Arm64Arg::Reg(Arm64Reg::X1);
+                code.push(line4);
+                
+                // Final store
+                line.arg2 = Arm64Arg::RegRef(Arm64Reg::X0);
+            },
+            
             _ => return,
         }
         
@@ -126,6 +157,37 @@ pub fn arm64_build_ld_str(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack
                 let mut line1 = create_arm64_instr(Arm64Type::LdrSW);
                 line1.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
                 line1.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - var);
+                code.push(line1);
+                
+                //lsl x0, x0, sqrt(size)
+                let mut line2 = create_arm64_instr(Arm64Type::Lsl);
+                line2.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
+                line2.arg2 = line2.arg1.clone();
+                line2.arg3 = Arm64Arg::Imm32(size / 2);
+                code.push(line2);
+                
+                //ldr x1, [sp, pos]
+                let mut line3 = create_arm64_instr(Arm64Type::Ldr);
+                line3.arg1 = Arm64Arg::Reg(Arm64Reg::X1);
+                line3.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos);
+                code.push(line3);
+                
+                // add x0, x0, x1
+                let mut line4 = create_arm64_instr(Arm64Type::Add);
+                line4.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
+                line4.arg2 = line4.arg1.clone();
+                line4.arg3 = Arm64Arg::Reg(Arm64Reg::X1);
+                code.push(line4);
+                
+                // Final store
+                line.arg2 = Arm64Arg::RegRef(Arm64Reg::X0);
+            },
+            
+            LtacArg::MemOffsetReg(pos, reg, size) => {
+                //mov x0, reg
+                let mut line1 = create_arm64_instr(Arm64Type::Mov);
+                line1.arg1 = Arm64Arg::Reg(Arm64Reg::X0);
+                line1.arg2 = Arm64Arg::Reg(arm64_arg_reg64(reg));
                 code.push(line1);
                 
                 //lsl x0, x0, sqrt(size)

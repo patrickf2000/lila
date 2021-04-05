@@ -333,6 +333,17 @@ fn write_register(reg : &Arm64Reg) -> String {
         Arm64Reg::X6 => "x6".to_string(),
         Arm64Reg::X7 => "x7".to_string(),
         Arm64Reg::X8 => "x8".to_string(),
+        
+        Arm64Reg::X9 => "x9".to_string(),
+        Arm64Reg::X10 => "x10".to_string(),
+        Arm64Reg::X11 => "x11".to_string(),
+        Arm64Reg::X12 => "x12".to_string(),
+        Arm64Reg::X13 => "x13".to_string(),
+        Arm64Reg::X14 => "x14".to_string(),
+        Arm64Reg::X15 => "x15".to_string(),
+        Arm64Reg::X16 => "x16".to_string(),
+        Arm64Reg::X17 => "x17".to_string(),
+        
         Arm64Reg::X29 => "x29".to_string(),
         Arm64Reg::X30 => "x30".to_string(),
         
