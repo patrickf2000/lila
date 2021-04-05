@@ -220,6 +220,7 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
         Arm64Type::Mov => line.push_str("mov "),
         Arm64Type::Str => line.push_str("str "),
         Arm64Type::Ldr => line.push_str("ldr "),
+        Arm64Type::LdrSW => line.push_str("ldrsw "),
         Arm64Type::Add => line.push_str("add "),
         Arm64Type::Sub => line.push_str("sub "),
         Arm64Type::Mul => line.push_str("mul "),

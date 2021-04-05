@@ -20,6 +20,7 @@ pub enum Arm64Type {
     
     Str,
     Ldr,
+    LdrSW,
     
     Add,
     Sub,
