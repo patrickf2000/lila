@@ -89,6 +89,8 @@ pub fn arm64_build_instr(code : &mut Vec<Arm64Instr>, instr : &LtacInstr) {
         LtacType::Lsh => ln = create_arm64_instr(Arm64Type::Lsl),
         LtacType::Rsh => ln = create_arm64_instr(Arm64Type::Lsr),
         
+        LtacType::I32Cmp => ln = create_arm64_instr(Arm64Type::Cmp),
+        
         _ => return,
     }
     
@@ -98,8 +100,13 @@ pub fn arm64_build_instr(code : &mut Vec<Arm64Instr>, instr : &LtacInstr) {
     }
     
     ln.arg1 = arm64_build_operand(&instr.arg1, code, false);
-    ln.arg2 = ln.arg1.clone();
-    ln.arg3 = arm64_build_operand(&instr.arg2, code, separate_li);
+    
+    if ln.instr_type == Arm64Type::Cmp {
+        ln.arg2 = arm64_build_operand(&instr.arg2, code, separate_li);
+    } else {
+        ln.arg2 = ln.arg1.clone();
+        ln.arg3 = arm64_build_operand(&instr.arg2, code, separate_li);
+    }
     
     if instr.instr_type == LtacType::I32Mod {
         let dest2 = Arm64Arg::Reg(Arm64Reg::W1);
@@ -162,4 +169,24 @@ fn arm64_arg_reg32(val : i32) -> Arm64Reg {
         7 => Arm64Reg::W16,
         _ => Arm64Reg::W17,
     }
+}
+
+// Translates a jump instruction
+pub fn arm64_build_jump(code : &mut Vec<Arm64Instr>, instr : &LtacInstr) {
+    let mut ln : Arm64Instr;
+    
+    match instr.instr_type {
+        LtacType::Br => ln = create_arm64_instr(Arm64Type::B),
+        LtacType::Be => ln = create_arm64_instr(Arm64Type::Beq),
+        LtacType::Bne => ln = create_arm64_instr(Arm64Type::Bne),
+        LtacType::Bl => ln = create_arm64_instr(Arm64Type::Bl),
+        LtacType::Ble => ln = create_arm64_instr(Arm64Type::Ble),
+        LtacType::Bg => ln = create_arm64_instr(Arm64Type::Bg),
+        LtacType::Bge => ln = create_arm64_instr(Arm64Type::Bge),
+        
+        _ => return,
+    }
+    
+    ln.name = instr.name.clone();
+    code.push(ln);
 }

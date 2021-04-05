@@ -134,7 +134,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
         },
         
         AstArgType::Id => {
-            let mut mov = ltac::create_instr(LtacType::MovU);
+            let mut mov = ltac::create_instr(LtacType::Ld);
             mov.arg1 = LtacArg::Reg32(0);
             
             match &builder.vars.get(&arg1.str_val) {
@@ -149,7 +149,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         
                     // Float-32 comparisons
                     } else if v.data_type == DataType::Float {
-                        mov = ltac::create_instr(LtacType::MovF32);
+                        mov = ltac::create_instr(LtacType::LdF32);
                         mov.arg1 = LtacArg::FltReg(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -158,7 +158,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         
                     // Float-64 comparisons
                     } else if v.data_type == DataType::Double {
-                        mov = ltac::create_instr(LtacType::MovF64);
+                        mov = ltac::create_instr(LtacType::LdF64);
                         mov.arg1 = LtacArg::FltReg64(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -170,7 +170,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp = ltac::create_instr(LtacType::I8Cmp);
                         cmp.arg1 = LtacArg::Reg8(0);
                         
-                        mov = ltac::create_instr(LtacType::MovB);
+                        mov = ltac::create_instr(LtacType::LdB);
                         mov.arg1 = LtacArg::Reg8(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -181,7 +181,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp = ltac::create_instr(LtacType::I8Cmp);
                         cmp.arg1 = LtacArg::Reg8(0);
                         
-                        mov = ltac::create_instr(LtacType::MovB);
+                        mov = ltac::create_instr(LtacType::LdB);
                         mov.arg1 = LtacArg::Reg8(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -190,7 +190,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp.instr_type = LtacType::U8Cmp;
                         cmp.arg1 = LtacArg::Reg8(0);
                         
-                        mov = ltac::create_instr(LtacType::MovUB);
+                        mov = ltac::create_instr(LtacType::LdUB);
                         mov.arg1 = LtacArg::Reg8(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -199,7 +199,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp= ltac::create_instr(LtacType::I16Cmp);
                         cmp.arg1 = LtacArg::Reg16(0);
                         
-                        mov = ltac::create_instr(LtacType::MovW);
+                        mov = ltac::create_instr(LtacType::LdW);
                         mov.arg1 = LtacArg::Reg16(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -210,7 +210,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp.instr_type = LtacType::U16Cmp;
                         cmp.arg1 = LtacArg::Reg16(0);
                         
-                        mov = ltac::create_instr(LtacType::MovUW);
+                        mov = ltac::create_instr(LtacType::LdUW);
                         mov.arg1 = LtacArg::Reg16(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -219,7 +219,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp.instr_type = LtacType::I64Cmp;
                         cmp.arg1 = LtacArg::Reg64(0);
                         
-                        mov = ltac::create_instr(LtacType::MovQ);
+                        mov = ltac::create_instr(LtacType::LdQ);
                         mov.arg1 = LtacArg::Reg64(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                     
@@ -228,14 +228,14 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         cmp.instr_type = LtacType::U64Cmp;
                         cmp.arg1 = LtacArg::Reg64(0);
                         
-                        mov = ltac::create_instr(LtacType::MovUQ);
+                        mov = ltac::create_instr(LtacType::LdUQ);
                         mov.arg1 = LtacArg::Reg64(0);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
                     // Integer comparisons
                     } else {
                         if v.data_type == DataType::Int {
-                            mov.instr_type = LtacType::Mov;
+                            mov.instr_type = LtacType::Ld;
                             cmp.instr_type = LtacType::I32Cmp;
                             signed_variant = true;
                         }
@@ -319,7 +319,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
         },
         
         AstArgType::Id => {
-            let mut mov = ltac::create_instr(LtacType::Mov);
+            let mut mov = ltac::create_instr(LtacType::Ld);
             mov.arg1 = LtacArg::Reg32(1);
             
             match &builder.vars.get(&arg2.str_val) {
@@ -332,7 +332,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         
                     // Single-precision floats
                     } else if v.data_type == DataType::Float {
-                        mov = ltac::create_instr(LtacType::MovF32);
+                        mov = ltac::create_instr(LtacType::LdF32);
                         mov.arg1 = LtacArg::FltReg(1);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -340,7 +340,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                         
                     // Double-precision floats
                     } else if v.data_type == DataType::Double {
-                        mov = ltac::create_instr(LtacType::MovF64);
+                        mov = ltac::create_instr(LtacType::LdF64);
                         mov.arg1 = LtacArg::FltReg64(1);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -349,7 +349,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                                 block.pop();
                                 
                                 let name = builder.build_float(arg1.f64_val, true, false);
-                                let mut mov = ltac::create_instr(LtacType::MovF64);
+                                let mut mov = ltac::create_instr(LtacType::LdF64);
                                 mov.arg1 = LtacArg::FltReg64(pos);
                                 mov.arg2 = LtacArg::F64(name);
                                 block.push(mov);
@@ -367,7 +367,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     } else if v.data_type == DataType::Byte {
                         if arg1.arg_type == AstArgType::ByteL {
                             block.pop();
-                            mov = ltac::create_instr(LtacType::MovB);
+                            mov = ltac::create_instr(LtacType::LdB);
                             mov.arg1 = LtacArg::Reg8(0);
                             mov.arg2 = LtacArg::Byte(arg1.u8_val as i8);
                         
@@ -381,7 +381,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     
                     // Unsigned bytes
                     } else if v.data_type == DataType::UByte {
-                        mov = ltac::create_instr(LtacType::MovUB);
+                        mov = ltac::create_instr(LtacType::LdUB);
                         mov.arg1 = LtacArg::Reg8(1);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -394,7 +394,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                             let val : i8 = 0;
                         
                             block.pop();
-                            mov = ltac::create_instr(LtacType::MovB);
+                            mov = ltac::create_instr(LtacType::LdB);
                             mov.arg1 = LtacArg::Reg8(0);
                             mov.arg2 = LtacArg::Byte(val);
                             
@@ -410,7 +410,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     } else if v.data_type == DataType::Short {
                         if arg1.arg_type == AstArgType::ShortL {
                             block.pop();
-                            mov = ltac::create_instr(LtacType::MovW);
+                            mov = ltac::create_instr(LtacType::LdW);
                             mov.arg1 = LtacArg::Reg16(0);
                             mov.arg2 = LtacArg::I16(arg1.u16_val as i16);
                         
@@ -424,7 +424,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     
                     // Unsigned short
                     } else if v.data_type == DataType::UShort {
-                        mov = ltac::create_instr(LtacType::MovUW);
+                        mov = ltac::create_instr(LtacType::LdUW);
                         mov.arg1 = LtacArg::Reg16(1);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -434,7 +434,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     } else if v.data_type == DataType::Int64 {
                         if arg1.arg_type == AstArgType::IntL {
                             block.pop();
-                            let mut mov2 = ltac::create_instr(LtacType::MovQ);
+                            let mut mov2 = ltac::create_instr(LtacType::LdQ);
                             mov2.arg1 = LtacArg::Reg64(0);
                             mov2.arg2 = LtacArg::I64(arg1.u64_val as i64);
                             block.push(mov2);
@@ -443,7 +443,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                             cmp.arg1 = LtacArg::Reg64(0);
                         }
                         
-                        mov = ltac::create_instr(LtacType::MovQ);
+                        mov = ltac::create_instr(LtacType::LdQ);
                         mov.arg1 = LtacArg::Reg64(1);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -453,7 +453,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     } else if v.data_type == DataType::UInt64 {
                         if arg1.arg_type == AstArgType::IntL {
                             block.pop();
-                            let mut mov2 = ltac::create_instr(LtacType::MovUQ);
+                            let mut mov2 = ltac::create_instr(LtacType::LdUQ);
                             mov2.arg1 = LtacArg::Reg64(0);
                             mov2.arg2 = LtacArg::U64(arg1.u64_val);
                             block.push(mov2);
@@ -462,7 +462,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                             cmp.arg1 = LtacArg::Reg64(0);
                         }
                         
-                        mov = ltac::create_instr(LtacType::MovUQ);
+                        mov = ltac::create_instr(LtacType::LdUQ);
                         mov.arg1 = LtacArg::Reg64(1);
                         mov.arg2 = LtacArg::Mem(v.pos);
                         
@@ -472,7 +472,7 @@ fn build_cmp(builder : &mut LtacBuilder, line : &AstStmt) -> Vec<LtacInstr> {
                     } else if v.data_type == DataType::Int {
                         if arg1.arg_type == AstArgType::IntL {
                             block.pop();
-                            mov = ltac::create_instr(LtacType::Mov);
+                            mov = ltac::create_instr(LtacType::Ld);
                             mov.arg1 = LtacArg::Reg32(0);
                             mov.arg2 = LtacArg::I32(arg1.u64_val as i32);
                         

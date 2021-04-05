@@ -33,6 +33,12 @@ pub enum Arm64Type {
     Lsl,
     Lsr,
     
+    Cmp,
+    B,
+    Beq,    Bne,
+    Bl,     Ble,
+    Bg,     Bge,
+    
     Call,
     Ret,
     Svc

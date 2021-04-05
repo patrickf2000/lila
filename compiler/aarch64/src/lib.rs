@@ -130,7 +130,12 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
             | LtacType::I32Div | LtacType::I32Mod
             | LtacType::And | LtacType::Or | LtacType::Xor
             | LtacType::Lsh | LtacType::Rsh
+            | LtacType::I32Cmp
             => arm64_build_instr(code, &ln),
+            
+            LtacType::Br | LtacType::Be | LtacType::Bne
+            | LtacType::Bl | LtacType::Ble
+            | LtacType::Bg | LtacType::Bge => arm64_build_jump(code, &ln),
             
             _ => {},
         }
@@ -191,6 +196,11 @@ fn write_code(writer : &mut BufWriter<File>, code : &Vec<Arm64Instr>) {
                     .expect("[AArch64_syscall] Write failed.");
             },
             
+            Arm64Type::B
+            | Arm64Type::Beq | Arm64Type::Bne
+            | Arm64Type::Bl | Arm64Type::Ble
+            | Arm64Type::Bg | Arm64Type::Bge => write_jump(writer, &ln),
+            
             _ => write_instr(writer, &ln),
         }
     }
@@ -216,6 +226,7 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
         Arm64Type::Eor => line.push_str("eor "),
         Arm64Type::Lsl => line.push_str("lsl "),
         Arm64Type::Lsr => line.push_str("lsr "),
+        Arm64Type::Cmp => line.push_str("cmp "),
         _ => {},
     }
     
@@ -237,6 +248,30 @@ fn write_instr(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
     
     writer.write(&line.into_bytes())
         .expect("[AArch64_instr] Write failed.");
+}
+
+// Writes a jump statement
+fn write_jump(writer : &mut BufWriter<File>, ln : &Arm64Instr) {
+    let mut line = "  ".to_string();
+    
+    match ln.instr_type {
+        Arm64Type::B => line.push_str("b"),
+        Arm64Type::Beq => line.push_str("beq"),
+        Arm64Type::Bne => line.push_str("bne"),
+        Arm64Type::Bl => line.push_str("bl"),
+        Arm64Type::Ble => line.push_str("ble"),
+        Arm64Type::Bg => line.push_str("bg"),
+        Arm64Type::Bge => line.push_str("bge"),
+        
+        _ => return,
+    }
+    
+    line.push_str(" ");
+    line.push_str(&ln.name);
+    line.push_str("\n");
+    
+    writer.write(&line.into_bytes())
+        .expect("[AArch64_jump] Write failed.");
 }
 
 // Writes an operand
