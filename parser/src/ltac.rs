@@ -202,7 +202,7 @@ pub struct LtacData {
 }
 
 // Represents an instruction
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LtacInstr {
     pub instr_type : LtacType,
     pub name : String,

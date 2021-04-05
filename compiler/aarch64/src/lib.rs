@@ -114,6 +114,10 @@ fn translate_code(code : &mut Vec<Arm64Instr>, input : &Vec<LtacInstr>) {
                 code.push(instr);
             },
             
+            LtacType::LdArgI8 | LtacType::LdArgU8 | LtacType::LdArgI16 | LtacType::LdArgU16
+            | LtacType::LdArgI32 | LtacType::LdArgU32 | LtacType::LdArgI64 | LtacType::LdArgU64
+            | LtacType::LdArgPtr => arm64_build_ldarg(code, &ln, stack_size),
+            
             LtacType::StrB | LtacType::StrUB | LtacType::StrW | LtacType::StrUW
             | LtacType::Str | LtacType::StrU | LtacType::StrQ | LtacType::StrUQ
             | LtacType::StrPtr => arm64_build_ld_str(code, &ln, stack_size),

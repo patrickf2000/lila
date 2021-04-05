@@ -890,7 +890,7 @@ pub fn build_expr_func_call(builder : &mut LtacBuilder, arg : &AstArg, var : &Va
     };
 
     // First, push the current register
-    let mut store = mov_for_type(&t, &DataType::None);        // TODO: Replace this
+    let mut store = str_for_type(&t, &DataType::None);        // TODO: Replace this
     store.arg1 = LtacArg::Mem(var.pos);
     store.arg2 = reg_for_type(&t, &DataType::None, reg_no);    // TODO: Replace this
     builder.file.code.push(store.clone());
@@ -902,6 +902,7 @@ pub fn build_expr_func_call(builder : &mut LtacBuilder, arg : &AstArg, var : &Va
     build_func_call(builder, &stmt);
            
     //Restore the current register
+    store = ld_for_type(&t, &DataType::None);
     store.arg1 = reg_for_type(&t, &DataType::None, reg_no);        // TODO: Replace this
     store.arg2 = LtacArg::Mem(var.pos);
     builder.file.code.push(store);

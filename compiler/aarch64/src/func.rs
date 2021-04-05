@@ -4,7 +4,7 @@
 // Ida is licensed under the BSD-3 license. See the COPYING file for more information.
 //
 
-use parser::ltac::{LtacInstr, LtacArg};
+use parser::ltac::{LtacInstr, LtacType, LtacArg};
 use crate::asm::*;
 
 // Builds a function declaration
@@ -92,6 +92,30 @@ pub fn arm64_build_pusharg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stac
         
         _ => {},
     }
+}
+
+// Builds a ldarg statement
+// Syntax: ldarg <mem> <reg>
+pub fn arm64_build_ldarg(code : &mut Vec<Arm64Instr>, instr : &LtacInstr, stack_size : i32) {
+    let mut line : Arm64Instr;
+    
+    match instr.instr_type {
+        LtacType::LdArgI32 => line = create_arm64_instr(Arm64Type::Str),
+        
+        _ => return,
+    }
+    
+    // Register
+    line.arg1 = Arm64Arg::Reg(arm64_arg_reg(instr.arg2_val));
+    
+    // Memory
+    match instr.arg1 {
+        LtacArg::Mem(pos) => line.arg2 = Arm64Arg::Mem(Arm64Reg::SP, stack_size - pos),
+        
+        _ => return,
+    }
+    
+    code.push(line);
 }
 
 fn arm64_arg_reg(pos : i32) -> Arm64Reg {
