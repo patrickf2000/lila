@@ -30,7 +30,7 @@ Compile with `idac first.ida -o first`
 
 This has been my hobby/learning project of the past three months now. I don't think the syntax will change much anymore, but its still under a lot of development. Its to the point where it can do some non-trivial tasks, but I still have a ways to go.
 
-Please see [the log](https://patrickflynn.co/pages/lila-log.html) for updates.
+Please see [the log](https://patrickflynn.co/pages/ida-log.html) for updates.
 
 ### Features
 
